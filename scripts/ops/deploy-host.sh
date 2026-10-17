@@ -74,7 +74,7 @@ if "${compose[@]}" up -d --no-build; then
 for attempt in $(seq 1 30); do
   if node -e 'fetch("http://127.0.0.1:3000/healthz",{signal:AbortSignal.timeout(3000)}).then(async r=>{if(!r.ok||(await r.json()).revision!==process.argv[1])process.exit(1)}).catch(()=>process.exit(1))' "$commit"; then
     if [[ "$mode" == foundation ]]; then
-      if node -e 'Promise.all([fetch("http://127.0.0.1:3000/readyz"),fetch("http://127.0.0.1:3000/deployment.json")]).then(rs=>{if(rs.some(r=>r.status!==503))process.exit(1)}).catch(()=>process.exit(1))'; then healthy=true; break; fi
+      if curl --fail --silent --max-time 5 http://127.0.0.1:3000/health/db >/dev/null && node -e 'Promise.all([fetch("http://127.0.0.1:3000/readyz"),fetch("http://127.0.0.1:3000/deployment.json")]).then(rs=>{if(rs.some(r=>r.status!==503))process.exit(1)}).catch(()=>process.exit(1))'; then healthy=true; break; fi
     elif curl --fail --silent --max-time 5 http://127.0.0.1:3000/deployment.json > "$base/state/served.json" &&
       node -e 'const fs=require("fs");if(JSON.stringify(JSON.parse(fs.readFileSync(process.argv[1])))!==JSON.stringify(JSON.parse(fs.readFileSync(process.argv[2]))))process.exit(1)' "$manifest" "$base/state/served.json" &&
       curl --fail --silent --max-time 5 http://127.0.0.1:3000/readyz >/dev/null; then healthy=true; break; fi

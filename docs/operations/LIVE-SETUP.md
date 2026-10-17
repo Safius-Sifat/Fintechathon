@@ -18,7 +18,7 @@
 2. CI runs typecheck, operations/configuration tests, real PostgreSQL tests, a Docker build and a production-user container smoke test.
 3. Main is tested again. GitHub OIDC authenticates an identity scoped to Run Command on this app VM.
 4. The host fetches the exact tested main commit, refreshes version-pinned app configuration, builds an immutable local API image, uploads a database backup, applies pending migrations and recreates the backend container.
-5. A release succeeds only when the backend reports the exact commit and the required health/manifest checks pass. An API start/health failure attempts to restore the previous compatible code; the release stays failed.
+5. A release succeeds only when the backend reports the exact commit and the required process/database/manifest checks pass. An API start/health failure attempts to restore the previous compatible code; the release stays failed.
 
 `AZURE_DEPLOY_ENABLED` is a **repository variable** because the job condition is evaluated before environment variables load. Its initial setup sets it true only after the source PR tests pass. The `demo` environment supplies Azure tenant/subscription/client/VM IDs and permits the main branch only. No Azure client secret, GitHub PAT or wallet key is stored in the workflow.
 
@@ -29,6 +29,7 @@ Main requires the GitHub Actions `Repository tests` check and a PR. Approvals ar
 `/opt/mandate/config/release-mode` is operator-owned. Initial mode is `foundation`:
 
 - `/healthz`:200 with `stage:bootstrap` and the deployed Git commit.
+- `/health/db`:200 only after an actual verified-TLS query as the runtime role.
 - `/readyz`:503. Financial acceptance is incomplete.
 - `/deployment.json`:503. No fake contract addresses are supplied.
 - Wallet/payment/agent routes remain unimplemented. This operations setup does not build those features.
