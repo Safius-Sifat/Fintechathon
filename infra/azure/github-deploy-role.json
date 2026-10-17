@@ -1,0 +1,16 @@
+{
+  "Name": "Mandate App VM Delivery",
+  "IsCustom": true,
+  "Description": "Run a tested app release on the dedicated Mandate app VM. No signer, vault or RBAC administration.",
+  "Actions": [
+    "Microsoft.Compute/virtualMachines/read",
+    "Microsoft.Compute/virtualMachines/instanceView/read",
+    "Microsoft.Compute/virtualMachines/runCommand/action"
+  ],
+  "NotActions": [],
+  "DataActions": [],
+  "NotDataActions": [],
+  "AssignableScopes": [
+    "/subscriptions/04323111-d122-4da0-a1b0-c0ea70736686/resourceGroups/mandate-demo-rg"
+  ]
+}

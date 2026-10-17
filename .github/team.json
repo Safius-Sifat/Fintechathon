@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "repository": "Safius-Sifat/Fintechathon",
+  "independentReviewersReady": false,
+  "roles": {
+    "contracts": "Safius-Sifat",
+    "backend": null,
+    "mobile": null,
+    "agents": null
+  }
+}

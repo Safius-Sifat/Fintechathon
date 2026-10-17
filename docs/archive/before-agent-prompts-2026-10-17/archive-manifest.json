@@ -1,0 +1,10 @@
+{
+  "status": "historical-superseded",
+  "files": {
+    "docs/plans/01 - Contracts and Shared Interfaces.md": "69685683f7288ec6ce11aa0c4ca4f5b9eb259fbc807a57c3a7ec5e7635b7c89d",
+    "docs/plans/02 - Platform Policy and MPCium.md": "9b46748548b7c641140257e47feffbbbc47fd66e123e658dbbfcf3cf7d9719ab",
+    "docs/plans/03 - Android Owner Wallet.md": "d0aee50dd69e3409dd3118c7090b2a1639b7ccb95956f28c611e290b4aac85be",
+    "docs/plans/04 - Agents Services Inspection and Demo.md": "612d1e94ee31045ad6c7cf09d485c02295b4f7713c651e73a0bbf4aaf3913f3c",
+    "docs/plans/manifest.json": "cac9f09f1c7e9f9bf3b2f0efc260953a2b14ff30e9b88247031e9230ad4221d3"
+  }
+}

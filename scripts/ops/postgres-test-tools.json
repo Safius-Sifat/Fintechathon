@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "postgresVersion": "16.10",
+  "tools": {
+    "darwin-arm64": {
+      "package": "@embedded-postgres/darwin-arm64",
+      "version": "16.10.0-beta.15",
+      "url": "https://registry.npmjs.org/@embedded-postgres/darwin-arm64/-/darwin-arm64-16.10.0-beta.15.tgz",
+      "integrity": "sha512-Sr9wZjdJvmU1YTo3dDgNo1Tt7NIN/z18jHiUTlXp73hjD23BJ3geWBNZWXtqtS6QQbLp6y1/w6DNcm+TiQ03Jg=="
+    },
+    "linux-x64": {
+      "package": "@embedded-postgres/linux-x64",
+      "version": "16.10.0-beta.15",
+      "url": "https://registry.npmjs.org/@embedded-postgres/linux-x64/-/linux-x64-16.10.0-beta.15.tgz",
+      "integrity": "sha512-otk3MgGhT0DvVd6g5Ui08R1N1DnIliv2wjIaOrIOpMdhS5ezgx8pe80UBXtBnlWsNgd46CYNUgmC0gxvmINaxA=="
+    }
+  }
+}

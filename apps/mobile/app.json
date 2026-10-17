@@ -1,0 +1,26 @@
+{
+  "expo": {
+    "name": "Mandate",
+    "slug": "mandate-wallet",
+    "version": "0.0.0",
+    "orientation": "portrait",
+    "platforms": ["android"],
+    "android": {
+      "package": "app.mandate.wallet.dev"
+    },
+    "extra": {
+      "chainId": 84532,
+      "stage": "bootstrap"
+    },
+    "plugins": [
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "minSdkVersion": 31
+          }
+        }
+      ]
+    ]
+  }
+}
