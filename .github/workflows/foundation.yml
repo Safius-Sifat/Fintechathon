@@ -8,7 +8,7 @@ permissions:
   contents: read
 concurrency:
   group: delivery-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   test:
     name: Repository tests
@@ -32,7 +32,10 @@ jobs:
       - run: pnpm test:migrations
       - run: pnpm test:db
       - name: Build backend image
-        run: docker build --tag mandate-ci .
+        run: |
+          # Match the private umask used by the production release checkout.
+          find apps/api packages/platform packages/schema -path '*/node_modules' -prune -o -type f -exec chmod 600 {} +
+          docker build --tag mandate-ci .
       - name: Smoke-test backend container
         run: bash scripts/ops/container-smoke.sh mandate-ci
   deploy:
