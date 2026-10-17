@@ -44,8 +44,8 @@ chmod 0755 /opt/mandate/bin/runtime-network-policy
 cat >/etc/systemd/system/mandate-runtime-network.service <<'UNIT'
 [Unit]
 Description=Block app runtime access to Azure VM identity
-After=docker.service
-Before=caddy.service
+After=network-pre.target
+Before=docker.service caddy.service
 [Service]
 Type=oneshot
 RemainAfterExit=yes
@@ -53,6 +53,12 @@ ExecStart=/opt/mandate/bin/runtime-network-policy
 [Install]
 WantedBy=multi-user.target
 UNIT
+install -d -m0755 /etc/systemd/system/docker.service.d
+cat >/etc/systemd/system/docker.service.d/mandate-runtime.conf <<'DOCKERUNIT'
+[Unit]
+Requires=mandate-runtime-network.service
+After=mandate-runtime-network.service
+DOCKERUNIT
 systemctl daemon-reload
 systemctl enable --now mandate-runtime-network.service
 printf 'API_IDENTITY_BOUNDARY_CONFIGURED\n'
