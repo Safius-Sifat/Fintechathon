@@ -29,6 +29,32 @@
               "destinationAddressPrefix": "*",
               "destinationPortRange": "22"
             }
+          },
+          {
+            "name": "HTTPS",
+            "properties": {
+              "priority": 1100,
+              "direction": "Inbound",
+              "access": "Allow",
+              "protocol": "Tcp",
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "443"
+            }
+          },
+          {
+            "name": "HTTP-redirect-and-ACME",
+            "properties": {
+              "priority": 1101,
+              "direction": "Inbound",
+              "access": "Allow",
+              "protocol": "Tcp",
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "80"
+            }
           }
         ]
       }
@@ -67,7 +93,10 @@
       "properties": {
         "publicIPAllocationMethod": "Static",
         "publicIPAddressVersion": "IPv4",
-        "idleTimeoutInMinutes": 4
+        "idleTimeoutInMinutes": 4,
+        "dnsSettings": {
+          "domainNameLabel": "mandate-demo-04323111"
+        }
       }
     },
     {

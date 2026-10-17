@@ -72,3 +72,71 @@ test("VM token helper uses IMDS metadata header and bounded allowed audience", a
     /UNAVAILABLE/,
   );
 });
+
+import {
+  mkdtemp,
+  mkdir,
+  readFile,
+  writeFile,
+  chmod,
+  rm,
+} from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { spawnSync } from "node:child_process";
+test("backup helper resolves beside its script after changing working directory", async () => {
+  const root = await mkdtemp(join(tmpdir(), "mandate-backup-path-"));
+  try {
+    for (const dir of [
+      "private",
+      "starting-directory",
+      "release/scripts/ops",
+      "bin",
+    ])
+      await mkdir(join(root, dir), { recursive: true });
+    await writeFile(join(root, "private", "ca"), "test-only-ca");
+    await writeFile(join(root, "private", "pass"), "test-only-pass");
+    await writeFile(
+      join(root, "private", "backup.env"),
+      `PGSSLMODE=verify-full\nPGPASSFILE=${root}/private/pass\nPGSSLROOTCERT=${root}/private/ca\n`,
+    );
+    const source = await readFile(
+      new URL("../backup-db.sh", import.meta.url),
+      "utf8",
+    );
+    await writeFile(
+      join(root, "release/scripts/ops/backup-db.sh"),
+      source.replace("base=/opt/mandate", "base=" + root),
+    );
+    await writeFile(
+      join(root, "release/scripts/ops/upload-backup.mjs"),
+      'console.log("UPLOAD_HELPER_LOCATED");\n',
+    );
+    await writeFile(
+      join(root, "bin/pg_dump"),
+      '#!/bin/bash\nfor arg in "$@"; do case "$arg" in --file=*) printf test-only-archive > "${arg#--file=}" ;; esac; done\n',
+    );
+    await writeFile(
+      join(root, "bin/pg_restore"),
+      '#!/bin/bash\n[[ -s "${@: -1}" ]]\n',
+    );
+    for (const name of ["pg_dump", "pg_restore"])
+      await chmod(join(root, "bin", name), 0o755);
+    const result = spawnSync(
+      "bash",
+      ["../release/scripts/ops/backup-db.sh", "a".repeat(40)],
+      {
+        cwd: join(root, "starting-directory"),
+        env: {
+          ...process.env,
+          PATH: join(root, "bin") + ":" + process.env.PATH,
+        },
+        encoding: "utf8",
+      },
+    );
+    assert.equal(result.status, 0, result.stderr);
+    assert.match(result.stdout, /UPLOAD_HELPER_LOCATED/);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});

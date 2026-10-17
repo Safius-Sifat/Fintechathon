@@ -40,7 +40,7 @@ console.log(
       scope: "repository-foundation",
       financialAcceptance: "NOT_IMPLEMENTED",
       deploymentActivation:
-        "GitHub demo environment variable AZURE_DEPLOY_ENABLED; unset by default",
+        "GitHub repository variable AZURE_DEPLOY_ENABLED; unset by default",
       checkedFiles: files.length,
       failures,
     },

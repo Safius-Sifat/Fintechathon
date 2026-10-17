@@ -12,8 +12,6 @@
   "identityPrincipalId": "af3cdbd1-43fc-421b-ade2-2af7d671d9c7",
   "osDiskGiB": 32,
   "provisioningState": "Succeeded",
-  "applicationDeployed": false,
-  "automaticDeploymentEnabled": false,
   "sshRestriction": "Owner public IP/32; see mandate-app-nsg",
   "verifiedAt": "2026-10-17T12:05:01.082544+00:00",
   "powerState": "running",
@@ -24,5 +22,14 @@
   "diskSku": "StandardSSD_LRS",
   "secureBootEnabled": true,
   "vTpmEnabled": true,
-  "passwordAuthenticationEnabled": false
+  "passwordAuthenticationEnabled": false,
+  "applicationDeployedAtVmProvisioning": false,
+  "automaticDeploymentEnabledAtVmProvisioning": false,
+  "apiUrl": "https://mandate-demo-04323111.malaysiawest.cloudapp.azure.com",
+  "keyVaultName": "mandate-app-kv-04323111",
+  "backupStorageAccount": "mandatebackup04323111",
+  "githubDeployClientId": "0bccc475-5097-48ba-8bab-9b6b390c88f0",
+  "releaseMode": "foundation",
+  "releaseStatusUrl": "https://github.com/Safius-Sifat/Fintechathon/actions",
+  "financialExecutionEnabled": false
 }
