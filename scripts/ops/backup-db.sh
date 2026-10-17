@@ -4,6 +4,7 @@ umask 077
 commit=${1:?commit required}
 [[ "$commit" =~ ^[a-f0-9]{40}$ ]]
 base=/opt/mandate
+cd "$base"
 # libpq variables: PGHOST/PGPORT/PGUSER/PGDATABASE/PGPASSFILE/PGSSLROOTCERT, PGSSLMODE=verify-full.
 set -a
 source "$base/private/backup.env"
