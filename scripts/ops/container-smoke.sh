@@ -3,7 +3,7 @@ set -euo pipefail
 image=${1:?image required}
 name="mandate-smoke-$RANDOM-$$"
 trap 'docker rm -f "$name" >/dev/null 2>&1 || true' EXIT
-docker run -d --name "$name" "$image" >/dev/null
+docker run -d --user 1001:1001 --read-only --tmpfs /tmp --cap-drop ALL --security-opt no-new-privileges:true --name "$name" "$image" >/dev/null
 for attempt in $(seq 1 30); do
   if docker exec "$name" node -e 'fetch("http://127.0.0.1:3000/healthz").then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))' 2>/dev/null; then
     # Foundation liveness must never be presented as financial readiness.

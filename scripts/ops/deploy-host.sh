@@ -70,8 +70,8 @@ compose_file="$release/infra/release/compose.$mode.yaml"
 previous_image=''; previous_manifest=''; previous_commit=''; previous_mode=''
 if [[ -f "$base/state/current" ]]; then read -r previous_image previous_manifest previous_commit previous_mode < "$base/state/current"; [[ "$previous_manifest" != - ]] || previous_manifest=''; fi
 compose=(docker compose -f "$compose_file")
-"${compose[@]}" up -d --no-build
 healthy=false
+if "${compose[@]}" up -d --no-build; then
 for attempt in $(seq 1 30); do
   if node -e 'fetch("http://127.0.0.1:3000/healthz",{signal:AbortSignal.timeout(3000)}).then(async r=>{if(!r.ok||(await r.json()).revision!==process.argv[1])process.exit(1)}).catch(()=>process.exit(1))' "$commit"; then
     if [[ "$mode" == foundation ]]; then
@@ -82,6 +82,7 @@ for attempt in $(seq 1 30); do
   fi
   sleep 2
 done
+fi
 if [[ "$healthy" != true ]]; then
   if [[ -n "$previous_image" ]]; then
     MANDATE_IMAGE="$previous_image" MANDATE_MANIFEST="$previous_manifest" MANDATE_COMMIT="$previous_commit" docker compose -f "$base/releases/$previous_commit/infra/release/compose.$previous_mode.yaml" up -d --no-build
