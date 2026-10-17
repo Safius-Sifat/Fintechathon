@@ -8,7 +8,7 @@ import {
   chmod,
 } from "node:fs/promises";
 import { join, resolve, basename } from "node:path";
-import { randomUUID } from "node:crypto";
+import { randomUUID, X509Certificate } from "node:crypto";
 export function validateSecretMap(input) {
   if (
     !input ||
@@ -78,4 +78,19 @@ export async function materializeSecrets(input, { directory, readSecret }) {
     }
   }
   return { files: entries.map((x) => x.file), count: entries.length }; // No secret values or hashes in logs.
+}
+
+export function assertPublicCertificates(value) {
+  if (typeof value !== "string") throw Error("PUBLIC_CERTIFICATE_REQUIRED");
+  const pattern =
+    /-----BEGIN CERTIFICATE-----[\s\S]*?-----END CERTIFICATE-----/g;
+  const certificates = value.match(pattern);
+  if (!certificates?.length || value.replace(pattern, "").trim())
+    throw Error("PUBLIC_CERTIFICATE_REQUIRED");
+  try {
+    for (const certificate of certificates) new X509Certificate(certificate);
+  } catch {
+    throw Error("PUBLIC_CERTIFICATE_INVALID");
+  }
+  return value;
 }

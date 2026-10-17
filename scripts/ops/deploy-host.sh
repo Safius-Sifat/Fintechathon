@@ -65,7 +65,6 @@ docker run --rm --user "$(id -u):$(id -g)" --network host --env-file "$base/priv
   "$image" packages/platform/node_modules/.bin/tsx packages/platform/src/migrate.ts
 # Expansion-only migrations keep the previous backend compatible. Never run SQL down migrations.
 export MANDATE_IMAGE="$image" MANDATE_MANIFEST="$manifest" MANDATE_COMMIT="$commit"
-export MANDATE_UID="$(id -u)" MANDATE_GID="$(id -g)"
 compose_file="$release/infra/release/compose.$mode.yaml"
 previous_image=''; previous_manifest=''; previous_commit=''; previous_mode=''
 if [[ -f "$base/state/current" ]]; then read -r previous_image previous_manifest previous_commit previous_mode < "$base/state/current"; [[ "$previous_manifest" != - ]] || previous_manifest=''; fi

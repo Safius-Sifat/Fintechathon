@@ -1,7 +1,11 @@
 // Run only on the app VM, with its managed identity. No GitHub/Azure client secret.
-import { readFile } from "node:fs/promises";
+import { readFile, chmod } from "node:fs/promises";
 import { managedToken } from "./vm-identity.mjs";
-import { materializeSecrets, validateSecretMap } from "./secrets.mjs";
+import {
+  materializeSecrets,
+  validateSecretMap,
+  assertPublicCertificates,
+} from "./secrets.mjs";
 
 try {
   const map = validateSecretMap(
@@ -20,6 +24,9 @@ try {
   ]);
   if (map.entries.some((x) => !allowed.has(x.file)))
     throw Error("PRIVATE_FILE_NOT_ALLOWED");
+  const caId = map.entries.find(
+    (entry) => entry.file === "db-ca.crt",
+  )?.secretId;
   const token = await managedToken("https://vault.azure.net");
   await materializeSecrets(map, {
     directory: "/opt/mandate/private",
@@ -32,9 +39,11 @@ try {
       if (!response.ok) throw Error("SECRET_READ_FAILED");
       const value = (await response.json()).value;
       if (typeof value !== "string") throw Error("SECRET_VALUE_INVALID");
+      if (secretId === caId) assertPublicCertificates(value);
       return value;
     },
   });
+  if (caId) await chmod("/opt/mandate/private/db-ca.crt", 0o644); // Certificates are public; credentials remain0600.
   console.log("App secret files refreshed");
 } catch {
   console.error("App secret refresh failed; deployment stopped");

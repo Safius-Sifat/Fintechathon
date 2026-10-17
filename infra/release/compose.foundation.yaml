@@ -2,7 +2,7 @@ name: mandate-app
 services:
   api:
     image: ${MANDATE_IMAGE:?immutable local release image required}
-    user: "${MANDATE_UID:?uid required}:${MANDATE_GID:?gid required}"
+    user: "10001:10001"
     network_mode: host
     restart: unless-stopped
     init: true

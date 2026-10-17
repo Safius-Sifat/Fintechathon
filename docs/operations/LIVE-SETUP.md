@@ -39,13 +39,13 @@ Existing wallets are never automatically migrated to new contract addresses. And
 
 ## Credentials and database
 
-The VM managed identity has `Key Vault Secrets User` on the app vault and backup access on the one Blob container. The temporary initialization write role was removed. Runtime reads go directly from IMDS to Key Vault; Azure CLI is not needed on the VM. Secret files remain mode0600 under `/opt/mandate/private`; no values are committed or sent through chat.
+The VM managed identity has `Key Vault Secrets User` on the app vault and backup access on the one Blob container. The temporary initialization write role was removed. The host deployment user reads configuration directly from IMDS and Key Vault; Azure CLI is not needed on the VM. The API runs as UID10001, without capabilities or new privileges. A persistent host firewall rule blocks that UID from Azure IMDS, and Caddy’s administration API is disabled, so the API cannot obtain the deployment identity or its migration/backup credentials. Configuration is injected into the container with runtime-only DB credentials. Secret files remain mode0600 under `/opt/mandate/private`; no values are committed or sent through chat.
 
 - `mandate_runtime`: app DML; no schema DDL and no migration-ledger writes.
 - `mandate_migrator`: non-admin owner of the application schema; used only by the migration container.
 - `mandate_backup`: database read access for complete current-schema dumps.
 
-Migrations are immutable numbered files plus `apps/api/migrations/manifest.json`. Add a new migration rather than editing an applied file. Automatic migrations are conservative transactional expansions; their lint does not prove compatibility. The runner uses checksums and a bounded advisory lock. The reserved ledger is pre-created with migration-owner privileges before app default grants. Database credentials, TLS keys and wallet/MPC identities have separate roles; this setup creates no wallet or MPC key.
+Migrations are immutable numbered files plus `apps/api/migrations/manifest.json`. Add a new migration rather than editing an applied file. Automatic migrations are conservative transactional expansions; their lint does not prove compatibility. The runner uses checksums and a bounded advisory lock. The public DB CA certificate is validated as certificate-only PEM and exposed read-only as0644; passwords and private keys are never included in that exception. The reserved ledger is pre-created with migration-owner privileges before app default grants. Database credentials, TLS keys and wallet/MPC identities have separate roles; this setup creates no wallet or MPC key.
 
 ## Backup and recovery
 
