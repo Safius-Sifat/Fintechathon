@@ -1,6 +1,6 @@
 # Automatic testnet delivery
 
-Updated 2026-10-17 following the request to simplify. This replaces the earlier multi-controller deployment design. Repository files are prepared; nothing has been pushed, deployed or activated.
+Updated 2026-10-17 following the request to simplify. The current operating procedure is [Azure delivery runbook](LIVE-SETUP.md). This replaces the earlier multi-controller deployment design. The reviewed source has been published and the app infrastructure configured. Follow GitHub Actions and the API health endpoint for live release status.
 
 ## One normal workflow
 
@@ -28,7 +28,7 @@ PRs run without cloud credentials. Once activated, successful main builds deploy
 | `scripts/ops/deploy-host.sh` | Serialize releases; select exact tested main commit; contract tests/deployment; manifest; backup; migrate; roll out; smoke-test |
 | `scripts/ops/deployment-manifest.mjs` | Produce contract addresses from actual Foundry broadcast receipts; verify finality, receipt/block/code hashes and the shared schema |
 | `packages/platform/src/migrate.ts` | Apply ordered, immutable, reviewed SQL migrations under a bounded advisory lock |
-| `Dockerfile`, `infra/release/compose.yaml` | API container; local immutable image ID; persistent DB is outside the app container |
+| `Dockerfile`, `infra/release/compose.foundation.yaml / compose.wallet.yaml` | API container; local immutable image ID; persistent DB is outside the app container |
 | `scripts/ops/load-secrets.mjs` | Retrieve version-pinned app secrets through app VM managed identity into private files |
 
 ## Contract deployment and addresses
@@ -84,7 +84,7 @@ Add actual entries for `migration.env`, `backup.env`, `backup.pgpass`, `deploy.e
 
 Configure HTTPS reverse proxy to API127.0.0.1:3000; no public Docker/Postgres/MPC management ports. Protect persistent disks and copy encrypted backups outside the VM; define retention appropriate to available credits. GitHub deployment identity gets Run Command access only to this app VM, no Key Vault/signers/subscription-admin access. Runtime identity reads app secrets. GitHub authenticates through OIDC; no long-lived Azure client secret.
 
-Create GitHub environment `demo` with these variables:
+Create GitHub environment `demo` with the four Azure ID variables. Set the deployment activation variable at repository level:
 
 - `AZURE_CLIENT_ID`, `AZURE_TENANT_ID`, `AZURE_SUBSCRIPTION_ID`
 - `AZURE_APP_VM_ID` for an app VM named `mandate-app-*`
@@ -94,4 +94,4 @@ Federation issuer: `https://token.actions.githubusercontent.com`; audience: `api
 
 ## Team policy
 
-Work on short branches, open a PR, run tests, and merge to main when reviewed. Commit shared schema/ABI changes with all affected consumers. Keep secrets out of commits and screenshots. Do not edit another person's shared interface silently. Missing teammate usernames do not prevent local testing; CODEOWNERS currently names the owner only and provides no independent review guarantee. No branch protection, collaborator invitation or cloud enforcement has been applied.
+Work on short branches, open a PR, run tests, and merge to main when reviewed. Commit shared schema/ABI changes with all affected consumers. Keep secrets out of commits and screenshots. Do not edit another person's shared interface silently. Missing teammate usernames do not prevent local testing; CODEOWNERS currently names the owner only and provides no independent review guarantee. PR/CI enforcement and app-only cloud permissions are now configured; collaborator invitations and independent reviews remain pending real usernames.

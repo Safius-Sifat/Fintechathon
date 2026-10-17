@@ -34,7 +34,8 @@ grep ' node-v22.23.3-linux-x64.tar.xz$' SHASUMS256.txt | sha256sum --check -
 tar -xJf node-v22.23.3-linux-x64.tar.xz -C /usr/local --strip-components=1
 cd /
 rm -rf "$work"
-npm install -g pnpm@10.20.0
+npm install --global --prefix /usr/local pnpm@10.20.0
+chmod -R a+rX /usr/local/lib/node_modules/pnpm
 id mandate-deploy >/dev/null 2>&1 || useradd --create-home --shell /bin/bash mandate-deploy
 usermod -aG docker mandate-deploy
 install -d -m0755 /opt/mandate /opt/mandate/bin /opt/mandate/config
