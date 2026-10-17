@@ -1,0 +1,22 @@
+{
+  "specificationVersion": "5.0",
+  "adaptation": "Repository root path, standard Markdown root links and bootstrap status note; financial design unchanged.",
+  "files": {
+    "02 - Platform Policy and MPCium.md": {
+      "sourceSha256": "cf3ccf7b30e3b97942de43462c7466ccc71350e30506e5de863abd9956a45385",
+      "repositorySha256": "3471a394c6b98465bdae4c2c06b4326abe5bf12b16f19a4b73af6c1fcdff42aa"
+    },
+    "03 - Android Owner Wallet.md": {
+      "sourceSha256": "86e38d9826a36f4c4da39d713e2dc699d043efaf19f80be9d80a691252349f17",
+      "repositorySha256": "a3a4545a5f59c317ba10c5a85cb47962d16f49699a58cc87313b8cfbd33f15c5"
+    },
+    "04 - Agents Services Inspection and Demo.md": {
+      "sourceSha256": "d014a6cd8a702ea83f554015c31ce5defe73cc8b4ddb55ee223cbc48b2fbd6fb",
+      "repositorySha256": "d1379c182469813e39a166f20eecb03190563cc01cd42239cacf39ad19dbcdf4"
+    },
+    "01 - Contracts and Shared Interfaces.md": {
+      "sourceSha256": "66617b72dcd7bb47b3b90e5f9475bd7f82693db07a0b373ef2b443cfbe5f1d0b",
+      "repositorySha256": "d57a18e8b44bf34571c67873c6cd043939dfaa3368e4a68bc026ae6d6c345dbb"
+    }
+  }
+}

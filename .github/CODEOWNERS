@@ -1,0 +1,11 @@
+# Interim oversight only. Independent role owners are not yet supplied.
+# Regenerate the role-specific file after .github/team.json is complete.
+# This file requests review; GitHub rules are NOT currently enforced.
+* @Safius-Sifat
+/.github/ @Safius-Sifat
+/scripts/ops/ @Safius-Sifat
+/infra/ @Safius-Sifat
+/packages/schema/ @Safius-Sifat
+/packages/contracts/ @Safius-Sifat
+/packages/platform/src/migrat* @Safius-Sifat
+/apps/api/migrations/ @Safius-Sifat

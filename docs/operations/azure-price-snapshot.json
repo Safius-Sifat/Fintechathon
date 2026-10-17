@@ -1,0 +1,37 @@
+{
+  "queriedOn": "2026-10-17",
+  "query": "https://prices.azure.com/api/retail/prices?%24filter=serviceName+eq+%27Virtual+Machines%27+and+priceType+eq+%27Consumption%27+and+armRegionName+eq+%27eastus%27+and+%28armSkuName+eq+%27Standard_B1s%27+or+armSkuName+eq+%27Standard_B1ms%27+or+armSkuName+eq+%27Standard_B2s%27%29",
+  "scope": "Linux consumption compute only; illustrative 730h month/72h competition; excludes all ancillary charges and credits",
+  "items": [
+    {
+      "armRegionName": "eastus",
+      "armSkuName": "Standard_B2s",
+      "productName": "Virtual Machines BS Series",
+      "skuName": "B2s",
+      "retailPrice": 0.0416,
+      "unitOfMeasure": "1 Hour",
+      "currencyCode": "USD",
+      "effectiveStartDate": "2025-10-01T00:00:00Z"
+    },
+    {
+      "armRegionName": "eastus",
+      "armSkuName": "Standard_B1ms",
+      "productName": "Virtual Machines BS Series",
+      "skuName": "B1ms",
+      "retailPrice": 0.0207,
+      "unitOfMeasure": "1 Hour",
+      "currencyCode": "USD",
+      "effectiveStartDate": "2025-10-01T00:00:00Z"
+    },
+    {
+      "armRegionName": "eastus",
+      "armSkuName": "Standard_B1s",
+      "productName": "Virtual Machines BS Series",
+      "skuName": "B1s",
+      "retailPrice": 0.0104,
+      "unitOfMeasure": "1 Hour",
+      "currencyCode": "USD",
+      "effectiveStartDate": "2025-10-01T00:00:00Z"
+    }
+  ]
+}

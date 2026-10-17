@@ -1,0 +1,12 @@
+{
+  "repository": "https://github.com/fystack/mpcium",
+  "commit": "90e3ee3c15e6698ade5626ff6c6b49d2453d8ce2",
+  "goVersion": "1.25.8",
+  "thresholdConfig": 1,
+  "requiredParticipants": 2,
+  "requiredAuthorizers": [
+    "mandate-policy-v1"
+  ],
+  "status": "integration-required",
+  "dependencyReplacement": "github.com/bnb-chain/tss-lib/v3 => github.com/fystack/tss-lib/v3 v3.0.1"
+}

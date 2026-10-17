@@ -1,0 +1,13 @@
+{
+  "name": "@mandate/api",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/main.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@mandate/platform": "workspace:*"
+  }
+}

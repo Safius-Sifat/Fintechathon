@@ -1,0 +1,48 @@
+{
+  "name": "mandate",
+  "version": "0.0.0",
+  "private": true,
+  "packageManager": "pnpm@10.20.0",
+  "engines": {
+    "node": ">=22.23.3 <23",
+    "pnpm": "10.20.0"
+  },
+  "scripts": {
+    "setup:env": "node scripts/setup-env.mjs",
+    "doctor": "node scripts/doctor.mjs",
+    "typecheck": "pnpm -r --if-present typecheck",
+    "build": "pnpm -r --if-present build",
+    "dev:api": "pnpm --filter @mandate/api dev",
+    "dev:platform": "pnpm dev:api",
+    "dev:provider": "pnpm --filter @mandate/provider dev",
+    "dev:mobile": "pnpm --filter @mandate/mobile start",
+    "dev:worker": "pnpm --filter @mandate/worker dev",
+    "db:migrate": "pnpm --filter @mandate/platform migrate",
+    "infra:up": "docker compose --env-file .env -f infra/compose.dev.yaml up -d --wait",
+    "infra:down": "docker compose --env-file .env -f infra/compose.dev.yaml down",
+    "infra:logs": "docker compose --env-file .env -f infra/compose.dev.yaml logs -f",
+    "mpc:fetch": "node scripts/fetch-mpcium.mjs",
+    "contracts:build": "forge build --root packages/contracts",
+    "format:check": "prettier --check \"{apps,packages,services,scripts}/**/*.{ts,tsx,mjs,json}\"",
+    "check:integration": "node scripts/not-ready.mjs integration",
+    "release:check": "node scripts/not-ready.mjs release",
+    "mandate-verify": "pnpm --filter @mandate/verifier cli",
+    "relay-admin": "node scripts/not-ready.mjs owner-recovery-relayer",
+    "test:ops": "node --test scripts/ops/test/*.test.mjs",
+    "test:migrations": "tsx --test packages/platform/test/*.test.ts",
+    "test:db": "node scripts/ops/with-test-postgres.mjs",
+    "check:repository": "node scripts/ops/check-repository.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "22.18.12",
+    "prettier": "3.6.2",
+    "tsx": "4.20.6",
+    "typescript": "5.9.3",
+    "yaml": "2.9.1"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
+  }
+}
