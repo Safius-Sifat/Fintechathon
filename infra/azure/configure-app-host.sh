@@ -8,6 +8,9 @@ ALTER TABLE mandate.schema_migrations OWNER TO mandate_migrator;
 REVOKE ALL ON mandate.schema_migrations FROM mandate_runtime,PUBLIC;
 SQL
 cat >/etc/caddy/Caddyfile <<'CADDY'
+{
+  admin off
+}
 mandate-demo-04323111.malaysiawest.cloudapp.azure.com {
   encode zstd gzip
   header -Server
@@ -16,7 +19,8 @@ mandate-demo-04323111.malaysiawest.cloudapp.azure.com {
 CADDY
 chmod 0644 /etc/caddy/Caddyfile
 caddy validate --config /etc/caddy/Caddyfile
-systemctl enable --now caddy
+systemctl enable caddy
+systemctl restart caddy
 # Check least privileges using verified TLS; no connection strings appear in output.
 python3 - <<'PY'
 import os,pathlib,subprocess,urllib.parse
@@ -29,3 +33,32 @@ for sql in ['BEGIN;CREATE TABLE mandate.forbidden_runtime_ddl(id int);ROLLBACK;'
 print('RUNTIME_TLS_OK; DDL_DENIED; MIGRATION_LEDGER_WRITE_DENIED')
 PY
 printf 'MANDATE_APP_HOST_CONFIGURED\n'
+
+# The API cannot obtain the host identity and its migration/backup secrets.
+cat >/opt/mandate/bin/runtime-network-policy <<'POLICY'
+#!/bin/bash
+set -euo pipefail
+iptables -w -C OUTPUT -d 169.254.169.254/32 -m owner --uid-owner 10001 -j REJECT 2>/dev/null || iptables -w -I OUTPUT -d 169.254.169.254/32 -m owner --uid-owner 10001 -j REJECT
+POLICY
+chmod 0755 /opt/mandate/bin/runtime-network-policy
+cat >/etc/systemd/system/mandate-runtime-network.service <<'UNIT'
+[Unit]
+Description=Block app runtime access to Azure VM identity
+After=network-pre.target
+Before=docker.service caddy.service
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/opt/mandate/bin/runtime-network-policy
+[Install]
+WantedBy=multi-user.target
+UNIT
+install -d -m0755 /etc/systemd/system/docker.service.d
+cat >/etc/systemd/system/docker.service.d/mandate-runtime.conf <<'DOCKERUNIT'
+[Unit]
+Requires=mandate-runtime-network.service
+After=mandate-runtime-network.service
+DOCKERUNIT
+systemctl daemon-reload
+systemctl enable --now mandate-runtime-network.service
+printf 'API_IDENTITY_BOUNDARY_CONFIGURED\n'

@@ -18,7 +18,7 @@
 2. CI runs typecheck, operations/configuration tests, real PostgreSQL tests, a Docker build and a production-user container smoke test.
 3. Main is tested again. GitHub OIDC authenticates an identity scoped to Run Command on this app VM.
 4. The host fetches the exact tested main commit, refreshes version-pinned app configuration, builds an immutable local API image, uploads a database backup, applies pending migrations and recreates the backend container.
-5. A release succeeds only when the backend reports the exact commit and the required health/manifest checks pass. An API start/health failure attempts to restore the previous compatible code; the release stays failed.
+5. A release succeeds only when the backend reports the exact commit and the required process/database/manifest checks pass. An API start/health failure attempts to restore the previous compatible code; the release stays failed.
 
 `AZURE_DEPLOY_ENABLED` is a **repository variable** because the job condition is evaluated before environment variables load. Its initial setup sets it true only after the source PR tests pass. The `demo` environment supplies Azure tenant/subscription/client/VM IDs and permits the main branch only. No Azure client secret, GitHub PAT or wallet key is stored in the workflow.
 
@@ -29,6 +29,7 @@ Main requires the GitHub Actions `Repository tests` check and a PR. Approvals ar
 `/opt/mandate/config/release-mode` is operator-owned. Initial mode is `foundation`:
 
 - `/healthz`:200 with `stage:bootstrap` and the deployed Git commit.
+- `/health/db`:200 only after an actual verified-TLS query as the runtime role.
 - `/readyz`:503. Financial acceptance is incomplete.
 - `/deployment.json`:503. No fake contract addresses are supplied.
 - Wallet/payment/agent routes remain unimplemented. This operations setup does not build those features.
@@ -39,13 +40,13 @@ Existing wallets are never automatically migrated to new contract addresses. And
 
 ## Credentials and database
 
-The VM managed identity has `Key Vault Secrets User` on the app vault and backup access on the one Blob container. The temporary initialization write role was removed. Runtime reads go directly from IMDS to Key Vault; Azure CLI is not needed on the VM. Secret files remain mode0600 under `/opt/mandate/private`; no values are committed or sent through chat.
+The VM managed identity has `Key Vault Secrets User` on the app vault and backup access on the one Blob container. The temporary initialization write role was removed. The host deployment user reads configuration directly from IMDS and Key Vault; Azure CLI is not needed on the VM. The API runs as UID10001, without capabilities or new privileges. A persistent host firewall rule blocks that UID from Azure IMDS, and Caddy’s administration API is disabled, so the API cannot obtain the deployment identity or its migration/backup credentials. Configuration is injected into the container with runtime-only DB credentials. Secret files remain mode0600 under `/opt/mandate/private`; no values are committed or sent through chat.
 
 - `mandate_runtime`: app DML; no schema DDL and no migration-ledger writes.
 - `mandate_migrator`: non-admin owner of the application schema; used only by the migration container.
 - `mandate_backup`: database read access for complete current-schema dumps.
 
-Migrations are immutable numbered files plus `apps/api/migrations/manifest.json`. Add a new migration rather than editing an applied file. Automatic migrations are conservative transactional expansions; their lint does not prove compatibility. The runner uses checksums and a bounded advisory lock. The reserved ledger is pre-created with migration-owner privileges before app default grants. Database credentials, TLS keys and wallet/MPC identities have separate roles; this setup creates no wallet or MPC key.
+Migrations are immutable numbered files plus `apps/api/migrations/manifest.json`. Add a new migration rather than editing an applied file. Automatic migrations are conservative transactional expansions; their lint does not prove compatibility. The runner uses checksums and a bounded advisory lock. The public DB CA certificate is validated as certificate-only PEM and exposed read-only as0644; passwords and private keys are never included in that exception. The reserved ledger is pre-created with migration-owner privileges before app default grants. Database credentials, TLS keys and wallet/MPC identities have separate roles; this setup creates no wallet or MPC key.
 
 ## Backup and recovery
 

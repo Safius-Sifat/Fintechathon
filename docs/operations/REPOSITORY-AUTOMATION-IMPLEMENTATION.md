@@ -6,7 +6,7 @@ Use [LIVE-SETUP](LIVE-SETUP.md) for the operating procedure.
 
 - One pinned workflow with PR/main tests and automatic main deployment through OIDC.
 - Source published after the user's explicit164-file approval and a Gitleaks8.30.1 scan with no findings.
-- 42 cases: 16 operations unit cases,16 migration/configuration cases,10 real PostgreSQL16 cases including teardown. Docker build and production-user/read-only smoke checks run in CI.
+- 44 cases: 18 operations unit cases,16 migration/configuration cases,10 real PostgreSQL16 cases including teardown. Docker build and production-user/read-only smoke checks run in CI.
 - Ordered, checksummed, locked, transactional migrations with production TLS and non-admin role checks.
 - App VM, native TLS database, separate service roles, protected migration ledger, app Key Vault and managed-identity configuration retrieval.
 - Valid HTTPS certificate on the Azure-provided hostname.

@@ -95,3 +95,56 @@ test("OPS-SEC-04 failed retrieval does not overwrite existing secret", async () 
     await rm(dir, { recursive: true, force: true });
   }
 });
+
+import { assertPublicCertificates } from "../secrets.mjs";
+import { execFileSync } from "node:child_process";
+test("public CA permission exception accepts genuine certificates only", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "mandate-ca-validation-"));
+  try {
+    const cert = join(dir, "ca.crt");
+    execFileSync(
+      "openssl",
+      [
+        "req",
+        "-x509",
+        "-newkey",
+        "rsa:2048",
+        "-nodes",
+        "-days",
+        "1",
+        "-subj",
+        "/CN=unit-test-only",
+        "-keyout",
+        join(dir, "fixture.key"),
+        "-out",
+        cert,
+      ],
+      { stdio: "pipe" },
+    );
+    const value = await readFile(cert, "utf8");
+    assert.equal(assertPublicCertificates(value), value);
+    assert.throws(
+      () => assertPublicCertificates(value + "not-certificate-data"),
+      /REQUIRED/,
+    );
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+test("secret text or malformed PEM can never be made a public CA file", () => {
+  assert.throws(
+    () => assertPublicCertificates("test-only-sensitive-text"),
+    /REQUIRED/,
+  );
+  assert.throws(
+    () =>
+      assertPublicCertificates(
+        "-----BEGIN CERTIFICATE-----\ninvalid\n-----END CERTIFICATE-----",
+      ),
+    /INVALID/,
+  );
+  assert.throws(
+    () => assertPublicCertificates("-----BEGIN " + "PRIVATE KEY-----"),
+    /REQUIRED/,
+  );
+});

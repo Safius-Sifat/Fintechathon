@@ -4,7 +4,7 @@ Current runbook: [Azure delivery](LIVE-SETUP.md). Live release results are autho
 
 | Area | Configured state |
 | --- | --- |
-| Source/CI | Reviewed bootstrap published through PR1; typecheck,42 operation/migration/DB tests, Docker build and production-user smoke checks |
+| Source/CI | Reviewed bootstrap published through PR1; typecheck,44 operation/migration/DB tests, Docker build and production-user smoke checks |
 | VM | App-only 4 GiB server, Malaysia West,32GiB SSD, Secure Boot/vTPM; no MPC share |
 | HTTPS | Azure hostname and automatic certificate; loopback-only API behind Caddy |
 | Database | PostgreSQL16, verified TLS, separate runtime/migration/backup roles; runtime DDL/ledger-write denial verified |
