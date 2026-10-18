@@ -46,7 +46,8 @@ library PermitTermsLib {
     if (p.maxActions == 0 || p.maxActions > MAX_ACTIONS) revert LimitExceeded("maxActions");
     if (p.maxPayments != 0) revert FieldNotZero("maxPayments");
     if (p.maxPayment != 0) revert FieldNotZero("maxPayment");
-    if (p.spendCap != 0) revert FieldNotZero("spendCap");
+    // spendCap is the CALL outflow budget; a LIQUIDITY Permit without templates has none.
+    if (p.templatesHash == bytes32(0) ? p.spendCap != 0 : p.spendCap > MAX_TASK_SPEND) revert LimitExceeded("spendCap");
     if (p.liquidFloor < MIN_LIQUID_FLOOR) revert LimitExceeded("liquidFloor");
     if (p.periodCap != 0) revert FieldNotZero("periodCap");
     if (p.periodSeconds != 0) revert FieldNotZero("periodSeconds");

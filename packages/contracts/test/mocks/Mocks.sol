@@ -54,7 +54,7 @@ contract ReentrantRecipient {
 
 /// Vault double whose redemption path misbehaves, for recovery tests.
 contract UnavailableVault is ERC20 {
-  enum Mode { Revert, BurnGas }
+  enum Mode { Revert, BurnGas, ReturnBomb }
   Mode public mode;
   address public immutable asset;
   uint256 public redeemCalls;
@@ -73,12 +73,21 @@ contract UnavailableVault is ERC20 {
   }
 
   function maxRedeem(address owner) external view returns (uint256) {
+    if (mode == Mode.ReturnBomb) _bomb(90_000); // fits in the 50k view-gas budget
     return balanceOf(owner);
+  }
+
+  /// Returns as much data as the forwarded gas allows, to inflate the caller's copy cost.
+  function _bomb(uint256 size) private pure {
+    assembly {
+      return(0, size)
+    }
   }
 
   function redeem(uint256, address, address) external returns (uint256) {
     redeemCalls++;
     if (mode == Mode.Revert) revert("redeem unavailable");
+    if (mode == Mode.ReturnBomb) _bomb(280_000); // fits in the 300k redeem-gas budget
     while (true) {}
     return 0;
   }

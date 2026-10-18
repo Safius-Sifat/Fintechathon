@@ -9,8 +9,8 @@
   "sourceMigration": "w0-schema-implemented-consumer-acceptance-pending",
   "files": {
     "AGENTS.md": {
-      "sha256": "478cc998447dadf05f455841c2b2aa5ef608837b7a667272c48184b59e4aea56",
-      "words": 290
+      "sha256": "06b751228467a419be40da57ce36aee1de269ffc634d03395cc71118f43e56de",
+      "words": 382
     },
     "FINAL PLAN.md": {
       "sha256": "c38c18e3d87db9c0ce436431ba3d49affc50dc00564c6767a5d7bc84e01a5183",
@@ -21,12 +21,12 @@
       "words": 2027
     },
     "README.md": {
-      "sha256": "b023c2023aae79b6a34ef255f9a6ba691a3a6c0c995bb645beb85d55a6697a20",
-      "words": 445
+      "sha256": "f755c4f6024034c953e33097ae7763d06e50cf935a71d991a42a4c2d193196eb",
+      "words": 463
     },
     "architecture.md": {
-      "sha256": "8a5a4564595d816a6391d9704ecea1deeccbcd74c9e8ea5344a470e892056b32",
-      "words": 14419
+      "sha256": "7e4747d099c6e3e318875546b3ced9236a13c4c38a8eb3a762de21155d3835a6",
+      "words": 14525
     },
     "docs/BOOTSTRAP-STATUS.md": {
       "sha256": "117ee8e70d52d7e3b8f9e5edd109061973be2b4bbbf434646d331339b68069ba",
@@ -49,20 +49,20 @@
       "words": 750
     },
     "docs/plans/01 - Contracts and Shared Interfaces.md": {
-      "sha256": "0dfa357fa1f0a8273763d5c8907a03a0093993af299112708e308ba507d3a5e4",
-      "words": 22216
+      "sha256": "8df6d52e0b7530f913569a7ef979a1c3e5c8e31b90b4c7a0c82b806f20c70357",
+      "words": 22322
     },
     "docs/plans/02 - Platform Policy and MPCium.md": {
-      "sha256": "a368815ae66807ddac71967fc60113d0193d5b925d849c2e34f2b9504fa06b6e",
-      "words": 24540
+      "sha256": "27f52024ed05407344500c07bd05546c7a8ad6e77968256a64bbd77a68f01bf1",
+      "words": 24646
     },
     "docs/plans/03 - Android Owner Wallet.md": {
-      "sha256": "9863caafef1aa9be68af3765a180e0097ee6b4785623f6b2174b1072a30f4063",
-      "words": 23063
+      "sha256": "1760e876d002c9a07a1768f020c757fcde8ec44976c5b0fa64dd97d898e5a8c4",
+      "words": 23169
     },
     "docs/plans/04 - Agents Services Inspection and Demo.md": {
-      "sha256": "9bf5a493854e16508234d0d72769c31e7a47c82c5531879cc4bc475d85e807a4",
-      "words": 22726
+      "sha256": "5f8a6b7bc638be07e748f0e8e7906dcfe695341265f98a8c6dfbfd834f5fc2f3",
+      "words": 22832
     },
     "pitch.md": {
       "sha256": "17e3eccad67df5a8d60edcddcbc17431d78f002d8b786465d4c7bb62937b4441",
@@ -103,7 +103,7 @@
     "implementationTestsExecutedByThisRevision": false
   },
   "invoiceDomainVersion": "2",
-  "agenticExtensionSha256": "fdd0acd2a11e8e0b932d3483b7c214bc8979bddd8bcaf2c14d612242770578f2",
+  "agenticExtensionSha256": "46f9f9c701a4d22743349e9713e998140c941b5d744c4a29d8a3a73bcbdbcf59",
   "appendixHashMethod": "sha256 of UTF-8 text: shared = from the shared-contract heading to before '### S8. '; wallet = '### S8. ' to before '### S9. '; agentic = '### S9. ' to end of file",
   "updated": "2026-10-18"
 }

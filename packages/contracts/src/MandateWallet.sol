@@ -12,6 +12,10 @@ import {PermitTermsLib} from "./lib/PermitTermsLib.sol";
 import {AssetsLib} from "./lib/AssetsLib.sol";
 import {WalletPolicyLib} from "./lib/WalletPolicyLib.sol";
 import {VaultLib} from "./lib/VaultLib.sol";
+import {CallTemplateLib} from "./lib/CallTemplateLib.sol";
+import {X402Lib} from "./lib/X402Lib.sol";
+import {ActivationLib} from "./lib/ActivationLib.sol";
+import {IERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Permit.sol";
 import "./lib/MandateLimits.sol";
 
 /// @notice Managed agent wallet (architecture S3, S8.3). The immutable owner signs
@@ -22,7 +26,8 @@ import "./lib/MandateLimits.sol";
 /// vault), SCHEDULE (TRANSFER), owner co-signature above the Permit review threshold,
 /// Admin (PAUSE, UNPAUSE, REVOKE, RECOVER, RECOVER_LIQUID), OwnerTransfer and native ETH
 /// receive, the owner WalletPolicy (S9.4), FREEZE/UNFREEZE, ALLOWANCE Permits and a second
-/// agent asset (Base Sepolia test USDC). CALL and X402 revert explicitly until P1-A03 lands.
+/// agent asset (Base Sepolia test USDC), CALL through call templates and x402 payments
+/// approved by ERC-1271 (S9.8, S9.10).
 contract MandateWallet is ReentrancyGuard {
   using SafeERC20 for IERC20;
 
@@ -58,23 +63,29 @@ contract MandateWallet is ReentrancyGuard {
   bytes32 private immutable WALLET_DOMAIN;
   bytes32 private immutable INVOICE_DOMAIN;
 
-  uint256 public permitNonce;
   uint256 public adminNonce;
+
+  /// Permit registry, passed to ActivationLib as one storage reference.
+  struct Registry {
+    uint256 permitNonce;
+    mapping(bytes32 => PermitState) permits;
+    mapping(bytes32 => mapping(address => bool)) permitRecipient;
+    mapping(bytes32 => bool) taskUsed;
+    mapping(bytes32 => bool) revokedPermitId;
+    mapping(bytes32 => T.Schedule) schedules;
+    mapping(bytes32 => bytes32[]) permitTemplateIds;
+  }
+
+  Registry private reg;
   uint256 public ownerTransferNonce;
   uint64 public authorityEpoch;
   bool public paused;
   bool public frozen;
-  mapping(bytes32 => mapping(bytes32 => bool)) private permitTemplate;
   mapping(bytes32 => mapping(uint256 => uint256)) private periodSpend;
 
-  mapping(bytes32 => PermitState) private permits;
-  mapping(bytes32 => mapping(address => bool)) private permitRecipient;
-  mapping(bytes32 => bool) public taskUsed;
   mapping(bytes32 => bool) public usedRequest;
   mapping(bytes32 => bool) public usedInvoice;
   mapping(bytes32 => bool) public usedOwnerTransfer;
-  mapping(bytes32 => bool) public revokedPermitId;
-  mapping(bytes32 => T.Schedule) private schedules;
   mapping(bytes32 => mapping(uint32 => bool)) public periodUsed;
   // asset => day/week index => gross outflow; never decreased by refunds.
   mapping(address => mapping(uint256 => uint256)) private walletDayGross;
@@ -86,6 +97,19 @@ contract MandateWallet is ReentrancyGuard {
   event PermitRevoked(bytes32 indexed permitId);
   event WalletPolicyUpdated(uint64 version, bytes32 policyDigest); // emitted by WalletPolicyLib
   event WalletFrozen(bool frozen);
+  // Emitted by CallTemplateLib and X402Lib in the wallet's context.
+  event CallExecuted(
+    bytes32 indexed permitId,
+    bytes32 indexed requestId,
+    bytes32 indexed templateId,
+    address asset,
+    address target,
+    bytes4 selector,
+    uint256 assetOutflow
+  );
+  event X402Authorized(
+    bytes32 indexed permitId, bytes32 indexed authorizationDigest, address payTo, uint256 amount, uint64 validBefore
+  );
   event Recovered(uint256 liquidAssets, uint256 redeemedShares, uint256 redeemedAssets, bool vaultFailed);
   event WalletPaused(bool paused, uint64 epoch);
   event ActionExecuted(
@@ -129,6 +153,7 @@ contract MandateWallet is ReentrancyGuard {
   error RecipientDenied(address recipient);
   error ScheduleNotZero();
   error TemplatesNotAllowed();
+  error TemplateDenied(bytes32 reason);
   error FieldNotZero(bytes32 field);
   error LimitExceeded(bytes32 limit);
   error RequestAlreadyUsed();
@@ -178,75 +203,24 @@ contract MandateWallet is ReentrancyGuard {
     T.Schedule calldata schedule,
     bytes32[] calldata templateIds,
     bytes calldata ownerSignature
-  ) external returns (bytes32 permitId) {
+  ) external returns (bytes32) {
     if (paused) revert WalletIsPaused();
-    permitId = H.hash(p);
-    _requireSigner(H.digest(WALLET_DOMAIN, permitId), ownerSignature, owner);
-    if (p.epoch != authorityEpoch) revert WrongEpoch();
-    if (p.nonce != permitNonce) revert WrongNonce();
-    if (p.startsAt < p.issuedAt || p.expiresAt <= p.startsAt) revert NotYetValid();
-    if (p.expiresAt - p.startsAt > (p.kind == T.KIND_ALLOWANCE ? MAX_ALLOWANCE_SECONDS : MAX_PERMIT_SECONDS)) {
-      revert LifetimeTooLong();
-    }
-    if (block.timestamp >= p.expiresAt) revert Expired();
-    if (p.executor == address(0)) revert ZeroAddress();
-    WalletPolicyLib.Cap memory cap = _cap(p.asset);
-    if (taskUsed[p.taskId]) revert TaskAlreadyUsed();
-    if (revokedPermitId[permitId]) revert PermitIsRevoked();
-    if (p.kind == T.KIND_BROWSER) {
-      PermitTermsLib.validateBrowserTerms(p);
-      PermitTermsLib.validateRecipients(p.recipientsHash, recipients, 1, 4);
-      PermitTermsLib.requireZeroSchedule(p.scheduleHash, schedule);
-    } else if (p.kind == T.KIND_LIQUIDITY) {
-      if (vault == address(0)) revert KindNotSupported(p.kind);
-      if (p.asset != token) revert AssetNotSupported(p.asset); // DemoVault underlying is DemoUSD
-      PermitTermsLib.validateLiquidityTerms(p);
-      PermitTermsLib.validateRecipients(p.recipientsHash, recipients, 0, 0);
-      PermitTermsLib.requireZeroSchedule(p.scheduleHash, schedule);
-    } else if (p.kind == T.KIND_SCHEDULE) {
-      PermitTermsLib.validateScheduleTerms(p, schedule);
-      PermitTermsLib.validateRecipients(p.recipientsHash, recipients, 1, 1);
-      if (recipients[0] != schedule.recipient) revert ScheduleInvalid("recipient");
-      schedules[permitId] = schedule;
-    } else if (p.kind == T.KIND_ALLOWANCE) {
-      PermitTermsLib.validateAllowanceTerms(p);
-      PermitTermsLib.validateRecipients(p.recipientsHash, recipients, 1, 4);
-      PermitTermsLib.requireZeroSchedule(p.scheduleHash, schedule);
-    } else {
-      revert KindNotSupported(p.kind);
-    }
-
-    // Most restrictive rule wins: the Permit must also fit the current WalletPolicy.
-    if (p.maxPayment > cap.perTx) revert PolicyViolation("perTx");
-    if (p.kind == T.KIND_ALLOWANCE && p.periodCap > (p.periodSeconds == 1 days ? cap.daily : cap.weekly)) {
-      revert PolicyViolation("periodCap");
-    }
-    for (uint256 i = 0; i < recipients.length; i++) _requireRecipientPolicy(recipients[i]);
-    _storeTemplates(permitId, p, templateIds);
-
-    permitNonce = p.nonce + 1;
-    taskUsed[p.taskId] = true;
-    PermitState storage st = permits[permitId];
-    st.permit = p;
-    st.activated = true;
-    for (uint256 i = 0; i < recipients.length; i++) permitRecipient[permitId][recipients[i]] = true;
-    emit PermitActivated(permitId, p.taskId, p.executor, p.epoch);
+    return ActivationLib.activate(
+      reg, p, recipients, schedule, templateIds, ownerSignature,
+      ActivationLib.Config(owner, WALLET_DOMAIN, token, usdc, vault, authorityEpoch)
+    );
   }
 
-  /// templatesHash = keccak256(abi.encode(bytes32[])) over sorted unique IDs, zero when none (S3).
-  /// Only LIQUIDITY Permits may carry templates, and each must be in the current policy.
-  function _storeTemplates(bytes32 permitId, T.Permit calldata p, bytes32[] calldata templateIds) private {
-    if (templateIds.length == 0) {
-      if (p.templatesHash != bytes32(0)) revert TemplatesNotAllowed();
-      return;
-    }
-    if (p.kind != T.KIND_LIQUIDITY || templateIds.length > MAX_POLICY_TEMPLATES) revert TemplatesNotAllowed();
-    if (keccak256(abi.encode(templateIds)) != p.templatesHash) revert TemplatesNotAllowed();
-    for (uint256 i = 0; i < templateIds.length; i++) {
-      if (i > 0 && templateIds[i - 1] >= templateIds[i]) revert TemplatesNotAllowed();
-      if (!WalletPolicyLib.store().template[WalletPolicyLib.store().policy.version][templateIds[i]]) revert PolicyViolation("template");
-      permitTemplate[permitId][templateIds[i]] = true;
-    }
+  function permitNonce() external view returns (uint256) {
+    return reg.permitNonce;
+  }
+
+  function taskUsed(bytes32 taskId) external view returns (bool) {
+    return reg.taskUsed[taskId];
+  }
+
+  function revokedPermitId(bytes32 permitId) external view returns (bool) {
+    return reg.revokedPermitId[permitId];
   }
 
   // ---------------------------------------------------------------- Actions
@@ -262,7 +236,8 @@ contract MandateWallet is ReentrancyGuard {
   ) external nonReentrant {
     if (paused) revert WalletIsPaused();
     if (frozen) revert WalletIsFrozen();
-    PermitState storage st = permits[a.permitId];
+    if (X402Lib.store().list.length != 0) X402Lib.prune(usdc, reg.permits, authorityEpoch);
+    PermitState storage st = reg.permits[a.permitId];
     T.Permit storage p = st.permit;
     if (!st.activated || st.closed || st.revoked) revert PermitNotActive();
     if (p.epoch != authorityEpoch) revert WrongEpoch();
@@ -273,7 +248,7 @@ contract MandateWallet is ReentrancyGuard {
     bytes32 actionDigest = H.digest(WALLET_DOMAIN, H.hash(a));
     _requireSigner(actionDigest, executorSignature, p.executor);
     if (usedRequest[a.requestId]) revert RequestAlreadyUsed();
-    if (callData.length != 0) revert OperationNotSupported(a.operation);
+    if (callData.length != 0 && a.operation != T.OP_CALL) revert OperationNotSupported(a.operation);
 
     if (a.operation == T.OP_CLOSE) {
       _close(st, a, actionDigest, invoice, providerSignature, approval, ownerApproval);
@@ -293,12 +268,13 @@ contract MandateWallet is ReentrancyGuard {
       if (a.operation == T.OP_DEPOSIT) VaultLib.deposit(st, a, actionDigest, vault);
       else VaultLib.withdraw(st, a, actionDigest, vault);
     } else if (a.operation == T.OP_CALL) {
-      // CALL and X402 land with P1-A03.
       if (p.kind != T.KIND_LIQUIDITY) revert OperationNotAllowed(p.kind, a.operation);
-      revert OperationNotSupported(a.operation);
+      _requireZeroInvoice(invoice, providerSignature);
+      _call(st, a, actionDigest, approval, ownerApproval, callData);
     } else if (a.operation == T.OP_X402) {
       if (p.kind != T.KIND_BROWSER && p.kind != T.KIND_ALLOWANCE) revert OperationNotAllowed(p.kind, a.operation);
-      revert OperationNotSupported(a.operation);
+      if (usdc == address(0) || p.asset != usdc) revert AssetNotSupported(p.asset);
+      _pay(st, a, actionDigest, invoice, providerSignature, approval, ownerApproval);
     } else {
       revert OperationNotSupported(a.operation);
     }
@@ -338,7 +314,7 @@ contract MandateWallet is ReentrancyGuard {
     if (a.minOutput != 0) revert FieldNotZero("minOutput");
     if (a.period != 0) revert FieldNotZero("period");
     if (a.amount == 0) revert InvalidAmount();
-    if (!permitRecipient[a.permitId][a.target]) revert RecipientDenied(a.target);
+    if (!reg.permitRecipient[a.permitId][a.target]) revert RecipientDenied(a.target);
     _requireRecipientPolicy(a.target);
 
     bool approved = a.amount > _reviewThreshold(p);
@@ -351,11 +327,22 @@ contract MandateWallet is ReentrancyGuard {
     if (a.deadline - a.issuedAt > maxLife) revert LifetimeTooLong();
     _checkInvoice(p, a, invoice, providerSignature, maxLife);
     _consumeSpend(a.permitId, st, a.amount, true);
+    _requireFloor(p, a.amount);
 
     usedRequest[a.requestId] = true;
     usedInvoice[a.invoiceId] = true;
-    IERC20(p.asset).safeTransfer(a.target, a.amount);
-    emit ActionExecuted(a.permitId, a.requestId, a.operation, p.asset, a.target, a.amount, 0, a.invoiceId, a.inputHash, actionDigest, approved);
+    if (a.operation == T.OP_X402) {
+      // Settled later by USDC transferWithAuthorization through isValidSignature (S9.10).
+      bytes32 digest = H.x402Digest(IERC20Permit(usdc).DOMAIN_SEPARATOR(), address(this), a);
+      X402Lib.register(
+        X402Lib.Auth(digest, a.permitId, a.requestId, p.asset, a.target, a.amount, a.deadline, authorityEpoch, approved)
+      );
+    } else {
+      IERC20(p.asset).safeTransfer(a.target, a.amount);
+    }
+    // X402 moves nothing here: settlement is the later USDC Transfer, so assets is 0.
+    uint256 moved = a.operation == T.OP_X402 ? 0 : a.amount;
+    emit ActionExecuted(a.permitId, a.requestId, a.operation, p.asset, a.target, moved, 0, a.invoiceId, a.inputHash, actionDigest, approved);
   }
 
   function _checkInvoice(
@@ -382,9 +369,9 @@ contract MandateWallet is ReentrancyGuard {
   function _consumeSpend(bytes32 permitId, PermitState storage st, uint256 amount, bool isPayment) private {
     T.Permit storage p = st.permit;
     WalletPolicyLib.Cap memory cap = _cap(p.asset);
+    if (isPayment && amount > p.maxPayment) revert LimitExceeded("maxPayment");
+    if (amount > cap.perTx) revert PolicyViolation("perTx");
     if (isPayment) {
-      if (amount > p.maxPayment) revert LimitExceeded("maxPayment");
-      if (amount > cap.perTx) revert PolicyViolation("perTx");
       if (st.paymentCount + 1 > p.maxPayments) revert LimitExceeded("maxPayments");
       st.paymentCount += 1;
     }
@@ -412,9 +399,37 @@ contract MandateWallet is ReentrancyGuard {
     executorDayGross[p.asset][p.executor][day] = execDay;
     walletDayGross[p.asset][day] = walletDay;
     walletWeekGross[p.asset][week] = walletWeek;
+  }
 
+  /// Liquid funds after `pending` outflow and outstanding x402 authorizations stay at or above the floor.
+  function _requireFloor(T.Permit storage p, uint256 pending) private view {
+    uint256 committed = pending + (p.asset == usdc ? X402Lib.committed(usdc) : 0); // pruned at execute start
     uint256 liquid = IERC20(p.asset).balanceOf(address(this));
-    if (liquid < amount || liquid - amount < p.liquidFloor) revert LimitExceeded("liquidFloor");
+    if (liquid < committed || liquid - committed < p.liquidFloor) revert LimitExceeded("liquidFloor");
+  }
+
+  /// CALL through an owner-approved template (S9.8); the measured outflow is charged afterwards.
+  function _call(
+    PermitState storage st,
+    T.Action calldata a,
+    bytes32 actionDigest,
+    T.Approval calldata approval,
+    bytes calldata ownerApproval,
+    bytes calldata callData
+  ) private {
+    if (a.minOutput != 0 || a.invoiceId != bytes32(0) || a.period != 0) revert FieldNotZero("call");
+    bool approved = a.amount > _reviewThreshold(st.permit);
+    if (approved) _requireApproval(actionDigest, a.deadline, approval, ownerApproval);
+    else _requireNoApproval(approval, ownerApproval);
+    if (a.deadline - a.issuedAt > (approved ? MAX_COSIGNED_SECONDS : MAX_ACTION_SECONDS)) revert LifetimeTooLong();
+    usedRequest[a.requestId] = true;
+    address asset = st.permit.asset;
+    uint256 outflow = CallTemplateLib.executeCall(
+      a, callData, reg.permitTemplateIds[a.permitId], CallTemplateLib.Assets(asset, asset == token ? usdc : token)
+    );
+    _consumeSpend(a.permitId, st, outflow, false);
+    _requireFloor(st.permit, 0);
+    emit ActionExecuted(a.permitId, a.requestId, a.operation, asset, a.target, outflow, 0, bytes32(0), a.inputHash, actionDigest, approved);
   }
 
   function _requireApproval(bytes32 actionDigest, uint64 deadline, T.Approval calldata approval, bytes calldata ownerApproval)
@@ -445,7 +460,7 @@ contract MandateWallet is ReentrancyGuard {
     T.Approval calldata approval,
     bytes calldata ownerApproval
   ) private {
-    T.Schedule storage s = schedules[a.permitId];
+    T.Schedule storage s = reg.schedules[a.permitId];
     if (a.minOutput != 0 || a.invoiceId != bytes32(0) || a.inputHash != bytes32(0)) revert FieldNotZero("transfer");
     if (a.target != s.recipient || a.amount != s.amount) revert ScheduleMismatch();
     if (a.period >= s.periods) revert ScheduleWindow();
@@ -460,6 +475,7 @@ contract MandateWallet is ReentrancyGuard {
     else _requireNoApproval(approval, ownerApproval);
     if (a.deadline - a.issuedAt > (approved ? MAX_COSIGNED_SECONDS : MAX_ACTION_SECONDS)) revert LifetimeTooLong();
     _consumeSpend(a.permitId, st, a.amount, true);
+    _requireFloor(st.permit, a.amount);
 
     usedRequest[a.requestId] = true;
     periodUsed[a.permitId][a.period] = true;
@@ -496,8 +512,8 @@ contract MandateWallet is ReentrancyGuard {
       paused = false; // never moves the epoch back; old Permits stay invalid
       emit WalletPaused(false, authorityEpoch);
     } else if (a.command == T.CMD_REVOKE) {
-      revokedPermitId[a.permitId] = true;
-      if (permits[a.permitId].activated) permits[a.permitId].revoked = true;
+      reg.revokedPermitId[a.permitId] = true;
+      if (reg.permits[a.permitId].activated) reg.permits[a.permitId].revoked = true;
       emit PermitRevoked(a.permitId);
     } else {
       paused = true;
@@ -529,26 +545,19 @@ contract MandateWallet is ReentrancyGuard {
     return WalletPolicyLib.store().nonce;
   }
 
-  function _isAgentAsset(address asset) private view returns (bool) {
-    return asset == token || (usdc != address(0) && asset == usdc);
-  }
-
   function _cap(address asset) private view returns (WalletPolicyLib.Cap memory cap) {
-    WalletPolicyLib.Store storage s = WalletPolicyLib.store();
-    cap = s.cap[s.policy.version][asset];
-    if (!_isAgentAsset(asset) || !cap.set) revert AssetNotSupported(asset);
+    bool ok;
+    (cap, ok) = WalletPolicyLib.capOf(asset, token, usdc);
+    if (!ok) revert AssetNotSupported(asset);
   }
 
   function _requireRecipientPolicy(address recipient) private view {
-    WalletPolicyLib.Store storage s = WalletPolicyLib.store();
-    uint64 v = s.policy.version;
-    if (s.blocked[v][recipient]) revert PolicyViolation("blocklist");
-    if (s.allowCount[v] != 0 && !s.allow[v][recipient]) revert PolicyViolation("allowlist");
+    bytes32 violation = WalletPolicyLib.recipientViolation(recipient);
+    if (violation != bytes32(0)) revert PolicyViolation(violation);
   }
 
   function _reviewThreshold(T.Permit storage p) private view returns (uint256) {
-    uint256 policyThreshold = WalletPolicyLib.store().policy.reviewThreshold;
-    return p.reviewThreshold < policyThreshold ? p.reviewThreshold : policyThreshold;
+    return WalletPolicyLib.reviewThreshold(p.reviewThreshold);
   }
 
   // ---------------------------------------------------------- Owner transfer
@@ -585,11 +594,11 @@ contract MandateWallet is ReentrancyGuard {
   // ------------------------------------------------------------------ Views
 
   function getPermit(bytes32 permitId) external view returns (PermitState memory) {
-    return permits[permitId];
+    return reg.permits[permitId];
   }
 
   function isPermitRecipient(bytes32 permitId, address recipient) external view returns (bool) {
-    return permitRecipient[permitId][recipient];
+    return reg.permitRecipient[permitId][recipient];
   }
 
   function getBudget(address executor, address asset) external view returns (Budget memory b) {
@@ -610,9 +619,8 @@ contract MandateWallet is ReentrancyGuard {
   }
 
   function assetCap(address asset) external view returns (uint256 perTx, uint256 daily, uint256 weekly, bool set) {
-    WalletPolicyLib.Store storage s = WalletPolicyLib.store();
-    WalletPolicyLib.Cap memory c = s.cap[s.policy.version][asset];
-    return (c.perTx, c.daily, c.weekly, c.set && _isAgentAsset(asset));
+    (WalletPolicyLib.Cap memory c, bool ok) = WalletPolicyLib.capOf(asset, token, usdc);
+    return (c.perTx, c.daily, c.weekly, ok);
   }
 
   function isAllowlisted(address recipient) external view returns (bool) {
@@ -632,6 +640,21 @@ contract MandateWallet is ReentrancyGuard {
 
   function getTemplate(bytes32 templateId) external view returns (T.CallTemplate memory) {
     return WalletPolicyLib.store().templateById[templateId];
+  }
+
+  /// ERC-1271: approves only a recorded, still-eligible x402 authorization (S9.10).
+  function isValidSignature(bytes32 hash, bytes calldata signature) external view returns (bytes4) {
+    if (usdc == address(0)) return 0xffffffff;
+    bool ok = X402Lib.isValid(hash, signature, reg.permits, X402Lib.WalletState(frozen, paused, authorityEpoch, token, usdc));
+    return ok ? bytes4(0x1626ba7e) : bytes4(0xffffffff);
+  }
+
+  function x402Outstanding(address asset) external view returns (uint256) {
+    return usdc == address(0) ? 0 : X402Lib.outstanding(asset, usdc);
+  }
+
+  function getPermitTemplates(bytes32 permitId) external view returns (bytes32[] memory) {
+    return reg.permitTemplateIds[permitId];
   }
 
   function getPeriodSpend(bytes32 permitId, uint64 periodIndex) external view returns (uint256) {
