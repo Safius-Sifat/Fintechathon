@@ -6,7 +6,7 @@
   "sharedAppendixSha256": "51252dbd26a1c6630fd514dbb0e81798b540ce14b4308e16039ce2806702de84",
   "walletExtensionSha256": "f225c9488c2252a70a638645eee44bcf4587b4b74ca96896107f1b94ef3e1be2",
   "status": "specified-not-built",
-  "sourceMigration": "w0-schema-implemented-solidity-vectors-not-run",
+  "sourceMigration": "w0-schema-implemented-consumer-acceptance-pending",
   "files": {
     "AGENTS.md": {
       "sha256": "625cc3d225ec396b1a28c8cdf5a0ad4e6de4661f5e05132025425102ab059427",

@@ -10,7 +10,8 @@
       "node": "22.23.3",
       "pnpm": "10.20.0",
       "os": "darwin",
-      "forge": "not installed"
+      "forge": "1.8.5",
+      "forgeStd": "v1.17.0@f3dae6e6ee381f25eb6a246f7da9b85c91a68219"
     },
     "command": "./scripts/pnpm.sh --filter @mandate/schema check",
     "exitCode": 0,
@@ -28,7 +29,7 @@
   {
     "caseId": "P1-01.T01-solidity",
     "taskId": "P1-01",
-    "status": "NOT_RUN",
+    "status": "PASS",
     "sourceCommit": "54b661cafa276dc83ab0ed0907c1bd88f7bb3a91",
     "workingTreeDigest": "c9b8ba9676a23af8ebcb056cbeee8604e62f5cba18fc09772c747c611db286ae",
     "schemaCommit": "this change",
@@ -36,19 +37,20 @@
       "node": "22.23.3",
       "pnpm": "10.20.0",
       "os": "darwin",
-      "forge": "not installed"
+      "forge": "1.8.5",
+      "forgeStd": "v1.17.0@f3dae6e6ee381f25eb6a246f7da9b85c91a68219"
     },
     "command": "forge test --root packages/contracts --match-path test/MandateHashes.t.sol",
-    "exitCode": null,
+    "exitCode": 0,
     "expected": "Solidity recomputes struct hash, domain, digest and ecrecover from fixtures",
-    "observed": "not run: Foundry not installed on the implementing machine",
+    "observed": "as expected (9 Foundry tests passed)",
     "startedAt": "2026-10-18T15:08:36+06:00",
     "finishedAt": "2026-10-18T15:08:36+06:00",
     "artifactRefs": [
       "packages/schema/fixtures/"
     ],
     "limitations": [
-      "Requires forge and forge-std"
+      "Local deterministic test only; no chain involved"
     ]
   },
   {
@@ -62,7 +64,8 @@
       "node": "22.23.3",
       "pnpm": "10.20.0",
       "os": "darwin",
-      "forge": "not installed"
+      "forge": "1.8.5",
+      "forgeStd": "v1.17.0@f3dae6e6ee381f25eb6a246f7da9b85c91a68219"
     },
     "command": "./scripts/pnpm.sh --filter @mandate/schema check",
     "exitCode": 0,
@@ -88,7 +91,8 @@
       "node": "22.23.3",
       "pnpm": "10.20.0",
       "os": "darwin",
-      "forge": "not installed"
+      "forge": "1.8.5",
+      "forgeStd": "v1.17.0@f3dae6e6ee381f25eb6a246f7da9b85c91a68219"
     },
     "command": "./scripts/pnpm.sh --filter @mandate/schema check",
     "exitCode": 0,
@@ -114,7 +118,8 @@
       "node": "22.23.3",
       "pnpm": "10.20.0",
       "os": "darwin",
-      "forge": "not installed"
+      "forge": "1.8.5",
+      "forgeStd": "v1.17.0@f3dae6e6ee381f25eb6a246f7da9b85c91a68219"
     },
     "command": "./scripts/pnpm.sh --filter @mandate/schema check",
     "exitCode": 0,
@@ -140,7 +145,8 @@
       "node": "22.23.3",
       "pnpm": "10.20.0",
       "os": "darwin",
-      "forge": "not installed"
+      "forge": "1.8.5",
+      "forgeStd": "v1.17.0@f3dae6e6ee381f25eb6a246f7da9b85c91a68219"
     },
     "command": "./scripts/pnpm.sh --filter @mandate/schema check",
     "exitCode": 0,

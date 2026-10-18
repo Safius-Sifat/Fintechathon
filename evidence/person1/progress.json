@@ -6,22 +6,18 @@
     "P1-01": {
       "status": "IN_PROGRESS",
       "blockedBy": [
-        "Foundry not installed: Solidity vector cases NOT_RUN",
         "Consumer acceptance from Persons 2, 3, 4 pending"
       ]
     },
     "P1-W01": {
       "status": "IN_PROGRESS",
       "blockedBy": [
-        "Solidity vector case NOT_RUN",
         "Native (Kotlin/Wallet Core) and Go consumers must confirm the same digests"
       ]
     },
     "P1-A01": {
       "status": "IN_PROGRESS",
-      "blockedBy": [
-        "Solidity vector case NOT_RUN"
-      ]
+      "blockedBy": []
     }
   },
   "files": [
