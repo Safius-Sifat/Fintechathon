@@ -8,6 +8,7 @@ import {
   x402Authorization,
   x402AuthorizationDigest,
   AgentAnswerSchema,
+  ApiErrorSchema,
   AgentQuestionSchema,
   DeploymentManifestSchema,
   PersonalTransferRequestSchema,
@@ -299,4 +300,23 @@ test("P1-W01.T06 no production source keeps bootstrap wallet4/Login1 literals", 
   for (const top of ["apps", "packages", "services", "modules"])
     walk(join(root, top));
   assert.deepEqual(offenders, []);
+});
+
+test("S9.11 simulation error codes are part of the API contract", () => {
+  for (const code of [
+    "SIMULATION_REVERT",
+    "SIMULATION_MISMATCH",
+    "SIMULATION_UNAVAILABLE",
+  ])
+    assert.equal(
+      ApiErrorSchema.safeParse({
+        code,
+        message: "x",
+        actionId: null,
+        evidenceId: null,
+        retryable: true,
+      }).success,
+      true,
+      code,
+    );
 });

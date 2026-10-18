@@ -40,7 +40,7 @@ An owner manually sending from the managed wallet is different from an agent pay
 
 ## Agent intelligence and owner policy (v7)
 
-A real LLM agent (Claude Agent SDK) does the judgement work: choosing offers, retrying or falling back, setting amounts within bounds and checking results. It can only choose among options the wallet's limits allow, so injected instructions cannot add recipients or amounts. The owner sets an on-chain wallet policy (per-asset daily/weekly caps, allowlist, blocklist, allowed contract templates), co-signs large actions from a push notification, and can freeze agents temporarily without losing their approved tasks. Agents pay x402 services in test USDC, with the wallet contract as the payer. A deterministic risk sentinel screens and simulates every payment before signing.
+A real LLM agent (Claude Agent SDK) does the judgement work: choosing offers, retrying or falling back, setting amounts within bounds and checking results. It can only choose among options the wallet's limits allow, so injected instructions cannot add recipients or amounts. The owner sets an on-chain wallet policy (per-asset daily/weekly caps, allowlist, blocklist, allowed contract templates), co-signs large actions from a push notification, and can freeze agents temporarily without losing their approved tasks. Agents pay x402 services in test USDC, with the wallet contract as the payer. A deterministic policy service checks permission, budget and risk before signing. One exact simulation checks the signed operation before broadcast, with additional effect checks for vault operations and approved contract calls.
 
 ## Specialized workflows
 

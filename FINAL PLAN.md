@@ -48,7 +48,7 @@ Person2 owns worker process; Person4 owns imported runbook library. Person2 writ
 | Standing Allowance | ALLOWANCE Permit up to 30 days with per-period cap | Recurring service purchases within a daily or weekly budget |
 | Call Templates | Allowed contract functions with argument bounds and outflow metering | Agent manages assets in approved contracts without arbitrary calldata |
 | USDC and x402 | Base Sepolia test USDC as agent asset; x402 `exact` USDC payments (official `@x402/*` packages) with the managed wallet as ERC-1271 payer; token side verified on a Base Sepolia fork, facilitator path behind gate X402-G; Mandate-native PAY as fallback | Stablecoin agent payments with honest interoperability claims |
-| Risk Sentinel | Deterministic screening, exact-effect simulation and velocity rules before authorization | Blocklisted or mismatching transactions denied; owner alerted and offered Freeze |
+| Transaction Safety | Policy/balance/reservation, screening and velocity checks before signing; one exact simulation after signing, with advanced effect checks only where needed | Unsafe signing denied; failed simulation blocks broadcast and retains reservation; owner alerted and offered Freeze |
 
 Four runbooks: Browser Check (PAY, agent chooses offer and fallback), Liquidity Keeper (deposit/redeem or approved call templates, agent sets amount within owner bounds), Scheduled Pay (fixed amount/recipient/window/count, missed periods skipped) and Service Allowance (agent buys allowlisted capabilities on demand under a standing period cap). Each closes authority separately when possible. One controlled test vault and DemoUSD demonstrate asset management without production-yield claims.
 
@@ -169,7 +169,7 @@ Architecture [A8/A9 and S9](architecture.md) define the agent runtime, decision 
 | Contract controls | Policy, co-signature, freeze, allowance, multi-asset, call templates, x402 authorization | P1-A02, P1-A03 |
 | Agent runtime | Claude Agent SDK agent, MCP-only tools, built-in tools disabled, bounded questions with defaults | P4-A01, P4-A02, P2-A01 |
 | Owner controls | Approval push and co-sign, policy editor, freeze, allowance and intent review on the phone | P3-A01, P3-A02, P2-A02 |
-| Risk and payments | Sentinel screening/simulation/velocity, USDC, x402-formatted providers, gate X402-G | P2-A03, P4-A03, P1-A03 |
+| Risk and payments | Pre-sign policy/screening/velocity; one post-sign simulation (advanced effects for vault/CALL/X402); USDC providers and gate X402-G | P2-A03, P4-A03, P1-A03 |
 | Inspection | Verifier checks co-signatures, freeze intervals, policy versions and call outflows | P4-A03 |
 
 Signing model decision D-01 (architecture A10): the owner key stays local on the phone and the agent executor stays 2-of-3 MPCium with the required policy authorizer; owner MPC is not in this release.
