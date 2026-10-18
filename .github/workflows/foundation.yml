@@ -33,6 +33,7 @@ jobs:
       - run: pnpm check:repository
       - run: pnpm typecheck
       - run: pnpm test:ops
+      - run: pnpm test:release
       - run: pnpm test:migrations
       - run: pnpm --filter @mandate/api check
       - run: pnpm test:db

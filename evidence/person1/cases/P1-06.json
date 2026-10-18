@@ -108,7 +108,7 @@
   {
     "caseId": "P1-06.T05",
     "taskId": "P1-06",
-    "status": "NOT_RUN",
+    "status": "LOCAL_PASS",
     "sourceCommit": "8b6d7ac74ecd03c9c100caf208653217225bbee2",
     "workingTreeDigest": "see commit",
     "schemaCommit": "8b6d7ac74ecd03c9c100caf208653217225bbee2",
@@ -117,18 +117,19 @@
       "solc": "0.8.28 via_ir",
       "chain": "local Foundry EVM / local anvil fork of Base Sepolia, chainId 84532"
     },
-    "command": null,
-    "testName": null,
-    "exitCode": null,
+    "command": "pnpm test:release; pnpm release:check",
+    "testName": "scripts/test/release-check.test.mjs",
+    "exitCode": 0,
     "expected": "release gate cannot report overall PASS with missing cases",
-    "observed": "not run",
-    "startedAt": "2026-10-19T00:03:33+06:00",
-    "finishedAt": "2026-10-19T00:03:33+06:00",
+    "observed": "8 gate tests pass; on the repository the gate exits 1 with INCOMPLETE (71/335 mandatory cases PASS, manifest absent)",
+    "startedAt": "2026-10-19T02:56:39+06:00",
+    "finishedAt": "2026-10-19T02:56:39+06:00",
     "artifactRefs": [
-      "docs/contracts-deploy.md"
+      "scripts/release-check.mjs",
+      "scripts/test/release-check.test.mjs"
     ],
     "limitations": [
-      "release-check wiring is part of P1-W03/release assembly"
+      "Gate consumes case records; Person2 case files are task-level objects and are reported as invalidFiles until converted"
     ]
   }
 ]
