@@ -1,7 +1,7 @@
 {
   "owner": "Person1",
-  "updatedAt": "2026-10-18T19:55:32+06:00",
-  "milestone": "MA (P1-A03)",
+  "updatedAt": "2026-10-18T23:37:23+06:00",
+  "milestone": "M3/M4 contract side (P1-05)",
   "tasks": {
     "P1-01": {
       "status": "IN_PROGRESS",
@@ -59,6 +59,13 @@
         "Gate X402-G facilitator settlement on Base Sepolia with Person4",
         "Base Sepolia deployment evidence pending P1-06"
       ]
+    },
+    "P1-05": {
+      "status": "LOCAL_PASS",
+      "blockedBy": [
+        "Public chain event examples need P1-06 deployment",
+        "Person2/Person4 acceptance of view/event fixtures"
+      ]
     }
   },
   "files": [
@@ -83,6 +90,10 @@
     "packages/contracts/test/invariant/PolicyInvariants.t.sol",
     "packages/contracts/src/lib/{CallTemplateLib,X402Lib,ActivationLib}.sol",
     "packages/contracts/test/{CallTemplate,X402}.t.sol",
-    "packages/contracts/test/fork/X402Fork.t.sol"
+    "packages/contracts/test/fork/X402Fork.t.sol",
+    "packages/contracts/src/EvidenceAnchor.sol",
+    "packages/contracts/test/{Anchor,Views}.t.sol",
+    "packages/contracts/test/invariant/FinancialInvariants.t.sol",
+    "evidence/person1/contract-results.json"
   ]
 }
