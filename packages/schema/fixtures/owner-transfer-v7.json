@@ -1,0 +1,408 @@
+{
+  "schema": "mandate-vector/1",
+  "primaryType": "OwnerTransfer",
+  "valid": [
+    {
+      "id": "sweep-demousd",
+      "domain": {
+        "name": "MandateWallet",
+        "version": "5",
+        "chainId": 84532,
+        "verifyingContract": "0x1111111111111111111111111111111111111111"
+      },
+      "message": {
+        "transferId": "0x0000000000000000000000000000000000000000000000000000000000000007",
+        "asset": "0x2222222222222222222222222222222222222222",
+        "recipient": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        "amount": "1500000",
+        "epoch": "0",
+        "nonce": "0",
+        "issuedAt": "1793000300",
+        "deadline": "1793000600"
+      },
+      "typedData": {
+        "types": {
+          "EIP712Domain": [
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "version",
+              "type": "string"
+            },
+            {
+              "name": "chainId",
+              "type": "uint256"
+            },
+            {
+              "name": "verifyingContract",
+              "type": "address"
+            }
+          ],
+          "OwnerTransfer": [
+            {
+              "name": "transferId",
+              "type": "bytes32"
+            },
+            {
+              "name": "asset",
+              "type": "address"
+            },
+            {
+              "name": "recipient",
+              "type": "address"
+            },
+            {
+              "name": "amount",
+              "type": "uint256"
+            },
+            {
+              "name": "epoch",
+              "type": "uint64"
+            },
+            {
+              "name": "nonce",
+              "type": "uint256"
+            },
+            {
+              "name": "issuedAt",
+              "type": "uint64"
+            },
+            {
+              "name": "deadline",
+              "type": "uint64"
+            }
+          ]
+        },
+        "primaryType": "OwnerTransfer",
+        "domain": {
+          "name": "MandateWallet",
+          "version": "5",
+          "chainId": 84532,
+          "verifyingContract": "0x1111111111111111111111111111111111111111"
+        },
+        "message": {
+          "transferId": "0x0000000000000000000000000000000000000000000000000000000000000007",
+          "asset": "0x2222222222222222222222222222222222222222",
+          "recipient": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+          "amount": "1500000",
+          "epoch": "0",
+          "nonce": "0",
+          "issuedAt": "1793000300",
+          "deadline": "1793000600"
+        }
+      },
+      "structHash": "0x6d2ef25381b4fa61dd73ebe8ef754b898c4aab70e7861ddd11c995726a4da24b",
+      "domainSeparator": "0xa34ca99a0fbaf645168fa5e21ac311b27ffc06a966896fd0315ecfdaba1da25d",
+      "digest": "0xb534cc1d1f01b6fa18adf3cafcdcf368cba45ea76a3fe6d64b1e97160ada52da",
+      "abiEncoded": "0x00000000000000000000000000000000000000000000000000000000000000070000000000000000000000002222222222222222222222222222222222222222000000000000000000000000f39fd6e51aad88f6f4ce6ab8827279cfffb92266000000000000000000000000000000000000000000000000000000000016e36000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000006adf036c000000000000000000000000000000000000000000000000000000006adf0498",
+      "signer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "signature": "0xd98c1a8b5c08a9adecf51d87e3e36bedfe6c91f94edd9256f4dc2def4322afbd42a8d446cd675f104d66de3a9ca8756038476b7c4af453db247bfe3004f1f2b41b"
+    },
+    {
+      "id": "sweep-eth",
+      "domain": {
+        "name": "MandateWallet",
+        "version": "5",
+        "chainId": 84532,
+        "verifyingContract": "0x1111111111111111111111111111111111111111"
+      },
+      "message": {
+        "transferId": "0x0000000000000000000000000000000000000000000000000000000000000008",
+        "asset": "0x0000000000000000000000000000000000000000",
+        "recipient": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        "amount": "1000000000000000",
+        "epoch": "1",
+        "nonce": "1",
+        "issuedAt": "1793000300",
+        "deadline": "1793000600"
+      },
+      "typedData": {
+        "types": {
+          "EIP712Domain": [
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "version",
+              "type": "string"
+            },
+            {
+              "name": "chainId",
+              "type": "uint256"
+            },
+            {
+              "name": "verifyingContract",
+              "type": "address"
+            }
+          ],
+          "OwnerTransfer": [
+            {
+              "name": "transferId",
+              "type": "bytes32"
+            },
+            {
+              "name": "asset",
+              "type": "address"
+            },
+            {
+              "name": "recipient",
+              "type": "address"
+            },
+            {
+              "name": "amount",
+              "type": "uint256"
+            },
+            {
+              "name": "epoch",
+              "type": "uint64"
+            },
+            {
+              "name": "nonce",
+              "type": "uint256"
+            },
+            {
+              "name": "issuedAt",
+              "type": "uint64"
+            },
+            {
+              "name": "deadline",
+              "type": "uint64"
+            }
+          ]
+        },
+        "primaryType": "OwnerTransfer",
+        "domain": {
+          "name": "MandateWallet",
+          "version": "5",
+          "chainId": 84532,
+          "verifyingContract": "0x1111111111111111111111111111111111111111"
+        },
+        "message": {
+          "transferId": "0x0000000000000000000000000000000000000000000000000000000000000008",
+          "asset": "0x0000000000000000000000000000000000000000",
+          "recipient": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+          "amount": "1000000000000000",
+          "epoch": "1",
+          "nonce": "1",
+          "issuedAt": "1793000300",
+          "deadline": "1793000600"
+        }
+      },
+      "structHash": "0x7bc3b6c080e751d52617a43ab761148b6cd3c2cd7c530b4604ff258befd0c0ca",
+      "domainSeparator": "0xa34ca99a0fbaf645168fa5e21ac311b27ffc06a966896fd0315ecfdaba1da25d",
+      "digest": "0x9fead0f3822729bcf54750c378facb7d1324052840486de5db9a237e3d84e4d8",
+      "abiEncoded": "0x00000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000000000000000000000000000f39fd6e51aad88f6f4ce6ab8827279cfffb9226600000000000000000000000000000000000000000000000000038d7ea4c6800000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000006adf036c000000000000000000000000000000000000000000000000000000006adf0498",
+      "signer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "signature": "0x53f8ae6ace90e7ec3e0fb939514544d8dbcde8c9861b6897286295d460f572e208a2b808df78673156a49e44b673b837140ec17ebd99d97e77b3c727b0f6f9bd1b"
+    }
+  ],
+  "invalid": [
+    {
+      "id": "unknown-field",
+      "expect": "SCHEMA_REJECT",
+      "reason": "Unknown fields reject",
+      "domain": {
+        "name": "MandateWallet",
+        "version": "5",
+        "chainId": 84532,
+        "verifyingContract": "0x1111111111111111111111111111111111111111"
+      },
+      "message": {
+        "transferId": "0x0000000000000000000000000000000000000000000000000000000000000007",
+        "asset": "0x2222222222222222222222222222222222222222",
+        "recipient": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        "amount": "1500000",
+        "epoch": "0",
+        "nonce": "0",
+        "issuedAt": "1793000300",
+        "deadline": "1793000600",
+        "extra": "1"
+      }
+    },
+    {
+      "id": "null-field",
+      "expect": "SCHEMA_REJECT",
+      "reason": "null never replaces a required value",
+      "domain": {
+        "name": "MandateWallet",
+        "version": "5",
+        "chainId": 84532,
+        "verifyingContract": "0x1111111111111111111111111111111111111111"
+      },
+      "message": {
+        "transferId": "0x0000000000000000000000000000000000000000000000000000000000000007",
+        "asset": "0x2222222222222222222222222222222222222222",
+        "recipient": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        "amount": null,
+        "epoch": "0",
+        "nonce": "0",
+        "issuedAt": "1793000300",
+        "deadline": "1793000600"
+      }
+    },
+    {
+      "id": "missing-field",
+      "expect": "SCHEMA_REJECT",
+      "reason": "Every field is required",
+      "domain": {
+        "name": "MandateWallet",
+        "version": "5",
+        "chainId": 84532,
+        "verifyingContract": "0x1111111111111111111111111111111111111111"
+      },
+      "message": {
+        "asset": "0x2222222222222222222222222222222222222222",
+        "recipient": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        "amount": "1500000",
+        "epoch": "0",
+        "nonce": "0",
+        "issuedAt": "1793000300",
+        "deadline": "1793000600"
+      }
+    },
+    {
+      "id": "wrong-chain",
+      "expect": "DOMAIN_REJECT",
+      "reason": "Only chainId 84532",
+      "domain": {
+        "name": "MandateWallet",
+        "version": "5",
+        "chainId": 8453,
+        "verifyingContract": "0x1111111111111111111111111111111111111111"
+      },
+      "message": {
+        "transferId": "0x0000000000000000000000000000000000000000000000000000000000000007",
+        "asset": "0x2222222222222222222222222222222222222222",
+        "recipient": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        "amount": "1500000",
+        "epoch": "0",
+        "nonce": "0",
+        "issuedAt": "1793000300",
+        "deadline": "1793000600"
+      }
+    },
+    {
+      "id": "old-domain-version",
+      "expect": "DOMAIN_REJECT",
+      "reason": "Bootstrap/old domain versions reject",
+      "domain": {
+        "name": "MandateWallet",
+        "version": "4",
+        "chainId": 84532,
+        "verifyingContract": "0x1111111111111111111111111111111111111111"
+      },
+      "message": {
+        "transferId": "0x0000000000000000000000000000000000000000000000000000000000000007",
+        "asset": "0x2222222222222222222222222222222222222222",
+        "recipient": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        "amount": "1500000",
+        "epoch": "0",
+        "nonce": "0",
+        "issuedAt": "1793000300",
+        "deadline": "1793000600"
+      }
+    },
+    {
+      "id": "one-unit-change",
+      "expect": "SIGNER_MISMATCH",
+      "reason": "Original signature must not authorize a 1-unit change",
+      "domain": {
+        "name": "MandateWallet",
+        "version": "5",
+        "chainId": 84532,
+        "verifyingContract": "0x1111111111111111111111111111111111111111"
+      },
+      "message": {
+        "transferId": "0x0000000000000000000000000000000000000000000000000000000000000007",
+        "asset": "0x2222222222222222222222222222222222222222",
+        "recipient": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        "amount": "1500001",
+        "epoch": "0",
+        "nonce": "0",
+        "issuedAt": "1793000300",
+        "deadline": "1793000600"
+      }
+    },
+    {
+      "id": "reordered-fields",
+      "expect": "SIGNER_MISMATCH",
+      "reason": "Field order is part of the type hash",
+      "domain": {
+        "name": "MandateWallet",
+        "version": "5",
+        "chainId": 84532,
+        "verifyingContract": "0x1111111111111111111111111111111111111111"
+      },
+      "message": {
+        "transferId": "0x0000000000000000000000000000000000000000000000000000000000000007",
+        "asset": "0x2222222222222222222222222222222222222222",
+        "recipient": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        "amount": "1500000",
+        "epoch": "0",
+        "nonce": "0",
+        "issuedAt": "1793000300",
+        "deadline": "1793000600"
+      },
+      "types": {
+        "OwnerTransfer": [
+          {
+            "name": "deadline",
+            "type": "uint64"
+          },
+          {
+            "name": "issuedAt",
+            "type": "uint64"
+          },
+          {
+            "name": "nonce",
+            "type": "uint256"
+          },
+          {
+            "name": "epoch",
+            "type": "uint64"
+          },
+          {
+            "name": "amount",
+            "type": "uint256"
+          },
+          {
+            "name": "recipient",
+            "type": "address"
+          },
+          {
+            "name": "asset",
+            "type": "address"
+          },
+          {
+            "name": "transferId",
+            "type": "bytes32"
+          }
+        ]
+      }
+    },
+    {
+      "id": "zero-amount",
+      "expect": "SCHEMA_REJECT",
+      "reason": "amount must be positive",
+      "domain": {
+        "name": "MandateWallet",
+        "version": "5",
+        "chainId": 84532,
+        "verifyingContract": "0x1111111111111111111111111111111111111111"
+      },
+      "message": {
+        "transferId": "0x0000000000000000000000000000000000000000000000000000000000000007",
+        "asset": "0x2222222222222222222222222222222222222222",
+        "recipient": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        "amount": "0",
+        "epoch": "0",
+        "nonce": "0",
+        "issuedAt": "1793000300",
+        "deadline": "1793000600"
+      }
+    }
+  ]
+}

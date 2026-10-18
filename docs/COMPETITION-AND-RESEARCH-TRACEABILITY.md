@@ -36,20 +36,20 @@ The statuses mean: **adopted** = a concrete release mechanism; **adapted** = the
 | 08 | Payment rail selection | **Adapted.** One known testnet payment asset and approved recipients; no multi-rail router. |
 | 09 | Consent, liability and audit trail | **Adopted.** Owner-signed scope and inspectable evidence; disclose what the verifier cannot prove. |
 | 10 | Agent adoption | **Adapted.** Report task success, spend, failure/recovery and evidence coverage; do not claim production adoption. |
-| 11 | x402 agent payments | **Adapted (v7).** Providers return x402-formatted 402 responses next to the signed Mandate invoice; settlement is Mandate-native. ERC-1271 x402 settlement is claimed only after gate X402-G passes (architecture S9.10). |
+| 11 | x402 agent payments | **Adopted (v7).** Official x402 v2 `exact` scheme with USDC via the `@x402/*` packages; the managed wallet pays as an ERC-1271 contract payer (token side verified on a Base Sepolia fork). Interoperability is claimed only after the facilitator gate X402-G passes. |
 | 12 | Discovery, trust and settlement | **Adapted.** Allowlisted providers and separate payment, delivery and completion; no open marketplace or reputation score. |
 | 13 | Agent operating system and skills | **Adopted.** Typed, versioned runbooks plus SDK/MCP access through the same policy boundary. |
 | 14 | Cross-asset routing | **Deferred.** No swaps, bridges or route optimizer in this release. |
 | 15 | Quantum optimization | **Framing only.** No quantum service or optimization claim. |
 | 16 | Agent finance SDK and wallet | **Adapted.** Typed SDK/MCP methods expose proposals and permitted tasks, not a raw signer. |
-| 17 | Secure agent workspace | **Adopted.** Separate agent runtime, policy authorizer and signer hosts; host separation still needs operational proof. |
+| 17 | Secure agent workspace | **Adapted.** Agent runtime, policy authorizer and MPC nodes are separate processes and identities, but the competition PoC runs them on one VM; this is not host separation. |
 | 18 | Agent identity, reputation and verification | **Adapted.** Bind provider identity and signed claims to records; identity is not owner authorization or proof of honest work. No reputation system. |
 | 19 | Judgment in agent commerce | **Adapted.** Agent may compare approved service offers; deterministic policy decides whether the resulting payment is allowed. |
 | 20 | Credit for machines | **Deferred.** Prefunded balances only; no credit, borrowing or underwriting. |
 | 21 | Blockspace and faster settlement | **Adapted.** Distinguish submitted, included and finalized; no preconfirmation or MEV-protection service. |
 | 22 | Financial intent and agent loops | **Adopted.** Persist task intent, budget, deadline, checkpoints and stop conditions for restartable work. |
 | 23 | Agent payment stack | **Adapted.** Separate provider discovery/terms, authorization, settlement and service verification; no general payments marketplace. |
-| 24 | Coinbase x402 vision | **Adapted (v7).** Same scope as row 11; no interoperability claim until gate X402-G passes. |
+| 24 | Coinbase x402 vision | **Adopted (v7).** Same scope as row 11. |
 | 25 | Microsoft future web/payments | **Adapted.** Keep payment tooling replaceable; demonstrate low-value testnet payments only. |
 | 26 | Cloudflare agent identity/security | **Adopted.** Separate agent identity from owner authorization; minimize sensitive data in receipts. No standards interoperability claim. |
 
@@ -59,7 +59,7 @@ The statuses mean: **adopted** = a concrete release mechanism; **adapted** = the
 | --- | --- | --- |
 | Cobo’s Pacts, MPC and Recipes | Scoped human authorization, distributed signing and repeatable workflows | Owner-signed on-chain task permits, MPCium with a separate required policy authorizer, and typed runbooks. This is not Cobo’s architecture, does not claim equivalent security, and must pass its own topology/recovery gates. |
 | Embedded wallet SDKs | Usable wallet/account primitives | Local owner key generation/signing plus an app-controlled account experience. A provider SDK is not itself Mandate’s policy, contracts, evidence or delivery verification. |
-| x402 and Cloudflare MPP | Machine-payment protocols can simplify service checkout | x402-formatted responses are in v7 scope, with interoperability claimed only after gate X402-G. MPP stays out of scope. |
+| x402 and Cloudflare MPP | Machine-payment protocols can simplify service checkout | x402 `exact` payments are in v7 scope (S9.10), with interoperability claimed only after gate X402-G. MPP stays out of scope. |
 | Playlist research | Bounded autonomy, clear consent, deterministic checks and evidence from intent to outcome | Use the traceability above; video claims are inspiration and are not independently validated product guarantees. |
 
 ## Demo proof and measures

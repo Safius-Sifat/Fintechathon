@@ -1,0 +1,110 @@
+[
+  {
+    "caseId": "P1-A03.T06-token",
+    "taskId": "P1-A03",
+    "status": "PASS",
+    "sourceCommit": "see git log",
+    "workingTreeDigest": null,
+    "schemaCommit": "this change",
+    "environment": {
+      "node": "22.23.3",
+      "pnpm": "10.20.0",
+      "os": "darwin",
+      "forge": "1.8.5",
+      "forgeStd": "v1.17.0@f3dae6e6ee381f25eb6a246f7da9b85c91a68219"
+    },
+    "command": "forge test --fork-url https://sepolia.base.org (scratch probe)",
+    "exitCode": 0,
+    "expected": "Base Sepolia USDC accepts a contract-wallet payer via transferWithAuthorization(bytes) and rejects unapproved digests",
+    "observed": "Payment settled; unapproved digest reverted (fork block 48273937)",
+    "startedAt": "2026-10-18T15:44:37+06:00",
+    "finishedAt": "2026-10-18T15:44:37+06:00",
+    "artifactRefs": [
+      "packages/schema/fixtures/x402-v7.json"
+    ],
+    "limitations": [
+      "Fork test; facilitator path not yet tested"
+    ]
+  },
+  {
+    "caseId": "P1-A03.T06-vector",
+    "taskId": "P1-A03",
+    "status": "PASS",
+    "sourceCommit": "see git log",
+    "workingTreeDigest": null,
+    "schemaCommit": "this change",
+    "environment": {
+      "node": "22.23.3",
+      "pnpm": "10.20.0",
+      "os": "darwin",
+      "forge": "1.8.5",
+      "forgeStd": "v1.17.0@f3dae6e6ee381f25eb6a246f7da9b85c91a68219"
+    },
+    "command": "make check-schema",
+    "exitCode": 0,
+    "expected": "TS and Solidity derive the same USDC authorization digest from an X402 Action; local domain equals on-chain DOMAIN_SEPARATOR",
+    "observed": "as expected",
+    "startedAt": "2026-10-18T15:44:37+06:00",
+    "finishedAt": "2026-10-18T15:44:37+06:00",
+    "artifactRefs": [
+      "packages/schema/fixtures/x402-v7.json"
+    ],
+    "limitations": [
+      "Wallet contract enforcement is P1-A03 contract work, not yet implemented"
+    ]
+  },
+  {
+    "caseId": "P1-A03.T07-schema",
+    "taskId": "P1-A03",
+    "status": "PASS",
+    "sourceCommit": "see git log",
+    "workingTreeDigest": null,
+    "schemaCommit": "this change",
+    "environment": {
+      "node": "22.23.3",
+      "pnpm": "10.20.0",
+      "os": "darwin",
+      "forge": "1.8.5",
+      "forgeStd": "v1.17.0@f3dae6e6ee381f25eb6a246f7da9b85c91a68219"
+    },
+    "command": "make check-schema",
+    "exitCode": 0,
+    "expected": "Template IDs are content-addressed in TS and Solidity",
+    "observed": "as expected",
+    "startedAt": "2026-10-18T15:44:37+06:00",
+    "finishedAt": "2026-10-18T15:44:37+06:00",
+    "artifactRefs": [
+      "packages/schema/fixtures/x402-v7.json"
+    ],
+    "limitations": [
+      "Contract policy/CALL enforcement not yet implemented"
+    ]
+  },
+  {
+    "caseId": "P1-A03.T06-facilitator",
+    "taskId": "P1-A03",
+    "status": "NOT_RUN",
+    "sourceCommit": "see git log",
+    "workingTreeDigest": null,
+    "schemaCommit": "this change",
+    "environment": {
+      "node": "22.23.3",
+      "pnpm": "10.20.0",
+      "os": "darwin",
+      "forge": "1.8.5",
+      "forgeStd": "v1.17.0@f3dae6e6ee381f25eb6a246f7da9b85c91a68219"
+    },
+    "command": "(gate X402-G)",
+    "exitCode": null,
+    "expected": "One x402 payment settles through the facilitator on Base Sepolia",
+    "observed": "not run",
+    "startedAt": "2026-10-18T15:44:37+06:00",
+    "finishedAt": "2026-10-18T15:44:37+06:00",
+    "artifactRefs": [
+      "packages/schema/fixtures/x402-v7.json"
+    ],
+    "limitations": [
+      "Needs the MandateWallet contract, deployment and a facilitator"
+    ]
+  }
+]

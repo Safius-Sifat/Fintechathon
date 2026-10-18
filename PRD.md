@@ -54,7 +54,7 @@ Personal EOA and managed contract have different addresses/funds/fee payers; app
 | F18 Freeze Controls | FREEZE/UNFREEZE without epoch change, distinct from PAUSE/REVOKE and logout | 1;2;3 |
 | F19 Standing Allowance | ALLOWANCE Permit ≤30 days with daily/weekly period cap; service-allowance runbook | 1;4 runbook;3 approval |
 | F20 Call Templates | Allowed contract functions with argument bounds, exact approve/reset and outflow metering | 1;2 sentinel;3 editor;4 runbook |
-| F21 Stablecoins and x402 | Base Sepolia test USDC as second agent asset; x402-formatted 402 responses; ERC-1271 settlement only after gate X402-G | 1;2;4 |
+| F21 Stablecoins and x402 | Base Sepolia test USDC as second agent asset; x402 `exact` USDC payments (official `@x402/*` packages) with the managed wallet as ERC-1271 payer; token side verified on a Base Sepolia fork, facilitator path behind gate X402-G; Mandate-native PAY as fallback | 1;2;4 |
 | F22 Risk Sentinel | Deterministic screening, exact-effect simulation and velocity rules with off-chain inhibit and owner alert | 2;3 alerts;4 fixtures |
 | F13 Complete App Delivery | Reachable screen inventory, funding/help/settings, secure account/cache behavior, cancellation/error/offline/reorg states, installed APK | 3;all qualify |
 

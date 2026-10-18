@@ -1,0 +1,306 @@
+{
+  "schema": "mandate-vector/1",
+  "primaryType": "Invoice",
+  "valid": [
+    {
+      "id": "provider-a-200000",
+      "domain": {
+        "name": "MandateInvoice",
+        "version": "2",
+        "chainId": 84532,
+        "verifyingContract": "0x1111111111111111111111111111111111111111"
+      },
+      "message": {
+        "invoiceId": "0x000000000000000000000000000000000000000000000000000000000000001f",
+        "taskId": "0x0000000000000000000000000000000000000000000000000000000000007a5c",
+        "wallet": "0x1111111111111111111111111111111111111111",
+        "asset": "0x2222222222222222222222222222222222222222",
+        "recipient": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+        "amount": "200000",
+        "inputHash": "0x000000000000000000000000000000000000000000000000000000000000001e",
+        "issuedAt": "1793000090",
+        "expiresAt": "1793000150"
+      },
+      "typedData": {
+        "types": {
+          "EIP712Domain": [
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "version",
+              "type": "string"
+            },
+            {
+              "name": "chainId",
+              "type": "uint256"
+            },
+            {
+              "name": "verifyingContract",
+              "type": "address"
+            }
+          ],
+          "Invoice": [
+            {
+              "name": "invoiceId",
+              "type": "bytes32"
+            },
+            {
+              "name": "taskId",
+              "type": "bytes32"
+            },
+            {
+              "name": "wallet",
+              "type": "address"
+            },
+            {
+              "name": "asset",
+              "type": "address"
+            },
+            {
+              "name": "recipient",
+              "type": "address"
+            },
+            {
+              "name": "amount",
+              "type": "uint256"
+            },
+            {
+              "name": "inputHash",
+              "type": "bytes32"
+            },
+            {
+              "name": "issuedAt",
+              "type": "uint64"
+            },
+            {
+              "name": "expiresAt",
+              "type": "uint64"
+            }
+          ]
+        },
+        "primaryType": "Invoice",
+        "domain": {
+          "name": "MandateInvoice",
+          "version": "2",
+          "chainId": 84532,
+          "verifyingContract": "0x1111111111111111111111111111111111111111"
+        },
+        "message": {
+          "invoiceId": "0x000000000000000000000000000000000000000000000000000000000000001f",
+          "taskId": "0x0000000000000000000000000000000000000000000000000000000000007a5c",
+          "wallet": "0x1111111111111111111111111111111111111111",
+          "asset": "0x2222222222222222222222222222222222222222",
+          "recipient": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+          "amount": "200000",
+          "inputHash": "0x000000000000000000000000000000000000000000000000000000000000001e",
+          "issuedAt": "1793000090",
+          "expiresAt": "1793000150"
+        }
+      },
+      "structHash": "0x9bb7d3c9ce13fe7cdac90e7961ff19f3259af28a4b398f6f2ea3d535a99bbb74",
+      "domainSeparator": "0x8bf02c83ea0da0634b71e57da372f7af2dbdb5a94aeb7ad03a0812190eaf9ce5",
+      "digest": "0xfbbe79c27c7fac238cc9c1b8436c63011850f36302aa2d6407845e0d374c6cc6",
+      "abiEncoded": "0x000000000000000000000000000000000000000000000000000000000000001f0000000000000000000000000000000000000000000000000000000000007a5c000000000000000000000000111111111111111111111111111111111111111100000000000000000000000022222222222222222222222222222222222222220000000000000000000000003c44cdddb6a900fa2b585dd299e03d12fa4293bc0000000000000000000000000000000000000000000000000000000000030d40000000000000000000000000000000000000000000000000000000000000001e000000000000000000000000000000000000000000000000000000006adf029a000000000000000000000000000000000000000000000000000000006adf02d6",
+      "signer": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+      "signature": "0x231afa1b29ae2159de3c3f1fa8537fbc2b7039ed6947e6ca73a5f78fcd4649b81268840bc0cc0787359c78be97e0a90049a10ac21ab61c0177586a36a23e5e171b"
+    }
+  ],
+  "invalid": [
+    {
+      "id": "unknown-field",
+      "expect": "SCHEMA_REJECT",
+      "reason": "Unknown fields reject",
+      "domain": {
+        "name": "MandateInvoice",
+        "version": "2",
+        "chainId": 84532,
+        "verifyingContract": "0x1111111111111111111111111111111111111111"
+      },
+      "message": {
+        "invoiceId": "0x000000000000000000000000000000000000000000000000000000000000001f",
+        "taskId": "0x0000000000000000000000000000000000000000000000000000000000007a5c",
+        "wallet": "0x1111111111111111111111111111111111111111",
+        "asset": "0x2222222222222222222222222222222222222222",
+        "recipient": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+        "amount": "200000",
+        "inputHash": "0x000000000000000000000000000000000000000000000000000000000000001e",
+        "issuedAt": "1793000090",
+        "expiresAt": "1793000150",
+        "extra": "1"
+      }
+    },
+    {
+      "id": "null-field",
+      "expect": "SCHEMA_REJECT",
+      "reason": "null never replaces a required value",
+      "domain": {
+        "name": "MandateInvoice",
+        "version": "2",
+        "chainId": 84532,
+        "verifyingContract": "0x1111111111111111111111111111111111111111"
+      },
+      "message": {
+        "invoiceId": "0x000000000000000000000000000000000000000000000000000000000000001f",
+        "taskId": "0x0000000000000000000000000000000000000000000000000000000000007a5c",
+        "wallet": "0x1111111111111111111111111111111111111111",
+        "asset": "0x2222222222222222222222222222222222222222",
+        "recipient": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+        "amount": null,
+        "inputHash": "0x000000000000000000000000000000000000000000000000000000000000001e",
+        "issuedAt": "1793000090",
+        "expiresAt": "1793000150"
+      }
+    },
+    {
+      "id": "missing-field",
+      "expect": "SCHEMA_REJECT",
+      "reason": "Every field is required",
+      "domain": {
+        "name": "MandateInvoice",
+        "version": "2",
+        "chainId": 84532,
+        "verifyingContract": "0x1111111111111111111111111111111111111111"
+      },
+      "message": {
+        "taskId": "0x0000000000000000000000000000000000000000000000000000000000007a5c",
+        "wallet": "0x1111111111111111111111111111111111111111",
+        "asset": "0x2222222222222222222222222222222222222222",
+        "recipient": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+        "amount": "200000",
+        "inputHash": "0x000000000000000000000000000000000000000000000000000000000000001e",
+        "issuedAt": "1793000090",
+        "expiresAt": "1793000150"
+      }
+    },
+    {
+      "id": "wrong-chain",
+      "expect": "DOMAIN_REJECT",
+      "reason": "Only chainId 84532",
+      "domain": {
+        "name": "MandateInvoice",
+        "version": "2",
+        "chainId": 8453,
+        "verifyingContract": "0x1111111111111111111111111111111111111111"
+      },
+      "message": {
+        "invoiceId": "0x000000000000000000000000000000000000000000000000000000000000001f",
+        "taskId": "0x0000000000000000000000000000000000000000000000000000000000007a5c",
+        "wallet": "0x1111111111111111111111111111111111111111",
+        "asset": "0x2222222222222222222222222222222222222222",
+        "recipient": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+        "amount": "200000",
+        "inputHash": "0x000000000000000000000000000000000000000000000000000000000000001e",
+        "issuedAt": "1793000090",
+        "expiresAt": "1793000150"
+      }
+    },
+    {
+      "id": "old-domain-version",
+      "expect": "DOMAIN_REJECT",
+      "reason": "Bootstrap/old domain versions reject",
+      "domain": {
+        "name": "MandateInvoice",
+        "version": "1",
+        "chainId": 84532,
+        "verifyingContract": "0x1111111111111111111111111111111111111111"
+      },
+      "message": {
+        "invoiceId": "0x000000000000000000000000000000000000000000000000000000000000001f",
+        "taskId": "0x0000000000000000000000000000000000000000000000000000000000007a5c",
+        "wallet": "0x1111111111111111111111111111111111111111",
+        "asset": "0x2222222222222222222222222222222222222222",
+        "recipient": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+        "amount": "200000",
+        "inputHash": "0x000000000000000000000000000000000000000000000000000000000000001e",
+        "issuedAt": "1793000090",
+        "expiresAt": "1793000150"
+      }
+    },
+    {
+      "id": "one-unit-change",
+      "expect": "SIGNER_MISMATCH",
+      "reason": "Original signature must not authorize a 1-unit change",
+      "domain": {
+        "name": "MandateInvoice",
+        "version": "2",
+        "chainId": 84532,
+        "verifyingContract": "0x1111111111111111111111111111111111111111"
+      },
+      "message": {
+        "invoiceId": "0x000000000000000000000000000000000000000000000000000000000000001f",
+        "taskId": "0x0000000000000000000000000000000000000000000000000000000000007a5c",
+        "wallet": "0x1111111111111111111111111111111111111111",
+        "asset": "0x2222222222222222222222222222222222222222",
+        "recipient": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+        "amount": "200001",
+        "inputHash": "0x000000000000000000000000000000000000000000000000000000000000001e",
+        "issuedAt": "1793000090",
+        "expiresAt": "1793000150"
+      }
+    },
+    {
+      "id": "reordered-fields",
+      "expect": "SIGNER_MISMATCH",
+      "reason": "Field order is part of the type hash",
+      "domain": {
+        "name": "MandateInvoice",
+        "version": "2",
+        "chainId": 84532,
+        "verifyingContract": "0x1111111111111111111111111111111111111111"
+      },
+      "message": {
+        "invoiceId": "0x000000000000000000000000000000000000000000000000000000000000001f",
+        "taskId": "0x0000000000000000000000000000000000000000000000000000000000007a5c",
+        "wallet": "0x1111111111111111111111111111111111111111",
+        "asset": "0x2222222222222222222222222222222222222222",
+        "recipient": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+        "amount": "200000",
+        "inputHash": "0x000000000000000000000000000000000000000000000000000000000000001e",
+        "issuedAt": "1793000090",
+        "expiresAt": "1793000150"
+      },
+      "types": {
+        "Invoice": [
+          {
+            "name": "expiresAt",
+            "type": "uint64"
+          },
+          {
+            "name": "issuedAt",
+            "type": "uint64"
+          },
+          {
+            "name": "inputHash",
+            "type": "bytes32"
+          },
+          {
+            "name": "amount",
+            "type": "uint256"
+          },
+          {
+            "name": "recipient",
+            "type": "address"
+          },
+          {
+            "name": "asset",
+            "type": "address"
+          },
+          {
+            "name": "wallet",
+            "type": "address"
+          },
+          {
+            "name": "taskId",
+            "type": "bytes32"
+          },
+          {
+            "name": "invoiceId",
+            "type": "bytes32"
+          }
+        ]
+      }
+    }
+  ]
+}

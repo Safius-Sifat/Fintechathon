@@ -1,0 +1,342 @@
+{
+  "schema": "mandate-vector/1",
+  "primaryType": "WalletPolicy",
+  "valid": [
+    {
+      "id": "policy-v1",
+      "domain": {
+        "name": "MandateWallet",
+        "version": "5",
+        "chainId": 84532,
+        "verifyingContract": "0x1111111111111111111111111111111111111111"
+      },
+      "message": {
+        "version": "1",
+        "assetCapsHash": "0xfa56ab30469af3603948cf8263165e58ade3c2c5fdfb8d144c53ed514b2a15e7",
+        "allowlistHash": "0x670d710de9a802307c730e3bf46431fee52af09c62a2b1800cfbe92256d3f04d",
+        "blocklistHash": "0x0f1b5dba665c47ac96cf9dcd2297ead9a0b080433cc07aaee4e95e9c4d443be8",
+        "templatesHash": "0xf39d7394f53c3459ba6dce1ca5acb7bbe45a2bffd92035fafead65064b4e141e",
+        "reviewThreshold": "300000",
+        "nonce": "0",
+        "issuedAt": "1793000000",
+        "deadline": "1793001800"
+      },
+      "typedData": {
+        "types": {
+          "EIP712Domain": [
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "version",
+              "type": "string"
+            },
+            {
+              "name": "chainId",
+              "type": "uint256"
+            },
+            {
+              "name": "verifyingContract",
+              "type": "address"
+            }
+          ],
+          "WalletPolicy": [
+            {
+              "name": "version",
+              "type": "uint64"
+            },
+            {
+              "name": "assetCapsHash",
+              "type": "bytes32"
+            },
+            {
+              "name": "allowlistHash",
+              "type": "bytes32"
+            },
+            {
+              "name": "blocklistHash",
+              "type": "bytes32"
+            },
+            {
+              "name": "templatesHash",
+              "type": "bytes32"
+            },
+            {
+              "name": "reviewThreshold",
+              "type": "uint256"
+            },
+            {
+              "name": "nonce",
+              "type": "uint256"
+            },
+            {
+              "name": "issuedAt",
+              "type": "uint64"
+            },
+            {
+              "name": "deadline",
+              "type": "uint64"
+            }
+          ]
+        },
+        "primaryType": "WalletPolicy",
+        "domain": {
+          "name": "MandateWallet",
+          "version": "5",
+          "chainId": 84532,
+          "verifyingContract": "0x1111111111111111111111111111111111111111"
+        },
+        "message": {
+          "version": "1",
+          "assetCapsHash": "0xfa56ab30469af3603948cf8263165e58ade3c2c5fdfb8d144c53ed514b2a15e7",
+          "allowlistHash": "0x670d710de9a802307c730e3bf46431fee52af09c62a2b1800cfbe92256d3f04d",
+          "blocklistHash": "0x0f1b5dba665c47ac96cf9dcd2297ead9a0b080433cc07aaee4e95e9c4d443be8",
+          "templatesHash": "0xf39d7394f53c3459ba6dce1ca5acb7bbe45a2bffd92035fafead65064b4e141e",
+          "reviewThreshold": "300000",
+          "nonce": "0",
+          "issuedAt": "1793000000",
+          "deadline": "1793001800"
+        }
+      },
+      "structHash": "0x2504dd1c6821a016bb31e586f60f63c42c5445fa50b6b71191922df41a33f40d",
+      "domainSeparator": "0xa34ca99a0fbaf645168fa5e21ac311b27ffc06a966896fd0315ecfdaba1da25d",
+      "digest": "0x62a773050e2b32072f337be955f9a6b4a1829626fd319c312927bc7557e52d0a",
+      "abiEncoded": "0x0000000000000000000000000000000000000000000000000000000000000001fa56ab30469af3603948cf8263165e58ade3c2c5fdfb8d144c53ed514b2a15e7670d710de9a802307c730e3bf46431fee52af09c62a2b1800cfbe92256d3f04d0f1b5dba665c47ac96cf9dcd2297ead9a0b080433cc07aaee4e95e9c4d443be8f39d7394f53c3459ba6dce1ca5acb7bbe45a2bffd92035fafead65064b4e141e00000000000000000000000000000000000000000000000000000000000493e00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000006adf0240000000000000000000000000000000000000000000000000000000006adf0948",
+      "signer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "signature": "0x7ad4ac9d3647aceba43aa7280bac9cb64ca7a7b7c07ef365c221cbfbf4394ea224cf501768757bc08097b777add2139ddc25115072f6056dffa6e617589c666f1b"
+    }
+  ],
+  "invalid": [
+    {
+      "id": "unknown-field",
+      "expect": "SCHEMA_REJECT",
+      "reason": "Unknown fields reject",
+      "domain": {
+        "name": "MandateWallet",
+        "version": "5",
+        "chainId": 84532,
+        "verifyingContract": "0x1111111111111111111111111111111111111111"
+      },
+      "message": {
+        "version": "1",
+        "assetCapsHash": "0xfa56ab30469af3603948cf8263165e58ade3c2c5fdfb8d144c53ed514b2a15e7",
+        "allowlistHash": "0x670d710de9a802307c730e3bf46431fee52af09c62a2b1800cfbe92256d3f04d",
+        "blocklistHash": "0x0f1b5dba665c47ac96cf9dcd2297ead9a0b080433cc07aaee4e95e9c4d443be8",
+        "templatesHash": "0xf39d7394f53c3459ba6dce1ca5acb7bbe45a2bffd92035fafead65064b4e141e",
+        "reviewThreshold": "300000",
+        "nonce": "0",
+        "issuedAt": "1793000000",
+        "deadline": "1793001800",
+        "extra": "1"
+      }
+    },
+    {
+      "id": "null-field",
+      "expect": "SCHEMA_REJECT",
+      "reason": "null never replaces a required value",
+      "domain": {
+        "name": "MandateWallet",
+        "version": "5",
+        "chainId": 84532,
+        "verifyingContract": "0x1111111111111111111111111111111111111111"
+      },
+      "message": {
+        "version": "1",
+        "assetCapsHash": "0xfa56ab30469af3603948cf8263165e58ade3c2c5fdfb8d144c53ed514b2a15e7",
+        "allowlistHash": "0x670d710de9a802307c730e3bf46431fee52af09c62a2b1800cfbe92256d3f04d",
+        "blocklistHash": "0x0f1b5dba665c47ac96cf9dcd2297ead9a0b080433cc07aaee4e95e9c4d443be8",
+        "templatesHash": "0xf39d7394f53c3459ba6dce1ca5acb7bbe45a2bffd92035fafead65064b4e141e",
+        "reviewThreshold": null,
+        "nonce": "0",
+        "issuedAt": "1793000000",
+        "deadline": "1793001800"
+      }
+    },
+    {
+      "id": "missing-field",
+      "expect": "SCHEMA_REJECT",
+      "reason": "Every field is required",
+      "domain": {
+        "name": "MandateWallet",
+        "version": "5",
+        "chainId": 84532,
+        "verifyingContract": "0x1111111111111111111111111111111111111111"
+      },
+      "message": {
+        "assetCapsHash": "0xfa56ab30469af3603948cf8263165e58ade3c2c5fdfb8d144c53ed514b2a15e7",
+        "allowlistHash": "0x670d710de9a802307c730e3bf46431fee52af09c62a2b1800cfbe92256d3f04d",
+        "blocklistHash": "0x0f1b5dba665c47ac96cf9dcd2297ead9a0b080433cc07aaee4e95e9c4d443be8",
+        "templatesHash": "0xf39d7394f53c3459ba6dce1ca5acb7bbe45a2bffd92035fafead65064b4e141e",
+        "reviewThreshold": "300000",
+        "nonce": "0",
+        "issuedAt": "1793000000",
+        "deadline": "1793001800"
+      }
+    },
+    {
+      "id": "wrong-chain",
+      "expect": "DOMAIN_REJECT",
+      "reason": "Only chainId 84532",
+      "domain": {
+        "name": "MandateWallet",
+        "version": "5",
+        "chainId": 8453,
+        "verifyingContract": "0x1111111111111111111111111111111111111111"
+      },
+      "message": {
+        "version": "1",
+        "assetCapsHash": "0xfa56ab30469af3603948cf8263165e58ade3c2c5fdfb8d144c53ed514b2a15e7",
+        "allowlistHash": "0x670d710de9a802307c730e3bf46431fee52af09c62a2b1800cfbe92256d3f04d",
+        "blocklistHash": "0x0f1b5dba665c47ac96cf9dcd2297ead9a0b080433cc07aaee4e95e9c4d443be8",
+        "templatesHash": "0xf39d7394f53c3459ba6dce1ca5acb7bbe45a2bffd92035fafead65064b4e141e",
+        "reviewThreshold": "300000",
+        "nonce": "0",
+        "issuedAt": "1793000000",
+        "deadline": "1793001800"
+      }
+    },
+    {
+      "id": "old-domain-version",
+      "expect": "DOMAIN_REJECT",
+      "reason": "Bootstrap/old domain versions reject",
+      "domain": {
+        "name": "MandateWallet",
+        "version": "4",
+        "chainId": 84532,
+        "verifyingContract": "0x1111111111111111111111111111111111111111"
+      },
+      "message": {
+        "version": "1",
+        "assetCapsHash": "0xfa56ab30469af3603948cf8263165e58ade3c2c5fdfb8d144c53ed514b2a15e7",
+        "allowlistHash": "0x670d710de9a802307c730e3bf46431fee52af09c62a2b1800cfbe92256d3f04d",
+        "blocklistHash": "0x0f1b5dba665c47ac96cf9dcd2297ead9a0b080433cc07aaee4e95e9c4d443be8",
+        "templatesHash": "0xf39d7394f53c3459ba6dce1ca5acb7bbe45a2bffd92035fafead65064b4e141e",
+        "reviewThreshold": "300000",
+        "nonce": "0",
+        "issuedAt": "1793000000",
+        "deadline": "1793001800"
+      }
+    },
+    {
+      "id": "one-unit-change",
+      "expect": "SIGNER_MISMATCH",
+      "reason": "Original signature must not authorize a 1-unit change",
+      "domain": {
+        "name": "MandateWallet",
+        "version": "5",
+        "chainId": 84532,
+        "verifyingContract": "0x1111111111111111111111111111111111111111"
+      },
+      "message": {
+        "version": "1",
+        "assetCapsHash": "0xfa56ab30469af3603948cf8263165e58ade3c2c5fdfb8d144c53ed514b2a15e7",
+        "allowlistHash": "0x670d710de9a802307c730e3bf46431fee52af09c62a2b1800cfbe92256d3f04d",
+        "blocklistHash": "0x0f1b5dba665c47ac96cf9dcd2297ead9a0b080433cc07aaee4e95e9c4d443be8",
+        "templatesHash": "0xf39d7394f53c3459ba6dce1ca5acb7bbe45a2bffd92035fafead65064b4e141e",
+        "reviewThreshold": "300001",
+        "nonce": "0",
+        "issuedAt": "1793000000",
+        "deadline": "1793001800"
+      }
+    },
+    {
+      "id": "reordered-fields",
+      "expect": "SIGNER_MISMATCH",
+      "reason": "Field order is part of the type hash",
+      "domain": {
+        "name": "MandateWallet",
+        "version": "5",
+        "chainId": 84532,
+        "verifyingContract": "0x1111111111111111111111111111111111111111"
+      },
+      "message": {
+        "version": "1",
+        "assetCapsHash": "0xfa56ab30469af3603948cf8263165e58ade3c2c5fdfb8d144c53ed514b2a15e7",
+        "allowlistHash": "0x670d710de9a802307c730e3bf46431fee52af09c62a2b1800cfbe92256d3f04d",
+        "blocklistHash": "0x0f1b5dba665c47ac96cf9dcd2297ead9a0b080433cc07aaee4e95e9c4d443be8",
+        "templatesHash": "0xf39d7394f53c3459ba6dce1ca5acb7bbe45a2bffd92035fafead65064b4e141e",
+        "reviewThreshold": "300000",
+        "nonce": "0",
+        "issuedAt": "1793000000",
+        "deadline": "1793001800"
+      },
+      "types": {
+        "WalletPolicy": [
+          {
+            "name": "deadline",
+            "type": "uint64"
+          },
+          {
+            "name": "issuedAt",
+            "type": "uint64"
+          },
+          {
+            "name": "nonce",
+            "type": "uint256"
+          },
+          {
+            "name": "reviewThreshold",
+            "type": "uint256"
+          },
+          {
+            "name": "templatesHash",
+            "type": "bytes32"
+          },
+          {
+            "name": "blocklistHash",
+            "type": "bytes32"
+          },
+          {
+            "name": "allowlistHash",
+            "type": "bytes32"
+          },
+          {
+            "name": "assetCapsHash",
+            "type": "bytes32"
+          },
+          {
+            "name": "version",
+            "type": "uint64"
+          }
+        ]
+      }
+    }
+  ],
+  "lists": {
+    "assetCaps": [
+      {
+        "asset": "0x2222222222222222222222222222222222222222",
+        "perTx": "500000",
+        "daily": "10000000",
+        "weekly": "25000000"
+      },
+      {
+        "asset": "0x3333333333333333333333333333333333333333",
+        "perTx": "500000",
+        "daily": "5000000",
+        "weekly": "20000000"
+      }
+    ],
+    "allowlist": [
+      "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+      "0x6666666666666666666666666666666666666666"
+    ],
+    "blocklist": [
+      "0x000000000000000000000000000000000000dEaD"
+    ],
+    "templates": [
+      {
+        "templateId": "0x034aec0c19d53111ef4a7c23be2fc139fbb38165383333d3af783dfcce1f3117",
+        "target": "0x5555555555555555555555555555555555555555",
+        "targetCodeHash": "0x000000000000000000000000000000000000000000000000000000000000c0de",
+        "selector": "0x6e553f65",
+        "amountArg": 0,
+        "recipientArg": 1,
+        "recipientRule": 1,
+        "flags": 1,
+        "maxAmount": "1000000"
+      }
+    ]
+  }
+}

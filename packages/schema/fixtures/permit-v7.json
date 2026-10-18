@@ -1,0 +1,1014 @@
+{
+  "schema": "mandate-vector/1",
+  "primaryType": "Permit",
+  "valid": [
+    {
+      "id": "browser-demousd-cosign-above-0.30",
+      "domain": {
+        "name": "MandateWallet",
+        "version": "5",
+        "chainId": 84532,
+        "verifyingContract": "0x1111111111111111111111111111111111111111"
+      },
+      "message": {
+        "taskId": "0x0000000000000000000000000000000000000000000000000000000000007a5c",
+        "executor": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+        "kind": 0,
+        "asset": "0x2222222222222222222222222222222222222222",
+        "runbookHash": "0xb261a9ae6c3f0922fca12faa9ef4c173d3239cac5bd6fdba64d4a6748695d5bd",
+        "conditionsHash": "0xc876cc81c36c31836fddefb2477e97885a264ff1162624d621a202e1166b0010",
+        "recipientsHash": "0x670d710de9a802307c730e3bf46431fee52af09c62a2b1800cfbe92256d3f04d",
+        "scheduleHash": "0x1e990e27f0d7976bf2adbd60e20384da0125b76e2885a96aa707bcb054108b0d",
+        "templatesHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "issuedAt": "1793000000",
+        "startsAt": "1793000000",
+        "expiresAt": "1793003600",
+        "epoch": "0",
+        "nonce": "0",
+        "maxActions": 6,
+        "maxPayments": 3,
+        "maxPayment": "500000",
+        "spendCap": "2000000",
+        "liquidFloor": "3000000",
+        "depositCap": "0",
+        "withdrawCap": "0",
+        "reviewThreshold": "300000",
+        "periodCap": "0",
+        "periodSeconds": 0
+      },
+      "typedData": {
+        "types": {
+          "EIP712Domain": [
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "version",
+              "type": "string"
+            },
+            {
+              "name": "chainId",
+              "type": "uint256"
+            },
+            {
+              "name": "verifyingContract",
+              "type": "address"
+            }
+          ],
+          "Permit": [
+            {
+              "name": "taskId",
+              "type": "bytes32"
+            },
+            {
+              "name": "executor",
+              "type": "address"
+            },
+            {
+              "name": "kind",
+              "type": "uint8"
+            },
+            {
+              "name": "asset",
+              "type": "address"
+            },
+            {
+              "name": "runbookHash",
+              "type": "bytes32"
+            },
+            {
+              "name": "conditionsHash",
+              "type": "bytes32"
+            },
+            {
+              "name": "recipientsHash",
+              "type": "bytes32"
+            },
+            {
+              "name": "scheduleHash",
+              "type": "bytes32"
+            },
+            {
+              "name": "templatesHash",
+              "type": "bytes32"
+            },
+            {
+              "name": "issuedAt",
+              "type": "uint64"
+            },
+            {
+              "name": "startsAt",
+              "type": "uint64"
+            },
+            {
+              "name": "expiresAt",
+              "type": "uint64"
+            },
+            {
+              "name": "epoch",
+              "type": "uint64"
+            },
+            {
+              "name": "nonce",
+              "type": "uint256"
+            },
+            {
+              "name": "maxActions",
+              "type": "uint32"
+            },
+            {
+              "name": "maxPayments",
+              "type": "uint32"
+            },
+            {
+              "name": "maxPayment",
+              "type": "uint256"
+            },
+            {
+              "name": "spendCap",
+              "type": "uint256"
+            },
+            {
+              "name": "liquidFloor",
+              "type": "uint256"
+            },
+            {
+              "name": "depositCap",
+              "type": "uint256"
+            },
+            {
+              "name": "withdrawCap",
+              "type": "uint256"
+            },
+            {
+              "name": "reviewThreshold",
+              "type": "uint256"
+            },
+            {
+              "name": "periodCap",
+              "type": "uint256"
+            },
+            {
+              "name": "periodSeconds",
+              "type": "uint32"
+            }
+          ]
+        },
+        "primaryType": "Permit",
+        "domain": {
+          "name": "MandateWallet",
+          "version": "5",
+          "chainId": 84532,
+          "verifyingContract": "0x1111111111111111111111111111111111111111"
+        },
+        "message": {
+          "taskId": "0x0000000000000000000000000000000000000000000000000000000000007a5c",
+          "executor": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+          "kind": 0,
+          "asset": "0x2222222222222222222222222222222222222222",
+          "runbookHash": "0xb261a9ae6c3f0922fca12faa9ef4c173d3239cac5bd6fdba64d4a6748695d5bd",
+          "conditionsHash": "0xc876cc81c36c31836fddefb2477e97885a264ff1162624d621a202e1166b0010",
+          "recipientsHash": "0x670d710de9a802307c730e3bf46431fee52af09c62a2b1800cfbe92256d3f04d",
+          "scheduleHash": "0x1e990e27f0d7976bf2adbd60e20384da0125b76e2885a96aa707bcb054108b0d",
+          "templatesHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "issuedAt": "1793000000",
+          "startsAt": "1793000000",
+          "expiresAt": "1793003600",
+          "epoch": "0",
+          "nonce": "0",
+          "maxActions": 6,
+          "maxPayments": 3,
+          "maxPayment": "500000",
+          "spendCap": "2000000",
+          "liquidFloor": "3000000",
+          "depositCap": "0",
+          "withdrawCap": "0",
+          "reviewThreshold": "300000",
+          "periodCap": "0",
+          "periodSeconds": 0
+        }
+      },
+      "structHash": "0x4d211cfa44d5270541019b9dfc890a7da6cc6c5faf2ff2e86ae5e357206be463",
+      "domainSeparator": "0xa34ca99a0fbaf645168fa5e21ac311b27ffc06a966896fd0315ecfdaba1da25d",
+      "digest": "0xe25ce5a105548c0add66bea4540be8df93e7e128491228ebd7a71c6b2054ee30",
+      "abiEncoded": "0x0000000000000000000000000000000000000000000000000000000000007a5c00000000000000000000000070997970c51812dc3a010c7d01b50e0d17dc79c800000000000000000000000000000000000000000000000000000000000000000000000000000000000000002222222222222222222222222222222222222222b261a9ae6c3f0922fca12faa9ef4c173d3239cac5bd6fdba64d4a6748695d5bdc876cc81c36c31836fddefb2477e97885a264ff1162624d621a202e1166b0010670d710de9a802307c730e3bf46431fee52af09c62a2b1800cfbe92256d3f04d1e990e27f0d7976bf2adbd60e20384da0125b76e2885a96aa707bcb054108b0d0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000006adf0240000000000000000000000000000000000000000000000000000000006adf0240000000000000000000000000000000000000000000000000000000006adf10500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000003000000000000000000000000000000000000000000000000000000000007a12000000000000000000000000000000000000000000000000000000000001e848000000000000000000000000000000000000000000000000000000000002dc6c00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000493e000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "signer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "signature": "0x02fca377b728a2439a695071b0cadb74e78c745bc06764db0fcbb2e1de0eee0819bb6cd23c431baacf4dd400941ac46a76286c02a161247d86cd072d36dea6cb1b"
+    },
+    {
+      "id": "allowance-usdc-daily",
+      "domain": {
+        "name": "MandateWallet",
+        "version": "5",
+        "chainId": 84532,
+        "verifyingContract": "0x1111111111111111111111111111111111111111"
+      },
+      "message": {
+        "taskId": "0x0000000000000000000000000000000000000000000000000000000000007a5d",
+        "executor": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+        "kind": 3,
+        "asset": "0x3333333333333333333333333333333333333333",
+        "runbookHash": "0xb261a9ae6c3f0922fca12faa9ef4c173d3239cac5bd6fdba64d4a6748695d5bd",
+        "conditionsHash": "0xc876cc81c36c31836fddefb2477e97885a264ff1162624d621a202e1166b0010",
+        "recipientsHash": "0x670d710de9a802307c730e3bf46431fee52af09c62a2b1800cfbe92256d3f04d",
+        "scheduleHash": "0x1e990e27f0d7976bf2adbd60e20384da0125b76e2885a96aa707bcb054108b0d",
+        "templatesHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "issuedAt": "1793000000",
+        "startsAt": "1793000000",
+        "expiresAt": "1795592000",
+        "epoch": "0",
+        "nonce": "0",
+        "maxActions": 120,
+        "maxPayments": 100,
+        "maxPayment": "500000",
+        "spendCap": "20000000",
+        "liquidFloor": "3000000",
+        "depositCap": "0",
+        "withdrawCap": "0",
+        "reviewThreshold": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+        "periodCap": "2000000",
+        "periodSeconds": 86400
+      },
+      "typedData": {
+        "types": {
+          "EIP712Domain": [
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "version",
+              "type": "string"
+            },
+            {
+              "name": "chainId",
+              "type": "uint256"
+            },
+            {
+              "name": "verifyingContract",
+              "type": "address"
+            }
+          ],
+          "Permit": [
+            {
+              "name": "taskId",
+              "type": "bytes32"
+            },
+            {
+              "name": "executor",
+              "type": "address"
+            },
+            {
+              "name": "kind",
+              "type": "uint8"
+            },
+            {
+              "name": "asset",
+              "type": "address"
+            },
+            {
+              "name": "runbookHash",
+              "type": "bytes32"
+            },
+            {
+              "name": "conditionsHash",
+              "type": "bytes32"
+            },
+            {
+              "name": "recipientsHash",
+              "type": "bytes32"
+            },
+            {
+              "name": "scheduleHash",
+              "type": "bytes32"
+            },
+            {
+              "name": "templatesHash",
+              "type": "bytes32"
+            },
+            {
+              "name": "issuedAt",
+              "type": "uint64"
+            },
+            {
+              "name": "startsAt",
+              "type": "uint64"
+            },
+            {
+              "name": "expiresAt",
+              "type": "uint64"
+            },
+            {
+              "name": "epoch",
+              "type": "uint64"
+            },
+            {
+              "name": "nonce",
+              "type": "uint256"
+            },
+            {
+              "name": "maxActions",
+              "type": "uint32"
+            },
+            {
+              "name": "maxPayments",
+              "type": "uint32"
+            },
+            {
+              "name": "maxPayment",
+              "type": "uint256"
+            },
+            {
+              "name": "spendCap",
+              "type": "uint256"
+            },
+            {
+              "name": "liquidFloor",
+              "type": "uint256"
+            },
+            {
+              "name": "depositCap",
+              "type": "uint256"
+            },
+            {
+              "name": "withdrawCap",
+              "type": "uint256"
+            },
+            {
+              "name": "reviewThreshold",
+              "type": "uint256"
+            },
+            {
+              "name": "periodCap",
+              "type": "uint256"
+            },
+            {
+              "name": "periodSeconds",
+              "type": "uint32"
+            }
+          ]
+        },
+        "primaryType": "Permit",
+        "domain": {
+          "name": "MandateWallet",
+          "version": "5",
+          "chainId": 84532,
+          "verifyingContract": "0x1111111111111111111111111111111111111111"
+        },
+        "message": {
+          "taskId": "0x0000000000000000000000000000000000000000000000000000000000007a5d",
+          "executor": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+          "kind": 3,
+          "asset": "0x3333333333333333333333333333333333333333",
+          "runbookHash": "0xb261a9ae6c3f0922fca12faa9ef4c173d3239cac5bd6fdba64d4a6748695d5bd",
+          "conditionsHash": "0xc876cc81c36c31836fddefb2477e97885a264ff1162624d621a202e1166b0010",
+          "recipientsHash": "0x670d710de9a802307c730e3bf46431fee52af09c62a2b1800cfbe92256d3f04d",
+          "scheduleHash": "0x1e990e27f0d7976bf2adbd60e20384da0125b76e2885a96aa707bcb054108b0d",
+          "templatesHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "issuedAt": "1793000000",
+          "startsAt": "1793000000",
+          "expiresAt": "1795592000",
+          "epoch": "0",
+          "nonce": "0",
+          "maxActions": 120,
+          "maxPayments": 100,
+          "maxPayment": "500000",
+          "spendCap": "20000000",
+          "liquidFloor": "3000000",
+          "depositCap": "0",
+          "withdrawCap": "0",
+          "reviewThreshold": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+          "periodCap": "2000000",
+          "periodSeconds": 86400
+        }
+      },
+      "structHash": "0x2e0051fae6acd15a76061f5815eee95ffb7894a0b9aaed538dfb0d2e5777c294",
+      "domainSeparator": "0xa34ca99a0fbaf645168fa5e21ac311b27ffc06a966896fd0315ecfdaba1da25d",
+      "digest": "0xe5d9611d12c0ce8eda6dbf3979ddfb259487bf560c3160c6fff62e3da9457db6",
+      "abiEncoded": "0x0000000000000000000000000000000000000000000000000000000000007a5d00000000000000000000000070997970c51812dc3a010c7d01b50e0d17dc79c800000000000000000000000000000000000000000000000000000000000000030000000000000000000000003333333333333333333333333333333333333333b261a9ae6c3f0922fca12faa9ef4c173d3239cac5bd6fdba64d4a6748695d5bdc876cc81c36c31836fddefb2477e97885a264ff1162624d621a202e1166b0010670d710de9a802307c730e3bf46431fee52af09c62a2b1800cfbe92256d3f04d1e990e27f0d7976bf2adbd60e20384da0125b76e2885a96aa707bcb054108b0d0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000006adf0240000000000000000000000000000000000000000000000000000000006adf0240000000000000000000000000000000000000000000000000000000006b068f400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000780000000000000000000000000000000000000000000000000000000000000064000000000000000000000000000000000000000000000000000000000007a1200000000000000000000000000000000000000000000000000000000001312d0000000000000000000000000000000000000000000000000000000000002dc6c000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff00000000000000000000000000000000000000000000000000000000001e84800000000000000000000000000000000000000000000000000000000000015180",
+      "signer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "signature": "0x002c091f903b3bec74539fc42383e0c948ea639f045f32f5edb58217f59e55146126915426584c5d8b4b7586f59dbe12e9792bcf103cc2e632cc1a12188a089b1b"
+    }
+  ],
+  "invalid": [
+    {
+      "id": "unknown-field",
+      "expect": "SCHEMA_REJECT",
+      "reason": "Unknown fields reject",
+      "domain": {
+        "name": "MandateWallet",
+        "version": "5",
+        "chainId": 84532,
+        "verifyingContract": "0x1111111111111111111111111111111111111111"
+      },
+      "message": {
+        "taskId": "0x0000000000000000000000000000000000000000000000000000000000007a5c",
+        "executor": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+        "kind": 0,
+        "asset": "0x2222222222222222222222222222222222222222",
+        "runbookHash": "0xb261a9ae6c3f0922fca12faa9ef4c173d3239cac5bd6fdba64d4a6748695d5bd",
+        "conditionsHash": "0xc876cc81c36c31836fddefb2477e97885a264ff1162624d621a202e1166b0010",
+        "recipientsHash": "0x670d710de9a802307c730e3bf46431fee52af09c62a2b1800cfbe92256d3f04d",
+        "scheduleHash": "0x1e990e27f0d7976bf2adbd60e20384da0125b76e2885a96aa707bcb054108b0d",
+        "templatesHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "issuedAt": "1793000000",
+        "startsAt": "1793000000",
+        "expiresAt": "1793003600",
+        "epoch": "0",
+        "nonce": "0",
+        "maxActions": 6,
+        "maxPayments": 3,
+        "maxPayment": "500000",
+        "spendCap": "2000000",
+        "liquidFloor": "3000000",
+        "depositCap": "0",
+        "withdrawCap": "0",
+        "reviewThreshold": "300000",
+        "periodCap": "0",
+        "periodSeconds": 0,
+        "extra": "1"
+      }
+    },
+    {
+      "id": "null-field",
+      "expect": "SCHEMA_REJECT",
+      "reason": "null never replaces a required value",
+      "domain": {
+        "name": "MandateWallet",
+        "version": "5",
+        "chainId": 84532,
+        "verifyingContract": "0x1111111111111111111111111111111111111111"
+      },
+      "message": {
+        "taskId": "0x0000000000000000000000000000000000000000000000000000000000007a5c",
+        "executor": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+        "kind": 0,
+        "asset": "0x2222222222222222222222222222222222222222",
+        "runbookHash": "0xb261a9ae6c3f0922fca12faa9ef4c173d3239cac5bd6fdba64d4a6748695d5bd",
+        "conditionsHash": "0xc876cc81c36c31836fddefb2477e97885a264ff1162624d621a202e1166b0010",
+        "recipientsHash": "0x670d710de9a802307c730e3bf46431fee52af09c62a2b1800cfbe92256d3f04d",
+        "scheduleHash": "0x1e990e27f0d7976bf2adbd60e20384da0125b76e2885a96aa707bcb054108b0d",
+        "templatesHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "issuedAt": "1793000000",
+        "startsAt": "1793000000",
+        "expiresAt": "1793003600",
+        "epoch": "0",
+        "nonce": null,
+        "maxActions": 6,
+        "maxPayments": 3,
+        "maxPayment": "500000",
+        "spendCap": "2000000",
+        "liquidFloor": "3000000",
+        "depositCap": "0",
+        "withdrawCap": "0",
+        "reviewThreshold": "300000",
+        "periodCap": "0",
+        "periodSeconds": 0
+      }
+    },
+    {
+      "id": "missing-field",
+      "expect": "SCHEMA_REJECT",
+      "reason": "Every field is required",
+      "domain": {
+        "name": "MandateWallet",
+        "version": "5",
+        "chainId": 84532,
+        "verifyingContract": "0x1111111111111111111111111111111111111111"
+      },
+      "message": {
+        "executor": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+        "kind": 0,
+        "asset": "0x2222222222222222222222222222222222222222",
+        "runbookHash": "0xb261a9ae6c3f0922fca12faa9ef4c173d3239cac5bd6fdba64d4a6748695d5bd",
+        "conditionsHash": "0xc876cc81c36c31836fddefb2477e97885a264ff1162624d621a202e1166b0010",
+        "recipientsHash": "0x670d710de9a802307c730e3bf46431fee52af09c62a2b1800cfbe92256d3f04d",
+        "scheduleHash": "0x1e990e27f0d7976bf2adbd60e20384da0125b76e2885a96aa707bcb054108b0d",
+        "templatesHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "issuedAt": "1793000000",
+        "startsAt": "1793000000",
+        "expiresAt": "1793003600",
+        "epoch": "0",
+        "nonce": "0",
+        "maxActions": 6,
+        "maxPayments": 3,
+        "maxPayment": "500000",
+        "spendCap": "2000000",
+        "liquidFloor": "3000000",
+        "depositCap": "0",
+        "withdrawCap": "0",
+        "reviewThreshold": "300000",
+        "periodCap": "0",
+        "periodSeconds": 0
+      }
+    },
+    {
+      "id": "wrong-chain",
+      "expect": "DOMAIN_REJECT",
+      "reason": "Only chainId 84532",
+      "domain": {
+        "name": "MandateWallet",
+        "version": "5",
+        "chainId": 8453,
+        "verifyingContract": "0x1111111111111111111111111111111111111111"
+      },
+      "message": {
+        "taskId": "0x0000000000000000000000000000000000000000000000000000000000007a5c",
+        "executor": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+        "kind": 0,
+        "asset": "0x2222222222222222222222222222222222222222",
+        "runbookHash": "0xb261a9ae6c3f0922fca12faa9ef4c173d3239cac5bd6fdba64d4a6748695d5bd",
+        "conditionsHash": "0xc876cc81c36c31836fddefb2477e97885a264ff1162624d621a202e1166b0010",
+        "recipientsHash": "0x670d710de9a802307c730e3bf46431fee52af09c62a2b1800cfbe92256d3f04d",
+        "scheduleHash": "0x1e990e27f0d7976bf2adbd60e20384da0125b76e2885a96aa707bcb054108b0d",
+        "templatesHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "issuedAt": "1793000000",
+        "startsAt": "1793000000",
+        "expiresAt": "1793003600",
+        "epoch": "0",
+        "nonce": "0",
+        "maxActions": 6,
+        "maxPayments": 3,
+        "maxPayment": "500000",
+        "spendCap": "2000000",
+        "liquidFloor": "3000000",
+        "depositCap": "0",
+        "withdrawCap": "0",
+        "reviewThreshold": "300000",
+        "periodCap": "0",
+        "periodSeconds": 0
+      }
+    },
+    {
+      "id": "old-domain-version",
+      "expect": "DOMAIN_REJECT",
+      "reason": "Bootstrap/old domain versions reject",
+      "domain": {
+        "name": "MandateWallet",
+        "version": "4",
+        "chainId": 84532,
+        "verifyingContract": "0x1111111111111111111111111111111111111111"
+      },
+      "message": {
+        "taskId": "0x0000000000000000000000000000000000000000000000000000000000007a5c",
+        "executor": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+        "kind": 0,
+        "asset": "0x2222222222222222222222222222222222222222",
+        "runbookHash": "0xb261a9ae6c3f0922fca12faa9ef4c173d3239cac5bd6fdba64d4a6748695d5bd",
+        "conditionsHash": "0xc876cc81c36c31836fddefb2477e97885a264ff1162624d621a202e1166b0010",
+        "recipientsHash": "0x670d710de9a802307c730e3bf46431fee52af09c62a2b1800cfbe92256d3f04d",
+        "scheduleHash": "0x1e990e27f0d7976bf2adbd60e20384da0125b76e2885a96aa707bcb054108b0d",
+        "templatesHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "issuedAt": "1793000000",
+        "startsAt": "1793000000",
+        "expiresAt": "1793003600",
+        "epoch": "0",
+        "nonce": "0",
+        "maxActions": 6,
+        "maxPayments": 3,
+        "maxPayment": "500000",
+        "spendCap": "2000000",
+        "liquidFloor": "3000000",
+        "depositCap": "0",
+        "withdrawCap": "0",
+        "reviewThreshold": "300000",
+        "periodCap": "0",
+        "periodSeconds": 0
+      }
+    },
+    {
+      "id": "one-unit-change",
+      "expect": "SIGNER_MISMATCH",
+      "reason": "Original signature must not authorize a 1-unit change",
+      "domain": {
+        "name": "MandateWallet",
+        "version": "5",
+        "chainId": 84532,
+        "verifyingContract": "0x1111111111111111111111111111111111111111"
+      },
+      "message": {
+        "taskId": "0x0000000000000000000000000000000000000000000000000000000000007a5c",
+        "executor": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+        "kind": 0,
+        "asset": "0x2222222222222222222222222222222222222222",
+        "runbookHash": "0xb261a9ae6c3f0922fca12faa9ef4c173d3239cac5bd6fdba64d4a6748695d5bd",
+        "conditionsHash": "0xc876cc81c36c31836fddefb2477e97885a264ff1162624d621a202e1166b0010",
+        "recipientsHash": "0x670d710de9a802307c730e3bf46431fee52af09c62a2b1800cfbe92256d3f04d",
+        "scheduleHash": "0x1e990e27f0d7976bf2adbd60e20384da0125b76e2885a96aa707bcb054108b0d",
+        "templatesHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "issuedAt": "1793000000",
+        "startsAt": "1793000000",
+        "expiresAt": "1793003600",
+        "epoch": "0",
+        "nonce": "1",
+        "maxActions": 6,
+        "maxPayments": 3,
+        "maxPayment": "500000",
+        "spendCap": "2000000",
+        "liquidFloor": "3000000",
+        "depositCap": "0",
+        "withdrawCap": "0",
+        "reviewThreshold": "300000",
+        "periodCap": "0",
+        "periodSeconds": 0
+      }
+    },
+    {
+      "id": "reordered-fields",
+      "expect": "SIGNER_MISMATCH",
+      "reason": "Field order is part of the type hash",
+      "domain": {
+        "name": "MandateWallet",
+        "version": "5",
+        "chainId": 84532,
+        "verifyingContract": "0x1111111111111111111111111111111111111111"
+      },
+      "message": {
+        "taskId": "0x0000000000000000000000000000000000000000000000000000000000007a5c",
+        "executor": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+        "kind": 0,
+        "asset": "0x2222222222222222222222222222222222222222",
+        "runbookHash": "0xb261a9ae6c3f0922fca12faa9ef4c173d3239cac5bd6fdba64d4a6748695d5bd",
+        "conditionsHash": "0xc876cc81c36c31836fddefb2477e97885a264ff1162624d621a202e1166b0010",
+        "recipientsHash": "0x670d710de9a802307c730e3bf46431fee52af09c62a2b1800cfbe92256d3f04d",
+        "scheduleHash": "0x1e990e27f0d7976bf2adbd60e20384da0125b76e2885a96aa707bcb054108b0d",
+        "templatesHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "issuedAt": "1793000000",
+        "startsAt": "1793000000",
+        "expiresAt": "1793003600",
+        "epoch": "0",
+        "nonce": "0",
+        "maxActions": 6,
+        "maxPayments": 3,
+        "maxPayment": "500000",
+        "spendCap": "2000000",
+        "liquidFloor": "3000000",
+        "depositCap": "0",
+        "withdrawCap": "0",
+        "reviewThreshold": "300000",
+        "periodCap": "0",
+        "periodSeconds": 0
+      },
+      "types": {
+        "Permit": [
+          {
+            "name": "periodSeconds",
+            "type": "uint32"
+          },
+          {
+            "name": "periodCap",
+            "type": "uint256"
+          },
+          {
+            "name": "reviewThreshold",
+            "type": "uint256"
+          },
+          {
+            "name": "withdrawCap",
+            "type": "uint256"
+          },
+          {
+            "name": "depositCap",
+            "type": "uint256"
+          },
+          {
+            "name": "liquidFloor",
+            "type": "uint256"
+          },
+          {
+            "name": "spendCap",
+            "type": "uint256"
+          },
+          {
+            "name": "maxPayment",
+            "type": "uint256"
+          },
+          {
+            "name": "maxPayments",
+            "type": "uint32"
+          },
+          {
+            "name": "maxActions",
+            "type": "uint32"
+          },
+          {
+            "name": "nonce",
+            "type": "uint256"
+          },
+          {
+            "name": "epoch",
+            "type": "uint64"
+          },
+          {
+            "name": "expiresAt",
+            "type": "uint64"
+          },
+          {
+            "name": "startsAt",
+            "type": "uint64"
+          },
+          {
+            "name": "issuedAt",
+            "type": "uint64"
+          },
+          {
+            "name": "templatesHash",
+            "type": "bytes32"
+          },
+          {
+            "name": "scheduleHash",
+            "type": "bytes32"
+          },
+          {
+            "name": "recipientsHash",
+            "type": "bytes32"
+          },
+          {
+            "name": "conditionsHash",
+            "type": "bytes32"
+          },
+          {
+            "name": "runbookHash",
+            "type": "bytes32"
+          },
+          {
+            "name": "asset",
+            "type": "address"
+          },
+          {
+            "name": "kind",
+            "type": "uint8"
+          },
+          {
+            "name": "executor",
+            "type": "address"
+          },
+          {
+            "name": "taskId",
+            "type": "bytes32"
+          }
+        ]
+      }
+    },
+    {
+      "id": "decimal-amount",
+      "expect": "SCHEMA_REJECT",
+      "reason": "0.5 is not base units",
+      "domain": {
+        "name": "MandateWallet",
+        "version": "5",
+        "chainId": 84532,
+        "verifyingContract": "0x1111111111111111111111111111111111111111"
+      },
+      "message": {
+        "taskId": "0x0000000000000000000000000000000000000000000000000000000000007a5c",
+        "executor": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+        "kind": 0,
+        "asset": "0x2222222222222222222222222222222222222222",
+        "runbookHash": "0xb261a9ae6c3f0922fca12faa9ef4c173d3239cac5bd6fdba64d4a6748695d5bd",
+        "conditionsHash": "0xc876cc81c36c31836fddefb2477e97885a264ff1162624d621a202e1166b0010",
+        "recipientsHash": "0x670d710de9a802307c730e3bf46431fee52af09c62a2b1800cfbe92256d3f04d",
+        "scheduleHash": "0x1e990e27f0d7976bf2adbd60e20384da0125b76e2885a96aa707bcb054108b0d",
+        "templatesHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "issuedAt": "1793000000",
+        "startsAt": "1793000000",
+        "expiresAt": "1793003600",
+        "epoch": "0",
+        "nonce": "0",
+        "maxActions": 6,
+        "maxPayments": 3,
+        "maxPayment": "0.5",
+        "spendCap": "2000000",
+        "liquidFloor": "3000000",
+        "depositCap": "0",
+        "withdrawCap": "0",
+        "reviewThreshold": "300000",
+        "periodCap": "0",
+        "periodSeconds": 0
+      }
+    },
+    {
+      "id": "negative-amount",
+      "expect": "SCHEMA_REJECT",
+      "reason": "negative",
+      "domain": {
+        "name": "MandateWallet",
+        "version": "5",
+        "chainId": 84532,
+        "verifyingContract": "0x1111111111111111111111111111111111111111"
+      },
+      "message": {
+        "taskId": "0x0000000000000000000000000000000000000000000000000000000000007a5c",
+        "executor": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+        "kind": 0,
+        "asset": "0x2222222222222222222222222222222222222222",
+        "runbookHash": "0xb261a9ae6c3f0922fca12faa9ef4c173d3239cac5bd6fdba64d4a6748695d5bd",
+        "conditionsHash": "0xc876cc81c36c31836fddefb2477e97885a264ff1162624d621a202e1166b0010",
+        "recipientsHash": "0x670d710de9a802307c730e3bf46431fee52af09c62a2b1800cfbe92256d3f04d",
+        "scheduleHash": "0x1e990e27f0d7976bf2adbd60e20384da0125b76e2885a96aa707bcb054108b0d",
+        "templatesHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "issuedAt": "1793000000",
+        "startsAt": "1793000000",
+        "expiresAt": "1793003600",
+        "epoch": "0",
+        "nonce": "0",
+        "maxActions": 6,
+        "maxPayments": 3,
+        "maxPayment": "-1",
+        "spendCap": "2000000",
+        "liquidFloor": "3000000",
+        "depositCap": "0",
+        "withdrawCap": "0",
+        "reviewThreshold": "300000",
+        "periodCap": "0",
+        "periodSeconds": 0
+      }
+    },
+    {
+      "id": "leading-zero",
+      "expect": "SCHEMA_REJECT",
+      "reason": "noncanonical decimal",
+      "domain": {
+        "name": "MandateWallet",
+        "version": "5",
+        "chainId": 84532,
+        "verifyingContract": "0x1111111111111111111111111111111111111111"
+      },
+      "message": {
+        "taskId": "0x0000000000000000000000000000000000000000000000000000000000007a5c",
+        "executor": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+        "kind": 0,
+        "asset": "0x2222222222222222222222222222222222222222",
+        "runbookHash": "0xb261a9ae6c3f0922fca12faa9ef4c173d3239cac5bd6fdba64d4a6748695d5bd",
+        "conditionsHash": "0xc876cc81c36c31836fddefb2477e97885a264ff1162624d621a202e1166b0010",
+        "recipientsHash": "0x670d710de9a802307c730e3bf46431fee52af09c62a2b1800cfbe92256d3f04d",
+        "scheduleHash": "0x1e990e27f0d7976bf2adbd60e20384da0125b76e2885a96aa707bcb054108b0d",
+        "templatesHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "issuedAt": "1793000000",
+        "startsAt": "1793000000",
+        "expiresAt": "1793003600",
+        "epoch": "0",
+        "nonce": "0",
+        "maxActions": 6,
+        "maxPayments": 3,
+        "maxPayment": "01",
+        "spendCap": "2000000",
+        "liquidFloor": "3000000",
+        "depositCap": "0",
+        "withdrawCap": "0",
+        "reviewThreshold": "300000",
+        "periodCap": "0",
+        "periodSeconds": 0
+      }
+    },
+    {
+      "id": "json-number-amount",
+      "expect": "SCHEMA_REJECT",
+      "reason": "uint256 must be a string",
+      "domain": {
+        "name": "MandateWallet",
+        "version": "5",
+        "chainId": 84532,
+        "verifyingContract": "0x1111111111111111111111111111111111111111"
+      },
+      "message": {
+        "taskId": "0x0000000000000000000000000000000000000000000000000000000000007a5c",
+        "executor": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+        "kind": 0,
+        "asset": "0x2222222222222222222222222222222222222222",
+        "runbookHash": "0xb261a9ae6c3f0922fca12faa9ef4c173d3239cac5bd6fdba64d4a6748695d5bd",
+        "conditionsHash": "0xc876cc81c36c31836fddefb2477e97885a264ff1162624d621a202e1166b0010",
+        "recipientsHash": "0x670d710de9a802307c730e3bf46431fee52af09c62a2b1800cfbe92256d3f04d",
+        "scheduleHash": "0x1e990e27f0d7976bf2adbd60e20384da0125b76e2885a96aa707bcb054108b0d",
+        "templatesHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "issuedAt": "1793000000",
+        "startsAt": "1793000000",
+        "expiresAt": "1793003600",
+        "epoch": "0",
+        "nonce": "0",
+        "maxActions": 6,
+        "maxPayments": 3,
+        "maxPayment": 500000,
+        "spendCap": "2000000",
+        "liquidFloor": "3000000",
+        "depositCap": "0",
+        "withdrawCap": "0",
+        "reviewThreshold": "300000",
+        "periodCap": "0",
+        "periodSeconds": 0
+      }
+    },
+    {
+      "id": "uint64-overflow",
+      "expect": "SCHEMA_REJECT",
+      "reason": "exceeds uint64",
+      "domain": {
+        "name": "MandateWallet",
+        "version": "5",
+        "chainId": 84532,
+        "verifyingContract": "0x1111111111111111111111111111111111111111"
+      },
+      "message": {
+        "taskId": "0x0000000000000000000000000000000000000000000000000000000000007a5c",
+        "executor": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+        "kind": 0,
+        "asset": "0x2222222222222222222222222222222222222222",
+        "runbookHash": "0xb261a9ae6c3f0922fca12faa9ef4c173d3239cac5bd6fdba64d4a6748695d5bd",
+        "conditionsHash": "0xc876cc81c36c31836fddefb2477e97885a264ff1162624d621a202e1166b0010",
+        "recipientsHash": "0x670d710de9a802307c730e3bf46431fee52af09c62a2b1800cfbe92256d3f04d",
+        "scheduleHash": "0x1e990e27f0d7976bf2adbd60e20384da0125b76e2885a96aa707bcb054108b0d",
+        "templatesHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "issuedAt": "1793000000",
+        "startsAt": "1793000000",
+        "expiresAt": "1793003600",
+        "epoch": "18446744073709551616",
+        "nonce": "0",
+        "maxActions": 6,
+        "maxPayments": 3,
+        "maxPayment": "500000",
+        "spendCap": "2000000",
+        "liquidFloor": "3000000",
+        "depositCap": "0",
+        "withdrawCap": "0",
+        "reviewThreshold": "300000",
+        "periodCap": "0",
+        "periodSeconds": 0
+      }
+    },
+    {
+      "id": "period-on-browser",
+      "expect": "SCHEMA_REJECT",
+      "reason": "periodCap only for ALLOWANCE",
+      "domain": {
+        "name": "MandateWallet",
+        "version": "5",
+        "chainId": 84532,
+        "verifyingContract": "0x1111111111111111111111111111111111111111"
+      },
+      "message": {
+        "taskId": "0x0000000000000000000000000000000000000000000000000000000000007a5c",
+        "executor": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+        "kind": 0,
+        "asset": "0x2222222222222222222222222222222222222222",
+        "runbookHash": "0xb261a9ae6c3f0922fca12faa9ef4c173d3239cac5bd6fdba64d4a6748695d5bd",
+        "conditionsHash": "0xc876cc81c36c31836fddefb2477e97885a264ff1162624d621a202e1166b0010",
+        "recipientsHash": "0x670d710de9a802307c730e3bf46431fee52af09c62a2b1800cfbe92256d3f04d",
+        "scheduleHash": "0x1e990e27f0d7976bf2adbd60e20384da0125b76e2885a96aa707bcb054108b0d",
+        "templatesHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "issuedAt": "1793000000",
+        "startsAt": "1793000000",
+        "expiresAt": "1793003600",
+        "epoch": "0",
+        "nonce": "0",
+        "maxActions": 6,
+        "maxPayments": 3,
+        "maxPayment": "500000",
+        "spendCap": "2000000",
+        "liquidFloor": "3000000",
+        "depositCap": "0",
+        "withdrawCap": "0",
+        "reviewThreshold": "300000",
+        "periodCap": "1",
+        "periodSeconds": 86400
+      }
+    },
+    {
+      "id": "allowance-bad-period",
+      "expect": "SCHEMA_REJECT",
+      "reason": "period must be day or week",
+      "domain": {
+        "name": "MandateWallet",
+        "version": "5",
+        "chainId": 84532,
+        "verifyingContract": "0x1111111111111111111111111111111111111111"
+      },
+      "message": {
+        "taskId": "0x0000000000000000000000000000000000000000000000000000000000007a5d",
+        "executor": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+        "kind": 3,
+        "asset": "0x3333333333333333333333333333333333333333",
+        "runbookHash": "0xb261a9ae6c3f0922fca12faa9ef4c173d3239cac5bd6fdba64d4a6748695d5bd",
+        "conditionsHash": "0xc876cc81c36c31836fddefb2477e97885a264ff1162624d621a202e1166b0010",
+        "recipientsHash": "0x670d710de9a802307c730e3bf46431fee52af09c62a2b1800cfbe92256d3f04d",
+        "scheduleHash": "0x1e990e27f0d7976bf2adbd60e20384da0125b76e2885a96aa707bcb054108b0d",
+        "templatesHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "issuedAt": "1793000000",
+        "startsAt": "1793000000",
+        "expiresAt": "1795592000",
+        "epoch": "0",
+        "nonce": "0",
+        "maxActions": 120,
+        "maxPayments": 100,
+        "maxPayment": "500000",
+        "spendCap": "20000000",
+        "liquidFloor": "3000000",
+        "depositCap": "0",
+        "withdrawCap": "0",
+        "reviewThreshold": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
+        "periodCap": "2000000",
+        "periodSeconds": 3600
+      }
+    }
+  ]
+}
