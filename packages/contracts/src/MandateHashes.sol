@@ -66,6 +66,9 @@ library MandateHashes {
     return digest(tokenDomain, structHash);
   }
 
+  /// scheduleHash = keccak256(abi.encode(Schedule)) (S3); not an EIP-712 struct hash.
+  function hashSchedule(T.Schedule memory s) internal pure returns (bytes32) { return keccak256(abi.encode(s)); }
+
   function domainSeparator(string memory name, string memory version, address verifyingContract) internal pure returns (bytes32) {
     return keccak256(abi.encode(DOMAIN_TYPEHASH, keccak256(bytes(name)), keccak256(bytes(version)), CHAIN_ID, verifyingContract));
   }

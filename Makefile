@@ -27,8 +27,8 @@ check-schema:
 	node scripts/check-suite.mjs node @mandate/schema
 	node scripts/check-suite.mjs forge packages/contracts test/MandateHashes.t.sol
 check-contracts:
-	$(PNPM) contracts:build
-	node scripts/not-ready.mjs contract-acceptance
+	node scripts/check-suite.mjs forge packages/contracts 'test/**/*.t.sol'
+	$(PNPM) --filter @mandate/contracts abi:check
 check-platform check-mobile check-agents:
 	node scripts/not-ready.mjs $@
 check-integration:
