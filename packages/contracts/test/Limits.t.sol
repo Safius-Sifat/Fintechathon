@@ -13,11 +13,11 @@ contract LimitsTest is MandateFixture {
     token.transfer(address(0xdead), 6_000_000);
     bytes32 permitId = _activateLiquidity("floor", 2_000_000, 0);
     (T.Action memory a, bytes memory sig) = _vaultAction(permitId, T.OP_DEPOSIT, 1_000_001, 1);
-    vm.expectRevert(abi.encodeWithSelector(MandateWallet.LimitExceeded.selector, "liquidFloor"));
+    vm.expectRevert(abi.encodeWithSelector(MandateWallet.LimitExceeded.selector, bytes32("liquidFloor")));
     _run(a, sig);
     // 1,000,000 of 4,000,000 is 25% > 20%: the allocation rule also binds here.
     (a, sig) = _vaultAction(permitId, T.OP_DEPOSIT, 1_000_000, 1);
-    vm.expectRevert(abi.encodeWithSelector(MandateWallet.LimitExceeded.selector, "allocation"));
+    vm.expectRevert(abi.encodeWithSelector(MandateWallet.LimitExceeded.selector, bytes32("allocation")));
     _run(a, sig);
     (a, sig) = _vaultAction(permitId, T.OP_DEPOSIT, 800_000, 1);
     _run(a, sig);

@@ -51,7 +51,7 @@ contract AdminTest is MandateFixture {
     wallet.applyAdmin(a, sig);
 
     (a, sig) = _admin(T.CMD_PAUSE, keccak256("not-zero"));
-    vm.expectRevert(abi.encodeWithSelector(MandateWallet.FieldNotZero.selector, "permitId"));
+    vm.expectRevert(abi.encodeWithSelector(MandateWallet.FieldNotZero.selector, bytes32("permitId")));
     wallet.applyAdmin(a, sig);
 
     (a, sig) = _admin(T.CMD_PAUSE, bytes32(0));
@@ -72,9 +72,9 @@ contract AdminTest is MandateFixture {
     wallet.applyAdmin(a, sig);
   }
 
-  function test_P1_04_freezeCommandsNotYetSupported() public {
-    (T.Admin memory a, bytes memory sig) = _admin(T.CMD_FREEZE, bytes32(0));
-    vm.expectRevert(abi.encodeWithSelector(MandateWallet.CommandNotSupported.selector, T.CMD_FREEZE));
+  function test_P1_04_unknownCommandRejected() public {
+    (T.Admin memory a, bytes memory sig) = _admin(7, bytes32(0));
+    vm.expectRevert(abi.encodeWithSelector(MandateWallet.CommandNotSupported.selector, uint8(7)));
     wallet.applyAdmin(a, sig);
   }
 }

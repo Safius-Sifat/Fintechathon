@@ -13,6 +13,11 @@
         "internalType": "address"
       },
       {
+        "name": "usdc_",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
         "name": "vault_",
         "type": "address",
         "internalType": "address"
@@ -23,227 +28,6 @@
   {
     "type": "receive",
     "stateMutability": "payable"
-  },
-  {
-    "type": "function",
-    "name": "CHAIN_ID",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "MAX_ACTIONS",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint32",
-        "internalType": "uint32"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "MAX_ACTION_SECONDS",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint64",
-        "internalType": "uint64"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "MAX_ADMIN_SECONDS",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint64",
-        "internalType": "uint64"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "MAX_ALLOCATION_BPS",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "MAX_BROWSER_PAYMENTS",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint32",
-        "internalType": "uint32"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "MAX_COSIGNED_SECONDS",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint64",
-        "internalType": "uint64"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "MAX_EXECUTOR_DAY",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "MAX_OWNER_TRANSFER_SECONDS",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint64",
-        "internalType": "uint64"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "MAX_PAYMENT",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "MAX_PERMIT_SECONDS",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint64",
-        "internalType": "uint64"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "MAX_TASK_SPEND",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "MAX_WALLET_DAY",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "MAX_WALLET_WEEK",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "MIN_LIQUID_FLOOR",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "RECOVER_REDEEM_GAS",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "RECOVER_VIEW_GAS",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "stateMutability": "view"
   },
   {
     "type": "function",
@@ -558,6 +342,194 @@
   },
   {
     "type": "function",
+    "name": "applyWalletPolicy",
+    "inputs": [
+      {
+        "name": "p",
+        "type": "tuple",
+        "internalType": "struct MandateTypes.WalletPolicy",
+        "components": [
+          {
+            "name": "version",
+            "type": "uint64",
+            "internalType": "uint64"
+          },
+          {
+            "name": "assetCapsHash",
+            "type": "bytes32",
+            "internalType": "bytes32"
+          },
+          {
+            "name": "allowlistHash",
+            "type": "bytes32",
+            "internalType": "bytes32"
+          },
+          {
+            "name": "blocklistHash",
+            "type": "bytes32",
+            "internalType": "bytes32"
+          },
+          {
+            "name": "templatesHash",
+            "type": "bytes32",
+            "internalType": "bytes32"
+          },
+          {
+            "name": "reviewThreshold",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "nonce",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "issuedAt",
+            "type": "uint64",
+            "internalType": "uint64"
+          },
+          {
+            "name": "deadline",
+            "type": "uint64",
+            "internalType": "uint64"
+          }
+        ]
+      },
+      {
+        "name": "caps",
+        "type": "tuple[]",
+        "internalType": "struct MandateTypes.AssetCap[]",
+        "components": [
+          {
+            "name": "asset",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "perTx",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "daily",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "weekly",
+            "type": "uint256",
+            "internalType": "uint256"
+          }
+        ]
+      },
+      {
+        "name": "allowlist",
+        "type": "address[]",
+        "internalType": "address[]"
+      },
+      {
+        "name": "blocklist",
+        "type": "address[]",
+        "internalType": "address[]"
+      },
+      {
+        "name": "templates",
+        "type": "tuple[]",
+        "internalType": "struct MandateTypes.CallTemplate[]",
+        "components": [
+          {
+            "name": "templateId",
+            "type": "bytes32",
+            "internalType": "bytes32"
+          },
+          {
+            "name": "target",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "targetCodeHash",
+            "type": "bytes32",
+            "internalType": "bytes32"
+          },
+          {
+            "name": "selector",
+            "type": "bytes4",
+            "internalType": "bytes4"
+          },
+          {
+            "name": "amountArg",
+            "type": "uint8",
+            "internalType": "uint8"
+          },
+          {
+            "name": "recipientArg",
+            "type": "uint8",
+            "internalType": "uint8"
+          },
+          {
+            "name": "recipientRule",
+            "type": "uint8",
+            "internalType": "uint8"
+          },
+          {
+            "name": "flags",
+            "type": "uint8",
+            "internalType": "uint8"
+          },
+          {
+            "name": "maxAmount",
+            "type": "uint256",
+            "internalType": "uint256"
+          }
+        ]
+      },
+      {
+        "name": "ownerSignature",
+        "type": "bytes",
+        "internalType": "bytes"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "assetCap",
+    "inputs": [
+      {
+        "name": "asset",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "perTx",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "daily",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "weekly",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "set",
+        "type": "bool",
+        "internalType": "bool"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "authorityEpoch",
     "inputs": [],
     "outputs": [
@@ -743,6 +715,32 @@
   },
   {
     "type": "function",
+    "name": "factory",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "frozen",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool",
+        "internalType": "bool"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "getBudget",
     "inputs": [
       {
@@ -803,6 +801,30 @@
             "internalType": "uint256"
           }
         ]
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getPeriodSpend",
+    "inputs": [
+      {
+        "name": "permitId",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      },
+      {
+        "name": "periodIndex",
+        "type": "uint64",
+        "internalType": "uint64"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
       }
     ],
     "stateMutability": "view"
@@ -997,6 +1019,110 @@
   },
   {
     "type": "function",
+    "name": "getTemplate",
+    "inputs": [
+      {
+        "name": "templateId",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "tuple",
+        "internalType": "struct MandateTypes.CallTemplate",
+        "components": [
+          {
+            "name": "templateId",
+            "type": "bytes32",
+            "internalType": "bytes32"
+          },
+          {
+            "name": "target",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "targetCodeHash",
+            "type": "bytes32",
+            "internalType": "bytes32"
+          },
+          {
+            "name": "selector",
+            "type": "bytes4",
+            "internalType": "bytes4"
+          },
+          {
+            "name": "amountArg",
+            "type": "uint8",
+            "internalType": "uint8"
+          },
+          {
+            "name": "recipientArg",
+            "type": "uint8",
+            "internalType": "uint8"
+          },
+          {
+            "name": "recipientRule",
+            "type": "uint8",
+            "internalType": "uint8"
+          },
+          {
+            "name": "flags",
+            "type": "uint8",
+            "internalType": "uint8"
+          },
+          {
+            "name": "maxAmount",
+            "type": "uint256",
+            "internalType": "uint256"
+          }
+        ]
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "isAllowlisted",
+    "inputs": [
+      {
+        "name": "recipient",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool",
+        "internalType": "bool"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "isBlocklisted",
+    "inputs": [
+      {
+        "name": "recipient",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool",
+        "internalType": "bool"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "isPermitRecipient",
     "inputs": [
       {
@@ -1008,6 +1134,25 @@
         "name": "recipient",
         "type": "address",
         "internalType": "address"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool",
+        "internalType": "bool"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "isPolicyTemplate",
+    "inputs": [
+      {
+        "name": "templateId",
+        "type": "bytes32",
+        "internalType": "bytes32"
       }
     ],
     "outputs": [
@@ -1097,6 +1242,19 @@
   },
   {
     "type": "function",
+    "name": "policyNonce",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "revokedPermitId",
     "inputs": [
       {
@@ -1136,6 +1294,19 @@
   {
     "type": "function",
     "name": "token",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "usdc",
     "inputs": [],
     "outputs": [
       {
@@ -1212,6 +1383,66 @@
         "name": "",
         "type": "address",
         "internalType": "address"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "walletPolicy",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "tuple",
+        "internalType": "struct MandateTypes.WalletPolicy",
+        "components": [
+          {
+            "name": "version",
+            "type": "uint64",
+            "internalType": "uint64"
+          },
+          {
+            "name": "assetCapsHash",
+            "type": "bytes32",
+            "internalType": "bytes32"
+          },
+          {
+            "name": "allowlistHash",
+            "type": "bytes32",
+            "internalType": "bytes32"
+          },
+          {
+            "name": "blocklistHash",
+            "type": "bytes32",
+            "internalType": "bytes32"
+          },
+          {
+            "name": "templatesHash",
+            "type": "bytes32",
+            "internalType": "bytes32"
+          },
+          {
+            "name": "reviewThreshold",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "nonce",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "issuedAt",
+            "type": "uint64",
+            "internalType": "uint64"
+          },
+          {
+            "name": "deadline",
+            "type": "uint64",
+            "internalType": "uint64"
+          }
+        ]
       }
     ],
     "stateMutability": "view"
@@ -1422,6 +1653,19 @@
   },
   {
     "type": "event",
+    "name": "WalletFrozen",
+    "inputs": [
+      {
+        "name": "frozen",
+        "type": "bool",
+        "indexed": false,
+        "internalType": "bool"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
     "name": "WalletPaused",
     "inputs": [
       {
@@ -1435,6 +1679,25 @@
         "type": "uint64",
         "indexed": false,
         "internalType": "uint64"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "WalletPolicyUpdated",
+    "inputs": [
+      {
+        "name": "version",
+        "type": "uint64",
+        "indexed": false,
+        "internalType": "uint64"
+      },
+      {
+        "name": "policyDigest",
+        "type": "bytes32",
+        "indexed": false,
+        "internalType": "bytes32"
       }
     ],
     "anonymous": false
@@ -1482,8 +1745,8 @@
     "inputs": [
       {
         "name": "field",
-        "type": "string",
-        "internalType": "string"
+        "type": "bytes32",
+        "internalType": "bytes32"
       }
     ]
   },
@@ -1528,8 +1791,8 @@
     "inputs": [
       {
         "name": "field",
-        "type": "string",
-        "internalType": "string"
+        "type": "bytes32",
+        "internalType": "bytes32"
       }
     ]
   },
@@ -1555,8 +1818,8 @@
     "inputs": [
       {
         "name": "limit",
-        "type": "string",
-        "internalType": "string"
+        "type": "bytes32",
+        "internalType": "bytes32"
       }
     ]
   },
@@ -1614,6 +1877,28 @@
   },
   {
     "type": "error",
+    "name": "PolicyInvalid",
+    "inputs": [
+      {
+        "name": "field",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "PolicyViolation",
+    "inputs": [
+      {
+        "name": "rule",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ]
+  },
+  {
+    "type": "error",
     "name": "RecipientDenied",
     "inputs": [
       {
@@ -1655,8 +1940,8 @@
     "inputs": [
       {
         "name": "field",
-        "type": "string",
-        "internalType": "string"
+        "type": "bytes32",
+        "internalType": "bytes32"
       }
     ]
   },
@@ -1688,6 +1973,11 @@
   {
     "type": "error",
     "name": "TransferAlreadyUsed",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "WalletIsFrozen",
     "inputs": []
   },
   {

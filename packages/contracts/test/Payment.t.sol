@@ -33,7 +33,7 @@ contract PaymentTest is MandateFixture {
   function test_P1_02_T05_paymentCapBoundary() public {
     bytes32 permitId = _activateNew("task-cap");
     Pay memory over = _pay(permitId, 500_001, providerA, PROVIDER_A_PK);
-    vm.expectRevert(abi.encodeWithSelector(MandateWallet.LimitExceeded.selector, "maxPayment"));
+    vm.expectRevert(abi.encodeWithSelector(MandateWallet.LimitExceeded.selector, bytes32("maxPayment")));
     _execute(over);
     _execute(_pay(permitId, 500_000, providerA, PROVIDER_A_PK));
     assertEq(token.balanceOf(providerA), 500_000);
@@ -45,7 +45,7 @@ contract PaymentTest is MandateFixture {
     bytes32 permitId = _activate(p);
     _execute(_pay(permitId, 400_000, providerA, PROVIDER_A_PK));
     Pay memory over = _pay(permitId, 200_001, providerA, PROVIDER_A_PK);
-    vm.expectRevert(abi.encodeWithSelector(MandateWallet.LimitExceeded.selector, "spendCap"));
+    vm.expectRevert(abi.encodeWithSelector(MandateWallet.LimitExceeded.selector, bytes32("spendCap")));
     _execute(over);
     _execute(_pay(permitId, 200_000, providerA, PROVIDER_A_PK));
     assertEq(wallet.getPermit(permitId).grossSpend, 600_000);
@@ -57,7 +57,7 @@ contract PaymentTest is MandateFixture {
     token.transfer(address(0xdead), 10_000_000 - 3_199_999);
     bytes32 permitId = _activateNew("task-floor");
     Pay memory x = _pay(permitId, 200_000, providerA, PROVIDER_A_PK);
-    vm.expectRevert(abi.encodeWithSelector(MandateWallet.LimitExceeded.selector, "liquidFloor"));
+    vm.expectRevert(abi.encodeWithSelector(MandateWallet.LimitExceeded.selector, bytes32("liquidFloor")));
     _execute(x);
     _execute(_pay(permitId, 199_999, providerA, PROVIDER_A_PK));
     assertEq(token.balanceOf(address(wallet)), 3_000_000);
@@ -68,7 +68,7 @@ contract PaymentTest is MandateFixture {
     bytes32[4] memory ids = [_activateNew("d1"), _activateNew("d2"), _activateNew("d3"), _activateNew("d4")];
     for (uint256 i = 0; i < 10; i++) _execute(_pay(ids[i / 3], 500_000, providerA, PROVIDER_A_PK));
     Pay memory over = _pay(ids[3], 1, providerA, PROVIDER_A_PK);
-    vm.expectRevert(abi.encodeWithSelector(MandateWallet.LimitExceeded.selector, "executorDay"));
+    vm.expectRevert(abi.encodeWithSelector(MandateWallet.LimitExceeded.selector, bytes32("executorDay")));
     _execute(over);
     // The next UTC day has a fresh allowance.
     vm.warp(START + 1 days);
@@ -80,7 +80,7 @@ contract PaymentTest is MandateFixture {
     bytes32 permitId = _activateNew("task-count");
     for (uint256 i = 0; i < 3; i++) _execute(_pay(permitId, 1, providerA, PROVIDER_A_PK));
     Pay memory over = _pay(permitId, 1, providerA, PROVIDER_A_PK);
-    vm.expectRevert(abi.encodeWithSelector(MandateWallet.LimitExceeded.selector, "maxPayments"));
+    vm.expectRevert(abi.encodeWithSelector(MandateWallet.LimitExceeded.selector, bytes32("maxPayments")));
     _execute(over);
   }
 
@@ -105,7 +105,7 @@ contract PaymentTest is MandateFixture {
     bytes memory sig = _signAction(a, EXECUTOR_PK);
     T.Invoice memory noInvoice;
     T.Approval memory noApproval;
-    vm.expectRevert(abi.encodeWithSelector(MandateWallet.FieldNotZero.selector, "close"));
+    vm.expectRevert(abi.encodeWithSelector(MandateWallet.FieldNotZero.selector, bytes32("close")));
     wallet.execute(a, sig, noInvoice, "", noApproval, "", "");
   }
 

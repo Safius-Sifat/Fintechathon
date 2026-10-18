@@ -1,0 +1,242 @@
+[
+  {
+    "caseId": "P1-A02.T01",
+    "taskId": "P1-A02",
+    "status": "PASS",
+    "sourceCommit": "27fd925e89803b5e5166ca286642dc694ffd07d3",
+    "workingTreeDigest": "see commit",
+    "schemaCommit": "27fd925e89803b5e5166ca286642dc694ffd07d3",
+    "environment": {
+      "forge": "1.8.5",
+      "forgeStd": "v1.17.0",
+      "solc": "0.8.28 via_ir",
+      "chain": "local Foundry EVM, chainId 84532",
+      "invariant": "64 runs x 64 depth"
+    },
+    "command": "forge test --root packages/contracts --match-contract \"PolicyTest\"",
+    "testName": "test_P1_A02_T01_*",
+    "exitCode": 0,
+    "expected": "Permit above policy perTx, off the allowlist or blocklisted is rejected",
+    "observed": "as expected",
+    "startedAt": "2026-10-18T18:56:22+06:00",
+    "finishedAt": "2026-10-18T18:56:22+06:00",
+    "artifactRefs": [
+      "packages/contracts/test/",
+      "docs/contracts-security.md"
+    ],
+    "limitations": [
+      "Local Foundry EVM only; Base Sepolia hashes pending P1-06",
+      "USDC is a 6-decimal stand-in token in tests; the real Base Sepolia USDC address and code hash are pinned at deployment"
+    ]
+  },
+  {
+    "caseId": "P1-A02.T02",
+    "taskId": "P1-A02",
+    "status": "PASS",
+    "sourceCommit": "27fd925e89803b5e5166ca286642dc694ffd07d3",
+    "workingTreeDigest": "see commit",
+    "schemaCommit": "27fd925e89803b5e5166ca286642dc694ffd07d3",
+    "environment": {
+      "forge": "1.8.5",
+      "forgeStd": "v1.17.0",
+      "solc": "0.8.28 via_ir",
+      "chain": "local Foundry EVM, chainId 84532",
+      "invariant": "64 runs x 64 depth"
+    },
+    "command": "forge test --root packages/contracts --match-contract \"PolicyTest\"",
+    "testName": "test_P1_A02_T02_*",
+    "exitCode": 0,
+    "expected": "tightening and blocklisting stop active Permits; loosening never enlarges a Permit",
+    "observed": "as expected",
+    "startedAt": "2026-10-18T18:56:22+06:00",
+    "finishedAt": "2026-10-18T18:56:22+06:00",
+    "artifactRefs": [
+      "packages/contracts/test/",
+      "docs/contracts-security.md"
+    ],
+    "limitations": [
+      "Local Foundry EVM only; Base Sepolia hashes pending P1-06",
+      "USDC is a 6-decimal stand-in token in tests; the real Base Sepolia USDC address and code hash are pinned at deployment"
+    ]
+  },
+  {
+    "caseId": "P1-A02.T03",
+    "taskId": "P1-A02",
+    "status": "PASS",
+    "sourceCommit": "27fd925e89803b5e5166ca286642dc694ffd07d3",
+    "workingTreeDigest": "see commit",
+    "schemaCommit": "27fd925e89803b5e5166ca286642dc694ffd07d3",
+    "environment": {
+      "forge": "1.8.5",
+      "forgeStd": "v1.17.0",
+      "solc": "0.8.28 via_ir",
+      "chain": "local Foundry EVM, chainId 84532",
+      "invariant": "64 runs x 64 depth"
+    },
+    "command": "forge test --root packages/contracts --match-contract \"CosignTest|PaymentTest\"",
+    "testName": "test_P1_A02_T03_* / test_P1_A02_cosign*",
+    "exitCode": 0,
+    "expected": "lower policy threshold wins; missing, executor-signed, expired or mismatched approvals rejected; valid approval sets ownerApproved",
+    "observed": "as expected",
+    "startedAt": "2026-10-18T18:56:22+06:00",
+    "finishedAt": "2026-10-18T18:56:22+06:00",
+    "artifactRefs": [
+      "packages/contracts/test/",
+      "docs/contracts-security.md"
+    ],
+    "limitations": [
+      "Local Foundry EVM only; Base Sepolia hashes pending P1-06",
+      "USDC is a 6-decimal stand-in token in tests; the real Base Sepolia USDC address and code hash are pinned at deployment"
+    ]
+  },
+  {
+    "caseId": "P1-A02.T04",
+    "taskId": "P1-A02",
+    "status": "PASS",
+    "sourceCommit": "27fd925e89803b5e5166ca286642dc694ffd07d3",
+    "workingTreeDigest": "see commit",
+    "schemaCommit": "27fd925e89803b5e5166ca286642dc694ffd07d3",
+    "environment": {
+      "forge": "1.8.5",
+      "forgeStd": "v1.17.0",
+      "solc": "0.8.28 via_ir",
+      "chain": "local Foundry EVM, chainId 84532",
+      "invariant": "64 runs x 64 depth"
+    },
+    "command": "forge test --root packages/contracts --match-contract \"FreezeTest\"",
+    "testName": "test_P1_A02_T04_*",
+    "exitCode": 0,
+    "expected": "FREEZE blocks execution; UNFREEZE resumes the same signed Action; epoch and pause unchanged; owner controls work while frozen",
+    "observed": "as expected",
+    "startedAt": "2026-10-18T18:56:22+06:00",
+    "finishedAt": "2026-10-18T18:56:22+06:00",
+    "artifactRefs": [
+      "packages/contracts/test/",
+      "docs/contracts-security.md"
+    ],
+    "limitations": [
+      "Local Foundry EVM only; Base Sepolia hashes pending P1-06",
+      "USDC is a 6-decimal stand-in token in tests; the real Base Sepolia USDC address and code hash are pinned at deployment"
+    ]
+  },
+  {
+    "caseId": "P1-A02.T05",
+    "taskId": "P1-A02",
+    "status": "PASS",
+    "sourceCommit": "27fd925e89803b5e5166ca286642dc694ffd07d3",
+    "workingTreeDigest": "see commit",
+    "schemaCommit": "27fd925e89803b5e5166ca286642dc694ffd07d3",
+    "environment": {
+      "forge": "1.8.5",
+      "forgeStd": "v1.17.0",
+      "solc": "0.8.28 via_ir",
+      "chain": "local Foundry EVM, chainId 84532",
+      "invariant": "64 runs x 64 depth"
+    },
+    "command": "forge test --root packages/contracts --match-contract \"AllowanceTest\"",
+    "testName": "test_P1_A02_T05_periodCapsAcrossBoundary",
+    "exitCode": 0,
+    "expected": "period cap per day; fresh cap next period; total spendCap still binds",
+    "observed": "as expected",
+    "startedAt": "2026-10-18T18:56:22+06:00",
+    "finishedAt": "2026-10-18T18:56:22+06:00",
+    "artifactRefs": [
+      "packages/contracts/test/",
+      "docs/contracts-security.md"
+    ],
+    "limitations": [
+      "Local Foundry EVM only; Base Sepolia hashes pending P1-06",
+      "USDC is a 6-decimal stand-in token in tests; the real Base Sepolia USDC address and code hash are pinned at deployment"
+    ]
+  },
+  {
+    "caseId": "P1-A02.T06",
+    "taskId": "P1-A02",
+    "status": "PASS",
+    "sourceCommit": "27fd925e89803b5e5166ca286642dc694ffd07d3",
+    "workingTreeDigest": "see commit",
+    "schemaCommit": "27fd925e89803b5e5166ca286642dc694ffd07d3",
+    "environment": {
+      "forge": "1.8.5",
+      "forgeStd": "v1.17.0",
+      "solc": "0.8.28 via_ir",
+      "chain": "local Foundry EVM, chainId 84532",
+      "invariant": "64 runs x 64 depth"
+    },
+    "command": "forge test --root packages/contracts --match-contract \"MultiAssetTest\"",
+    "testName": "test_P1_A02_T06_*",
+    "exitCode": 0,
+    "expected": "DemoUSD and USDC counters independent; invoice asset must match; USDC needs an AssetCap; removing a cap stops the asset",
+    "observed": "as expected",
+    "startedAt": "2026-10-18T18:56:22+06:00",
+    "finishedAt": "2026-10-18T18:56:22+06:00",
+    "artifactRefs": [
+      "packages/contracts/test/",
+      "docs/contracts-security.md"
+    ],
+    "limitations": [
+      "Local Foundry EVM only; Base Sepolia hashes pending P1-06",
+      "USDC is a 6-decimal stand-in token in tests; the real Base Sepolia USDC address and code hash are pinned at deployment"
+    ]
+  },
+  {
+    "caseId": "P1-A02.T07",
+    "taskId": "P1-A02",
+    "status": "PASS",
+    "sourceCommit": "27fd925e89803b5e5166ca286642dc694ffd07d3",
+    "workingTreeDigest": "see commit",
+    "schemaCommit": "27fd925e89803b5e5166ca286642dc694ffd07d3",
+    "environment": {
+      "forge": "1.8.5",
+      "forgeStd": "v1.17.0",
+      "solc": "0.8.28 via_ir",
+      "chain": "local Foundry EVM, chainId 84532",
+      "invariant": "64 runs x 64 depth"
+    },
+    "command": "forge test --root packages/contracts --match-contract \"PolicyInvariantsTest\"",
+    "testName": "invariant_P1_A02_T07_*",
+    "exitCode": 0,
+    "expected": "no outflow while frozen; no payment above perTx in force; gross within caps; every eligible payment succeeds",
+    "observed": "as expected",
+    "startedAt": "2026-10-18T18:56:22+06:00",
+    "finishedAt": "2026-10-18T18:56:22+06:00",
+    "artifactRefs": [
+      "packages/contracts/test/",
+      "docs/contracts-security.md"
+    ],
+    "limitations": [
+      "Local Foundry EVM only; Base Sepolia hashes pending P1-06",
+      "USDC is a 6-decimal stand-in token in tests; the real Base Sepolia USDC address and code hash are pinned at deployment"
+    ]
+  },
+  {
+    "caseId": "P1-A02.SIZE",
+    "taskId": "P1-A02",
+    "status": "PASS",
+    "sourceCommit": "27fd925e89803b5e5166ca286642dc694ffd07d3",
+    "workingTreeDigest": "see commit",
+    "schemaCommit": "27fd925e89803b5e5166ca286642dc694ffd07d3",
+    "environment": {
+      "forge": "1.8.5",
+      "forgeStd": "v1.17.0",
+      "solc": "0.8.28 via_ir",
+      "chain": "local Foundry EVM, chainId 84532",
+      "invariant": "64 runs x 64 depth"
+    },
+    "command": "forge test --root packages/contracts --match-contract \"SizeTest\"",
+    "testName": "test_contractSizesWithinEip170",
+    "exitCode": 0,
+    "expected": "MandateWallet, WalletFactory, DemoVault and DemoUSD runtime code each within 24,576 bytes (EIP-170)",
+    "observed": "as expected after library split: wallet 23,201 B, factory 1,355 B (before: wallet 30,968 B, factory 33,936 B, which could not be deployed)",
+    "startedAt": "2026-10-18T18:56:22+06:00",
+    "finishedAt": "2026-10-18T18:56:22+06:00",
+    "artifactRefs": [
+      "packages/contracts/test/",
+      "docs/contracts-security.md"
+    ],
+    "limitations": [
+      "Local Foundry EVM only; Base Sepolia hashes pending P1-06",
+      "USDC is a 6-decimal stand-in token in tests; the real Base Sepolia USDC address and code hash are pinned at deployment"
+    ]
+  }
+]

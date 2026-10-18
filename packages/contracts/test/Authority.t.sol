@@ -108,7 +108,7 @@ contract AuthorityTest is MandateFixture {
     p.periodCap = 1;
     _tryActivate(p, _signPermit(p, OWNER_PK), MandateWallet.FieldNotZero.selector);
     p = _permit("t");
-    p.kind = T.KIND_ALLOWANCE;
+    p.kind = 4; // no such kind
     _tryActivate(p, _signPermit(p, OWNER_PK), MandateWallet.KindNotSupported.selector);
 
     bytes32 permitId = _activateNew("browser");
