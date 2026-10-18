@@ -1,0 +1,98 @@
+{
+  "chainId": 84532,
+  "sourceCommit": "069090ab42e9cb99d814fe76c28e79e1f02581e1",
+  "sourceClean": true,
+  "deployer": "0x77e9B6A71A985e49372f07A26F696B4C519025b3",
+  "compiler": {
+    "solc": "0.8.28+commit.7893614a",
+    "viaIR": true,
+    "optimizer": {
+      "enabled": true,
+      "runs": 200
+    },
+    "evmVersion": "prague"
+  },
+  "config": {
+    "usdc": "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
+    "anchorPublisher": "0x5cCEfD0Ac77088d72d38047856f4045E5ae56a95"
+  },
+  "contracts": {
+    "token": {
+      "address": "0xE030717a657E9194bC086A546fb59aDBc631ad7a",
+      "deploymentBlock": "48293963",
+      "codeHash": "0xa77bb5b06759b6ff168d53e43a2308c7c1ae113ce764ea1d0e23f64e777f9649"
+    },
+    "vault": {
+      "address": "0xd82b54fbaD1B03D4D593479c154b2d6C413d9800",
+      "deploymentBlock": "48293964",
+      "codeHash": "0x6de08d88946b23f863603e201844c81257a20b343679ace45e1c94c509df966c"
+    },
+    "anchor": {
+      "address": "0x11384648A1FbB81da2E664E5Ae5EF547720BCC49",
+      "deploymentBlock": "48293965",
+      "codeHash": "0xc7d959d854dbc05e3c4d999dea492d9580e59eafb338351b0dffc4ce62fc0ab1"
+    },
+    "factory": {
+      "address": "0x094875D5656726980016E8712a8A02C96aD382ce",
+      "deploymentBlock": "48293966",
+      "codeHash": "0x282b238002723ed3fc3635aeed86305ec25b6f3ff27451b94ceace995dd56587"
+    }
+  },
+  "libraries": {
+    "PermitTermsLib": {
+      "address": "0xBd974cd1096A7F115b6882c202669897b6E6e482",
+      "deploymentBlock": "48293959",
+      "codeHash": "0xffd69436a18b9b075c7c1e4634f092ad0472b3c1db57d11c29a151dce5800327"
+    },
+    "WalletPolicyLib": {
+      "address": "0x2B71b15759A92C1c0542A4Cd6E4a549AA892b51b",
+      "deploymentBlock": "48293957",
+      "codeHash": "0x6e523bc975ac76ed15430f2a528072c94a5cd9374c74599008e1eed94db3a547"
+    },
+    "VaultLib": {
+      "address": "0x3105eaf124BC05EfA6d42376369D328D0cb4E000",
+      "deploymentBlock": "48293958",
+      "codeHash": "0x37d65e1bae00929e7431d6189cd6f4053c36f88836c64d7276ad3aa41929bc0e"
+    },
+    "AssetsLib": {
+      "address": "0xDC0107A7bB5F3954BB573AF526AD0688836ad604",
+      "deploymentBlock": "48293955",
+      "codeHash": "0xbc0a4a4a77d1dfed0b1ea90d2cda99348f02feae7a9d6ed38678c696a4083e8d"
+    },
+    "ActivationLib": {
+      "address": "0x6a927de9D5f4224DfC281857DAb7F3e774Af1D97",
+      "deploymentBlock": "48293960",
+      "codeHash": "0x71b417cc514e72e84fbad89d8f1fa944413e8259b0324f0ee9a225c1c54eb3ff"
+    },
+    "CallTemplateLib": {
+      "address": "0xeD5B4a5dBd376AA34325c503E2D6bb9868Ac7223",
+      "deploymentBlock": "48293962",
+      "codeHash": "0x57288afb042a4984cb706ee1fa6003ee9f8ad62f7f35fd843a1df4b134a4c9f6"
+    },
+    "X402Lib": {
+      "address": "0x6b5F294AB2C836b91cd1CFeBb7a189c01e406c4C",
+      "deploymentBlock": "48293956",
+      "codeHash": "0x96e171ddfe930823e14feb121350bbbbf7171a40c08094fd455c348a007500a6"
+    }
+  },
+  "walletCode": {
+    "storage": [
+      "0x275BEB92f6b3f37243eA935A88cFE1ebbD56c4E4",
+      "0x052cA2419236AB8Ff1f250228d8e9741D0e4f5cE"
+    ],
+    "creationCodeHash": "0x3548a32cb9c3ff507459402124362e7bb9c111d5be63813bd9663735ce5b46fb"
+  },
+  "transactions": {
+    "AssetsLib": "0x889cbfb73dae83ed9b118bc82a2e05da04563d6591768cd9e168c7b9d61e771f",
+    "X402Lib": "0xeacbd8babf480dd7677ea202b8bdd89c32362e35c3f78fb0e412a98a903d4e89",
+    "WalletPolicyLib": "0xa187608af0810357f46cdaafc4b26edd29a0331ed3889c7a88dccec8c49be0f2",
+    "VaultLib": "0xa97244f5c0cc863919fe7eb40604195cb4d79dc2e79f0d9aaf6c13b44d647125",
+    "PermitTermsLib": "0xfe5d83f7fba211d3bfda497ebd29cd881b7b569099423babe182b0da271f5173",
+    "ActivationLib": "0x0b784b6d696363f2873a1d05e4209bdf7b06cd73361c4f9f565e53ec73144ff0",
+    "CallTemplateLib": "0x5c59587e6b911e06f09220741dbbc72e4c41e5248903fa75580945a812023253",
+    "DemoUSD": "0x7e83a6ec7d5929e6fc83cac2c9c8b267152b7b5499a0fa62e62b5d4f9113e5b3",
+    "DemoVault": "0x20a85c74622c881cce52afcb2668e5d78a669ada8068c481a0f46da857b3dc8d",
+    "EvidenceAnchor": "0x59c69d4594bd0be10b535cc2e5b9b17be111bec1dd5741bee659c22565de4162",
+    "WalletFactory": "0x91a1e8e57abd584fe75066d036b30de44db968cf540829b4812a45d8e93a1fe3"
+  }
+}

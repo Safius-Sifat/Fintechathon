@@ -1,7 +1,7 @@
 {
   "owner": "Person1",
-  "updatedAt": "2026-10-19T00:03:33+06:00",
-  "milestone": "M5 deployment preparation (P1-06)",
+  "updatedAt": "2026-10-19T02:44:59+06:00",
+  "milestone": "M5 Base Sepolia deployment (P1-06)",
   "tasks": {
     "P1-01": {
       "status": "IN_PROGRESS",
@@ -68,10 +68,10 @@
       ]
     },
     "P1-06": {
-      "status": "IN_PROGRESS",
+      "status": "DEPLOYED",
       "blockedBy": [
-        "Owner authorization and funded deployer keystore",
-        "Provider, origin, MPC, runbook and agent values from Persons 2-4 for the full manifest"
+        "T04 actual agent PAY then owner pause/transfer needs the Person2 MPC executor and Person3 owner wallet",
+        "Full deployments/base-sepolia.json manifest needs provider, origin, MPC, runbook and agent values from Persons 2-4"
       ]
     }
   },
@@ -106,6 +106,7 @@
     "packages/contracts/test/Deploy.t.sol",
     "packages/contracts/scripts/record-deployment.mjs",
     "deployments/base-sepolia.config.json",
-    "docs/contracts-deploy.md"
+    "docs/contracts-deploy.md",
+    "evidence/person1/deployment.json"
   ]
 }

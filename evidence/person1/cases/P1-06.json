@@ -54,27 +54,29 @@
   {
     "caseId": "P1-06.T03",
     "taskId": "P1-06",
-    "status": "LOCAL_PASS",
-    "sourceCommit": "8b6d7ac74ecd03c9c100caf208653217225bbee2",
+    "status": "PASS",
+    "sourceCommit": "069090ab42e9cb99d814fe76c28e79e1f02581e1",
     "workingTreeDigest": "see commit",
-    "schemaCommit": "8b6d7ac74ecd03c9c100caf208653217225bbee2",
+    "schemaCommit": "069090ab42e9cb99d814fe76c28e79e1f02581e1",
     "environment": {
       "forge": "1.8.5",
-      "solc": "0.8.28 via_ir",
-      "chain": "local Foundry EVM / local anvil fork of Base Sepolia, chainId 84532"
+      "solc": "0.8.28+commit.7893614a",
+      "chain": "Base Sepolia 84532"
     },
-    "command": "forge script script/Deploy.s.sol --broadcast (local anvil fork) + node scripts/record-deployment.mjs",
-    "testName": "dry run",
+    "command": "forge clean && forge test; forge script script/Deploy.s.sol --account mandate-deployer --broadcast --slow; node scripts/record-deployment.mjs (two independent RPC providers)",
+    "testName": "live deployment readback",
     "exitCode": 0,
     "expected": "11 contracts deployed on a local fork; runtimes equal linked compiled artifacts with immutables masked; factory wallet code equals linked MandateWallet creation code; wiring equals config",
-    "observed": "as expected",
-    "startedAt": "2026-10-19T00:03:33+06:00",
-    "finishedAt": "2026-10-19T00:03:33+06:00",
+    "observed": "11 contracts deployed from a clean tree at the source commit; both RPC providers returned identical receipts, linked runtime code equal to the compiled artifacts, factory wallet code equal to the linked MandateWallet creation code and wiring equal to the approved config; Blockscout shows the same creator and creation transactions",
+    "startedAt": "2026-10-19T02:44:59+06:00",
+    "finishedAt": "2026-10-19T02:44:59+06:00",
     "artifactRefs": [
-      "docs/contracts-deploy.md"
+      "evidence/person1/deployment.json",
+      "deployments/base-sepolia.config.json"
     ],
     "limitations": [
-      "Local fork only; clean-clone rebuild and live Base Sepolia readback wait for the authorized deployment"
+      "Rebuilt with forge clean in the existing checkout, not a fresh clone",
+      "Source is not yet verified on a block explorer"
     ]
   },
   {
