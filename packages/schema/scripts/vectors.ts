@@ -30,6 +30,13 @@ import {
   invoiceDomain,
   loginDomain,
   personalTransferCall,
+  callTemplateId,
+  usdcDomainSeparator,
+  x402Authorization,
+  x402AuthorizationDigest,
+  x402Signature,
+  BASE_SEPOLIA_USDC,
+  USDC_DOMAIN_SEPARATOR,
   typedDataJson,
   walletDomain,
   type SignedType,
@@ -207,15 +214,19 @@ export async function buildVectors(): Promise<Record<string, unknown>> {
     validatorArtifactHash: h(4),
     dependencyLockHash: h(5),
   };
-  const template = {
-    templateId: h(0x51),
+  const templateBody = {
     target: FIXTURE.pool,
+    targetCodeHash: h(0xc0de),
     selector: "0x6e553f65", // deposit(uint256,address)
     amountArg: 0,
     recipientArg: 1,
     recipientRule: RecipientRule.WALLET,
     flags: TemplateFlag.PULLS_ASSET,
     maxAmount: "1000000",
+  };
+  const template = {
+    templateId: callTemplateId(templateBody),
+    ...templateBody,
   };
   const permitBase = {
     taskId: h(0x7a5c),
@@ -347,6 +358,37 @@ export async function buildVectors(): Promise<Record<string, unknown>> {
     },
   ]);
   const actionDigest = hashDigest("Action", actionBase, wd);
+  const x402Action = {
+    ...actionBase,
+    requestId: h(0xa3),
+    operation: Operation.X402,
+  };
+  const x402Auth = x402Authorization(x402Action, FIXTURE.wallet);
+  const x402 = {
+    schema: "mandate-x402/1",
+    note: "EIP-3009 authorization derived from the signed X402 Action (S9.10). USDC domain verified on chain 2026-10-18.",
+    token: BASE_SEPOLIA_USDC,
+    tokenDomainSeparator: usdcDomainSeparator(),
+    onChainDomainSeparator: USDC_DOMAIN_SEPARATOR,
+    wallet: FIXTURE.wallet,
+    action: x402Action,
+    actionAbiEncoded: abiEncodeStruct("Action", x402Action),
+    authorization: x402Auth,
+    digest: x402AuthorizationDigest(x402Auth),
+    signature: x402Signature(x402Action.requestId, x402Action.permitId),
+    invalid: [
+      { id: "value-changed", authorization: { ...x402Auth, value: "200001" } },
+      {
+        id: "recipient-changed",
+        authorization: { ...x402Auth, to: FIXTURE.recipient },
+      },
+      { id: "nonce-changed", authorization: { ...x402Auth, nonce: h(0xa4) } },
+      {
+        id: "valid-before-changed",
+        authorization: { ...x402Auth, validBefore: "1793000161" },
+      },
+    ],
+  };
   const admin = await signedVector("Admin", "owner", wd, [
     {
       id: "freeze",
@@ -832,6 +874,7 @@ export async function buildVectors(): Promise<Record<string, unknown>> {
       note: "Fixture-only addresses and hashes; not a deployment.",
       valid: manifest,
     },
+    "x402-v7.json": x402,
     "permit-v7.json": permit,
     "action-v7.json": action,
     "admin-v7.json": admin,

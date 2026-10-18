@@ -2,7 +2,11 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { authorityTypes } from "../src/index.js";
+import {
+  authorityTypes,
+  policyTypes,
+  transferWithAuthorizationTypes,
+} from "../src/index.js";
 
 const encodeType = (
   name: string,
@@ -21,6 +25,10 @@ test("P1-01.T01 Solidity EIP-712 type strings equal the TypeScript schema", () =
   );
   const expected = [
     "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)",
+    encodeType(
+      "TransferWithAuthorization",
+      transferWithAuthorizationTypes.TransferWithAuthorization,
+    ),
     ...(
       [
         "Permit",
@@ -71,4 +79,9 @@ test("P1-01.T01 Solidity struct field order equals the TypeScript schema", () =>
       authorityTypes[t].map((f) => `${f.type} ${f.name}`),
       t,
     );
+  assert.deepEqual(
+    structs.get("CallTemplate"),
+    policyTypes.CallTemplate.map((f) => `${f.type} ${f.name}`),
+    "CallTemplate",
+  );
 });

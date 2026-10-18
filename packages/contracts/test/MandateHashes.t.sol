@@ -98,4 +98,28 @@ contract MandateHashesTest is Test {
     T.Login memory l = abi.decode(_abi(json, ".valid[0]"), (T.Login));
     _check(json, ".valid[0]", H.hash(l), H.loginDomain());
   }
+
+  function test_P1_A03_T06_x402Digest() public view {
+    string memory json = _load("x402-v7.json");
+    T.Action memory a = abi.decode(vm.parseJsonBytes(json, ".actionAbiEncoded"), (T.Action));
+    bytes32 domain = vm.parseJsonBytes32(json, ".onChainDomainSeparator");
+    address wallet = vm.parseJsonAddress(json, ".wallet");
+    assertEq(H.x402Digest(domain, wallet, a), vm.parseJsonBytes32(json, ".digest"), "x402 digest");
+  }
+
+  function test_P1_A03_T07_callTemplateId() public view {
+    string memory json = _load("wallet-policy-v7.json");
+    T.CallTemplate memory c = T.CallTemplate({
+      templateId: vm.parseJsonBytes32(json, ".lists.templates[0].templateId"),
+      target: vm.parseJsonAddress(json, ".lists.templates[0].target"),
+      targetCodeHash: vm.parseJsonBytes32(json, ".lists.templates[0].targetCodeHash"),
+      selector: bytes4(vm.parseJsonBytes(json, ".lists.templates[0].selector")),
+      amountArg: uint8(vm.parseJsonUint(json, ".lists.templates[0].amountArg")),
+      recipientArg: uint8(vm.parseJsonUint(json, ".lists.templates[0].recipientArg")),
+      recipientRule: uint8(vm.parseJsonUint(json, ".lists.templates[0].recipientRule")),
+      flags: uint8(vm.parseJsonUint(json, ".lists.templates[0].flags")),
+      maxAmount: vm.parseJsonUint(json, ".lists.templates[0].maxAmount")
+    });
+    assertEq(H.callTemplateId(c), c.templateId, "template id");
+  }
 }

@@ -3,6 +3,10 @@ import assert from "node:assert/strict";
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join, resolve } from "node:path";
 import {
+  CallTemplateSchema,
+  callTemplateId,
+  x402Authorization,
+  x402AuthorizationDigest,
   AgentAnswerSchema,
   AgentQuestionSchema,
   DeploymentManifestSchema,
@@ -152,29 +156,78 @@ test("P1-W01.T05 / P1-A01.T06 manifest rejects bad chain, code hashes, transfer 
 
 test("P1-A01.T04 x402 terms must match the signed invoice", () => {
   const invoice = loadFixture("invoice-v7.json").valid[0];
+  const x402 = {
+    scheme: "exact",
+    network: "eip155:84532",
+    amount: invoice.message.amount,
+    asset: invoice.message.asset,
+    payTo: invoice.message.recipient,
+    maxTimeoutSeconds: 60,
+    extra: {
+      name: "USDC",
+      version: "2",
+      mandateInvoice: invoice.message,
+      mandateProviderSignature: invoice.signature,
+    },
+  };
   const quote = {
     providerId: "a",
     invoice: invoice.message,
     providerSignature: invoice.signature,
-    x402: {
-      scheme: "exact",
-      network: "base-sepolia",
-      asset: invoice.message.asset,
-      payTo: invoice.message.recipient,
-      maxAmountRequired: invoice.message.amount,
-      resource: "https://provider.mandate.example/providers/a/check",
-      description: "pageLoad,title",
-      maxTimeoutSeconds: 60,
-    },
+    x402,
   };
   assert.equal(QuoteEnvelopeSchema.safeParse(quote).success, true);
   assert.equal(
-    QuoteEnvelopeSchema.safeParse({
-      ...quote,
-      x402: { ...quote.x402, maxAmountRequired: "200001" },
-    }).success,
-    false,
+    QuoteEnvelopeSchema.safeParse({ ...quote, x402: null }).success,
+    true,
   );
+  for (const bad of [
+    { ...x402, amount: "200001" },
+    { ...x402, payTo: "0x6666666666666666666666666666666666666666" },
+    { ...x402, network: "base-sepolia" },
+  ])
+    assert.equal(
+      QuoteEnvelopeSchema.safeParse({ ...quote, x402: bad }).success,
+      false,
+    );
+});
+
+test("P1-A03.T06 x402 authorization is derived from the X402 Action and pinned to on-chain USDC", () => {
+  const v = loadFixture("x402-v7.json");
+  assert.equal(v.tokenDomainSeparator, v.onChainDomainSeparator);
+  assert.deepEqual(x402Authorization(v.action, v.wallet), v.authorization);
+  assert.equal(x402AuthorizationDigest(v.authorization), v.digest);
+  for (const c of v.invalid)
+    assert.notEqual(x402AuthorizationDigest(c.authorization), v.digest, c.id);
+  assert.equal((v.signature.length - 2) / 2, 65);
+  assert.throws(() =>
+    x402Authorization({ ...v.action, operation: 0 }, v.wallet),
+  );
+});
+
+test("P1-A03.T07 call template IDs are content-addressed", () => {
+  const t0 = loadFixture("wallet-policy-v7.json").lists.templates[0];
+  assert.equal(CallTemplateSchema.safeParse(t0).success, true);
+  for (const change of [
+    { target: "0x6666666666666666666666666666666666666666" },
+    { maxAmount: "1000001" },
+    { targetCodeHash: "0x" + "ab".repeat(32) },
+    { recipientRule: 2 },
+  ])
+    assert.equal(
+      CallTemplateSchema.safeParse({ ...t0, ...change }).success,
+      false,
+      JSON.stringify(change),
+    );
+  const redefined = { ...t0, maxAmount: "2000000" };
+  assert.equal(
+    CallTemplateSchema.safeParse({
+      ...redefined,
+      templateId: callTemplateId(redefined),
+    }).success,
+    true,
+  );
+  assert.notEqual(callTemplateId(redefined), t0.templateId);
 });
 
 test("P1-W01.T03 activity attribution keeps owner control and agent spend distinct", () => {

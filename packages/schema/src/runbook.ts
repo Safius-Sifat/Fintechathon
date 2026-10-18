@@ -45,17 +45,6 @@ export const INITIAL_RUNBOOK_STATE = {
   missedPeriods: [],
 } as const;
 
-export const X402AuthorizationSchema = z
-  .object({
-    payTo: NonZeroAddressSchema,
-    amount: Uint256,
-    validAfter: Uint64,
-    validBefore: Uint64,
-    nonce: Hex32Schema,
-    authorizationDigest: Hex32Schema,
-  })
-  .strict();
-
 export const ActionIntentSchema = z
   .object({
     operation: z.union([
@@ -75,7 +64,6 @@ export const ActionIntentSchema = z
     period: Uint32,
     templateId: Hex32Schema.nullable(),
     callData: HexDataSchema.nullable(),
-    x402: X402AuthorizationSchema.nullable(),
   })
   .strict()
   .superRefine((i, ctx) => {
@@ -85,8 +73,8 @@ export const ActionIntentSchema = z
       issue(
         "CALL requires templateId and callData; other operations forbid them",
       );
-    if ((i.operation === 6) !== (i.x402 !== null))
-      issue("X402 requires x402 authorization; other operations forbid it");
+    if ((i.operation === 0 || i.operation === 6) && i.invoice === null)
+      issue("PAY and X402 require the provider-signed invoice");
     if ((i.invoice === null) !== (i.providerSignature === null))
       issue("invoice and providerSignature go together");
   });

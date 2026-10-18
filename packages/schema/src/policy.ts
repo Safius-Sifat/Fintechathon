@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { encodeAbiParameters, keccak256, type Hex } from "viem";
 import {
   AddressSchema,
   big,
@@ -42,6 +43,7 @@ export const CallTemplateSchema = z
   .object({
     templateId: Hex32Schema,
     target: AddressSchema,
+    targetCodeHash: Hex32Schema,
     selector: Bytes4Schema,
     amountArg: uintNumber(7),
     recipientArg: uintNumber(7),
@@ -62,7 +64,54 @@ export const CallTemplateSchema = z
     (t) =>
       t.recipientRule === RecipientRule.NONE || t.recipientArg !== t.amountArg,
     "recipientArg and amountArg must differ",
+  )
+  .refine((t) => {
+    try {
+      return t.templateId === callTemplateId(t);
+    } catch {
+      return false;
+    }
+  }, "templateId must equal the content hash of the template definition");
+
+/**
+ * Content-addressed template ID (architecture S9.8): a definition can never be
+ * replaced under the same ID.
+ */
+export function callTemplateId(t: {
+  target: string;
+  targetCodeHash: string;
+  selector: string;
+  amountArg: number;
+  recipientArg: number;
+  recipientRule: number;
+  flags: number;
+  maxAmount: string;
+}): Hex {
+  return keccak256(
+    encodeAbiParameters(
+      [
+        { type: "address" },
+        { type: "bytes32" },
+        { type: "bytes4" },
+        { type: "uint8" },
+        { type: "uint8" },
+        { type: "uint8" },
+        { type: "uint8" },
+        { type: "uint256" },
+      ],
+      [
+        t.target as Hex,
+        t.targetCodeHash as Hex,
+        t.selector as Hex,
+        t.amountArg,
+        t.recipientArg,
+        t.recipientRule,
+        t.flags,
+        BigInt(t.maxAmount),
+      ],
+    ),
   );
+}
 
 export const WalletPolicySchema = z
   .object({
@@ -124,6 +173,7 @@ export const policyTypes = {
   CallTemplate: f([
     ["templateId", "bytes32"],
     ["target", "address"],
+    ["targetCodeHash", "bytes32"],
     ["selector", "bytes4"],
     ["amountArg", "uint8"],
     ["recipientArg", "uint8"],

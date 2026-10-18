@@ -15,3 +15,4 @@ export * from "./assets.js";
 export * from "./activity.js";
 export * from "./sessions.js";
 export * from "./manifest.js";
+export * from "./x402.js";

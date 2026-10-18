@@ -48,6 +48,24 @@ library MandateHashes {
     return keccak256(abi.encode(LOGIN_TYPEHASH, keccak256(bytes(l.origin)), l.nonce, l.deviceId, l.issuedAt, l.expiresAt));
   }
 
+  /// EIP-3009 typehash used by Base Sepolia USDC (architecture S9.10).
+  bytes32 internal constant TRANSFER_WITH_AUTHORIZATION_TYPEHASH = keccak256(
+    "TransferWithAuthorization(address from,address to,uint256 value,uint256 validAfter,uint256 validBefore,bytes32 nonce)"
+  );
+
+  /// Content-addressed template ID (S9.8).
+  function callTemplateId(T.CallTemplate memory c) internal pure returns (bytes32) {
+    return keccak256(abi.encode(c.target, c.targetCodeHash, c.selector, c.amountArg, c.recipientArg, c.recipientRule, c.flags, c.maxAmount));
+  }
+
+  /// USDC authorization digest derived only from the signed X402 Action (S9.10).
+  function x402Digest(bytes32 tokenDomain, address wallet, T.Action memory a) internal pure returns (bytes32) {
+    bytes32 structHash = keccak256(
+      abi.encode(TRANSFER_WITH_AUTHORIZATION_TYPEHASH, wallet, a.target, a.amount, uint256(0), uint256(a.deadline), a.requestId)
+    );
+    return digest(tokenDomain, structHash);
+  }
+
   function domainSeparator(string memory name, string memory version, address verifyingContract) internal pure returns (bytes32) {
     return keccak256(abi.encode(DOMAIN_TYPEHASH, keccak256(bytes(name)), keccak256(bytes(version)), CHAIN_ID, verifyingContract));
   }

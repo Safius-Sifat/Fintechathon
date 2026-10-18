@@ -20,23 +20,31 @@ export const CheckRequestSchema = z
   .object({
     taskId: Hex32Schema,
     wallet: NonZeroAddressSchema,
+    asset: NonZeroAddressSchema,
     targetId: TargetIdSchema,
     checks: ChecksSchema,
     reviewWindowSeconds: uintNumber(900).optional(),
   })
   .strict();
 
-// x402-formatted "accepts" entry (S9.10). It must describe exactly the signed invoice terms.
+// x402 v2 `exact` PaymentRequirements entry (S9.10). It must describe exactly the signed invoice.
 export const X402AcceptsSchema = z
   .object({
     scheme: z.literal("exact"),
-    network: z.literal("base-sepolia"),
+    network: z.literal("eip155:84532"),
+    amount: Uint256,
     asset: NonZeroAddressSchema,
     payTo: NonZeroAddressSchema,
-    maxAmountRequired: Uint256,
-    resource: z.string().url().startsWith("https://"),
-    description: z.string().max(200),
     maxTimeoutSeconds: uintNumber(900).min(1),
+    extra: z
+      .object({
+        assetTransferMethod: z.literal("eip3009").optional(),
+        name: z.literal("USDC"),
+        version: z.literal("2"),
+        mandateInvoice: InvoiceSchema,
+        mandateProviderSignature: SignatureSchema,
+      })
+      .strict(),
   })
   .strict();
 
@@ -45,15 +53,18 @@ export const QuoteEnvelopeSchema = z
     providerId: ProviderIdSchema,
     invoice: InvoiceSchema,
     providerSignature: SignatureSchema,
-    x402: X402AcceptsSchema,
+    x402: X402AcceptsSchema.nullable(), // null when the quoted asset is not USDC
   })
   .strict()
   .refine(
     (q) =>
-      q.x402.asset === q.invoice.asset &&
-      q.x402.payTo === q.invoice.recipient &&
-      q.x402.maxAmountRequired === q.invoice.amount,
-    "x402 terms must equal the signed invoice asset, recipient and amount",
+      q.x402 === null ||
+      (q.x402.asset === q.invoice.asset &&
+        q.x402.payTo === q.invoice.recipient &&
+        q.x402.amount === q.invoice.amount &&
+        q.x402.extra.mandateInvoice.invoiceId === q.invoice.invoiceId &&
+        q.x402.extra.mandateProviderSignature === q.providerSignature),
+    "x402 terms must equal the signed invoice asset, recipient, amount and ID",
   );
 
 export const BrowserResultSchema = z

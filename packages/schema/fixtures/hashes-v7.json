@@ -32,9 +32,9 @@
     "empty": "0x0000000000000000000000000000000000000000000000000000000000000000",
     "single": {
       "input": [
-        "0x0000000000000000000000000000000000000000000000000000000000000051"
+        "0x034aec0c19d53111ef4a7c23be2fc139fbb38165383333d3af783dfcce1f3117"
       ],
-      "hash": "0x4ccd39a6967b1b6a4fd3ba973c7820818ed982a2af3f3f8ab17119d06636adc8"
+      "hash": "0xf7dab2e93b6ab1cc8aefaaa3a6c0b7533b3acc77185fa280ff1dce864d73b7b8"
     }
   },
   "assetCaps": {
@@ -57,8 +57,9 @@
   "callTemplates": {
     "input": [
       {
-        "templateId": "0x0000000000000000000000000000000000000000000000000000000000000051",
+        "templateId": "0x034aec0c19d53111ef4a7c23be2fc139fbb38165383333d3af783dfcce1f3117",
         "target": "0x5555555555555555555555555555555555555555",
+        "targetCodeHash": "0x000000000000000000000000000000000000000000000000000000000000c0de",
         "selector": "0x6e553f65",
         "amountArg": 0,
         "recipientArg": 1,
@@ -67,7 +68,7 @@
         "maxAmount": "1000000"
       }
     ],
-    "hash": "0xc56525754de386cb676eb8e62b05a57f50a18f6e29e431013e3e02123cc65a41"
+    "hash": "0xf39d7394f53c3459ba6dce1ca5acb7bbe45a2bffd92035fafead65064b4e141e"
   },
   "walletPolicyLists": {
     "input": {
@@ -94,8 +95,9 @@
       ],
       "templates": [
         {
-          "templateId": "0x0000000000000000000000000000000000000000000000000000000000000051",
+          "templateId": "0x034aec0c19d53111ef4a7c23be2fc139fbb38165383333d3af783dfcce1f3117",
           "target": "0x5555555555555555555555555555555555555555",
+          "targetCodeHash": "0x000000000000000000000000000000000000000000000000000000000000c0de",
           "selector": "0x6e553f65",
           "amountArg": 0,
           "recipientArg": 1,
@@ -109,7 +111,7 @@
       "assetCapsHash": "0xfa56ab30469af3603948cf8263165e58ade3c2c5fdfb8d144c53ed514b2a15e7",
       "allowlistHash": "0x670d710de9a802307c730e3bf46431fee52af09c62a2b1800cfbe92256d3f04d",
       "blocklistHash": "0x0f1b5dba665c47ac96cf9dcd2297ead9a0b080433cc07aaee4e95e9c4d443be8",
-      "templatesHash": "0xc56525754de386cb676eb8e62b05a57f50a18f6e29e431013e3e02123cc65a41"
+      "templatesHash": "0xf39d7394f53c3459ba6dce1ca5acb7bbe45a2bffd92035fafead65064b4e141e"
     }
   },
   "conditions": {

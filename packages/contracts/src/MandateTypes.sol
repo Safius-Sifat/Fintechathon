@@ -56,7 +56,7 @@ library MandateTypes {
   }
   struct AssetCap { address asset; uint256 perTx; uint256 daily; uint256 weekly; }
   struct CallTemplate {
-    bytes32 templateId; address target; bytes4 selector; uint8 amountArg;
+    bytes32 templateId; address target; bytes32 targetCodeHash; bytes4 selector; uint8 amountArg;
     uint8 recipientArg; uint8 recipientRule; uint8 flags; uint256 maxAmount;
   }
   struct Invoice {
