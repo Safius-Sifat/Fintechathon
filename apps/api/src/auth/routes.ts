@@ -42,6 +42,21 @@ export async function registerAuth(
           .send(apiError(new AuthError(401, "Login origin is invalid.")));
     });
     auth.setErrorHandler((error, _request, reply) => {
+      if (
+        error instanceof Error &&
+        "statusCode" in error &&
+        error.statusCode === 415
+      )
+        return reply
+          .code(415)
+          .send(
+            apiError(
+              new AuthError(
+                415,
+                "Authentication requests require application/json.",
+              ),
+            ),
+          );
       if (error instanceof AuthError)
         return reply.code(error.status).send(apiError(error));
       if (

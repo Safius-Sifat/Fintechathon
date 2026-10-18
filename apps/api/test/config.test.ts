@@ -87,3 +87,77 @@ test("unconfigured auth fails closed while foundation health stays available", a
     await app.close();
   }
 });
+
+test("proxy trust defaults off and accepts only explicit IP addresses for API ingress", async () => {
+  const { createFoundationApp } = await import("@mandate/platform");
+  const peer = async (
+    service: "api" | "provider" | "policy",
+    addresses?: string[],
+  ) => {
+    const app = createFoundationApp(service, {
+      logger: false,
+      ...(addresses ? { trustedProxyAddresses: addresses } : {}),
+    });
+    app.get("/peer", (request) => ({ ip: request.ip }));
+    try {
+      return (
+        await app.inject({
+          url: "/peer",
+          remoteAddress: "127.0.0.1",
+          headers: { "x-forwarded-for": "198.51.100.1, 203.0.113.10" },
+        })
+      ).json<{ ip: string }>().ip;
+    } finally {
+      await app.close();
+    }
+  };
+  assert.equal(await peer("api"), "127.0.0.1");
+  assert.equal(await peer("api", ["127.0.0.1"]), "203.0.113.10");
+  assert.equal(await peer("provider", ["127.0.0.1"]), "127.0.0.1");
+  assert.equal(await peer("policy", ["127.0.0.1"]), "127.0.0.1");
+  for (const addresses of [["true"], ["*"], ["0.0.0.0/0"], ["loopback"], [""]])
+    assert.throws(
+      () => createFoundationApp("api", { trustedProxyAddresses: addresses }),
+      /ingress/,
+    );
+});
+
+test("API startup reads the explicit trusted ingress configuration", async () => {
+  const { startFoundationService } = await import("@mandate/platform");
+  const names = [
+    "APP_ENV",
+    "DATABASE_URL",
+    "DEPLOYMENT_MANIFEST_FILE",
+    "API_HOST",
+    "API_PORT",
+    "API_TRUSTED_PROXY_ADDRESSES",
+  ] as const;
+  const previous = new Map(names.map((name) => [name, process.env[name]]));
+  process.env.APP_ENV = "production";
+  delete process.env.DATABASE_URL;
+  delete process.env.DEPLOYMENT_MANIFEST_FILE;
+  process.env.API_HOST = "127.0.0.1";
+  process.env.API_PORT = "0";
+  process.env.API_TRUSTED_PROXY_ADDRESSES = "127.0.0.1";
+  try {
+    const app = await startFoundationService("api", 0, async (server) => {
+      server.get("/peer", (request) => ({ ip: request.ip }));
+    });
+    try {
+      const response = await app.inject({
+        url: "/peer",
+        remoteAddress: "127.0.0.1",
+        headers: { "x-forwarded-for": "198.51.100.1, 203.0.113.10" },
+      });
+      assert.equal(response.json<{ ip: string }>().ip, "203.0.113.10");
+    } finally {
+      await app.close();
+    }
+  } finally {
+    for (const name of names) {
+      const value = previous.get(name);
+      if (value === undefined) delete process.env[name];
+      else process.env[name] = value;
+    }
+  }
+});

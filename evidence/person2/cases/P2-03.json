@@ -1,7 +1,7 @@
 {
   "owner": "Person2",
   "milestone": "M0/W0 auth and database foundation",
-  "sourceBase": "b67035614c9f1ed456384dee0cd6cf1ef9a59f32",
+  "sourceBase": "27fd925e89803b5e5166ca286642dc694ffd07d3",
   "schemaBase": "b67035614c9f1ed456384dee0cd6cf1ef9a59f32",
   "environment": "macOS arm64, pinned Node22.23.3/pnpm10.20.0, disposable PostgreSQL16.10 with verified TLS",
   "command": "pnpm test:db",
@@ -17,7 +17,8 @@
   "cases": [
     "T01 twenty concurrent auth mutations share one persisted response; changed body409",
     "T02 session owner isolation403; owner token cannot authenticate as another account",
-    "T05 strict auth validators422 and bounded body/rate handling"
+    "T05 strict auth validators422 and bounded body/rate handling",
+    "M0 ingress: trusted client buckets isolated, untrusted/spoofed forwarding rejected, unsupported content type415 nonretryable"
   ],
   "observed": "Assertions executed in apps/api/test/db/auth.test.ts; command results in implementation report",
   "exitStatus": 0

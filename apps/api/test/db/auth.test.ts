@@ -54,7 +54,7 @@ const base = {
 const admin = new Pool(base);
 
 type Environment = Awaited<ReturnType<typeof environment>>;
-async function environment() {
+async function environment(trustedProxyAddresses?: string[]) {
   const schema = "auth_" + randomBytes(8).toString("hex");
   await admin.query(`CREATE SCHEMA "${schema}"`);
   const pool = new Pool({ ...base, options: "-c search_path=" + schema });
@@ -80,6 +80,7 @@ async function environment() {
     auth: config,
     clock: () => now,
     logger: false,
+    ...(trustedProxyAddresses ? { trustedProxyAddresses } : {}),
   });
   const challenge = async (account = owner) => {
     const response = await app.inject({
@@ -158,8 +159,11 @@ async function environment() {
     },
   };
 }
-async function withDatabase(run: (env: Environment) => Promise<void>) {
-  const env = await environment();
+async function withDatabase(
+  run: (env: Environment) => Promise<void>,
+  trustedProxyAddresses?: string[],
+) {
+  const env = await environment(trustedProxyAddresses);
   try {
     await run(env);
   } finally {
@@ -766,6 +770,101 @@ test("P2-M0 auth operates with runtime DML privileges and no schema creation pri
       await admin.query(`REVOKE ALL ON SCHEMA "${schema}" FROM "${role}"`);
       await admin.query(`DROP ROLE "${role}"`);
     }
+  }));
+
+function invalidVerify(
+  e: Environment,
+  remoteAddress: string,
+  forwarded: string,
+) {
+  return e.app.inject({
+    method: "POST",
+    url: "/v1/auth/verify",
+    remoteAddress,
+    headers: { "x-forwarded-for": forwarded },
+    payload: { challengeId: randomUUID(), signature: "0x" + "11".repeat(65) },
+  });
+}
+
+test("P2-M0 ingress: trusted Caddy preserves separate real-client rate buckets", () =>
+  withDatabase(
+    async (e) => {
+      for (let i = 0; i < 60; i++)
+        assert.equal(
+          (await invalidVerify(e, "127.0.0.1", "203.0.113.10")).statusCode,
+          401,
+        );
+      assert.equal(
+        (await invalidVerify(e, "127.0.0.1", "203.0.113.10")).statusCode,
+        429,
+      );
+      const b = await e.app.inject({
+        method: "POST",
+        url: "/v1/auth/challenge",
+        remoteAddress: "127.0.0.1",
+        headers: { "x-forwarded-for": "203.0.113.20" },
+        payload: { ownerAddress: owner.address, deviceId },
+      });
+      assert.equal(b.statusCode, 200, b.body);
+    },
+    ["127.0.0.1"],
+  ));
+
+test("P2-M0 ingress: untrusted direct peer cannot evade its rate bucket with spoofed XFF", () =>
+  withDatabase(
+    async (e) => {
+      for (let i = 0; i < 60; i++)
+        assert.equal(
+          (await invalidVerify(e, "203.0.113.10", "198.51.100." + (i + 1)))
+            .statusCode,
+          401,
+        );
+      assert.equal(
+        (await invalidVerify(e, "203.0.113.10", "198.51.100.250")).statusCode,
+        429,
+      );
+    },
+    ["127.0.0.1"],
+  ));
+
+test("P2-M0 ingress: spoofed forwarding prefixes cannot override nearest untrusted client", () =>
+  withDatabase(
+    async (e) => {
+      for (let i = 0; i < 60; i++)
+        assert.equal(
+          (
+            await invalidVerify(
+              e,
+              "127.0.0.1",
+              "198.51.100." + (i + 1) + ", 203.0.113.10",
+            )
+          ).statusCode,
+          401,
+        );
+      assert.equal(
+        (await invalidVerify(e, "127.0.0.1", "198.51.100.250, 203.0.113.10"))
+          .statusCode,
+        429,
+      );
+      assert.equal(
+        (await invalidVerify(e, "127.0.0.1", "198.51.100.250, 203.0.113.20"))
+          .statusCode,
+        401,
+      );
+    },
+    ["127.0.0.1"],
+  ));
+
+test("P2-M0 unsupported authentication content type is a nonretryable client error", () =>
+  withDatabase(async (e) => {
+    const result = await e.app.inject({
+      method: "POST",
+      url: "/v1/auth/challenge",
+      headers: { "content-type": "application/xml" },
+      payload: "<challenge/>",
+    });
+    assert.equal(result.statusCode, 415);
+    assert.equal(ApiErrorSchema.parse(result.json()).retryable, false);
   }));
 
 test("close real PostgreSQL admin pool", async () => {

@@ -3,6 +3,7 @@ import { Pool } from "pg";
 import { readFile } from "node:fs/promises";
 import { config } from "dotenv";
 import { resolve } from "node:path";
+import { isIP } from "node:net";
 if (
   !process.env.APP_ENV ||
   ["development", "test"].includes(process.env.APP_ENV)
@@ -13,12 +14,22 @@ export type FoundationOptions = {
   database?: Pool | null;
   deployment?: unknown;
   logger?: boolean;
+  trustedProxyAddresses?: readonly string[];
 };
 export function createFoundationApp(
   service: "api" | "provider" | "policy",
   options: FoundationOptions = {},
 ) {
+  const ingress = service === "api" ? options.trustedProxyAddresses : undefined;
+  if (
+    ingress &&
+    (ingress.length > 16 || ingress.some((address) => !isIP(address)))
+  )
+    throw new Error(
+      "Trusted API ingress must contain at most 16 explicit IP addresses",
+    );
   const app = Fastify({
+    trustProxy: ingress ? [...ingress] : false,
     logger:
       options.logger === false
         ? false
@@ -116,7 +127,17 @@ export async function startFoundationService(
   const deployment: unknown = manifestPath
     ? JSON.parse(await readFile(manifestPath, "utf8"))
     : null;
-  const app = createFoundationApp(service, { database, deployment });
+  const trustedProxyAddresses =
+    service === "api" && process.env.API_TRUSTED_PROXY_ADDRESSES
+      ? process.env.API_TRUSTED_PROXY_ADDRESSES.split(",").map((address) =>
+          address.trim(),
+        )
+      : undefined;
+  const app = createFoundationApp(service, {
+    database,
+    deployment,
+    ...(trustedProxyAddresses ? { trustedProxyAddresses } : {}),
+  });
   database?.on("error", () =>
     app.log.error("Runtime database connection failed"),
   );
@@ -130,4 +151,5 @@ export async function startFoundationService(
   await app.listen({ host, port });
   for (const sig of ["SIGINT", "SIGTERM"] as const)
     process.once(sig, () => void app.close());
+  return app;
 }
