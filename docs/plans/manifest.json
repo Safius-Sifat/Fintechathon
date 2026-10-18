@@ -1,32 +1,32 @@
 {
-  "documentationVersion": "6.0",
+  "documentationVersion": "7.0",
   "walletDomainVersion": "5",
   "loginDomainVersion": "2",
   "evidenceSchemaVersion": 4,
-  "sharedAppendixSha256": "c040b7041affacb1f05584dc1757ab7cbb1e39a31b196932de39d6cef0b3e97b",
-  "walletExtensionSha256": "74113ed8e6ba6205bf2c9387cd580b2e3a1d98214faed2ac0185e474fe0c5133",
+  "sharedAppendixSha256": "cb136d119026db68d78c1ff206295449f6fc1612ef66f12c8c07dfaef198d465",
+  "walletExtensionSha256": "f225c9488c2252a70a638645eee44bcf4587b4b74ca96896107f1b94ef3e1be2",
   "status": "specified-not-built",
   "sourceMigration": "not-performed",
   "files": {
     "AGENTS.md": {
-      "sha256": "aad08653551fd8fb2e2d413df40a8a4f0f88a7212b771796b8f9d8ba4b441475",
-      "words": 213
+      "sha256": "625cc3d225ec396b1a28c8cdf5a0ad4e6de4661f5e05132025425102ab059427",
+      "words": 249
     },
     "FINAL PLAN.md": {
-      "sha256": "271fa290bfa4eee8bae73a5a01fc17616f8be977082e776429e70e5d52bccf1a",
-      "words": 1899
+      "sha256": "df2d11eed8f5a3d6a1da3ddd59a34ab8f7d4bf729e9296b3c3e2e6123fb010c0",
+      "words": 2669
     },
     "PRD.md": {
-      "sha256": "ea8e5cd2399b31c414850f310e9ad74bfd14535659d881ba08bfe29a9a8bb5b0",
-      "words": 1159
+      "sha256": "580c2296e88b3e4b788e0f23458390cb2aa0659d7399808875aca5c38dd37435",
+      "words": 1904
     },
     "README.md": {
-      "sha256": "7eab37d549f63f58f0d41592df72ab86400e2ec9dc27a81e597a77330c72ce76",
-      "words": 395
+      "sha256": "bba9b9cefd8838d358e188545183bdee88cf8c4a552ddca2806853ad660af503",
+      "words": 424
     },
     "architecture.md": {
-      "sha256": "069ba0a92f22fa63644b1c46616cc3f97524de91cd84af31c40da8b48afc5ed1",
-      "words": 7559
+      "sha256": "694d3696297023d2c35b2ca412d7ebdab37d16fae208a5d63b80801b96849a60",
+      "words": 12420
     },
     "docs/BOOTSTRAP-STATUS.md": {
       "sha256": "117ee8e70d52d7e3b8f9e5edd109061973be2b4bbbf434646d331339b68069ba",
@@ -37,69 +37,72 @@
       "words": 2854
     },
     "docs/OWNERSHIP.md": {
-      "sha256": "e813392f1a88ac5af5f6066a464fada3eab8763cf061d8cc294152b9a50d653c",
-      "words": 190
+      "sha256": "7dbdfc4171d9b54f7b7b9166f2c36a1fa5ea188c59679afa06f427fa782aba5e",
+      "words": 192
     },
     "docs/PLAN-MIGRATION-v6.md": {
-      "sha256": "d46a643a48cfef85ece8307e9715e3f51fcbef90c8d956791f51e6b2f19641aa",
-      "words": 556
+      "sha256": "5b8a03f7125c693fa9fb3dc3c8b81f3dc3c30b4dd5f184ec41aa09dea8dcc3d9",
+      "words": 563
     },
     "docs/SETUP.md": {
-      "sha256": "3018666fa6e286f6e609ca49304404bb228c73b239eaf1f14a2fa51e4ce14f77",
-      "words": 651
+      "sha256": "53564c34265a73b98e340e61e202f1de728cdc13d14e86d874d67f918f0866f9",
+      "words": 713
     },
     "docs/plans/01 - Contracts and Shared Interfaces.md": {
-      "sha256": "2c03c452c5817794944651ba0c72cbcd77009467c67249698626e6b207598d13",
-      "words": 14349
+      "sha256": "0c4dad10121774c0ba0afaa8f1434bff40a1a972d1a13713a547af2017b1c290",
+      "words": 20092
     },
     "docs/plans/02 - Platform Policy and MPCium.md": {
-      "sha256": "b083325add8480954cf21d66bc5e6695d85e27b8965c434d29abb64478278a49",
-      "words": 16072
+      "sha256": "084b604d7e43bed1012dfa32d0b3e15f497f9a2e774f6a9448a21d0370ee2a4d",
+      "words": 22437
     },
     "docs/plans/03 - Android Owner Wallet.md": {
-      "sha256": "64269830747b6d421156686c1d4b3c3947b8d4c0a868e653415e3161aaeeed1c",
-      "words": 16182
+      "sha256": "ba7a71c175c3ce893670a7627532fed93646bceea8bfcf98b5775008c0cbd573",
+      "words": 21251
     },
     "docs/plans/04 - Agents Services Inspection and Demo.md": {
-      "sha256": "3e5546bba0711bde7d542344223d5255554df070d31aa0ff1913f9195e81a37e",
-      "words": 15153
+      "sha256": "b712274deb25dce7b7274969b4fedfc9ffe316a082d41e5133aa8b26a7410046",
+      "words": 20871
     },
     "pitch.md": {
-      "sha256": "bc25b754eb69480a8c4c3fc67d3bd8cf1d127c9aad49da25d3bc20a9a147b4c8",
-      "words": 807
+      "sha256": "243cb0a8e162b5beb2d03b80f0606118cde11ecc5fd12ca6ede27631e54b46dd",
+      "words": 839
     },
     "review.md": {
-      "sha256": "c782f1f9898e706b22e27582c3ca44f37581a4db6ddb82fdea7f4bf929b757fb",
-      "words": 495
+      "sha256": "1bfab2d140ed89ea4f992fb16ce65f624b4a0ddeaa0ccb7c0d5a1b9836bb3e0d",
+      "words": 734
     }
   },
-  "handoffRevision": "agent-prompt-2026-10-17",
+  "handoffRevision": "agent-prompt-2026-10-18-v7",
   "promptCoverage": {
-    "taskCount": 39,
-    "specifiedCaseCount": 244,
-    "milestoneCount": 24,
+    "taskCount": 50,
+    "specifiedCaseCount": 310,
+    "milestoneCount": 28,
     "perDocument": {
       "01 - Contracts and Shared Interfaces.md": {
-        "tasks": 9,
-        "specifiedCaseIds": 51,
-        "milestones": 6
+        "tasks": 12,
+        "specifiedCaseIds": 70,
+        "milestones": 7
       },
       "02 - Platform Policy and MPCium.md": {
-        "tasks": 10,
-        "specifiedCaseIds": 67,
-        "milestones": 6
+        "tasks": 13,
+        "specifiedCaseIds": 86,
+        "milestones": 7
       },
       "03 - Android Owner Wallet.md": {
-        "tasks": 11,
-        "specifiedCaseIds": 66,
-        "milestones": 6
+        "tasks": 13,
+        "specifiedCaseIds": 77,
+        "milestones": 7
       },
       "04 - Agents Services Inspection and Demo.md": {
-        "tasks": 9,
-        "specifiedCaseIds": 60,
-        "milestones": 6
+        "tasks": 12,
+        "specifiedCaseIds": 77,
+        "milestones": 7
       }
     },
     "implementationTestsExecutedByThisRevision": false
-  }
+  },
+  "invoiceDomainVersion": "2",
+  "agenticExtensionSha256": "d017883f3f827cce0d85c54bbff3bdc6c28407c639002f8c56321076a97431e4",
+  "appendixHashMethod": "sha256 of UTF-8 text: shared = from the shared-contract heading to before '### S8. '; wallet = '### S8. ' to before '### S9. '; agentic = '### S9. ' to end of file"
 }

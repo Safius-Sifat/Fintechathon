@@ -3,7 +3,10 @@
   "commit": "90e3ee3c15e6698ade5626ff6c6b49d2453d8ce2",
   "goVersion": "1.25.8",
   "thresholdConfig": 1,
+  "nodeCount": 3,
   "requiredParticipants": 2,
+  "deploymentMode": "competition-poc-single-vm-three-containers",
+  "qualificationStatus": "planned-not-qualified",
   "requiredAuthorizers": [
     "mandate-policy-v1"
   ],

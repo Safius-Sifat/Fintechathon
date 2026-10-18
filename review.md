@@ -34,8 +34,18 @@ Existing code remains pre-v6 bootstrap: schema domain4/Login1/structs are migrat
 
 Public Etherscan V2 chainlist lists84532; authenticated account endpoint/quota still needs supplied API key qualification. Anonymous Base Sepolia Blockscout requests returned403 in this environment, so no availability assumption was used. WalletConnect is deferred, so Reown SDK compatibility is not a release dependency. EIP681/712 and Wallet Core/Android references define primitives only; native integration still needs real device qualification.
 
-MPCium upstream production guide specifies≥3nodes while proposed plan has2; exact supported source/config/topology must be proved and all manifests aligned before claiming deployment readiness. Existing node threshold source inspection alone is not that proof. Full owner wallet scope does not remove original financial authority/nonce/reservation/reorg/outage requirements.
+MPCium plan now specifies three nodes on one VM with an intended two-participant quorum. The pinned source/config must prove DKG, each signing pair, one-node tolerance, two-node fail-closed behavior, authorization and signature recovery before deployment readiness. The shared VM does not provide host-compromise resilience. Full owner wallet scope does not remove original financial authority/nonce/reservation/reorg/outage requirements.
 
 Wallet W0–W5/WQ01–WQ14 add to original agent G/Q gates. Dates remain aggressive internal Oct18/official Oct20; neither complete-app scope nor source SDK presence guarantees completion/winning. No hidden ordinary-key fallback, universal MetaMask parity or production audit claim.
 
 Planning checks: shared appendix identity, document links/fences, version/domain/interface consistency and required task ownership. These are document checks, not implementation tests. Active references: [master](FINAL%20PLAN.md), [PRD](PRD.md), [architecture](architecture.md), [complete app](docs/COMPLETE-APP.md).
+
+## Competition and playlist audit — 2026-10-17
+
+The detailed source-to-plan matrix is [docs/COMPETITION-AND-RESEARCH-TRACEABILITY.md](docs/COMPETITION-AND-RESEARCH-TRACEABILITY.md). It keeps the official 40/30/30 scoring split, 0–5 optional on-chain challenge, submission package, eligibility and deadline separate from ideas in the 26 talks. The PRD, architecture and pitch now link to that matrix.
+
+**Review result:** the PRD covers the stated Topic F work and submission artifacts; the architecture describes how the named controls should work; the pitch describes the product and its limits without claiming it is built or security-equivalent to Cobo. Most playlist themes appear as bounded permits, deterministic authorization, runbooks, risk checks, service-delivery verification, transaction lifecycle states and inspectable evidence. x402, MPP, credit, cross-asset routing, open marketplace/reputation and quantum optimization are marked deferred or out of scope rather than implied as features.
+
+**Release blockers and risks:** the repo is still the bootstrap described in `docs/BOOTSTRAP-STATUS.md`; there are no deployed financial contracts, operational MPC nodes, wallet flows or end-to-end financial tests. The three-node/two-participant MPC PoC remains unqualified until the pinned build passes its defined DKG/quorum/outage tests. The scope is very large for the remaining competition window. Do not claim completion, audit, Cobo-equivalent security or a guaranteed result until the corresponding evidence exists. The pitch itself needed no feature rewrite; its status and qualification statements are consistent with the codebase.
+
+**Review type:** document/source alignment only. No implementation tests were run and no runtime behavior was verified.

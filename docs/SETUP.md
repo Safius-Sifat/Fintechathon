@@ -16,11 +16,11 @@ Workspace/dependency pins, shared authority layouts/structural schemas/hash help
 
 ## MPCium setup
 
-Run `make mpc-fetch` to clone pinned source into ignored `vendor/mpcium`. Fetch script never starts nodes/generates keys. Person2 follows `docs/plans/02 - Platform Policy and MPCium.md`: separate identities/storage, common chain_code, threshold config1/two required, mandatory nonempty authorizer list on both nodes, exact Go message binding,20verified public vectors and either-node-alone failure. Add nodes only when those secret boundaries are implemented. Full release uses separate Linux hosts A/B; two local containers are development only.
+Run `make mpc-fetch` to clone pinned source into ignored `vendor/mpcium`. Fetch script never starts nodes or generates keys. Person2 follows `docs/plans/02 - Platform Policy and MPCium.md`: three distinct node identities and encrypted persistent volumes on the existing Azure 4 GiB VM; common chain_code; candidate pinned threshold config1/two required participants; mandatory nonempty authorizer list on all three nodes; exact Go message binding; 20 verified public vectors; every pair succeeds; a single node fails; one-node outage works and two-node outage fails closed. This is an explicitly shared-host competition PoC, not independent compromise protection. Qualification against the pinned build is required before a demo claim.
 
 ## Shared resources supplied by team
 
-Two reachable Linux hosts with private authenticated connectivity; Base Sepolia RPC and independent RPC; test ETH for deployment/normal/emergency/anchor senders; HTTPS API/provider origins; Wallet Core package-read build credential; model API access; physical secure-screen-lock phone. Store private credentials in ignored local/host secret files, never public manifests. Owner words only on phone.
+Existing Azure Standard_B2als_v2 VM (2 vCPU/4 GiB RAM), private Docker networking and durable disk volumes; Base Sepolia RPC and independent RPC; test ETH for deployment/normal/emergency/anchor senders; HTTPS API/provider origins; Wallet Core package-read build credential; model API access; physical secure-screen-lock phone. Store node identities, passwords and shares outside Git and container images. The VM administrator can access all local node services and shares. Owner words only on phone.
 
 ## First connected gate
 
@@ -35,4 +35,4 @@ Person1 emits shared fixtures/ABI→Person2 and3 establish independent executor/
 
 Read [Complete App Plan](COMPLETE-APP.md) and [migration](PLAN-MIGRATION-v6.md) before financial work. Bootstrap source remains domain4/Login1; Person1 publishes domain5/OwnerTransfer/Login2 fixtures, then all consumers migrate together. Add server-only Etherscan V2 API key/84532 quota check, trusted native direct RPC/OP-stack fee estimation, native protected refresh/session/profile/journal storage and personal ETH funding for independent gas. No private API/signing key belongs in APK. WalletConnect/dApp connections are deferred; do not require WalletKit or a Reown projectId for this release.
 
-Qualify SDK compatibility on Expo54/Hermes and original MPC topology (upstream guide≥3nodes versus proposed2) before deployment claims. Personal send/history/app lock/restore/session/QR WQ cases are required in addition to original agent acceptance. Existing startup commands still launch only the documented bootstrap; they do not make the complete wallet functional.
+Qualify SDK compatibility on Expo54/Hermes and the planned three-node/two-participant MPCium topology on the existing single Azure VM before deployment claims. The containers share a host trust boundary. Personal send/history/app lock/restore/session/QR WQ cases are required in addition to original agent acceptance. Existing startup commands still launch only the documented bootstrap; they do not make the complete wallet functional.

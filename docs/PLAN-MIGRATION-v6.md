@@ -12,7 +12,7 @@
 | Owner command |Admin only |Admin + OwnerTransfer with independent nonce/epoch |
 | Native owner interface |Single-account typed-signing plan |Account/profile methods, semantic transaction builder/journal, session storage and secure receive/confirmation flows |
 | Receipt/runbook schema |4 |4, unchanged agent format; manual WalletActivity is separate |
-| Invoice/Delivery domains |1 |1 |
+| Invoice/Delivery domains |1 |Invoice 2 (adds asset, v7) / Delivery 1 |
 
 Person1 first updates `packages/schema/src/{authority,hashing,runtime}.ts`, Solidity MandateTypes and fixtures/ABI. Person2/3/4 consume that same schema commit. No source component may sign new-domain payloads by silently substituting a domain number at its boundary. New deployed contract implements declared OwnerTransfer semantics. No live contract has been deployed by this task; no user migration exists yet.
 
