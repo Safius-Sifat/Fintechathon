@@ -1,0 +1,176 @@
+[
+  {
+    "caseId": "P1-03.T01",
+    "taskId": "P1-03",
+    "status": "PASS",
+    "sourceCommit": "47b39f7177bc80b3fdfe17d753cb6f77d2df896c",
+    "workingTreeDigest": "see commit",
+    "schemaCommit": "47b39f7177bc80b3fdfe17d753cb6f77d2df896c",
+    "environment": {
+      "forge": "1.8.5",
+      "forgeStd": "v1.17.0",
+      "solc": "0.8.28 via_ir",
+      "chain": "local Foundry EVM, chainId 84532"
+    },
+    "command": "forge test --root packages/contracts --match-contract \"VaultTest\"",
+    "testName": "test_P1_03_T01_allocationBoundary",
+    "exitCode": 0,
+    "expected": "2,000,000 passes at 20%; 2,000,001 rejects; shares match previewDeposit; allowance 0",
+    "observed": "as expected",
+    "startedAt": "2026-10-18T18:10:17+06:00",
+    "finishedAt": "2026-10-18T18:10:17+06:00",
+    "artifactRefs": [
+      "packages/contracts/test/",
+      "docs/contracts-security.md"
+    ],
+    "limitations": [
+      "Local Foundry EVM only; Base Sepolia evidence comes with P1-06",
+      "Independent relayer/RPC run with API stopped is an integration-gate item"
+    ]
+  },
+  {
+    "caseId": "P1-03.T02",
+    "taskId": "P1-03",
+    "status": "PASS",
+    "sourceCommit": "47b39f7177bc80b3fdfe17d753cb6f77d2df896c",
+    "workingTreeDigest": "see commit",
+    "schemaCommit": "47b39f7177bc80b3fdfe17d753cb6f77d2df896c",
+    "environment": {
+      "forge": "1.8.5",
+      "forgeStd": "v1.17.0",
+      "solc": "0.8.28 via_ir",
+      "chain": "local Foundry EVM, chainId 84532"
+    },
+    "command": "forge test --root packages/contracts --match-contract \"VaultTest|LimitsTest\"",
+    "testName": "test_P1_03_T02_* / test_P1_03_depositFloorBoundary",
+    "exitCode": 0,
+    "expected": "minOutput and floor failures leave no allowance, balance or counter residue",
+    "observed": "as expected",
+    "startedAt": "2026-10-18T18:10:17+06:00",
+    "finishedAt": "2026-10-18T18:10:17+06:00",
+    "artifactRefs": [
+      "packages/contracts/test/",
+      "docs/contracts-security.md"
+    ],
+    "limitations": [
+      "Local Foundry EVM only; Base Sepolia evidence comes with P1-06",
+      "Independent relayer/RPC run with API stopped is an integration-gate item"
+    ]
+  },
+  {
+    "caseId": "P1-03.T03",
+    "taskId": "P1-03",
+    "status": "PASS",
+    "sourceCommit": "47b39f7177bc80b3fdfe17d753cb6f77d2df896c",
+    "workingTreeDigest": "see commit",
+    "schemaCommit": "47b39f7177bc80b3fdfe17d753cb6f77d2df896c",
+    "environment": {
+      "forge": "1.8.5",
+      "forgeStd": "v1.17.0",
+      "solc": "0.8.28 via_ir",
+      "chain": "local Foundry EVM, chainId 84532"
+    },
+    "command": "forge test --root packages/contracts --match-contract \"VaultTest\"",
+    "testName": "test_P1_03_T03_redeemOnlyToWallet",
+    "exitCode": 0,
+    "expected": "redeem returns assets only to wallet; non-vault target rejects; minOutput atomic",
+    "observed": "as expected",
+    "startedAt": "2026-10-18T18:10:17+06:00",
+    "finishedAt": "2026-10-18T18:10:17+06:00",
+    "artifactRefs": [
+      "packages/contracts/test/",
+      "docs/contracts-security.md"
+    ],
+    "limitations": [
+      "Local Foundry EVM only; Base Sepolia evidence comes with P1-06",
+      "Independent relayer/RPC run with API stopped is an integration-gate item"
+    ]
+  },
+  {
+    "caseId": "P1-03.T04",
+    "taskId": "P1-03",
+    "status": "PASS",
+    "sourceCommit": "47b39f7177bc80b3fdfe17d753cb6f77d2df896c",
+    "workingTreeDigest": "see commit",
+    "schemaCommit": "47b39f7177bc80b3fdfe17d753cb6f77d2df896c",
+    "environment": {
+      "forge": "1.8.5",
+      "forgeStd": "v1.17.0",
+      "solc": "0.8.28 via_ir",
+      "chain": "local Foundry EVM, chainId 84532"
+    },
+    "command": "forge test --root packages/contracts --match-contract \"VaultTest\"",
+    "testName": "test_P1_03_T04_disabledRedemptionLeavesPositionVisible",
+    "exitCode": 0,
+    "expected": "disabled vault: withdraw reverts, shares still visible",
+    "observed": "as expected",
+    "startedAt": "2026-10-18T18:10:17+06:00",
+    "finishedAt": "2026-10-18T18:10:17+06:00",
+    "artifactRefs": [
+      "packages/contracts/test/",
+      "docs/contracts-security.md"
+    ],
+    "limitations": [
+      "Local Foundry EVM only; Base Sepolia evidence comes with P1-06",
+      "Independent relayer/RPC run with API stopped is an integration-gate item"
+    ]
+  },
+  {
+    "caseId": "P1-03.T05",
+    "taskId": "P1-03",
+    "status": "PASS",
+    "sourceCommit": "47b39f7177bc80b3fdfe17d753cb6f77d2df896c",
+    "workingTreeDigest": "see commit",
+    "schemaCommit": "47b39f7177bc80b3fdfe17d753cb6f77d2df896c",
+    "environment": {
+      "forge": "1.8.5",
+      "forgeStd": "v1.17.0",
+      "solc": "0.8.28 via_ir",
+      "chain": "local Foundry EVM, chainId 84532"
+    },
+    "command": "forge test --root packages/contracts --match-contract \"ScheduleTest\"",
+    "testName": "test_P1_03_T05_*",
+    "exitCode": 0,
+    "expected": "periods 0 and 2 pay once; duplicate and catch-up reject; window boundaries exact; signed recipient/amount",
+    "observed": "as expected",
+    "startedAt": "2026-10-18T18:10:17+06:00",
+    "finishedAt": "2026-10-18T18:10:17+06:00",
+    "artifactRefs": [
+      "packages/contracts/test/",
+      "docs/contracts-security.md"
+    ],
+    "limitations": [
+      "Local Foundry EVM only; Base Sepolia evidence comes with P1-06",
+      "Independent relayer/RPC run with API stopped is an integration-gate item"
+    ]
+  },
+  {
+    "caseId": "P1-03.T06",
+    "taskId": "P1-03",
+    "status": "PASS",
+    "sourceCommit": "47b39f7177bc80b3fdfe17d753cb6f77d2df896c",
+    "workingTreeDigest": "see commit",
+    "schemaCommit": "47b39f7177bc80b3fdfe17d753cb6f77d2df896c",
+    "environment": {
+      "forge": "1.8.5",
+      "forgeStd": "v1.17.0",
+      "solc": "0.8.28 via_ir",
+      "chain": "local Foundry EVM, chainId 84532"
+    },
+    "command": "forge test --root packages/contracts --match-contract \"VaultTest\"",
+    "testName": "test_P1_03_T06_zeroMinOutputAndWrongKind",
+    "exitCode": 0,
+    "expected": "zero minOutput and wrong kind reject; no counters consumed",
+    "observed": "as expected",
+    "startedAt": "2026-10-18T18:10:17+06:00",
+    "finishedAt": "2026-10-18T18:10:17+06:00",
+    "artifactRefs": [
+      "packages/contracts/test/",
+      "docs/contracts-security.md"
+    ],
+    "limitations": [
+      "Local Foundry EVM only; Base Sepolia evidence comes with P1-06",
+      "Independent relayer/RPC run with API stopped is an integration-gate item"
+    ]
+  }
+]

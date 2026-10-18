@@ -13,10 +13,11 @@ import {MandateHashes as H} from "./MandateHashes.sol";
 /// Permits and owner commands; a per-wallet executor signs Actions inside a Permit.
 /// Relayers only pay gas: no sender has any privilege.
 ///
-/// Implemented in M1: BROWSER Permits (PAY, CLOSE), owner co-signature above the
-/// Permit review threshold, OwnerTransfer and native ETH receive. Every other kind,
-/// operation and agent asset reverts explicitly until its task (P1-03, P1-04,
-/// P1-A02, P1-A03) lands.
+/// Implemented: BROWSER (PAY, CLOSE), LIQUIDITY (DEPOSIT, WITHDRAW on the immutable
+/// vault), SCHEDULE (TRANSFER), owner co-signature above the Permit review threshold,
+/// Admin (PAUSE, UNPAUSE, REVOKE, RECOVER, RECOVER_LIQUID), OwnerTransfer and native ETH
+/// receive. ALLOWANCE, CALL, X402, FREEZE/UNFREEZE and non-DemoUSD agent assets revert
+/// explicitly until P1-A02/P1-A03 land.
 contract MandateWallet is ReentrancyGuard {
   using SafeERC20 for IERC20;
 
@@ -33,6 +34,11 @@ contract MandateWallet is ReentrancyGuard {
   uint64 public constant MAX_ACTION_SECONDS = 60;
   uint64 public constant MAX_COSIGNED_SECONDS = 15 minutes;
   uint64 public constant MAX_OWNER_TRANSFER_SECONDS = 10 minutes;
+  uint64 public constant MAX_ADMIN_SECONDS = 30 minutes;
+  uint256 public constant MAX_ALLOCATION_BPS = 2_000;
+  /// Gas forwarded to the vault during RECOVER. A misbehaving vault cannot block recovery.
+  uint256 public constant RECOVER_VIEW_GAS = 50_000;
+  uint256 public constant RECOVER_REDEEM_GAS = 300_000;
 
   struct PermitState {
     T.Permit permit;
@@ -75,6 +81,9 @@ contract MandateWallet is ReentrancyGuard {
   mapping(bytes32 => bool) public usedRequest;
   mapping(bytes32 => bool) public usedInvoice;
   mapping(bytes32 => bool) public usedOwnerTransfer;
+  mapping(bytes32 => bool) public revokedPermitId;
+  mapping(bytes32 => T.Schedule) private schedules;
+  mapping(bytes32 => mapping(uint32 => bool)) public periodUsed;
   // asset => day/week index => gross outflow; never decreased by refunds.
   mapping(address => mapping(uint256 => uint256)) private walletDayGross;
   mapping(address => mapping(uint256 => uint256)) private walletWeekGross;
@@ -82,6 +91,8 @@ contract MandateWallet is ReentrancyGuard {
 
   event PermitActivated(bytes32 indexed permitId, bytes32 indexed taskId, address executor, uint64 epoch);
   event PermitClosed(bytes32 indexed permitId);
+  event PermitRevoked(bytes32 indexed permitId);
+  event Recovered(uint256 liquidAssets, uint256 redeemedShares, uint256 redeemedAssets, bool vaultFailed);
   event WalletPaused(bool paused, uint64 epoch);
   event ActionExecuted(
     bytes32 indexed permitId,
@@ -137,6 +148,13 @@ contract MandateWallet is ReentrancyGuard {
   error InvalidAsset();
   error InexactTokenTransfer();
   error NativeTransferFailed();
+  error InvalidTarget();
+  error ScheduleWindow();
+  error PeriodAlreadyUsed();
+  error ScheduleMismatch();
+  error ScheduleInvalid(string field);
+  error PermitIsRevoked();
+  error CommandNotSupported(uint8 command);
 
   constructor(address owner_, address token_, address vault_) {
     if (block.chainid != CHAIN_ID) revert WrongChain();
@@ -171,12 +189,23 @@ contract MandateWallet is ReentrancyGuard {
     if (p.executor == address(0)) revert ZeroAddress();
     if (p.asset != token) revert AssetNotSupported(p.asset);
     if (taskUsed[p.taskId]) revert TaskAlreadyUsed();
-    if (p.kind != T.KIND_BROWSER) revert KindNotSupported(p.kind);
-    _validateBrowserTerms(p);
-    _validateRecipients(p.recipientsHash, recipients);
-    if (H.hashSchedule(schedule) != p.scheduleHash || schedule.recipient != address(0) || schedule.amount != 0
-      || schedule.start != 0 || schedule.interval != 0 || schedule.window != 0 || schedule.periods != 0) {
-      revert ScheduleNotZero();
+    if (revokedPermitId[permitId]) revert PermitIsRevoked();
+    if (p.kind == T.KIND_BROWSER) {
+      _validateBrowserTerms(p);
+      _validateRecipients(p.recipientsHash, recipients, 1, 4);
+      _requireZeroSchedule(p.scheduleHash, schedule);
+    } else if (p.kind == T.KIND_LIQUIDITY) {
+      if (vault == address(0)) revert KindNotSupported(p.kind);
+      _validateLiquidityTerms(p);
+      _validateRecipients(p.recipientsHash, recipients, 0, 0);
+      _requireZeroSchedule(p.scheduleHash, schedule);
+    } else if (p.kind == T.KIND_SCHEDULE) {
+      _validateScheduleTerms(p, schedule);
+      _validateRecipients(p.recipientsHash, recipients, 1, 1);
+      if (recipients[0] != schedule.recipient) revert ScheduleInvalid("recipient");
+      schedules[permitId] = schedule;
+    } else {
+      revert KindNotSupported(p.kind);
     }
     if (templateIds.length != 0 || p.templatesHash != bytes32(0)) revert TemplatesNotAllowed();
 
@@ -201,9 +230,47 @@ contract MandateWallet is ReentrancyGuard {
     if (p.periodSeconds != 0) revert FieldNotZero("periodSeconds");
   }
 
-  /// recipientsHash = keccak256(abi.encode(address[])) over 1..4 strictly ascending nonzero addresses.
-  function _validateRecipients(bytes32 recipientsHash, address[] calldata recipients) private pure {
-    if (recipients.length == 0 || recipients.length > 4) revert RecipientsInvalid();
+  function _validateLiquidityTerms(T.Permit calldata p) private pure {
+    if (p.maxActions == 0 || p.maxActions > MAX_ACTIONS) revert LimitExceeded("maxActions");
+    if (p.maxPayments != 0) revert FieldNotZero("maxPayments");
+    if (p.maxPayment != 0) revert FieldNotZero("maxPayment");
+    if (p.spendCap != 0) revert FieldNotZero("spendCap");
+    if (p.liquidFloor < MIN_LIQUID_FLOOR) revert LimitExceeded("liquidFloor");
+    if (p.periodCap != 0) revert FieldNotZero("periodCap");
+    if (p.periodSeconds != 0) revert FieldNotZero("periodSeconds");
+  }
+
+  function _validateScheduleTerms(T.Permit calldata p, T.Schedule calldata s) private pure {
+    if (H.hashSchedule(s) != p.scheduleHash) revert ScheduleInvalid("hash");
+    if (s.recipient == address(0)) revert ScheduleInvalid("recipient");
+    if (s.amount == 0 || s.amount > MAX_PAYMENT) revert ScheduleInvalid("amount");
+    if (s.interval == 0 || s.window == 0 || s.window > s.interval) revert ScheduleInvalid("window");
+    if (s.periods == 0) revert ScheduleInvalid("periods");
+    if (p.maxPayments != s.periods) revert ScheduleInvalid("maxPayments");
+    if (p.maxActions < p.maxPayments || p.maxActions > MAX_ACTIONS) revert LimitExceeded("maxActions");
+    if (p.maxPayment < s.amount || p.maxPayment > MAX_PAYMENT) revert LimitExceeded("maxPayment");
+    if (p.spendCap > MAX_TASK_SPEND) revert LimitExceeded("spendCap");
+    if (p.liquidFloor < MIN_LIQUID_FLOOR) revert LimitExceeded("liquidFloor");
+    // uint256 arithmetic: the last window must close inside the Permit lifetime.
+    uint256 lastClose = uint256(s.start) + uint256(s.periods - 1) * uint256(s.interval) + uint256(s.window);
+    if (s.start < p.startsAt || lastClose > p.expiresAt) revert ScheduleInvalid("fit");
+    if (p.depositCap != 0) revert FieldNotZero("depositCap");
+    if (p.withdrawCap != 0) revert FieldNotZero("withdrawCap");
+    if (p.periodCap != 0) revert FieldNotZero("periodCap");
+    if (p.periodSeconds != 0) revert FieldNotZero("periodSeconds");
+  }
+
+  function _requireZeroSchedule(bytes32 scheduleHash, T.Schedule calldata s) private pure {
+    if (H.hashSchedule(s) != scheduleHash || s.recipient != address(0) || s.amount != 0 || s.start != 0
+      || s.interval != 0 || s.window != 0 || s.periods != 0) revert ScheduleNotZero();
+  }
+
+  /// recipientsHash = keccak256(abi.encode(address[])) over strictly ascending nonzero addresses.
+  function _validateRecipients(bytes32 recipientsHash, address[] calldata recipients, uint256 minLen, uint256 maxLen)
+    private
+    pure
+  {
+    if (recipients.length < minLen || recipients.length > maxLen) revert RecipientsInvalid();
     for (uint256 i = 0; i < recipients.length; i++) {
       if (recipients[i] == address(0)) revert RecipientsInvalid();
       if (i > 0 && recipients[i - 1] >= recipients[i]) revert RecipientsInvalid();
@@ -241,9 +308,23 @@ contract MandateWallet is ReentrancyGuard {
     } else if (a.operation == T.OP_PAY) {
       if (p.kind != T.KIND_BROWSER) revert OperationNotAllowed(p.kind, a.operation);
       _pay(st, a, actionDigest, invoice, providerSignature, approval, ownerApproval);
-    } else if (a.operation <= T.OP_X402) {
-      // TRANSFER/DEPOSIT/WITHDRAW land with P1-03, CALL/X402 with P1-A03.
-      if (p.kind == T.KIND_BROWSER && a.operation != T.OP_X402) revert OperationNotAllowed(p.kind, a.operation);
+    } else if (a.operation == T.OP_TRANSFER) {
+      if (p.kind != T.KIND_SCHEDULE) revert OperationNotAllowed(p.kind, a.operation);
+      _requireZeroInvoice(invoice, providerSignature);
+      _scheduledTransfer(st, a, actionDigest, approval, ownerApproval);
+    } else if (a.operation == T.OP_DEPOSIT || a.operation == T.OP_WITHDRAW) {
+      if (p.kind != T.KIND_LIQUIDITY) revert OperationNotAllowed(p.kind, a.operation);
+      _requireZeroInvoice(invoice, providerSignature);
+      _requireNoApproval(approval, ownerApproval);
+      if (a.deadline - a.issuedAt > MAX_ACTION_SECONDS) revert LifetimeTooLong();
+      if (a.operation == T.OP_DEPOSIT) _deposit(st, a, actionDigest);
+      else _withdraw(st, a, actionDigest);
+    } else if (a.operation == T.OP_CALL) {
+      // CALL and X402 land with P1-A03.
+      if (p.kind != T.KIND_LIQUIDITY) revert OperationNotAllowed(p.kind, a.operation);
+      revert OperationNotSupported(a.operation);
+    } else if (a.operation == T.OP_X402) {
+      if (p.kind != T.KIND_BROWSER) revert OperationNotAllowed(p.kind, a.operation);
       revert OperationNotSupported(a.operation);
     } else {
       revert OperationNotSupported(a.operation);
@@ -371,6 +452,150 @@ contract MandateWallet is ReentrancyGuard {
     if (providerSignature.length != 0 || i.invoiceId != bytes32(0) || i.taskId != bytes32(0) || i.wallet != address(0)
       || i.asset != address(0) || i.recipient != address(0) || i.amount != 0 || i.inputHash != bytes32(0)
       || i.issuedAt != 0 || i.expiresAt != 0) revert FieldNotZero("invoice");
+  }
+
+  function _scheduledTransfer(
+    PermitState storage st,
+    T.Action calldata a,
+    bytes32 actionDigest,
+    T.Approval calldata approval,
+    bytes calldata ownerApproval
+  ) private {
+    T.Schedule storage s = schedules[a.permitId];
+    if (a.minOutput != 0 || a.invoiceId != bytes32(0) || a.inputHash != bytes32(0)) revert FieldNotZero("transfer");
+    if (a.target != s.recipient || a.amount != s.amount) revert ScheduleMismatch();
+    if (a.period >= s.periods) revert ScheduleWindow();
+    // The current time must fall inside this period's window; missed windows never catch up.
+    uint256 opens = uint256(s.start) + uint256(a.period) * uint256(s.interval);
+    if (block.timestamp < opens || block.timestamp >= opens + s.window) revert ScheduleWindow();
+    if (periodUsed[a.permitId][a.period]) revert PeriodAlreadyUsed();
+
+    bool approved = a.amount > st.permit.reviewThreshold;
+    if (approved) _requireApproval(actionDigest, a.deadline, approval, ownerApproval);
+    else _requireNoApproval(approval, ownerApproval);
+    if (a.deadline - a.issuedAt > (approved ? MAX_COSIGNED_SECONDS : MAX_ACTION_SECONDS)) revert LifetimeTooLong();
+    _consumeSpend(st, a.amount, true);
+
+    usedRequest[a.requestId] = true;
+    periodUsed[a.permitId][a.period] = true;
+    IERC20(st.permit.asset).safeTransfer(a.target, a.amount);
+    emit ActionExecuted(a.permitId, a.requestId, a.operation, st.permit.asset, a.target, a.amount, 0, bytes32(0), bytes32(0), actionDigest, approved);
+  }
+
+  function _requireVaultAction(PermitState storage st, T.Action calldata a) private {
+    if (a.target != vault) revert InvalidTarget();
+    if (a.amount == 0 || a.minOutput == 0) revert InvalidAmount();
+    if (a.period != 0 || a.invoiceId != bytes32(0)) revert FieldNotZero("vault");
+    if (st.actionCount + 1 > st.permit.maxActions) revert LimitExceeded("maxActions");
+    st.actionCount += 1;
+    usedRequest[a.requestId] = true;
+  }
+
+  /// DEPOSIT: Action.amount is assets, minOutput is minimum shares (S3).
+  function _deposit(PermitState storage st, T.Action calldata a, bytes32 actionDigest) private {
+    _requireVaultAction(st, a);
+    T.Permit storage p = st.permit;
+    if (st.depositedAssets + a.amount > p.depositCap) revert LimitExceeded("depositCap");
+    st.depositedAssets += a.amount;
+    IERC20 asset = IERC20(p.asset);
+    IERC4626 v = IERC4626(vault);
+    uint256 liquidBefore = asset.balanceOf(address(this));
+    if (liquidBefore < a.amount || liquidBefore - a.amount < p.liquidFloor) revert LimitExceeded("liquidFloor");
+    uint256 sharesBefore = IERC20(vault).balanceOf(address(this));
+
+    asset.forceApprove(vault, a.amount);
+    v.deposit(a.amount, address(this));
+    asset.forceApprove(vault, 0);
+
+    uint256 liquidAfter = asset.balanceOf(address(this));
+    uint256 sharesReceived = IERC20(vault).balanceOf(address(this)) - sharesBefore;
+    if (liquidBefore - liquidAfter != a.amount) revert InexactTokenTransfer();
+    if (sharesReceived < a.minOutput) revert LimitExceeded("minOutput");
+    uint256 vaultAssets = v.convertToAssets(IERC20(vault).balanceOf(address(this)));
+    if (vaultAssets * 10_000 > MAX_ALLOCATION_BPS * (liquidAfter + vaultAssets)) revert LimitExceeded("allocation");
+    emit ActionExecuted(a.permitId, a.requestId, a.operation, p.asset, vault, a.amount, sharesReceived, bytes32(0), a.inputHash, actionDigest, false);
+  }
+
+  /// WITHDRAW: Action.amount is shares, minOutput is minimum assets; assets return only to the wallet.
+  function _withdraw(PermitState storage st, T.Action calldata a, bytes32 actionDigest) private {
+    _requireVaultAction(st, a);
+    T.Permit storage p = st.permit;
+    IERC20 asset = IERC20(p.asset);
+    if (a.amount > IERC20(vault).balanceOf(address(this))) revert LimitExceeded("shares");
+    uint256 liquidBefore = asset.balanceOf(address(this));
+
+    uint256 reported = IERC4626(vault).redeem(a.amount, address(this), address(this));
+
+    uint256 received = asset.balanceOf(address(this)) - liquidBefore;
+    if (received != reported) revert InexactTokenTransfer();
+    if (received < a.minOutput) revert LimitExceeded("minOutput");
+    if (st.withdrawnAssets + received > p.withdrawCap) revert LimitExceeded("withdrawCap");
+    st.withdrawnAssets += received; // incoming assets never replenish gross spend
+    emit ActionExecuted(a.permitId, a.requestId, a.operation, p.asset, vault, received, a.amount, bytes32(0), a.inputHash, actionDigest, false);
+  }
+
+  // ------------------------------------------------------------------ Admin
+
+  /// Owner governance (S3). No MPC or backend consent; any sender may relay.
+  function applyAdmin(T.Admin calldata a, bytes calldata ownerSignature) external nonReentrant {
+    _requireSigner(H.digest(WALLET_DOMAIN, H.hash(a)), ownerSignature, owner);
+    if (a.nonce != adminNonce) revert WrongNonce();
+    if (a.deadline <= a.issuedAt || a.deadline - a.issuedAt > MAX_ADMIN_SECONDS) revert LifetimeTooLong();
+    if (block.timestamp < a.issuedAt) revert NotYetValid();
+    if (block.timestamp > a.deadline) revert Expired();
+    if (a.command > T.CMD_RECOVER_LIQUID) revert CommandNotSupported(a.command); // FREEZE/UNFREEZE: P1-A02
+    if (a.command != T.CMD_REVOKE && a.permitId != bytes32(0)) revert FieldNotZero("permitId");
+    adminNonce = a.nonce + 1;
+
+    if (a.command == T.CMD_UNPAUSE) {
+      paused = false; // never moves the epoch back; old Permits stay invalid
+      emit WalletPaused(false, authorityEpoch);
+    } else if (a.command == T.CMD_REVOKE) {
+      revokedPermitId[a.permitId] = true;
+      if (permits[a.permitId].activated) permits[a.permitId].revoked = true;
+      emit PermitRevoked(a.permitId);
+    } else {
+      paused = true;
+      uint64 newEpoch = authorityEpoch + 1;
+      authorityEpoch = newEpoch;
+      emit WalletPaused(true, newEpoch);
+      if (a.command == T.CMD_RECOVER) _recover(true);
+      else if (a.command == T.CMD_RECOVER_LIQUID) _recover(false);
+    }
+  }
+
+  /// Sends core DemoUSD to the immutable owner. RECOVER first tries to redeem vault shares
+  /// to the owner with bounded gas; any vault failure is reported, never blocks liquid recovery.
+  function _recover(bool withVault) private {
+    uint256 redeemedShares;
+    uint256 redeemedAssets;
+    bool vaultFailed;
+    IERC20 asset = IERC20(token);
+    if (withVault && vault != address(0)) {
+      (bool okMax, bytes memory maxData) =
+        vault.staticcall{gas: RECOVER_VIEW_GAS}(abi.encodeCall(IERC4626.maxRedeem, (address(this))));
+      (bool okBal, bytes memory balData) =
+        vault.staticcall{gas: RECOVER_VIEW_GAS}(abi.encodeCall(IERC20.balanceOf, (address(this))));
+      uint256 shares = okMax && maxData.length >= 32 ? abi.decode(maxData, (uint256)) : 0;
+      uint256 held = okBal && balData.length >= 32 ? abi.decode(balData, (uint256)) : 0;
+      if (shares > held) shares = held;
+      if (shares > 0) {
+        uint256 ownerBefore = asset.balanceOf(owner);
+        (bool okRedeem,) =
+          vault.call{gas: RECOVER_REDEEM_GAS}(abi.encodeCall(IERC4626.redeem, (shares, owner, address(this))));
+        if (okRedeem) {
+          redeemedShares = shares;
+          redeemedAssets = asset.balanceOf(owner) - ownerBefore;
+        } else {
+          vaultFailed = true;
+        }
+      } else if (!okMax || !okBal || held > 0) {
+        vaultFailed = true; // position exists (or is unreadable) but cannot be redeemed now
+      }
+    }
+    uint256 liquid = asset.balanceOf(address(this));
+    if (liquid > 0) asset.safeTransfer(owner, liquid);
+    emit Recovered(liquid, redeemedShares, redeemedAssets, vaultFailed);
   }
 
   // ---------------------------------------------------------- Owner transfer

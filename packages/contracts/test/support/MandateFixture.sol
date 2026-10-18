@@ -7,6 +7,7 @@ import {MandateHashes as H} from "../../src/MandateHashes.sol";
 import {MandateWallet} from "../../src/MandateWallet.sol";
 import {WalletFactory} from "../../src/WalletFactory.sol";
 import {DemoUSD} from "../../src/DemoUSD.sol";
+import {DemoVault} from "../../src/DemoVault.sol";
 
 /// Shared setup: public Anvil test keys only; wallet funded with 10,000,000 DemoUSD units.
 abstract contract MandateFixture is Test {
@@ -23,6 +24,7 @@ abstract contract MandateFixture is Test {
   address internal relayer = makeAddr("relayer");
 
   DemoUSD internal token;
+  DemoVault internal vault;
   WalletFactory internal factory;
   MandateWallet internal wallet;
   uint256 private requestCounter;
@@ -31,7 +33,8 @@ abstract contract MandateFixture is Test {
     vm.chainId(84532);
     vm.warp(START);
     token = new DemoUSD();
-    factory = new WalletFactory(address(token), address(0));
+    vault = new DemoVault(token);
+    factory = new WalletFactory(address(token), address(vault));
     wallet = MandateWallet(payable(factory.createWallet(ownerAddr)));
     token.mint(address(wallet), 10_000_000);
   }
@@ -167,5 +170,120 @@ abstract contract MandateFixture is Test {
       deadline: uint64(vm.getBlockTimestamp() + 300)
     });
     sig = _sign(OWNER_PK, H.digest(wallet.domainSeparator(), H.hash(t)));
+  }
+
+  // ------------------------------------------------------------ P1-03 / P1-04 helpers
+
+  function _liquidityPermit(bytes32 taskId, uint256 depositCap, uint256 withdrawCap) internal view returns (T.Permit memory p) {
+    p = _permit(taskId);
+    p.kind = T.KIND_LIQUIDITY;
+    p.recipientsHash = keccak256(abi.encode(new address[](0)));
+    p.maxPayments = 0;
+    p.maxPayment = 0;
+    p.spendCap = 0;
+    p.depositCap = depositCap;
+    p.withdrawCap = withdrawCap;
+  }
+
+  function _activateWith(T.Permit memory p, address[] memory recipients, T.Schedule memory s) internal returns (bytes32) {
+    vm.prank(relayer);
+    return wallet.activatePermit(p, recipients, s, new bytes32[](0), _signPermit(p, OWNER_PK));
+  }
+
+  function _activateLiquidity(bytes32 taskId, uint256 depositCap, uint256 withdrawCap) internal returns (bytes32) {
+    return _activateWith(_liquidityPermit(taskId, depositCap, withdrawCap), new address[](0), _zeroSchedule());
+  }
+
+  function _vaultAction(bytes32 permitId, uint8 op, uint256 amount, uint256 minOutput)
+    internal
+    returns (T.Action memory a, bytes memory sig)
+  {
+    requestCounter++;
+    a = T.Action({
+      permitId: permitId,
+      requestId: keccak256(abi.encode("vault", requestCounter)),
+      operation: op,
+      target: address(vault),
+      amount: amount,
+      minOutput: minOutput,
+      invoiceId: bytes32(0),
+      inputHash: keccak256("liquidity-input"),
+      period: 0,
+      issuedAt: uint64(vm.getBlockTimestamp()),
+      deadline: uint64(vm.getBlockTimestamp() + 60)
+    });
+    sig = _signAction(a, EXECUTOR_PK);
+  }
+
+  function _run(T.Action memory a, bytes memory sig) internal {
+    T.Invoice memory noInvoice;
+    T.Approval memory noApproval;
+    vm.prank(relayer);
+    wallet.execute(a, sig, noInvoice, "", noApproval, "", "");
+  }
+
+  function _schedule(address to, uint256 amount, uint64 start, uint32 interval, uint32 window, uint32 periods)
+    internal
+    pure
+    returns (T.Schedule memory s)
+  {
+    s = T.Schedule({recipient: to, amount: amount, start: start, interval: interval, window: window, periods: periods});
+  }
+
+  function _schedulePermit(bytes32 taskId, T.Schedule memory s) internal view returns (T.Permit memory p) {
+    p = _permit(taskId);
+    p.kind = T.KIND_SCHEDULE;
+    address[] memory r = new address[](1);
+    r[0] = s.recipient;
+    p.recipientsHash = keccak256(abi.encode(r));
+    p.scheduleHash = H.hashSchedule(s);
+    p.maxPayments = s.periods;
+    p.maxActions = s.periods + 1;
+    p.maxPayment = s.amount;
+    p.spendCap = s.amount * s.periods;
+  }
+
+  function _activateSchedule(bytes32 taskId, T.Schedule memory s) internal returns (bytes32) {
+    address[] memory r = new address[](1);
+    r[0] = s.recipient;
+    return _activateWith(_schedulePermit(taskId, s), r, s);
+  }
+
+  function _transferAction(bytes32 permitId, address to, uint256 amount, uint32 period)
+    internal
+    returns (T.Action memory a, bytes memory sig)
+  {
+    requestCounter++;
+    a = T.Action({
+      permitId: permitId,
+      requestId: keccak256(abi.encode("transfer", requestCounter)),
+      operation: T.OP_TRANSFER,
+      target: to,
+      amount: amount,
+      minOutput: 0,
+      invoiceId: bytes32(0),
+      inputHash: bytes32(0),
+      period: period,
+      issuedAt: uint64(vm.getBlockTimestamp()),
+      deadline: uint64(vm.getBlockTimestamp() + 60)
+    });
+    sig = _signAction(a, EXECUTOR_PK);
+  }
+
+  function _admin(uint8 command, bytes32 permitId) internal view returns (T.Admin memory a, bytes memory sig) {
+    a = T.Admin({
+      command: command,
+      permitId: permitId,
+      nonce: wallet.adminNonce(),
+      issuedAt: uint64(vm.getBlockTimestamp()),
+      deadline: uint64(vm.getBlockTimestamp() + 600)
+    });
+    sig = _sign(OWNER_PK, H.digest(wallet.domainSeparator(), H.hash(a)));
+  }
+
+  function _applyAdmin(uint8 command, bytes32 permitId) internal {
+    (T.Admin memory a, bytes memory sig) = _admin(command, permitId);
+    vm.prank(relayer);
+    wallet.applyAdmin(a, sig);
   }
 }
