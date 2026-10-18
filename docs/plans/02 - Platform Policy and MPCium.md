@@ -1,8 +1,8 @@
 ---
 type: implementation-agent-prompt
 title: Person 2 — Platform Policy and MPCium
-version: "6.0"
-updated: 2026-10-17
+version: "7.0"
+updated: 2026-10-18
 status: specified-not-built
 owner: Person2
 handoff_revision: "agent-prompt-2026-10-17"
@@ -11,12 +11,14 @@ handoff_revision: "agent-prompt-2026-10-17"
 # Person 2 — Platform, Policy and MPCium
 
 > Repository bootstrap added 2026-10-17. Read [README](../../README.md) and [setup](../SETUP.md) for existing foundation files. Continue from that code; financial features and acceptance gates remain unimplemented.
+>
+> **Coordination rule:** follow the shared [team coordination and merge rules](../COORDINATION-AND-MERGE-POLICY.md). Do not change a shared interface without the review and consumer tests in that document.
 
 > Implementation handoff: execute the numbered tasks in order and save real acceptance results. The identical appendix defines interfaces with the other three owners. You own the runtime and signer integration; do not delegate an unspecified missing service to another person. Implementation agents may execute directly without subagents.
 
 **Goal:** deliver account authentication/sessions, assets/history, owner-transfer relaying, durable agent execution, qualified MPC signing, policy enforcement and inspectable exports.
 
-**Architecture:** API/worker/Postgres on host A; MPC node0 and Go adapter on A; separately administered host B runs MPC node1, deterministic policy service and Go authorizer. Both nodes require the policy authorizer. NATS/Consul are private infrastructure. One combined executor signature reaches the wallet; the owner's key never reaches either host.
+**Architecture:** API/worker/Postgres, policy authorizer, private NATS/Consul and three MPCium nodes run as separate Docker services on the existing Azure Standard_B2als_v2 VM (2 vCPU/4 GiB RAM). Each node has a distinct identity and encrypted persistent share volume. All three join DKG; two participating nodes are the intended signing quorum. This is a competition PoC boundary: all services share one VM/root, so it demonstrates threshold operation but does not protect against host compromise. Only the HTTPS API is public; MPC/NATS/Consul/policy ports stay on a private Docker network. The owner key stays on the phone.
 
 **Stack:** Node22/Fastify/Zod/viem/PostgreSQL16; Go1.25.8; MPCium commit `90e3ee3c15e6698ade5626ff6c6b49d2453d8ce2`; upstream's pinned Fystack tss-lib fork. No custom cryptography/C++ transport/embedded-wallet provider.
 
@@ -106,20 +108,22 @@ Task-level case IDs and public/device evidence below are the gate criteria. Refe
 | M3 / G3,W2/W3 | `P2-04, P2-W01/02/03` | All runbooks through one worker; owner relay, history coverage, session rotation/revocation and correct reservation/evidence behavior. |
 | M4 / G4,W4 | `P2-06, P2-W04 and all failure cases` | Node/DB/RPC/queue/crash/reorg/restore/tenant/refresh failures tested; installed app demonstrates API-offline personal/owner paths. |
 | M5 / G5,W5 | `Every P2 task` | Operable deployment/backup/loss guide, current pins/readiness, exact results/known risks and final integration sign-off; no unresolved required case. |
+| MA / W0–W4 (v7) | `P2-A01, P2-A02, P2-A03` | Agent questions, owner approvals, policy relay, per-asset execution and risk sentinel integrated; AQ03, AQ05–AQ09, AQ12 and AQ14 platform cases PASS. |
 
 ## Start here — current release scope and task order
 
 **Required:** the complete personal-wallet and managed-agent flows in S8. **Deferred:** WalletConnect/external dApp connections; no WalletKit dependency, Reown projectId, dApp screen or pairing acceptance gate. External agent SDK/MCP access remains required.
 
-Sections 2–6 and the wallet tasks in section 7 are one delivery. Follow the sequence below; wallet tasks are not work postponed until after the agent-only path. Existing bootstrap source needs W0 migration before new financial signatures. Documentation6, wallet domain5, Login2 and agent receipt/runbook schema4 remain unchanged by this handoff revision.
+Sections 2–6 and the wallet tasks in section 7 are one delivery. Follow the sequence below; wallet tasks are not work postponed until after the agent-only path. Existing bootstrap source needs W0 migration before new financial signatures. Documentation 7.0 keeps wallet domain 5, Login 2 and agent receipt/runbook schema 4, moves Invoice to domain 2 and adds the S9 agentic layer and policy controls; section 8 tasks are required in the same delivery.
 
 | Work order | Task IDs | Deliverable / dependency |
 | --- | --- | --- |
 | Auth and API foundation | `P2-03 + P2-W01` | Implement Login2, account isolation, native refresh rotation/session revocation and business migrations against Person1’s W0 schema commit. |
-| MPC qualification | `P2-01 + P2-02` | In parallel, prove the pinned topology and exact-request mandatory authorization; the upstream minimum-node discrepancy is a blocker until resolved. |
+| MPC qualification | `P2-01 + P2-02` | In parallel, prove the pinned topology and exact-request mandatory authorization; the exact pinned-build threshold and outage behavior are release gates. |
 | First integrated payment | `P2-04 + P2-W03` | Connect durable reservations/worker/relayer and managed owner-transfer draft/submit; retain separate authority and nonce lanes. |
 | Wallet continuity | `P2-W02 + P2-W04` | Provide actual assets/history/backfill/reorg coverage, indexer credentials and outage/session behavior. |
 | Evidence and operations | `P2-05 + P2-06` | Export inspectable records; qualify deployment/restore and report original-agent plus wallet gates. |
+| Agent decisions and owner controls | `P2-A01 + P2-A02 + P2-A03` | Question service and compile route, approvals/policy relay/per-asset execution, then the risk sentinel. |
 
 **Completion record:** for each task record source commit, shared-schema commit, command/device or chain reference, observed result and known gaps. Unrun or failed cases stay incomplete. Both original G/Q and wallet W/WQ gates apply; no acceptance or implementation tests were executed by updating this document.
 
@@ -132,45 +136,51 @@ Sections 2–6 and the wallet tasks in section 7 are one delivery. Follow the se
 | Storage | `apps/api/migrations`, `apps/api/src/db` | Constraints/locks/leases/outbox, refresh families/revocation, history coverage and encrypted artifacts |
 | Policy service | `services/policy/src/{load,validate,rules,authorize}` | Independently reload owner scope, immutable Action and current chain state |
 | MPC Go adapter | `services/mpc-adapter/{cmd,internal}` | Build exact signed requests, route results, normalize/recover EVM signature |
-| MPC Go authorizer | `services/mpc-authorizer/{cmd,internal}` | Verify initiator+policy-approved exact bytes, authorizer key only on B |
-| Operations | `infra/{compose.dev.yaml,host-a,host-b,mpcium.lock.json}`, `docs/platform-operations.md` | Private authenticated services, independent shares/backups, restore and deploy |
+| MPC Go authorizer | `services/mpc-authorizer/{cmd,internal}` | Verify initiator+policy-approved exact bytes, authorizer private key only in policy service |
+| Operations | `infra/{compose.dev.yaml,mpcium.lock.json}`, `infra/release/compose.mpcium.yaml`, `docs/platform-operations.md` | Private services, separate per-node shares/backups, restore and deploy |
 | Evidence | `apps/worker/src/evidence`, `evidence/person2` | Ledger/artifacts/checkpoint/anchor/export with no secret leakage |
 
 Person1 supplies ABI/schema; Person3 signs owner Login2/Permit5/Admin5/OwnerTransfer5; Person4 supplies runbooks/providers and independent inspector. You provide the stable backend those components use. Person4 cannot call a generic signer or bypass your worker.
 
 ## 2. Prove MPCium first
 
-### P2-01. Pinned two-node setup and EVM signature, G1
+Reference material: pinned [signing consumer](https://github.com/fystack/mpcium/blob/90e3ee3c15e6698ade5626ff6c6b49d2453d8ce2/pkg/eventconsumer/sign_consumer.go), pinned [keygen consumer](https://github.com/fystack/mpcium/blob/90e3ee3c15e6698ade5626ff6c6b49d2453d8ce2/pkg/eventconsumer/event_consumer.go), pinned [production config](https://github.com/fystack/mpcium/blob/90e3ee3c15e6698ade5626ff6c6b49d2453d8ce2/config.prod.yaml.template), pinned [installation steps](https://github.com/fystack/mpcium/blob/90e3ee3c15e6698ade5626ff6c6b49d2453d8ce2/INSTALLATION.md), and [current official MPCium docs](https://docs.fystack.io/mpcium). The pinned production config and current online threshold examples differ; qualify the checked-in source version.
 
-**Create:** `infra/mpcium.lock.json`, development compose, deployment templates, Go adapter package, `evidence/person2/mpcium-qualification.json`.
+### P2-01. Pinned three-node/two-participant setup and EVM signature, G1
+
+**Setup sequence:** fetch the commit recorded in `infra/mpcium.lock.json`; build MPCium and its CLI from that source; use the upstream `mpcium-cli generate-peers -n 3`; generate the initiator identity and three node identities using the pinned setup utilities; place private identity/password/share files under `/opt/mandate/private/mpc/node0`, `node1`, and `node2`; distribute peer public identity files and the same `peers.json` to each node; set the same 32-byte chain code and exact pinned config on all three; then start NATS/Consul, the three nodes, policy authorizer, adapter and worker in that order. Store no generated private file in Git or a container image. Use the exact commands supported by the pinned checkout and record them in the operator guide.
+
+**Create:** `infra/mpcium.lock.json`, `infra/release/compose.mpcium.yaml`, deployment templates, Go adapter package, `infra/scripts/qualify-mpc.sh`, and `evidence/person2/mpcium-qualification.json`.
 
 - [ ] Pin exact MPCium commit above plus `go.sum` and resolved images; record the replaced dependency `github.com/fystack/tss-lib/v3 v3.0.1`. Retain Apache2.0 notices. Do not claim the complete integration is audited.
-- [ ] Use **two nodes with `mpc_threshold: 1`**, meaning2 participating signers in the inspected t+1 implementation. Do not copy README's `mpc_threshold:2` as2-of-2. Run DKG and prove neither node can sign alone. If upstream startup rejects this configuration or signing fails, stop G1 and fix/version the integration; no assumption that this design already ran successfully.
-- [ ] Provision encrypted per-node identity and Badger share storage with different passwords/backup credentials. Generate node private identities on their own hosts and distribute public peer identities only; do not leave both private keys/share backups on a bootstrap machine. Generate one common32-byte chain_code as upstream requires; no child derivation in release (`DerivationPath` canonical empty). Generate one executor master wallet per Mandate wallet, no shared derived customer key tree. Set max_concurrent_keygen=1 and max_concurrent_signing=1 initially. Keygen is an administrative command, unavailable to end-user agent tokens.
-- [ ] Enable `authorization.enabled:true` and **nonempty `required_authorizers:[mandate-policy-v1]` on every node**; public key on A+B, private policy-authorizer key only on B. Refuse application readiness if config is disabled/missing/empty/mismatched. Keygen also requires this authorizer through an explicit administrative ceremony; reshare is denied in release.
-- [ ] Private NATS JetStream and Consul only; configure server TLS and client authentication/ACLs supported by pinned build, restricted firewall/VPN, Consul ACL token and encrypted disks. Verify unauthorized publish/read/register attempts fail. Inspect actual upstream TLS/config options rather than assuming every SECURITY.md claim is enabled. If native client cannot support required TLS authentication, keep all endpoints bound to authenticated encrypted private tunnels and document this transport boundary. Never expose plaintext services publicly.
+- [ ] Run **three nodes with `mpc_threshold: 1`**. In the pinned source, keygen passes the configured value to TSS and the signer computes `requiredPeers := mpcThreshold + 1`. The pinned production template uses `1`, so this is the candidate two-participant quorum. Current online docs use a different threshold-label convention. Verify actual keygen/signing behavior from this exact commit before accepting the value. DKG uses all three peers. Do not infer threshold semantics from a config name or copy another version's defaults. Record the resolved upstream doc/source mismatch in the qualification report. If DKG/signing behavior differs, mark G1 blocked and update the source/config/manifest together.
+- [ ] Generate three distinct node identities and public peer records; use three separate persistent encrypted Badger volumes, one per container, with distinct passwords and backup files. Generate one common32-byte chain_code as upstream requires; no child derivation in release (`DerivationPath` canonical empty). Generate one executor wallet per Mandate managed wallet, no shared derived customer key tree. Set max_concurrent_keygen=1 and max_concurrent_signing=1 initially. Keygen is an administrative command, unavailable to end-user agent tokens. Keep node secrets out of source control, image layers, compose literals and logs.
+- [ ] Enable `authorization.enabled:true` and **nonempty `required_authorizers:[mandate-policy-v1]` on all three nodes**; distribute only the policy public key to nodes and keep the authorizer private key in the policy service secret store. Refuse application readiness if config is disabled/missing/empty/mismatched. Keygen also requires this authorizer through an explicit administrative ceremony; reshare is denied in release.
+- [ ] Put the three MPC nodes, NATS and Consul on a private Docker bridge. The current API uses host networking, so expose NATS/Consul to host processes only with ports bound to `127.0.0.1` (for example 4222/8500); nodes use Docker service DNS on the bridge. Do not bind these ports to the VM public interface. Keep adapter/policy endpoints loopback-only. Configure NATS credentials/ACLs and Consul ACL token where supported; enforce host firewall and encrypted disks. Verify unauthorized publish/read/register attempts fail. Inspect pinned client TLS options; do not claim TLS unless tested. The VM is the single network/administrator trust boundary. The process uses loopback-only NATS/Consul host bindings because the API currently runs in host network mode; the release compose file must preserve this binding and verify public bind addresses before starting nodes.
 - [ ] Register result handlers **before publishing**, set stable unique adapter ClientID `mandate-adapter-a`, permit one active client process with that ID, serialize sessions per key. Match response walletId+TxID+expected key/digest; never accept an arbitrary success from result topic.
 - [ ] Decode R/S/recovery returned by ECDSA path; pad r/s to32 bytes, normalize low-S with vetted secp256k1 library and adjust/recover parity, produce canonical65-byte Ethereum signature. Recover expected executor on original32-byte Action digest, including leading-zero digest vectors. No extra hash/text signing. Verify in viem and Person1's Solidity test harness.
 
-**Acceptance:**20 sequential fresh requests validate; node0 alone and node1 alone fail; missing/wrong authorizer fails; mutated request fails; node restart does not substitute full-key signing. Save public vector/timing/config hashes, not private MPC transcript/share data.
+**Acceptance:** all three peers complete DKG; 20 sequential fresh requests validate; each pair (0+1, 0+2, 1+2) signs; each single node fails; stopping one node leaves the other two able to sign; stopping two fails closed; missing/wrong authorizer and mutated request fail; a node restart reloads its own persistent share and never uses a full key. Include a recorded demo drill: during a Base Sepolia task, stop node0 and show the valid payment still completes; stop node1 too and show the next request fails closed with no transaction broadcast and its reservation retained; restart a node and show readiness recovers without key regeneration. Save public vectors, timing and config hashes, not private MPC transcript/share data. Report shared-host limitation.
 
 
 #### Required execution contract — P2-01
 
-**Prerequisites / blockers:** P1 W0 Action vectors; two separately administered signer hosts, private network and authorized isolated test-key ceremony. Pinned source exists under vendor/mpcium.
+**Prerequisites / blockers:** P1 W0 Action vectors; existing Azure VM access, private Docker network and authorized isolated test-key ceremony. Pinned source exists under vendor/mpcium. Current VM is 2 vCPU/4 GiB; qualify actual memory use while API/database services are also running.
 
-**Required source and test files:** `infra/{mpcium.lock.json,host-a,host-b}`; `services/mpc-adapter/internal/qualification`; `services/mpc-adapter/testdata`; `infra/scripts/qualify-mpc.sh`; `evidence/person2/mpcium-qualification.json`.
+**Required source and test files:** `infra/mpcium.lock.json`, `infra/release/compose.mpcium.yaml`, `infra/secrets.example`; `services/mpc-adapter/internal/qualification`; `services/mpc-adapter/testdata`; `infra/scripts/qualify-mpc.sh`; `docs/platform-operations.md`; `evidence/person2/mpcium-qualification.json`.
 
-**Consumes / produces:** Consumes pinned MPCium90e3ee3c15e6698ade5626ff6c6b49d2453d8ce2 and Go1.25.8, source threshold=t requiring t+1 signers, required policy authorizer. Produces verified executor public key/address and an actual qualification report, never a private share/transcript.
+**Consumes / produces:** Consumes pinned MPCium90e3ee3c15e6698ade5626ff6c6b49d2453d8ce2 and Go1.25.8. Source inspection shows signing readiness requires configured threshold+1 peers; the observed test results must confirm the candidate value1 behaves as 2-of-3. Required policy authorizer is mandatory. Produces verified executor public key/address and an actual qualification report, never a private share/transcript.
 
 **Implementation algorithm:**
 
 ```text
-1. Inspect pinned registry/keygen/signing/identity/client/config code and record source references. Proposed participants=2, mpc_threshold=1 is unqualified until this task passes; upstream deployment guidance mentioning >=3 nodes is an explicit compatibility issue.
-2. Attempt isolated DKG/signing under the exact planned configuration without patching cryptographic source. Record startup, participants and threshold actually used.
-3. If two-node setup fails or upstream requirements cannot be satisfied, mark MPC_TOPOLOGY_BLOCKED and provide the precise source/log and proposed configuration change for Person1/team review. Do not silently deploy three nodes under a two-node manifest, swap engines or use a full key.
-4. Encrypt/store each identity/share on its own host; different backup credentials, no combined private bootstrap copy. Private NATS/Consul only; subscribe before publishing, stable unique client ID.
-5. Verify each actual returned R/S/recovery against original Action digest with an established secp256k1 implementation; no rehashing.
+1. Verify pinned source and record the exact threshold calculation, DKG peer requirements, storage/config paths, authorizer behavior and cited files/lines. Compare with the official current docs and record the documented convention difference.
+2. Run the pinned `mpcium-cli generate-peers -n 3`; generate the initiator and three node identities with the matching pinned CLI/scripts. Keep private files under `/opt/mandate/private/mpc/`, outside Git and image layers.
+3. Build the pinned image; start three services from the same immutable image digest with distinct node identity, config and persistent encrypted volume. Keep node ports private.
+4. Start NATS/Consul on the private Docker bridge, the nodes on that bridge, and adapter/policy with only loopback connectivity to their private endpoints. Confirm public-interface scans cannot reach any MPC/NATS/Consul endpoint.
+5. Run DKG with all three. Record readiness and resulting public executor address. Run pairwise signing tests for (0,1), (0,2), (1,2), then single-node and outage tests. Do not patch cryptographic source to force expected behavior.
+6. If 3-node startup, DKG or 2-of-3 signing fails, mark `MPC_TOPOLOGY_BLOCKED`, preserve logs/config hashes, and update the manifests before deployment; do not claim success or use a full-key fallback. If online guidance disagrees with this pinned behavior, the pinned code plus observed tests determine the release configuration; document the difference.
+7. Verify returned R/S/recovery against original Action digest with an established secp256k1 implementation; no rehashing. Record actual memory/CPU under the full demo stack.
 ```
 
 **Mandatory tests — implement each ID as an independently reported case:**
@@ -178,11 +188,13 @@ Person1 supplies ABI/schema; Person3 signs owner Login2/Permit5/Admin5/OwnerTran
 | Case ID | Exact setup / action | Required assertion / observed outcome |
 | --- | --- | --- |
 | `P2-01.T01` | 20 sequential fresh threshold-signing sessions with public digest vectors, including leading-zero digest | Every signature recovers exact expected executor on original32bytes; record count, duration and configuration hash. |
-| `P2-01.T02` | Run node0 alone, then node1 alone | Neither returns a valid threshold signature; missing node stops signing, not an ordinary-key fallback. |
+| `P2-01.T02` | Run each individual node alone | No individual node returns a valid threshold signature; no ordinary-key fallback. |
+| `P2-01.T02b` | Sign with each pair: 0+1, 0+2, 1+2 | Each pair returns a signature that recovers the same expected executor. |
+| `P2-01.T02c` | Stop node0 while nodes1+2 stay ready; then stop two nodes | One-node outage still signs; two-node outage fails closed and emits no broadcastable result. |
 | `P2-01.T03` | Missing/empty/wrong required_authorizers or authorization disabled | Application readiness fails; no financial signing even if upstream enabled flag alone would allow it. |
 | `P2-01.T04` | Unauthorized NATS publish/Consul read-register/network client | Denied by configured tunnel/auth/ACL/firewall; no plaintext public share/coordinator access. |
 | `P2-01.T05` | Restart a signer after a completed session; replay a mismatched result/wallet/attempt | Fresh valid sessions remain verifiable; wrong result is rejected; old ephemeral session is not resumed. |
-| `P2-01.T06` | Pinned two-node setup cannot start/complete or public key differs between participants | G1 remains BLOCKED with exact logs; no fabricated success or hidden topology change. |
+| `P2-01.T06` | Three-node setup/DKG/quorum does not match the pinned expected behavior | G1 remains BLOCKED with exact logs and source/config evidence; no fabricated success or hidden topology change. |
 
 **Task execution checklist:**
 
@@ -207,7 +219,7 @@ make check-platform
 
 **Create:** adapter `request.go`, authorizer `authorize.go`, policy `authorize.ts`, private endpoint contract test.
 
-Use upstream **Go** client/types at the same commit. This avoids dependence on a separately versioned TS client's serialization. Our public TypeScript SDK calls the API, never MPCium directly.
+Use upstream **Go** client/types at the same commit. This avoids dependence on a separately versioned TS client's serialization. Our public TypeScript SDK calls the API, never MPCium directly. Threshold references: pinned `event_consumer.go` passes config to TSS; pinned `sign_consumer.go` requires config+1 peers; pinned `config.prod.yaml.template` sets1. Current Fystack docs describe a different threshold-label convention (their example uses2 for 2-of-3). Capture these source and documentation references in the qualification report; do not mix versions.
 
 ```text
 internal SignAction(actionId) — no raw digest input
@@ -216,27 +228,27 @@ internal SignAction(actionId) — no raw digest input
    KeyType=secp256k1, WalletID=registered MPC UUID, TxID=signing attempt UUID,
    NetworkInternalCode="eip155:84532", Tx=exact 32 digest bytes,
    DerivationPath=nil (frozen by golden Go JSON fixture).
-3. Sign msg.Raw() using A's local Ed25519 initiator.
-4. Send {actionId,attemptId,message} over authenticated private channel to B.
-5. B independently verifies initiator signature and runs policy on stored data;
+3. Sign msg.Raw() using the adapter service's local Ed25519 initiator.
+4. Send {actionId,attemptId,message} over authenticated private channel to the policy/authorizer service.
+5. The policy service independently verifies initiator signature and runs policy on stored data;
    compare wallet/key/network/path/TxID/Tx against reconstructed expected message.
-6. B uses upstream ComposeAuthorizerRaw(message), signs those exact bytes with
+6. The Go authorizer uses upstream ComposeAuthorizerRaw(message), signs those exact bytes with
    policy-authorizer Ed25519 key, returns only required authorizer signature.
 7. Attach signature; Go client.SignTransaction signs Raw() again and publishes.
    Ed25519 is deterministic: assert repeated initiator signature unchanged.
-8. Both nodes verify initiator + required authorizer before threshold signing.
+8. All three nodes verify initiator + required authorizer before threshold signing.
 9. Recover executor from returned signature; persist before sending to relayer.
 ```
 
-`POST /internal/sign-actions {actionId}` on adapter returns202 `{actionId,attemptId,state}`; `GET /internal/sign-actions/:actionId` returns same stored status or `{actionId,attemptId,keyVersion,executorAddress,signature,state:'SIGNED'}`. Private caller is worker only. `POST /internal/authorizations {actionId,attemptId,message}` is Go authorizer on B; its local-only call `POST /internal/policy/check {actionId,attemptId,message}` returns `{allowed,ruleIds,expectedDigest,expectedMpcWalletId,expectedNetwork,expectedTxId,expectedDerivationPath,chainBlock}`. B compares every field before authorizing. Policy never accepts caller-supplied expected digest as truth. `GET /health/ready` reveals status only, not config/keys.
+`POST /internal/sign-actions {actionId}` on adapter returns202 `{actionId,attemptId,state}`; `GET /internal/sign-actions/:actionId` returns same stored status or `{actionId,attemptId,keyVersion,executorAddress,signature,state:'SIGNED'}`. Private caller is worker only. `POST /internal/authorizations {actionId,attemptId,message}` is the private Go authorizer service; its private-network call `POST /internal/policy/check {actionId,attemptId,message}` returns `{allowed,ruleIds,expectedDigest,expectedMpcWalletId,expectedNetwork,expectedTxId,expectedDerivationPath,chainBlock}`. The authorizer compares every field before authorizing. Policy never accepts caller-supplied expected digest as truth. `GET /health/ready` reveals status only, not config/keys.
 
-- [ ] B reads immutable owner-signed records through restricted DB role, verifies owner signature/hash commitments and queries its own RPC at one recent block. It does not trust API's admitted flag, current balance claim or model explanation.
+- [ ] Policy service reads immutable owner-signed records through restricted DB role, verifies owner signature/hash commitments and queries its own RPC at one recent block. It does not trust API's admitted flag, current balance claim or model explanation.
 - [ ] Check current active epoch/time, installed runbook/hash, Conditions, target/recipient, token/vault, quote/provider signature, request identity, quotas/floor, durable reservation and rate≤5proposals/min/executor. Deposit also fresh NORMAL signal/preview-derived minOutput with≤50bp margin; no available liquidity from pending withdrawal. Compare exact invoice/input binding.
 - [ ] Store attempt UUID→business action/digest/keyVersion before publish. Unique attempt and explicit message fingerprint; signed request has no independent policy-expiry field, so contract Action deadline and replay IDs remain mandatory. Replayed queue messages cannot create a second payment. Do not claim authorizer itself provides on-chain nonce protection.
 - [ ] Serialize per executor, bound timeouts/queue length; on uncertainty record SIGNING_UNKNOWN. No mid-protocol state restoration, custom nonce cache or automatic reuse of ephemeral state. Reconcile before new attempt on same business action; fresh upstream session only after safe abort. Completed action returns stored signature/status.
 - [ ] Deny remote reshare/keygen routes and arbitrary digest signing. Local keygen ceremony uses fixed planned walletId, admin operator approval and authorizer binding. Agent bearer tokens never reach either Go endpoint.
 
-**Acceptance:** initiator compromised alone cannot get unauthorized Action signed; authorization for one digest/wallet cannot authorize another. B unavailable stops new signing. Document that both share hosts compromised can bypass off-chain authorizer checks, while wallet caps remain enforced.
+**Acceptance:** initiator compromised alone cannot get unauthorized Action signed; authorization for one digest/wallet cannot authorize another. The policy/authorizer service unavailable stops new signing. Document that a VM administrator can access all shares and the policy key, so this PoC does not resist host compromise, while wallet caps remain enforced.
 
 
 #### Required execution contract — P2-02
@@ -264,7 +276,7 @@ Persist attempt ID/keyVersion/digest before publish; serialize per key; timeout 
 | `P2-02.T02` | Caller supplies allowed=true/expectedDigest but immutable DB state differs | Independent reload wins; deny caller claim. |
 | `P2-02.T03` | Stale chain snapshot>15s, revoked epoch, wrong recipient/runbook/quote or missing reservation | Deterministic denial rule ID; no MPC initiation. |
 | `P2-02.T04` | Policy NORMAL signal older than60s or WARNING on deposit; excessive proposal rate>5/min/executor | Deposit/rate admission denies, including when model asks to override. |
-| `P2-02.T05` | B unavailable, wrong initiator or wrong authorizer key | No new signing; already released usable signatures remain explicitly unresolved until reconciliation. |
+| `P2-02.T05` | Policy/authorizer service unavailable, wrong initiator or wrong authorizer key | No new signing; already released usable signatures remain explicitly unresolved until reconciliation. |
 | `P2-02.T06` | Result for wrong keyVersion/wallet/attempt/digest or nonrecovering EVM signature | Reject result; no relay and no release of uncertain reservation. |
 | `P2-02.T07` | Same committed action submitted twice while first attempt unresolved | Returns stored status/original logical action; no concurrent signing or second business payment. |
 
@@ -286,7 +298,7 @@ Persist attempt ID/keyVersion/digest before publish; serialize per key; timeout 
 make check-platform
 ```
 
-**Mandatory outcome before this task is complete:** Exact-request authorization is enforced by both nodes and independently tested; node/policy identities never become owner keys. Accepted digest/signature fixture works against Person1 contract.
+**Mandatory outcome before this task is complete:** Exact-request authorization is enforced by all three nodes and independently tested; node/policy identities never become owner keys. Accepted digest/signature fixture works against Person1 contract.
 
 ## 3. API and persistent financial runtime
 
@@ -483,9 +495,9 @@ make check-integration
 
 ### P2-06. Deployment, restoration and release, G3–G5
 
-- [ ] Deploy A/B with separate accounts/secrets/admin controls; infrastructure single NATS/Consul may be availability bottleneck, acknowledged. Nodes are online while owner offline. Go adapter key permits requests; authorizer key approves requests; neither is Ethereum executor share or owner key.
+- [ ] Deploy the API and three MPCium containers on the existing VM using the release compose file. Use separate per-node secrets and persistent volumes; keep policy service, NATS, Consul and MPC ports private. Nodes are online while owner is offline. This PoC has a single VM administrator boundary. Go adapter identity initiates requests; authorizer key approves requests; neither is an Ethereum executor share or owner key.
 - [ ] Encrypt separate long-term node backups and DB/artifact backups; keys outside archives. Restore into isolated environment with signing disabled, reconcile jobs/attempts/journal/chain before fresh signing. Never restore mid-sign ephemeral state as executable session.
-- [ ] Lost/compromised signer → local inhibit, owner confirmed pause/revoke, fresh per-wallet DKG/new executor, fresh owner Permit. No full-key reconstruction or unqualified reshare workflow. Owner can recover supported funds through independent CLI even if both hosts unavailable.
+- [ ] Lost/compromised signer → local inhibit, owner confirmed pause/revoke, fresh per-wallet DKG/new executor, fresh owner Permit. No full-key reconstruction or unqualified reshare workflow. Owner can recover supported funds through the independent CLI even if all MPC nodes are unavailable.
 - [ ] DB/RPC/stale snapshot/NATS/Consul/policy failure → no new signing. Record previously released signatures as possibly usable until revoked/expired and chain reconciled. Test participant outage, wrong initiator/authorizer, mixed client result, API-offline recovery and backup restoration.
 - [ ] Supply exact `.env.example` names with descriptions but no secrets, health/readiness endpoints, deploy/restart/backup/loss guide, image/source pins, fee/faucet funding checklist and clean-start demonstration.
 - [ ] Cross-review with Person1 financial rules, Person3 API/owner flow, Person4 schema/export/driver. Deliver platform security report/test results/cost data with actual commit and final deployment manifest entries.
@@ -495,14 +507,14 @@ make check-integration
 
 **Prerequisites / blockers:** P2 signing/auth/runtime/evidence tasks pass; authorized deployments and isolated backup targets available.
 
-**Required source and test files:** `infra/{host-a,host-b,compose.dev.yaml,mpcium.lock.json}`; `docs/platform-operations.md`; `.env.example via Person1`; `evidence/person2/{operations,restore}.json`.
+**Required source and test files:** `infra/{compose.dev.yaml,mpcium.lock.json}`, `infra/release/compose.mpcium.yaml`; `docs/platform-operations.md`; `.env.example via Person1`; `evidence/person2/{operations,restore}.json`.
 
-**Consumes / produces:** Provides actual start/ready/stop/restart/backup/restore/lost-signer procedures with separated keys/admin domains, public config manifest and dependency health. No full-key reconstruction or unqualified reshare.
+**Consumes / produces:** Provides actual start/ready/stop/restart/backup/restore/lost-signer procedures with separate per-node keys/volumes/backups and a documented shared admin domain, public config manifest and dependency health. No full-key reconstruction or unqualified reshare.
 
 **Implementation algorithm:**
 
 ```text
-Use separate host admin/share encryption/backup credentials; document any operator with access to both. Service endpoints remain private/authenticated; ingress only documented HTTPS API/provider surfaces.
+Use one VM for this competition PoC, with three distinct container identities, encrypted persistent share volumes and per-node backup credentials. Document clearly that one root/admin can access all three. Service endpoints remain private; ingress only documented HTTPS API/provider surfaces. Set per-service memory/pid limits after measuring the VM, keep API/DB resource use within the available headroom, and record measured peak memory/CPU with the complete demo stack.
 Backup long-term shares and DB/artifacts separately; backup keys outside archives. Restore isolated with financial signing disabled; reconcile journal/chain/leases before enabling new work.
 Lost signer -> inhibit -> owner-confirmed stop/recovery -> fresh per-wallet DKG/executor -> fresh Permit. Never resume saved ephemeral signing rounds.
 Readiness checks actual required DB/RPC/chain/MPC authorizer/config/schema/version/funding; liveness is only process health.
@@ -512,9 +524,9 @@ Readiness checks actual required DB/RPC/chain/MPC authorizer/config/schema/versi
 
 | Case ID | Exact setup / action | Required assertion / observed outcome |
 | --- | --- | --- |
-| `P2-06.T01` | Stop DB/RPC/NATS/Consul/policy/one signer separately | New financial signing denies; readiness503 names dependency safely; released signatures remain tracked. |
+| `P2-06.T01` | Stop DB/RPC/NATS/Consul/policy/node0 separately; then stop two MPC nodes | One node down: remaining pair signs. Two down: new signing denies; readiness503 names dependency safely; released signatures remain tracked. |
 | `P2-06.T02` | Restore backup into isolated environment | No signing on startup; existing jobs/nonces/history reconciled before release, no second payment. |
-| `P2-06.T03` | Lose share host permanently | Owner native/CLI can stop/recover; new executor requires fresh owner authority; no private-key reconstruction. |
+| `P2-06.T03` | Lose one node share permanently | Owner native/CLI can stop/recover; new executor requires fresh owner authority; no private-key reconstruction. |
 | `P2-06.T04` | Inspect host/firewall/containers/logs/build artifacts | No public share/coordinator/private identity, secret in APK or combined private share backup; record actual access limits. |
 | `P2-06.T05` | Restart all processes with pending scheduled/UNKNOWN work | Original request IDs/nonces/leases recover; no catch-up/duplicate schedule transfer. |
 | `P2-06.T06` | Fresh deployment from guide with required resources | Another operator can reproduce known state; exact source/image/toolchain pins and unresolved risks documented. |
@@ -544,7 +556,7 @@ Implement root targets `make check-platform` and `make check-integration`; packa
 
 Qualification matrix: auth replay/scope; amount/hash mutation; cap race; signed-before-broadcast crash; response-lost-after-broadcast; failed simulation after signing; UTC rollover with UNKNOWN; receipt reorg; node unavailable; wrong authorizer; restarted consumer; finality distinction; API-offline recovery; export round trip/tamper. Use valueless fixtures for fault injection. Provide exact case IDs and observed state transitions, not only a green aggregate.
 
-**Done means:** API and worker complete phone-approved real tasks while owner offline; either MPC node alone cannot sign; policy approval is mandatory; payment/reservation never duplicates under documented failures; verifier consumes authentic exports without your server.
+**Done means:** API and worker complete phone-approved real tasks while owner offline; any single MPC node alone cannot sign; policy approval is mandatory; payment/reservation never duplicates under documented failures; verifier consumes authentic exports without your server.
 
 ## 6. Reference implementation details
 
@@ -738,7 +750,7 @@ make check-integration
 ### P2-W04. Full app operational qualification, W4–W5
 
 - [ ] Prepare production/session/history secrets and public-origin configuration separately from signing shares; indexer/RPC credentials are not server-owner authentication credentials. API/device/session screens show real failure states.
-- [ ] Qualify original MPCium topology gate before claiming availability: upstream production guide assumes≥3nodes; proposed two-node threshold1 needs actual proof or openly revised deployment specification. No ordinary-key fallback.
+- [ ] Qualify the documented three-node/two-participant MPCium setup on the existing VM before claiming availability. DKG, all participant pairs, one-node tolerance, two-node fail-closed behavior, signature recovery and mandatory authorization must pass against the pinned build. This shared-host PoC does not claim host-compromise resilience. No ordinary-key fallback.
 - [ ] Supply WQ02/05–12 results and app-ready session/history/transfer fixtures. Retain original financial crash/UNKNOWN/reorg qualification and evidence writer responsibilities; session changes cannot weaken financial authority.
 - [ ] G4/G5 report original agent tests and WQ wallet cases separately. Typecheck/bootstrap process liveness does not satisfy either qualification suite.
 
@@ -793,36 +805,221 @@ make release-check
 **Mandatory outcome before this task is complete:** W5 backend sign-off contains real case results, cost/funding/secret/setup instructions and no unsupported readiness claim.
 
 
+## 8. Agentic layer and policy controls — required v7 tasks
+
+S9 adds the LLM agent and Cobo/Circle-class policy controls. You own the runtime that connects the agent to durable execution, the owner approval path and the deterministic risk sentinel. The agent never reaches the signer; your worker remains the only Action creator.
+
+### P2-A01. Agent question service and intent route, W1–W3
+
+**Files:** `apps/api/src/routes/{questions,intents}.ts`, `apps/worker/src/agent-questions.ts`, migrations `00NN_agent_questions.sql`.
+
+- [ ] Persist `AWAIT_AGENT` questions with options, bounds, default and deadline in the same transaction as runbook state; task state AWAITING_AGENT.
+- [ ] `GET /tasks/:taskId/questions/next` (long-poll ≤25s) and `POST /questions/:questionId/answer` with agent `run` scope restricted to the task; validate optionId or amount against the stored options and freshly recomputed bounds; one accepted answer per question; 409 on a different second answer.
+- [ ] Deadline job applies the recorded default (or fails the step when none) and records AGENT_TIMEOUT; next `advance` receives `snapshot.agentAnswers`.
+- [ ] Host `POST /intents/compile` (owner JWT) by calling Person4's compiler library; validate output against shared schemas and WalletPolicy; store draft; INTENT_COMPILED event.
+- [ ] Write AGENT_QUESTION, AGENT_DECISION and AGENT_TIMEOUT evidence events.
+
+**Acceptance:** the agent influences only which allowed option is used; restarts never lose or duplicate a question or answer.
+
+#### Required execution contract — P2-A01
+
+**Prerequisites / blockers:** P1-A01 DTOs; P4-A02 runbook questions; P2-04 worker.
+
+**Required source and test files:** `apps/api/test/{questions,intents}.test.ts`; `apps/worker/test/agent-questions.test.ts`.
+
+**Consumes / produces:** AgentQuestion/AgentAnswer routes for P4 MCP/SDK/CLI; snapshot.agentAnswers for runbooks.
+
+**Implementation algorithm:**
+
+```text
+on AWAIT_AGENT: insert question(taskId, questionId, options, bounds, default, deadline) + set state, one transaction
+answer: lock question; require state OPEN and token task == question.task
+ if optionId: require in options; if amount: recompute bounds from permit, policy, reservations; require within
+ store answer once; schedule advance
+deadline job: if OPEN and now >= deadline: apply default or FAIL step; record AGENT_TIMEOUT
+```
+
+**Mandatory tests — implement each ID as an independently reported case:**
+
+| Case ID | Exact setup / action | Required assertion / observed outcome |
+| --- | --- | --- |
+| `P2-A01.T01` | Answer with option not listed, amount outside bounds, or address field | Rejected AGENT_ANSWER_INVALID; question still open |
+| `P2-A01.T02` | Two different answers to one question | First accepted; second 409 |
+| `P2-A01.T03` | Budget consumed by another task between question and answer | Bounds recomputed; previously valid amount rejected |
+| `P2-A01.T04` | No answer by deadline | Default applied once; AGENT_TIMEOUT recorded |
+| `P2-A01.T05` | Worker restart while AWAITING_AGENT | Same question resumes; no duplicate action |
+| `P2-A01.T06` | Token for another task or read-only scope | 403 |
+| `P2-A01.T07` | Compiler returns unknown provider/asset/template | INTENT_INVALID; no draft stored |
+
+**Task execution checklist:**
+
+- [ ] Create the listed test files and fixtures; implement every case above with direct assertions on state/bytes/balances/status, not only HTTP200 or a log message.
+- [ ] Run the targeted cases against the incomplete behavior; retain genuine failing assertions after the runner/toolchain is working.
+- [ ] Complete the implementation checklist above and the algorithm here; keep ownership/trust boundaries intact.
+- [ ] Run the commands below and all affected regression suites. Real chain/device/MPC cases require the actual environment; label deterministic substitutes as local tests only.
+- [ ] Record each case in `evidence/person2/cases/P2-A01.json`; attach source/schema commit, command/exit status, expected/observed result, environment and redacted artifacts.
+- [ ] Give the receiving owner the actual interface sample/commit and verify the joint behavior; leave blocked dependencies explicitly incomplete.
+
+**Required verification commands** (wire missing real test scripts as specified above; placeholders cannot pass):
+
+```bash
+./scripts/pnpm.sh --filter @mandate/api check
+./scripts/pnpm.sh --filter @mandate/worker check
+make check-platform
+```
+
+**Mandatory outcome before this task is complete:** AQ03 and AQ05 platform assertions pass with the real agent connected.
+
+### P2-A02. Owner approvals, wallet policy relay and per-asset execution, W2–W3
+
+**Files:** `apps/api/src/routes/{approvals,policy,push}.ts`, `apps/worker/src/{approvals,reservations}.ts`, migrations.
+
+- [ ] When an Action exceeds the effective review threshold: reserve, store immutable Action, set AWAITING_APPROVAL, create an approval request, push only its ID; owner signs or rejects through `/approvals/:id/sign|reject`; then request MPC signing.
+- [ ] Rejection or expiry releases the reservation (no executor signature exists) and records OWNER_REJECTION; co-signed Action and Invoice lifetime ≤15 min.
+- [ ] Policy draft/submit routes with effects summary; relay applyWalletPolicy; re-read policy version before every new signing request. FREEZE/UNFREEZE through the existing admin draft/submit.
+- [ ] Reservations, counters and relaying keyed by agent asset (DemoUSD, USDC); WalletView per-asset fields.
+- [ ] Push delivery to registered devices (payload: ID only); agent tokens cannot reach approval or policy routes.
+
+**Acceptance:** above-threshold spending needs the owner's actual co-signature; owner policy and freeze apply to the next request immediately.
+
+#### Required execution contract — P2-A02
+
+**Prerequisites / blockers:** P1-A02 contracts; P3-A01 native approval signing; push credentials for the build.
+
+**Required source and test files:** `apps/api/test/{approvals,policy,push}.test.ts`; `apps/worker/test/{approvals,per-asset}.test.ts`.
+
+**Consumes / produces:** ApprovalRequest/PolicyDraft routes for P3; relayed policy/admin transactions; per-asset WalletView.
+
+**Implementation algorithm:**
+
+```text
+after reservation: if amount > min(permit.reviewThreshold, policy.reviewThreshold):
+ state AWAITING_APPROVAL; create request(expiresAt <= action.deadline <= now+15min); push(approvalId)
+on sign: verify owner signature over Approval(actionDigest, expiresAt) locally; store; continue to MPC
+on reject/expiry: state REJECTED; release reservation; evidence OWNER_REJECTION
+before each signing request: reload walletPolicy version, frozen, paused, epoch from chain
+```
+
+**Mandatory tests — implement each ID as an independently reported case:**
+
+| Case ID | Exact setup / action | Required assertion / observed outcome |
+| --- | --- | --- |
+| `P2-A02.T01` | Above-threshold Action without owner signature | No MPC request; state AWAITING_APPROVAL |
+| `P2-A02.T02` | Owner signs wrong digest or after expiry | Rejected; no MPC request |
+| `P2-A02.T03` | Owner rejects | Reservation released; OWNER_REJECTION; no transaction |
+| `P2-A02.T04` | Policy tightened between draft and signing | New limits applied; Action denied POLICY_VIOLATION |
+| `P2-A02.T05` | Wallet frozen on chain | No new signing; WALLET_FROZEN |
+| `P2-A02.T06` | Concurrent DemoUSD and USDC tasks | Independent reservations; no cross-asset double counting |
+| `P2-A02.T07` | Agent token calls approval or policy route | 403 |
+
+**Task execution checklist:**
+
+- [ ] Create the listed test files and fixtures; implement every case above with direct assertions on state/bytes/balances/status, not only HTTP200 or a log message.
+- [ ] Run the targeted cases against the incomplete behavior; retain genuine failing assertions after the runner/toolchain is working.
+- [ ] Complete the implementation checklist above and the algorithm here; keep ownership/trust boundaries intact.
+- [ ] Run the commands below and all affected regression suites. Real chain/device/MPC cases require the actual environment; label deterministic substitutes as local tests only.
+- [ ] Record each case in `evidence/person2/cases/P2-A02.json`; attach source/schema commit, command/exit status, expected/observed result, environment and redacted artifacts.
+- [ ] Give the receiving owner the actual interface sample/commit and verify the joint behavior; leave blocked dependencies explicitly incomplete.
+
+**Required verification commands** (wire missing real test scripts as specified above; placeholders cannot pass):
+
+```bash
+./scripts/pnpm.sh --filter @mandate/api check
+./scripts/pnpm.sh --filter @mandate/worker check
+make check-platform
+make check-integration
+```
+
+**Mandatory outcome before this task is complete:** AQ06–AQ08 and AQ12 platform assertions pass with real phone approvals and Base Sepolia hashes.
+
+### P2-A03. Risk sentinel and screening, W2–W3
+
+**Files:** `services/policy/src/{sentinel,screening,simulation,velocity}.ts`, `services/policy/rules/risk-rules-v1.json`.
+
+- [ ] Screening of recipient, call target and x402 payTo against the WalletPolicy blocklist and manifest `demo-screening-v1`; SCREENING_HIT denial.
+- [ ] Exact-effect simulation of the relayer transaction through the independent RPC; wallet agent-asset deltas must equal intended outflow; SIMULATION_MISMATCH denial.
+- [ ] Velocity rules from versioned `risk-rules-v1`; trigger sets off-chain inhibit for the wallet, records RISK_ALERT, pushes an alert recommending FREEZE; only the authenticated owner lifts it.
+- [ ] Rule file hash in manifest and evidence; no LLM in any sentinel decision.
+
+**Acceptance:** every agent Action is screened and simulated before the authorizer signs; alerts reach the owner.
+
+#### Required execution contract — P2-A03
+
+**Prerequisites / blockers:** P2-02 authorizer; independent RPC; P1-A03 CALL/X402 encoding.
+
+**Required source and test files:** `services/policy/test/{screening,simulation,velocity}.test.ts`.
+
+**Consumes / produces:** deny reasons and RISK_ALERT/SCREENING_DENIAL events; inhibit flag in WalletView.
+
+**Implementation algorithm:**
+
+```text
+for each signing request: screen(addresses) -> deny on hit
+ sim = simulate(relayerTx, latestBlock, independentRpc)
+ require deltas(wallet, agentAssets) == expected(action) and no other agent-asset delta
+ update velocity windows; if rule fires: inhibit(wallet), alert(owner), deny
+authorizer signs only after all checks pass
+```
+
+**Mandatory tests — implement each ID as an independently reported case:**
+
+| Case ID | Exact setup / action | Required assertion / observed outcome |
+| --- | --- | --- |
+| `P2-A03.T01` | Recipient in blocklist or screening list | Denied SCREENING_HIT; no authorizer signature |
+| `P2-A03.T02` | Template target that pulls more than amount in simulation | Denied SIMULATION_MISMATCH |
+| `P2-A03.T03` | Three denials within 10 minutes | Inhibit set; RISK_ALERT; push sent |
+| `P2-A03.T04` | Agent token tries to clear inhibit | 403; only owner clears |
+| `P2-A03.T05` | Independent RPC unavailable | Fail closed; MPC_UNAVAILABLE-class retryable denial |
+
+**Task execution checklist:**
+
+- [ ] Create the listed test files and fixtures; implement every case above with direct assertions on state/bytes/balances/status, not only HTTP200 or a log message.
+- [ ] Run the targeted cases against the incomplete behavior; retain genuine failing assertions after the runner/toolchain is working.
+- [ ] Complete the implementation checklist above and the algorithm here; keep ownership/trust boundaries intact.
+- [ ] Run the commands below and all affected regression suites. Real chain/device/MPC cases require the actual environment; label deterministic substitutes as local tests only.
+- [ ] Record each case in `evidence/person2/cases/P2-A03.json`; attach source/schema commit, command/exit status, expected/observed result, environment and redacted artifacts.
+- [ ] Give the receiving owner the actual interface sample/commit and verify the joint behavior; leave blocked dependencies explicitly incomplete.
+
+**Required verification commands** (wire missing real test scripts as specified above; placeholders cannot pass):
+
+```bash
+./scripts/pnpm.sh --filter @mandate/policy check
+make check-platform
+```
+
+**Mandatory outcome before this task is complete:** AQ09 and AQ14 pass with recorded denials and alerts.
+
+
 ## Shared implementation contract — included in all four handoffs
 
-This appendix is identical in the four documents. Specification6.0, dated2026-10-17: new MandateWallet EIP712 domain5, MandateLogin domain2 and unchanged agent receipt/runbook schema4. S8 adds the complete everyday-wallet behavior. No live contract is deployed by this update. Person1 owns shared interface changes; update fixtures and every consumer together. Existing bootstrap source is pre-v6 and must undergo W0 migration before signing.
+This appendix is identical in the four documents. Specification 7.0, dated 2026-10-18: MandateWallet EIP-712 domain 5, MandateLogin domain 2, MandateInvoice domain 2, MandateDelivery domain 1 and agent receipt/runbook schema 4 (with the additive v7 event types in S9.13). S8 adds the complete everyday-wallet behavior. S9 adds the agentic layer and Cobo/Circle-class policy controls; its type changes are already folded into S2–S6 below. Domain 5 has not been frozen at W0 or deployed, so the v7 layouts replace the v6 drafts of the same domain before freeze; nothing is migrated on chain. No live contract is deployed by this update. Person1 owns shared interface changes; update fixtures and every consumer together. Existing bootstrap source is pre-v6 and must undergo W0 migration before signing.
 
 ### S1. Product, boundary and ownership
 
-Build **Mandate Wallet**: an Android personal ETH/ERC20 wallet with receive/send/history/accounts and local security; a separately funded managed wallet delegates bounded tasks to an online agent; the agent buys real browser checks, operates one approved test vault and makes fixed scheduled payments. Payments and useful delivery are recorded separately. An independent verifier reconstructs permission, spending and delivery from an export and public chain data.
+Build **Mandate Wallet**: an Android personal ETH/ERC20 wallet with receive/send/history/accounts and local security; a separately funded managed wallet delegates bounded tasks to an online LLM agent (S9) that chooses among policy-bounded options; the agent buys real browser checks, spends a standing service allowance, operates approved vault/call templates and makes fixed scheduled payments under an owner wallet policy, review thresholds and freeze controls. Payments and useful delivery are recorded separately. An independent verifier reconstructs permission, spending and delivery from an export and public chain data.
 
 | Person | Sole write ownership | Outputs consumed by others |
 | --- | --- | --- |
 | 1 | `packages/contracts`, `packages/schema`, `deployments`, root workspace/CI configuration | ABI, schemas, fixtures, deployment manifest, chain validation |
-| 2 | `apps/api`, `apps/worker`, `services/policy`, `services/mpc-adapter`, `services/mpc-authorizer`, `infra`, migrations, evidence writer | Public API, durable execution, two-node MPCium, policy authorization, exports |
+| 2 | `apps/api`, `apps/worker`, `services/policy`, `services/mpc-adapter`, `services/mpc-authorizer`, `infra`, migrations, evidence writer | Public API, durable execution, three-node/two-participant MPCium PoC, policy authorization, exports |
 | 3 | `apps/mobile`, `modules/owner-wallet`, `tools/relay-admin.ts` | Complete personal/managed owner wallet, local transactions/sessions/security, installed APK, independent recovery sender |
-| 4 | `packages/runbooks`, `apps/provider`, `packages/sdk`, `apps/mcp`, `packages/verifier`, `demo`, `evaluation`, submission assembly | Runbook driver, paid browser services, integrations, standalone inspector, recorded demonstration |
+| 4 | `packages/runbooks`, `apps/provider`, `packages/sdk`, `apps/mcp`, `apps/agent`, `apps/cli`, `packages/verifier`, `demo`, `evaluation`, submission assembly | Runbook driver, reference LLM agent, intent compiler library, paid/x402-formatted browser services, SDK/MCP/CLI integrations, standalone inspector, recorded demonstration |
 
 Person 2 owns the worker process; Person 4 supplies its runbook library. Person 2 writes evidence; Person 4 verifies it independently. Person 1 owns ABI/schema generation; other owners never hand-maintain copies. Each owner supplies tests, deployment instructions, known risks and screenshots/logs for their own deliverable. No unassigned fifth person is required.
 
-Use one monorepo `./`, Node 22, TypeScript, pnpm workspaces with a checked-in lockfile; Solidity 0.8.28/OZ 5.x/Foundry; PostgreSQL 16; React Native with Expo 54 native Android build; Go 1.25.8 for MPCium. Person1 creates the workspace. All filenames here are relative to it and are planned files, not claims that source already exists. Pin resolved package versions in lockfiles; container images use resolved digests in the release manifest. Keep secrets out of Git and frontend bundles.
+Use one monorepo `./`, Node 22, TypeScript, pnpm workspaces with a checked-in lockfile; Solidity 0.8.28/OZ 5.x/Foundry; PostgreSQL 16; React Native with Expo 54 native Android build; Go 1.25.8 for MPCium; the Claude Agent SDK for TypeScript (`@anthropic-ai/claude-agent-sdk`, exact version pinned) with model `claude-opus-5-5` for the reference agent, and the Anthropic TypeScript SDK (`@anthropic-ai/sdk`) structured outputs for the intent compiler. No LangChain or hand-written agent loop. Person1 creates the workspace. All filenames here are relative to it and are planned files, not claims that source already exists. Pin resolved package versions in lockfiles; container images use resolved digests in the release manifest. Keep secrets out of Git and frontend bundles.
 
-`DeploymentManifest` includes `{schemaVersion:4,walletDomainVersion:"5",loginDomainVersion:"2",chainId:84532,sourceTag,contracts:{factory,token,vault,anchor,walletImplementation:null},providers,targets,origins,mpc,evidence,runbooks,supportedTokens,dependencyPins}`. Each non-null contract is `{address,deploymentBlock,codeHash}`; providers are `{providerId,recipient,capabilities}`; targets are `{targetId,url,expectedTitle}`; origins are `{api,provider}`; mpc is `{engine:'mpcium',commit,thresholdConfig:1,participants:2,initiatorPublicKey,authorizerPublicKey}`; evidence is `{ed25519PublicKey,publisher}`; runbooks is list of full hashed manifests. supportedTokens is a reviewed registry of {chainId,address,codeHash,decimals,symbol,transferMode:'STANDARD_ERC20'}; unknown imports remain watch-only. Strings for times/blocks, strict validated keys/addresses/hashes. Per-wallet mapping is `{walletId,owner,walletAddress,deploymentBlock,codeHash,mpcWalletId,executorAddress,executorPublicKey,keyVersion}` checked against factory and signed Permit. Keys in these structures are public only. Resolve real deployment addresses/versions at setup gates; do not fabricate them to fill the manifest.
+`DeploymentManifest` includes `{schemaVersion:4,walletDomainVersion:"5",loginDomainVersion:"2",chainId:84532,sourceTag,contracts:{factory,token,vault,anchor,walletImplementation:null},providers,targets,origins,mpc,evidence,runbooks,supportedTokens,dependencyPins}`. Each non-null contract is `{address,deploymentBlock,codeHash}`; providers are `{providerId,recipient,capabilities}`; targets are `{targetId,url,expectedTitle}`; origins are `{api,provider}`; mpc is `{engine:'mpcium',commit,thresholdConfig:1,nodeCount:3,requiredParticipants:2,deploymentMode:'competition-poc-single-vm-three-containers',initiatorPublicKey,authorizerPublicKey}`; evidence is `{ed25519PublicKey,publisher}`; runbooks is list of full hashed manifests. v7 adds `agentAssets:[{address,codeHash,decimals,symbol}]` (DemoUSD and Base Sepolia test USDC, S9.9), `screening:{listId:'demo-screening-v1',listHash}`, `riskRules:{version:'risk-rules-v1',hash}`, `x402:{mode:'MANDATE_NATIVE'|'ERC1271',facilitator:null|string,gatePassed:boolean}` and `agent:{runtime:'claude-agent-sdk',sdkVersion,model,mcpToolsetHash}`. supportedTokens is a reviewed registry of {chainId,address,codeHash,decimals,symbol,transferMode:'STANDARD_ERC20'}; unknown imports remain watch-only. Strings for times/blocks, strict validated keys/addresses/hashes. Per-wallet mapping is `{walletId,owner,walletAddress,deploymentBlock,codeHash,mpcWalletId,executorAddress,executorPublicKey,keyVersion}` checked against factory and signed Permit. Keys in these structures are public only. Resolve real deployment addresses/versions at setup gates; do not fabricate them to fill the manifest.
 
 ### S2. Network, assets and financial identities
 
-Base Sepolia, chainId **84532**. Agents use only six-decimal valueless DemoUSD and one controlled ERC4626 DemoVault. Personal wallet supports native test ETH and standard imported ERC20; managed OwnerTransfer supports owner liquid-token/native control under S8. Imported tokens do not become agent-authorized assets. No other chain or delegated vault is accepted. On-chain amounts are integers; JSON represents uint64/uint256 as decimal strings, enum/count fields as bounded integers, addresses as validated EVM addresses and bytes32/signatures as `0x` hex. API UUIDs never substitute for chain bytes32 IDs. Store explicit UUID ↔ chain ID mappings.
+Base Sepolia, chainId **84532**. Agents use only the manifest `agentAssets` — six-decimal valueless DemoUSD and six-decimal Base Sepolia test USDC — plus one controlled ERC4626 DemoVault and owner-approved call templates (S9.8). Each Permit names exactly one agent asset; counters and caps are per asset in that asset's base units. Personal wallet supports native test ETH and standard imported ERC20; managed OwnerTransfer supports owner liquid-token/native control under S8. Imported tokens do not become agent-authorized assets. No other chain or delegated vault is accepted. On-chain amounts are integers; JSON represents uint64/uint256 as decimal strings, enum/count fields as bounded integers, addresses as validated EVM addresses and bytes32/signatures as `0x` hex. API UUIDs never substitute for chain bytes32 IDs. Store explicit UUID ↔ chain ID mappings.
 
 Identities: local owner EOA; per-wallet MPC executor EOA; wallet contract; separately funded normal/emergency/anchor relayers; two provider signer/recipient EOAs; Ed25519 evidence signer; Ed25519 MPC initiator and policy-authorizer identities. None of the service credentials is the owner key. An executor signature authorizes an Action; a relayer signature only pays gas.
 
-Fixed ceilings: 500000 units/payment; 2000000/task gross spend; 5000000/executor/UTC day; 10000000/wallet/UTC day; minimum liquid floor 3000000; post-deposit allocation ≤2000 basis points; ≤20 financial actions/permit, browser ≤3 payments. Owner can tighten. Gross PAY/TRANSFER counters never decrease on refunds. Deposits/withdrawals have separate caps. UTC day is `block.timestamp / 86400`. Allocation limit applies when admitting a deposit, not as a perpetual ratio guarantee.
+Fixed ceilings: 500000 units/payment; 2000000/task gross spend; 5000000/executor/UTC day; 10000000/wallet/UTC day; minimum liquid floor 3000000; post-deposit allocation ≤2000 basis points; ≤20 financial actions/permit, browser ≤3 payments; ALLOWANCE ≤200 actions and periodCap ≤ the daily/weekly ceilings below. Weekly ceiling 25000000/wallet/asset; week index is `block.timestamp / 604800`. These ceilings apply per agent asset. The owner WalletPolicy (S9.4) and each Permit can only tighten them. Gross PAY/TRANSFER counters never decrease on refunds. Deposits/withdrawals have separate caps. UTC day is `block.timestamp / 86400`. Allocation limit applies when admitting a deposit, not as a perpetual ratio guarantee.
 
-Permit lifetime ≤24h. Browser task ≤10min, 8 workflow steps, 3 paid attempts. Action and invoice lifetime ≤60s. Policy chain snapshot ≤15s old; risk signal NORMAL and ≤60s old before deposit. Scheduled transfer uses exact owner-approved period/window; missed periods skip. No arbitrary agent/dApp calls/approvals, swaps, bridges, credit, production yield, x402 interoperability, iOS, mobile MPC or open marketplace. Personal transfers and owner-controlled transfers in S8 are required. WalletConnect/external dApp connections are deferred by user choice.
+Permit lifetime ≤24h, except ALLOWANCE ≤30 days. Browser task ≤10min, 8 workflow steps, 3 paid attempts. Action and invoice lifetime ≤60s, except an Action that needs an owner co-signature (S9.5), whose Action and Invoice lifetime is ≤15min. Policy chain snapshot ≤15s old; risk signal NORMAL and ≤60s old before deposit. Scheduled transfer uses exact owner-approved period/window; missed periods skip. Contract calls are possible only through owner-approved call templates (S9.8); no arbitrary agent/dApp calls, token approvals, swaps, bridges, credit, production yield, iOS, mobile MPC or open marketplace. x402 is supported only as defined in S9.10 and is claimed interoperable only after its gate passes. Personal transfers and owner-controlled transfers in S8 are required. WalletConnect/external dApp connections are deferred by user choice.
 
 ### S3. Signed financial objects
 
@@ -830,11 +1027,12 @@ Person 1 creates `packages/schema/src/{authority,hashing,api,runbook,evidence,ma
 
 ```text
 domain MandateWallet / version "5" / chainId 84532 / verifyingContract wallet
-Permit(bytes32 taskId,address executor,uint8 kind,bytes32 runbookHash,
+Permit(bytes32 taskId,address executor,uint8 kind,address asset,bytes32 runbookHash,
  bytes32 conditionsHash,bytes32 recipientsHash,bytes32 scheduleHash,
- uint64 issuedAt,uint64 startsAt,uint64 expiresAt,uint64 epoch,uint256 nonce,
- uint32 maxActions,uint32 maxPayments,uint256 maxPayment,uint256 spendCap,
- uint256 liquidFloor,uint256 depositCap,uint256 withdrawCap)
+ bytes32 templatesHash,uint64 issuedAt,uint64 startsAt,uint64 expiresAt,
+ uint64 epoch,uint256 nonce,uint32 maxActions,uint32 maxPayments,
+ uint256 maxPayment,uint256 spendCap,uint256 liquidFloor,uint256 depositCap,
+ uint256 withdrawCap,uint256 reviewThreshold,uint256 periodCap,uint32 periodSeconds)
 Action(bytes32 permitId,bytes32 requestId,uint8 operation,address target,
  uint256 amount,uint256 minOutput,bytes32 invoiceId,bytes32 inputHash,
  uint32 period,uint64 issuedAt,uint64 deadline)
@@ -843,14 +1041,22 @@ Schedule(address recipient,uint256 amount,uint64 start,uint32 interval,
 Admin(uint8 command,bytes32 permitId,uint256 nonce,uint64 issuedAt,uint64 deadline)
 OwnerTransfer(bytes32 transferId,address asset,address recipient,uint256 amount,
  uint64 epoch,uint256 nonce,uint64 issuedAt,uint64 deadline)
+Approval(bytes32 actionDigest,uint64 expiresAt)
+WalletPolicy(uint64 version,bytes32 assetCapsHash,bytes32 allowlistHash,
+ bytes32 blocklistHash,bytes32 templatesHash,uint256 reviewThreshold,
+ uint256 nonce,uint64 issuedAt,uint64 deadline)
+AssetCap(address asset,uint256 perTx,uint256 daily,uint256 weekly)
+CallTemplate(bytes32 templateId,address target,bytes4 selector,uint8 amountArg,
+ uint8 recipientArg,uint8 recipientRule,uint8 flags,uint256 maxAmount)
 
-kind: BROWSER=0 LIQUIDITY=1 SCHEDULE=2
-operation: PAY=0 TRANSFER=1 DEPOSIT=2 WITHDRAW=3 CLOSE=4
-command: PAUSE=0 UNPAUSE=1 REVOKE=2 RECOVER=3 RECOVER_LIQUID=4
+kind: BROWSER=0 LIQUIDITY=1 SCHEDULE=2 ALLOWANCE=3
+operation: PAY=0 TRANSFER=1 DEPOSIT=2 WITHDRAW=3 CLOSE=4 CALL=5 X402=6
+command: PAUSE=0 UNPAUSE=1 REVOKE=2 RECOVER=3 RECOVER_LIQUID=4 FREEZE=5 UNFREEZE=6
+recipientRule: NONE=0 WALLET=1 ALLOWLIST=2; flags bit0 PULLS_ASSET
 
-domain MandateInvoice / "1" / 84532 / wallet
-Invoice(bytes32 invoiceId,bytes32 taskId,address wallet,address recipient,
- uint256 amount,bytes32 inputHash,uint64 issuedAt,uint64 expiresAt)
+domain MandateInvoice / "2" / 84532 / wallet
+Invoice(bytes32 invoiceId,bytes32 taskId,address wallet,address asset,
+ address recipient,uint256 amount,bytes32 inputHash,uint64 issuedAt,uint64 expiresAt)
 
 domain MandateDelivery / "1" / 84532 / wallet
 DeliveryReceipt(bytes32 invoiceId,bytes32 requestId,bytes32 inputHash,
@@ -860,30 +1066,41 @@ domain MandateLogin / "2" / 84532 / zero address
 Login(string origin,bytes32 nonce,bytes32 deviceId,uint64 issuedAt,uint64 expiresAt)
 ```
 
-`permitId = hashStruct(Permit)`; signatures sign EIP-712 domain-separated digests. Shared helper `hashPermit(permit)` returns this struct hash/ID; `buildTypedData('Permit',permit,domain)` builds the signing payload; `hashAction(action,domain)` returns the domain-separated Action digest. Helpers never infer domain from untrusted payload. `recipientsHash = keccak256(abi.encode(address[]))` on sorted unique ≤4 recipients. `scheduleHash = keccak256(abi.encode(Schedule))`; non-schedule uses zero hash and zeroed Schedule. Other hashes are SHA-256 over RFC8785 canonical UTF-8 JSON, represented as bytes32. `runbookHash` hashes `{schemaVersion:4,runbookId,kind,version,entryArtifactHash,inputSchemaHash,outputSchemaHash,validatorArtifactHash,dependencyLockHash}`. Hash built artifacts/lockfile, omit own hash/timestamps. Installed runbook must match owner-signed hash. Contract does not attest worker execution.
+`permitId = hashStruct(Permit)`; signatures sign EIP-712 domain-separated digests. Shared helper `hashPermit(permit)` returns this struct hash/ID; `buildTypedData('Permit',permit,domain)` builds the signing payload; `hashAction(action,domain)` returns the domain-separated Action digest. Helpers never infer domain from untrusted payload. `recipientsHash = keccak256(abi.encode(address[]))` on sorted unique ≤4 recipients. `scheduleHash = keccak256(abi.encode(Schedule))`; non-schedule uses zero hash and zeroed Schedule. `templatesHash = keccak256(abi.encode(bytes32[]))` on sorted unique template IDs (zero hash when none); WalletPolicy list hashes use the same `keccak256(abi.encode(T[]))` rule on sorted unique entries (AssetCap sorted by asset, CallTemplate by templateId). `reviewThreshold = 2^256-1` means no co-signature; `periodCap`/`periodSeconds` are zero except for ALLOWANCE, where `periodSeconds ∈ {86400, 604800}`. Other hashes are SHA-256 over RFC8785 canonical UTF-8 JSON, represented as bytes32. `runbookHash` hashes `{schemaVersion:4,runbookId,kind,version,entryArtifactHash,inputSchemaHash,outputSchemaHash,validatorArtifactHash,dependencyLockHash}`. Hash built artifacts/lockfile, omit own hash/timestamps. Installed runbook must match owner-signed hash. Contract does not attest worker execution.
 
 `conditionsHash` commits exact owner-reviewed Conditions:
 
 ```ts
 type Conditions = {
- schemaVersion: 4; runbookId: 'browser-check'|'liquidity-keeper'|'scheduled-pay';
+ schemaVersion: 4;
+ runbookId: 'browser-check'|'liquidity-keeper'|'scheduled-pay'|'service-allowance';
  browser: null | {targetId:string; checks:('pageLoad'|'title'|'formSubmit')[];
    providerIds:('a'|'b')[]; maxPaidAttempts:number; maxSteps:number;
    taskDeadline:string; resultMaxAgeSeconds:300};
  liquidity: null | {vault:Address; command:'deposit'|'redeem'; amountUnits:string;
    maxSlippageBps:50; riskSourceId:'demo-risk-v1'; signalMaxAgeSeconds:60};
  schedule: null | Schedule;
-}; // exactly one non-null branch; schema rejects unknown fields
+ allowance: null | {providerIds:('a'|'b')[]; capabilities:('pageLoad'|'title'|'formSubmit')[];
+   periodSeconds:86400|604800; maxPaymentsPerPeriod:number};
+ calls: null | {templateIds:Hex32[]; purpose:string}; // only with liquidity branch
+}; // exactly one of browser/liquidity/schedule/allowance non-null (calls may
+   // accompany liquidity); runbookId adds 'service-allowance'; schema rejects unknown fields
 ```
 
 Scope envelope is `{conditions,runbookManifest,providerBindings}` with `providerBindings:[{providerId,recipient}]` from trusted deployment manifest. Conditions provider IDs resolve only through that manifest; recipients must equal sorted permitted provider recipients. Goals are display metadata; executable interpretation is committed in Conditions and confirmed natively. Scope bytes must recompute both signed hashes. Deposit/redeem amount is explicit; no natural-language financial parameter reaches the signer unchecked.
 
-Wallet ABI: `activatePermit(Permit,address[],Schedule,bytes ownerSignature)`; `execute(Action,bytes executorSignature,Invoice,bytes providerSignature)`; `applyAdmin(Admin,bytes ownerSignature)`; `applyOwnerTransfer(OwnerTransfer,bytes ownerSignature)`; `ownerTransferNonce()`; `usedOwnerTransfer(bytes32)`; `getPermit(bytes32)`; `getBudget(address executor)`; `usedRequest(bytes32)`; `permitNonce()`; `adminNonce()`; `authorityEpoch()`; `paused()`; `owner()/token()/vault()`; factory `createWallet(address owner)`/`walletForOwner(address)`. Anyone can relay fixed-configuration wallet creation; the nonzero provided address is immutable owner, never the relayer. Non-PAY uses zeroed Invoice and empty provider signature. `getPermit` returns `{permit,activated,closed,revoked,grossSpend,paymentCount,actionCount,depositedAssets,withdrawnAssets}`; counters uint256 except counts uint32, flags bool. `getBudget` returns uint256 `{day,walletGross,executorGross,liquidAssets,vaultShares,vaultAssets}`. ABI field names/bindings are generated by Person1; consumers never guess positional tuples. Required wallet events:
+Wallet ABI: `activatePermit(Permit,address[],Schedule,bytes32[] templateIds,bytes ownerSignature)`; `execute(Action,bytes executorSignature,Invoice,bytes providerSignature,Approval,bytes ownerApproval,bytes callData)`; `applyAdmin(Admin,bytes ownerSignature)`; `applyWalletPolicy(WalletPolicy,AssetCap[],address[] allowlist,address[] blocklist,CallTemplate[],bytes ownerSignature)`; `walletPolicy()`; `policyNonce()`; `frozen()`; `isValidSignature(bytes32,bytes)` (ERC-1271, S9.10 only); `getPeriodSpend(bytes32 permitId,uint64 periodIndex)`; `applyOwnerTransfer(OwnerTransfer,bytes ownerSignature)`; `ownerTransferNonce()`; `usedOwnerTransfer(bytes32)`; `getPermit(bytes32)`; `getBudget(address executor)`; `usedRequest(bytes32)`; `permitNonce()`; `adminNonce()`; `authorityEpoch()`; `paused()`; `owner()/token()/vault()`; factory `createWallet(address owner)`/`walletForOwner(address)`. Anyone can relay fixed-configuration wallet creation; the nonzero provided address is immutable owner, never the relayer. Non-PAY uses zeroed Invoice and empty provider signature; an Action at or below the effective review threshold uses a zeroed Approval and empty owner approval; non-CALL uses empty callData. `getPermit` returns `{permit,activated,closed,revoked,grossSpend,paymentCount,actionCount,depositedAssets,withdrawnAssets}`; counters uint256 except counts uint32, flags bool. `getBudget(address executor,address asset)` returns uint256 `{day,week,walletGross,walletWeekGross,executorGross,liquidAssets,vaultShares,vaultAssets}`. ABI field names/bindings are generated by Person1; consumers never guess positional tuples. Required wallet events:
 
 ```text
 ActionExecuted(bytes32 indexed permitId,bytes32 indexed requestId,uint8 operation,
- address target,uint256 assets,uint256 shares,bytes32 invoiceId,
- bytes32 inputHash,bytes32 actionDigest)
+ address asset,address target,uint256 assets,uint256 shares,bytes32 invoiceId,
+ bytes32 inputHash,bytes32 actionDigest,bool ownerApproved)
+CallExecuted(bytes32 indexed permitId,bytes32 indexed requestId,bytes32 indexed templateId,
+ address target,bytes4 selector,uint256 assetOutflow)
+X402Authorized(bytes32 indexed permitId,bytes32 indexed authorizationDigest,
+ address payTo,uint256 amount,uint64 validBefore)
+WalletPolicyUpdated(uint64 version,bytes32 policyDigest)
+WalletFrozen(bool frozen)
 PermitActivated(bytes32 indexed permitId,bytes32 indexed taskId,address executor,uint64 epoch)
 PermitRevoked(bytes32 indexed permitId)
 WalletPaused(bool paused,uint64 epoch)
@@ -893,7 +1110,7 @@ OwnerTransferExecuted(bytes32 indexed transferId,address indexed asset,address i
  uint256 amount,uint64 newEpoch,bytes32 transferDigest)
 ```
 
-Financial execution checks current epoch/time, executor signature, kind, recipient, counts, gross caps/floor, request/invoice uniqueness and invoice binding. BROWSER only PAY/CLOSE; LIQUIDITY only DEPOSIT/WITHDRAW/CLOSE; SCHEDULE only TRANSFER/CLOSE. WITHDRAW amount is shares and returns assets only to wallet; positive minOutput required for vault operations. Unused fields must be zero. CLOSE is signed, zero-value and exempt from financial quotas. PAUSE and either RECOVER pause/increment epoch; UNPAUSE never revives prior permits. REVOKE works on pending IDs. Recovery only to immutable owner, works while paused, separate admin nonce/lifetime ≤30min. `RECOVER_LIQUID` makes no vault call. No owner-admin operation requires MPC or backend consent. OwnerTransfer liquid funds, epoch effects, manual nonce and native ETH receive are defined in S8; they do not grant agents personal-wallet privileges.
+Financial execution checks not frozen, current epoch/time, executor signature, kind, asset, recipient, counts, gross/period caps/floor, the current WalletPolicy (S9.4: blocklist, asset caps, templates, review threshold — the most restrictive of policy and Permit wins), owner Approval when the amount exceeds the effective review threshold (S9.5), request/invoice uniqueness and invoice binding including invoice asset. BROWSER only PAY/X402/CLOSE; LIQUIDITY only DEPOSIT/WITHDRAW/CALL/CLOSE; SCHEDULE only TRANSFER/CLOSE; ALLOWANCE only PAY/X402/CLOSE. CALL and X402 rules are in S9.8 and S9.10. FREEZE blocks execute/CALL/X402 without changing the epoch or Permits; UNFREEZE restores them (S9.6). WITHDRAW amount is shares and returns assets only to wallet; positive minOutput required for vault operations. Unused fields must be zero. CLOSE is signed, zero-value and exempt from financial quotas. PAUSE and either RECOVER pause/increment epoch; UNPAUSE never revives prior permits. REVOKE works on pending IDs. Recovery only to immutable owner, works while paused, separate admin nonce/lifetime ≤30min. `RECOVER_LIQUID` makes no vault call. No owner-admin operation requires MPC or backend consent. OwnerTransfer liquid funds, epoch effects, manual nonce and native ETH receive are defined in S8; they do not grant agents personal-wallet privileges.
 
 ### S4. Public API and mobile bridge
 
@@ -915,15 +1132,25 @@ All endpoints under `/v1`. Mutations except challenge/verify/refresh require UUI
 | POST `/agent-tokens` | `{walletId,taskId:null|string,scopes,expiresAt}` → `{id,token}` once |
 | DELETE `/agent-tokens/:tokenId` | → `{revoked:true}` |
 | GET `/tasks/:taskId/evidence` | authenticated streamed export bundle; no permanent public URL |
+| POST `/intents/compile` | `{walletId,goal}` → `{intentId,draft:{runbookId,input,terms},explanation,warnings}`; owner JWT only (S9.3) |
+| GET `/tasks/:taskId/questions/next` | agent `run` scope; long-poll ≤25s → `AgentQuestion|null` (S9.2) |
+| POST `/questions/:questionId/answer` | agent `run` scope; `{optionId:string|null,amount:string|null,rationale}` → `{accepted:true,decisionId}` |
+| GET `/approvals` / GET `/approvals/:approvalId` | owner JWT; pending co-signature requests with action, invoice, typedData, digest, untrusted agent rationale (S9.5) |
+| POST `/approvals/:approvalId/sign` / `/reject` | owner JWT; `{ownerSignature}` / `{}` → `{state}` |
+| POST `/wallets/:walletId/policy/draft` / `/submit` | owner JWT; `{policy,assetCaps,allowlist,blocklist,templates}` → `{draftId,typedData,digest,effects}`; submit `{draftId,ownerSignature}` → `{txHash,version}` (S9.4) |
+| POST `/devices/push` | owner JWT; `{pushToken}` → `{registered:true}`; push payload carries only an approval/alert ID |
 
-`terms` is exactly `{startsAt,expiresAt,maxActions,maxPayments,maxPayment,spendCap,liquidFloor,depositCap,withdrawCap,recipients,schedule}` using Permit/Schedule types. All fields required; kind-inapplicable fields zero. Server derives issuedAt/executor/kind/task ID/hashes/nonce/epoch from verified state and checks recipients/Schedule equal Conditions and trusted provider bindings. Unknown/redundant mismatched fields fail. At most one outstanding Permit draft per wallet; refreshed terms require new native confirmation. Admin nonce/lane is separate.
+`terms` is exactly `{asset,startsAt,expiresAt,maxActions,maxPayments,maxPayment,spendCap,liquidFloor,depositCap,withdrawCap,reviewThreshold,periodCap,periodSeconds,recipients,schedule,templateIds}` using Permit/Schedule types. All fields required; kind-inapplicable fields zero. Server derives issuedAt/executor/kind/task ID/hashes/nonce/epoch from verified state and checks recipients/Schedule equal Conditions and trusted provider bindings, and checks every term against the current WalletPolicy (S9.4) before returning a draft. Unknown/redundant mismatched fields fail. At most one outstanding Permit draft per wallet; refreshed terms require new native confirmation. Admin nonce/lane is separate.
 
 ```ts
 type OwnerApproval = {draftId:string; typedData:TypedPermit; scope:Scope;
- recipients:Address[]; schedule:Schedule; digest:Hex32};
+ recipients:Address[]; schedule:Schedule; templateIds:Hex32[]; digest:Hex32;
+ policyVersion:string; intentId:string|null};
 type WalletView = {walletId:string; owner:Address; address:Address|null;
  chainId:84532; provisioningState:'DEPLOYING'|'KEYGEN'|'READY'|'FAILED';
- executorAddress:Address|null; paused:boolean; epoch:string;
+ executorAddress:Address|null; paused:boolean; frozen:boolean; epoch:string;
+ policyVersion:string; inhibited:boolean; assets:{asset:Address; symbol:string;
+ liquidUnits:string; reservedUnits:string}[]; // per agent asset; fields below are DemoUSD
  liquidUnits:string; floorUnits:string; reservedUnits:string;
  vaultAssetsUnits:string; spendableUnits:string;
  budgets:{day:string; walletSpentUnits:string; executorSpentUnits:string;
@@ -940,9 +1167,9 @@ type TaskView = {taskId:string; chainTaskId:Hex32; walletId:string;
  findings:Finding[]; nextPollMs:2000};
 ```
 
-Native methods are the account-aware interfaces in S8.6: native profile/accounts, specific Login2/Permit5/Admin5/OwnerTransfer5 signing, semantic personal transaction builder/journal, protected NativeSession and QR receive-request validation. Recovery words/private keys never cross RN bridge. Native scope/domain/actual-field confirmation remains mandatory; no generic raw digest method exists.
+Native methods are the account-aware interfaces in S8.6 plus S9.14: native profile/accounts, specific Login2/Permit5/Admin5/OwnerTransfer5/Approval5/WalletPolicy5 signing, semantic personal transaction builder/journal, protected NativeSession and QR receive-request validation. Recovery words/private keys never cross RN bridge. Native scope/domain/actual-field confirmation remains mandatory; no generic raw digest method exists.
 
-Errors: `{code,message,actionId:string|null,evidenceId:string|null,retryable:boolean}`. 401 auth,403 scope/tenant,409 idempotency/state conflict,422 invalid policy/input,503 unavailable dependency. Error codes include AUTH_SCOPE, PERMIT_INACTIVE, SCOPE_MISMATCH, RUNBOOK_VERSION, RECIPIENT_DENIED, PAYMENT_CAP, DAILY_CAP, LIQUID_FLOOR, RESERVATION_CONFLICT, QUOTE_EXPIRED, DUPLICATE_REQUEST, SCHEDULE_WINDOW, STALE_SIGNAL, MPC_UNAVAILABLE, SIGNING_UNKNOWN, SIMULATION_REVERT, SETTLEMENT_UNKNOWN, DELIVERY_INVALID, EVIDENCE_UNAVAILABLE. Never automatically retry a new financial request after UNKNOWN.
+Errors: `{code,message,actionId:string|null,evidenceId:string|null,retryable:boolean}`. 401 auth,403 scope/tenant,409 idempotency/state conflict,422 invalid policy/input,503 unavailable dependency. Error codes include AUTH_SCOPE, PERMIT_INACTIVE, SCOPE_MISMATCH, RUNBOOK_VERSION, RECIPIENT_DENIED, PAYMENT_CAP, DAILY_CAP, LIQUID_FLOOR, RESERVATION_CONFLICT, QUOTE_EXPIRED, DUPLICATE_REQUEST, SCHEDULE_WINDOW, STALE_SIGNAL, MPC_UNAVAILABLE, SIGNING_UNKNOWN, SIMULATION_REVERT, SETTLEMENT_UNKNOWN, DELIVERY_INVALID, EVIDENCE_UNAVAILABLE, POLICY_VIOLATION, SCREENING_HIT, SIMULATION_MISMATCH, REVIEW_REQUIRED, OWNER_REJECTED, WALLET_FROZEN, WALLET_INHIBITED, TEMPLATE_DENIED, PERIOD_CAP, AGENT_ANSWER_INVALID, INTENT_INVALID. Never automatically retry a new financial request after UNKNOWN.
 
 ### S5. Worker ↔ runbook boundary
 
@@ -953,25 +1180,34 @@ type RunbookDecision = (
  | {type:'PROPOSE'; decisionKey:string; intent:ActionIntent; evidence:JsonObject[]}
  | {type:'WAIT'; dueAt:string; reason:string}
  | {type:'COMPLETE'; result:JsonObject; evidence:JsonObject[]}
+ | {type:'AWAIT_AGENT'; question:AgentQuestion; evidence:JsonObject[]}
  | {type:'NEEDS_OWNER'|'FAILED'; reason:string; evidence:JsonObject[]}
  ) & {nextState:RunbookState};
-type ActionIntent = {operation:0|1|2|3; target:Address; amount:string; minOutput:string;
- invoice:Invoice|null; providerSignature:Hex|null; inputHash:Hex32; period:number};
+type ActionIntent = {operation:0|1|2|3|5|6; target:Address; amount:string; minOutput:string;
+ invoice:Invoice|null; providerSignature:Hex|null; inputHash:Hex32; period:number;
+ templateId:Hex32|null; callData:Hex|null; x402:X402Authorization|null};
+type AgentQuestion = {questionId:string; kind:'SELECT_OFFER'|'RETRY_OR_FALLBACK'|
+ 'SET_AMOUNT'|'CONFIRM_COMPLETION'|'ESCALATE'; prompt:string;
+ options:{optionId:string; label:string; facts:JsonObject; untrusted:boolean}[];
+ bounds:null|{asset:Address; minUnits:string; maxUnits:string};
+ defaultOptionId:string|null; defaultAmount:string|null; deadline:string};
 ```
 
-Snapshot is `{taskId,chainTaskId,walletId,walletAddress,permitId,conditions,scope,permit,now,chainBlock,wallet,actions,observations,runbookState}` using shared schema types; `now`/times are seconds strings, `actions` includes stored decisionKey, Action, state, txHash and invoice, observations include signed provider output and risk signals. `RunbookState={schemaVersion:4,step:number,attempt:number,retrievals:number,selectedProvider:null|'a'|'b',quotes:QuoteEnvelope[],delivery:DeliveryEnvelope|null,missedPeriods:number[]}`; initialize zero counters/null/empty arrays. `deps` offers `quote(providerId,input)→QuoteEnvelope`, `retrieve(providerId,invoiceId,requestId,paymentTxHash)→{state:'PENDING'}|DeliveryEnvelope`, `readVault()→{blockNumber,liquidAssets,vaultShares,vaultAssets,previewDepositShares,previewRedeemAssets,maxRedeemShares}`, `readRisk()→{sourceId:'demo-risk-v1',state:'NORMAL'|'WARNING',observedAt,sequence}` only; all uint/time values are decimal strings. Vault previews use the amount in immutable Conditions. QuoteEnvelope/DeliveryEnvelope are the exact S6 response bodies, JSON types/validators exported from shared schema. COMPLETE records useful outcome; Person2 separately closes authority. Person4 cannot set signature, epoch, requestId or raw calldata.
+`AWAIT_AGENT` pauses the task until the agent answers through `/questions/:questionId/answer` or the deadline passes; the worker then calls `advance` again with the answer (or the recorded default) in `snapshot.agentAnswers`. Options and bounds are computed by the runbook from the Permit, WalletPolicy, quotes and reservations; an answer outside them is rejected with AGENT_ANSWER_INVALID. Runbooks never take recipients, addresses, calldata or token addresses from an answer.
+
+Snapshot is `{taskId,chainTaskId,walletId,walletAddress,permitId,conditions,scope,permit,walletPolicy,now,chainBlock,wallet,actions,observations,agentAnswers,approvals,runbookState}` using shared schema types; `now`/times are seconds strings, `actions` includes stored decisionKey, Action, state, txHash and invoice, observations include signed provider output and risk signals. `RunbookState={schemaVersion:4,step:number,attempt:number,retrievals:number,selectedProvider:null|'a'|'b',quotes:QuoteEnvelope[],delivery:DeliveryEnvelope|null,missedPeriods:number[]}`; initialize zero counters/null/empty arrays. `deps` offers `quote(providerId,input)→QuoteEnvelope`, `retrieve(providerId,invoiceId,requestId,paymentTxHash)→{state:'PENDING'}|DeliveryEnvelope`, `readVault()→{blockNumber,liquidAssets,vaultShares,vaultAssets,previewDepositShares,previewRedeemAssets,maxRedeemShares}`, `readRisk()→{sourceId:'demo-risk-v1',state:'NORMAL'|'WARNING',observedAt,sequence}` only; all uint/time values are decimal strings. Vault previews use the amount in immutable Conditions. QuoteEnvelope/DeliveryEnvelope are the exact S6 response bodies, JSON types/validators exported from shared schema. COMPLETE records useful outcome; Person2 separately closes authority. Person4 cannot set signature, epoch, requestId or raw calldata.
 
 Unique `(taskId,decisionKey)` makes repeated advance calls return the same logical action. Person 2 creates random requestId once, chooses issuedAt/deadline, validates input against Permit, stores immutable Action/invoice, reserves atomically and initiates signing. Old expired unbroadcast signatures can be replaced only after prior usability/history is reconciled; never simply release the reservation because a timer elapsed. runbookState update, observations, action insertion and job scheduling commit transactionally. External quote/retrieval calls may repeat; payment cannot repeat.
 
-Outcome states: DRAFT/AWAITING_OWNER/READY/RUNNING/COMPLETED/DELIVERY_FAILED/NEEDS_OWNER/CANCELLED. Authority: PENDING/ACTIVE/CLOSING/CLOSED/REVOKED/EXPIRED/INVALIDATED. Action: PROPOSED/RESERVED/SIGNING/SIGNED/SUBMITTED/INCLUDED/FINALIZED/DENIED/REVERTED/UNKNOWN. Chain INCLUDED means three canonical confirmations; FINALIZED requires RPC finalized head. Delivery may proceed at INCLUDED; never label it finalized. Reorg returns action to unresolved and blocks dependent new spending.
+Outcome states: DRAFT/AWAITING_OWNER/READY/RUNNING/AWAITING_AGENT/COMPLETED/DELIVERY_FAILED/NEEDS_OWNER/CANCELLED. Authority: PENDING/ACTIVE/FROZEN/CLOSING/CLOSED/REVOKED/EXPIRED/INVALIDATED. Action: PROPOSED/RESERVED/AWAITING_APPROVAL/SIGNING/SIGNED/SUBMITTED/INCLUDED/FINALIZED/DENIED/REJECTED/REVERTED/UNKNOWN. An Action above the effective review threshold enters AWAITING_APPROVAL after reservation and before MPC signing; owner rejection or expiry releases its reservation because no signature exists. Chain INCLUDED means three canonical confirmations; FINALIZED requires RPC finalized head. Delivery may proceed at INCLUDED; never label it finalized. Reorg returns action to unresolved and blocks dependent new spending.
 
 ### S6. Provider and inspection contracts
 
-Trusted manifest maps target IDs `checkout-healthy`/`checkout-broken` to exact HTTPS fixture URLs; browser workers reject arbitrary URLs, scripts, selectors, redirects and private-network egress. Provider request `POST /providers/:id/check` body `{taskId:Hex32,wallet:Address,targetId,checks}` returns402 `{providerId,invoice,providerSignature}`. InputHash commits canonical `{taskId,wallet,targetId,checks}` with fixed check ordering pageLoad,title,formSubmit. Two providers a/b use prices200000/350000 units, distinct signer=recipient EOAs. Provider a supports pageLoad/title; b supports pageLoad/title/formSubmit. A+B fallback demonstration requests pageLoad/title; capability-filter variant requests formSubmit and selects b. No charge at quote generation.
+Trusted manifest maps target IDs `checkout-healthy`/`checkout-broken` to exact HTTPS fixture URLs; browser workers reject arbitrary URLs, scripts, selectors, redirects and private-network egress. Provider request `POST /providers/:id/check` body `{taskId:Hex32,wallet:Address,targetId,checks}` returns402 `{providerId,invoice,providerSignature,x402}` where `x402` is the x402-formatted `accepts` entry of S9.10 for the same amount/asset/recipient. InputHash commits canonical `{taskId,wallet,targetId,checks}` with fixed check ordering pageLoad,title,formSubmit. Two providers a/b use prices200000/350000 units, distinct signer=recipient EOAs. Provider a supports pageLoad/title; b supports pageLoad/title/formSubmit. A+B fallback demonstration requests pageLoad/title; capability-filter variant requests formSubmit and selects b. No charge at quote generation.
 
-Authenticated `POST /providers/:id/result {invoiceId,requestId,paymentTxHash}` returns202 `{state:'PENDING'}` or200 `{result,receipt,providerSignature,artifacts}`. It verifies canonical success + three confirmations + matching ActionExecuted and exact DemoUSD Transfer before running Playwright once. Unique invoice lock/cache; repeated retrieval returns original output. An invalid payment never triggers paid work. BrowserResult is `{schemaVersion:4,targetId,inputHash,checkedAt:string,checks:{pageLoad?:boolean,title?:{actual:string,expected:string,pass:boolean},formSubmit?:boolean},screenshotHash:Hex32,logHash:Hex32}`; exactly requested checks present; title expectation comes from trusted target fixture. Hash result canonical JSON; screenshot/log hashes cover actual bytes. Artifacts return `{artifactId,mediaType,sha256,base64}` through authenticated channel with a 10MiB/result bound. Provider signs DeliveryReceipt under S3. Negative form check is valid delivered inspection. First completed output must be ≤300s old, ≤5s future and consistent with receipt; retries never re-date old output.
+Authenticated `POST /providers/:id/result {invoiceId,requestId,paymentTxHash}` returns202 `{state:'PENDING'}` or200 `{result,receipt,providerSignature,artifacts}`. It verifies canonical success + three confirmations + matching ActionExecuted (or, in ERC1271 x402 mode, the matching X402Authorized event and settled transferWithAuthorization) and the exact invoice-asset Transfer before running Playwright once. Unique invoice lock/cache; repeated retrieval returns original output. An invalid payment never triggers paid work. BrowserResult is `{schemaVersion:4,targetId,inputHash,checkedAt:string,checks:{pageLoad?:boolean,title?:{actual:string,expected:string,pass:boolean},formSubmit?:boolean},screenshotHash:Hex32,logHash:Hex32}`; exactly requested checks present; title expectation comes from trusted target fixture. Hash result canonical JSON; screenshot/log hashes cover actual bytes. Artifacts return `{artifactId,mediaType,sha256,base64}` through authenticated channel with a 10MiB/result bound. Provider signs DeliveryReceipt under S3. Negative form check is valid delivered inspection. First completed output must be ≤300s old, ≤5s future and consistent with receipt; retries never re-date old output.
 
-Evidence event: `{schemaVersion:4,eventId,taskId:UUID,chainTaskId,wallet,sequence:number,recordedAt:string,type,requestId:Hex32|null,permitId:Hex32|null,payload,prevHash,eventHash}`. SHA-256 RFC8785 of whole event except eventHash, first prevHash zero32; append under task lock. Never overwrite corrections. Checkpoint `{schemaVersion:4,chainId:84532,wallet,taskId:Hex32,sequence,headHash}` is RFC8785 bytes signed Ed25519, digest SHA-256 anchored via `EvidenceAnchor.anchor(bytes32 taskId,bytes32 checkpointDigest,uint64 sequence)` with event `Anchored(bytes32 indexed taskId,bytes32 checkpointDigest,uint64 sequence,address publisher)`. Anchor is not an event in its own committed checkpoint; append it to a later checkpoint if needed.
+Evidence event: `{schemaVersion:4,eventId,taskId:UUID,chainTaskId,wallet,sequence:number,recordedAt:string,type,requestId:Hex32|null,permitId:Hex32|null,payload,prevHash,eventHash}`. SHA-256 RFC8785 of whole event except eventHash, first prevHash zero32; append under task lock. Never overwrite corrections. v7 adds the event types in S9.13; they reuse this envelope. Checkpoint `{schemaVersion:4,chainId:84532,wallet,taskId:Hex32,sequence,headHash}` is RFC8785 bytes signed Ed25519, digest SHA-256 anchored via `EvidenceAnchor.anchor(bytes32 taskId,bytes32 checkpointDigest,uint64 sequence)` with event `Anchored(bytes32 indexed taskId,bytes32 checkpointDigest,uint64 sequence,address publisher)`. Anchor is not an event in its own committed checkpoint; append it to a later checkpoint if needed.
 
 Export ZIP: `manifest.json`, `events.jsonl`, `checkpoint.json`, `checkpoint.sig`, `authority.json`, `transactions.json`, `artifact-index.json`, `artifacts/`. Manifest lists schema, chain/wallet/task, inspection range, public keys, retained hashes and anchor tx; verifier trusts keys/addresses from a separately supplied deployment manifest, never export alone. Store artifacts AES256GCM unique IV, AAD taskId/artifactId; storage commitment SHA256(salt32 || plaintext), with salt+plaintext disclosed only in authorized export. Retain original unsalted provider content hashes too. Retention30days; absent retained bytes means UNVERIFIABLE. Export contains no seeds, shares, service tokens or hidden model reasoning.
 
@@ -982,7 +1218,7 @@ Export ZIP: `manifest.json`, `events.jsonl`, `checkpoint.json`, `checkpoint.sig`
 | Gate, Dhaka time | Cross-owner result |
 | --- | --- |
 | G0, Oct17 15:30 | Workspace, ABI/schema fixtures, route examples, credentials, hosts, phone and test ETH agreed |
-| G1, Oct17 18:00 | Native owner signature + restore; MPCium two-node signature recovered correctly; mandatory authorizer rejection; contract local payment |
+| G1, Oct17 18:00 | Native owner signature + restore; three-node/two-participant MPCium signature recovered correctly; mandatory authorizer rejection; contract local payment |
 | G2, Oct18 02:00 | One phone-approved real Base Sepolia purchase, actual browser output, durable export, initial independent report |
 | G3, Oct18 10:00 | All three runbooks, fallback, reservations/restart, pause/recovery, SDK/MCP, full inspector |
 | G4, Oct18 15:00 | Adversarial/evaluation results and fixes, rebuild/install/recovery evidence |
@@ -991,7 +1227,7 @@ Export ZIP: `manifest.json`, `events.jsonl`, `checkpoint.json`, `checkpoint.sig`
 
 These are aggressive targets from Oct17, not estimates backed by an existing implementation. Record actual pass times; a failed gate remains incomplete. Keep a single scope and fix the blocker. No hidden ordinary-key MPC fallback, fabricated test results or guarantee of winning. Tests below are instructions for implementers; this documentation task does not run implementation tests.
 
-Every owner contributes to Q01 native recovery, Q02 MPC isolation, Q03 scope, Q04 contention, Q05 crash durability, Q06 useful purchase, Q07 paid failure/fallback, Q08 assets, Q09 schedule, Q10 confirmed stop, Q11 tampered evidence, Q12 tenant/input isolation, Q13 outage/restore/API-offline recovery, Q14 closure/finality. Required evaluation additionally includes wallet WQ01–WQ14 (S8). Agent evaluation: two target fixtures × three purchase variants × three repeats=18 runs: both providers, capability-filtered provider B, and budget-cap rejection. Report valid denials separately from useful task completion. Add two paid-failure, two contention/restart, one asset and one schedule run; record all outcomes. Direct contract/invariant checks are additional, not counted as user runs. Competition requires technical docs, source/README/deploy/test cases, security self-assessment, actual on-chain hashes, English presentation≤10min; optional demo≤5min. Scoring40% completion/30% security-compliance/30% innovation-interaction, possible0–5 on-chain bonus. Public testnet acceptance was confirmed by the user with organizer.
+Every owner contributes to Q01 native recovery, Q02 MPC isolation, Q03 scope, Q04 contention, Q05 crash durability, Q06 useful purchase, Q07 paid failure/fallback, Q08 assets, Q09 schedule, Q10 confirmed stop, Q11 tampered evidence, Q12 tenant/input isolation, Q13 outage/restore/API-offline recovery, Q14 closure/finality. Required evaluation additionally includes wallet WQ01–WQ14 (S8) and agentic/policy AQ01–AQ14 (S9.15). Agent evaluation: two target fixtures × three purchase variants × three repeats=18 runs: both providers, capability-filtered provider B, and budget-cap rejection. Report valid denials separately from useful task completion. Add two paid-failure, two contention/restart, one asset and one schedule run; record all outcomes. Direct contract/invariant checks are additional, not counted as user runs. Competition requires technical docs, source/README/deploy/test cases, security self-assessment, actual on-chain hashes, English presentation≤10min; optional demo≤5min. Scoring40% completion/30% security-compliance/30% innovation-interaction, possible0–5 on-chain bonus. Public testnet acceptance was confirmed by the user with organizer.
 
 ### S8. Complete wallet application — required v6 extension
 
@@ -1139,3 +1375,161 @@ A future wallet-side integration must keep owner signing native, select personal
 W0 precedes new signing; W1/W2 run alongside existing G1–G3; W3/W4 before release G4/G5. Original Oct18 internal target/Oct20 official deadline remain, but scope expansion does not establish capacity or guaranteed completion. Record actual gate times/failures and use submission buffer; no passing result or complete-app claim from a scaffold.
 
 Required wallet cases: WQ01 create/import same words+passphrase/index; WQ02 cross-account cache/session isolation; WQ03 native/token QR and wrong-chain/precision rejection; WQ04 ETH/ERC20 transfer exact debit/fee/balance; WQ05 sponsor versus personal gas clarity; WQ06 pending/restart/rebroadcast/UNKNOWN and replacement winner; WQ07 manual managed send pauses/epoch and works without MPC; WQ08 rejected owner/agent/token signatures/domain/nonce; WQ09 refresh replay/revoked device/session expiry leaves owner account unchanged; WQ10 logout versus on-chain stop/local removal; WQ11 history backfill/indexer outage/reorg/no false empty data; WQ12 API-offline personal send/owner independent recovery; WQ13 imported token metadata/taxed/invalid token behavior; WQ14 complete navigation/accessibility, camera permission denial, scan/clipboard precision and double-tap/cancel confirmation. Every case has actual operation/hash or explicit failure evidence. These are planned acceptance cases, not tests run by this update.
+
+### S9. Agentic layer and policy controls — required v7 extension
+
+This section is required implementation work. It adds a real LLM agent and the policy controls found in Cobo- and Circle-class agent wallets, while keeping Mandate's own properties: the owner key stays on the phone, financial limits are enforced by the wallet contract, and every outcome is independently inspectable. Type and route changes are already written into S2–S6; this section defines their behaviour. A max-loss certificate and an agent-initiated on-chain self-pause are **not** part of this release.
+
+| Capability | Reference product idea | Mandate mechanism |
+| --- | --- | --- |
+| Autonomous agent | Agent acts on a task without per-step human input | Reference agent on the Claude Agent SDK; decides through bounded questions (S9.1–S9.2) |
+| Intent to authorization | Pact intent and execution plan | Intent compiler drafts typed terms; owner reviews natively (S9.3) |
+| Wallet-wide policy, most restrictive wins | Policy engine with allowlists and limits | On-chain WalletPolicy checked at activation and at every execution (S9.4) |
+| Human review above a threshold | Review thresholds / human signing group | Owner co-signature over the exact Action digest, verified by the contract (S9.5) |
+| Freeze versus revoke | Freeze keeps terms; revoke ends them | Admin FREEZE/UNFREEZE without epoch change; PAUSE/REVOKE unchanged (S9.6) |
+| Standing periodic limits | Daily/weekly/monthly spending policies | ALLOWANCE Permit kind with per-period cap (S9.7) |
+| Allowed contracts | Allowed contracts list | Owner-approved call templates with argument bounds and outflow metering (S9.8) |
+| Stablecoin payments | USDC agent payments | Base Sepolia test USDC as a second agent asset (S9.9) |
+| Machine payments | x402 | x402-formatted 402 responses; ERC-1271 settlement behind a gate (S9.10) |
+| Pre-broadcast screening | Sanctions/risk screening | Deterministic risk sentinel: screening, simulation, velocity (S9.11) |
+| Agent tooling | CLI/SDK for agents | MCP toolset, SDK and `mandate` CLI with scoped agent tokens (S9.2, S9.14) |
+
+#### S9.1 Agent runtime
+
+- The reference agent `apps/agent` uses the Claude Agent SDK for TypeScript (`@anthropic-ai/claude-agent-sdk`, exact version pinned in the lockfile and the manifest `agent.sdkVersion`) with model `claude-opus-5-5`. The Anthropic API key is a server-side secret in the app Key Vault; it never enters the APK, MCP tool results, logs or evidence.
+- The agent's only tools are the Mandate MCP server (`apps/mcp`, stdio) running with a task-scoped agent token. Built-in file, shell, web and editing tools are disabled; the tool allowlist names the exact `mandate_*` tools; a pre-tool-use hook denies and records any other tool request. Loading of ambient project/user settings, skills and memory is disabled. Verify the exact option names against the pinned SDK version and record them in `apps/agent/README.md`.
+- The agent process has no signing key, owner credential, database access or RPC write access. It cannot create an Action; only the worker does (S5).
+- Any MCP-capable runtime (for example the GitHub Copilot SDK, Claude Desktop or another MCP client) can act as the agent with the same tools and token. The platform never trusts the runtime's identity; security comes from token scope, Permit, WalletPolicy, policy authorizer and contract.
+- No LangChain and no hand-written agent loop. The agent loop, context handling and tool calling come from the SDK.
+- Per-task model budget: at most 30 model turns and a configured token ceiling per task; on exhaustion the agent stops and the worker applies question defaults.
+
+#### S9.2 Decision protocol between agent and worker
+
+The worker stays the only component that turns decisions into Actions. When a runbook needs judgement it returns `AWAIT_AGENT` with an `AgentQuestion` (S5). The agent reads it with `mandate_next_question` and answers with `mandate_answer`.
+
+- An answer is valid only if `optionId` is one of the listed options, or `amount` is an integer string within `bounds`. Bounds are computed by the runbook from the Permit, WalletPolicy, remaining budget and reservations at question time and rechecked when the answer arrives.
+- One accepted answer per question; a repeated identical answer returns the same `decisionId`, a different answer returns 409.
+- If the deadline passes without a valid answer, the worker applies `defaultOptionId`/`defaultAmount` and records `AGENT_TIMEOUT`. A question with no safe default fails the task step instead.
+- Tool inputs never contain recipient or contract addresses, calldata, nonces, signatures or token addresses. Those resolve from IDs through the trusted manifest, Permit and WalletPolicy.
+- Content from providers or web pages appears only inside `facts` with `untrusted:true`. Prompt injection can at most make the agent pick a worse option that is still allowed; this residual risk is listed in the security self-assessment.
+- `rationale` is display text of at most 2000 characters, stored as a model claim (`recorder_assertion`), never parsed for instructions.
+
+| Question kind | Used by | What the agent decides |
+| --- | --- | --- |
+| `SELECT_OFFER` | browser-check, service-allowance | Which eligible signed quote to buy, using price, capability and past delivery facts |
+| `RETRY_OR_FALLBACK` | browser-check | Retrieve again, use another approved provider, or stop |
+| `SET_AMOUNT` | liquidity-keeper | Deposit/redeem amount inside owner-approved bounds |
+| `CONFIRM_COMPLETION` | all | Whether delivered output answers the goal; the deterministic validator still decides validity |
+| `ESCALATE` | all | Ask the owner for a new or larger Permit (creates `NEEDS_OWNER`) |
+
+MCP tools (agent token scopes in brackets): `mandate_get_task` [read], `mandate_get_wallet` [read], `mandate_next_question` [run], `mandate_answer` [run], `mandate_get_delivery` [read], `mandate_request_owner` [run], `mandate_get_evidence` [evidence], plus the existing `mandate_create_task` [prepare] and `mandate_run_task` [run]. The SDK and the `mandate` CLI expose the same operations.
+
+#### S9.3 Intent compiler
+
+`POST /v1/intents/compile` turns an owner's goal into a draft `{runbookId,input,terms}` with a short explanation and warnings. It uses Anthropic structured outputs validated by the shared Zod schemas; the server then rejects unknown providers, assets, targets or templates and checks every term against the WalletPolicy. The draft is a proposal only: the owner edits it in the app, the normal `/tasks` and `/permits/draft` flow follows, and the native screen shows the exact signed terms next to the original goal. The compiler has no keys and no side effects except storing the draft and an `INTENT_COMPILED` evidence event. If it fails, the app offers the manual form.
+
+#### S9.4 Wallet policy — most restrictive rule wins
+
+Each managed wallet stores one owner-signed WalletPolicy: per-asset caps (`perTx`, `daily`, `weekly`), an address allowlist and blocklist, allowed call templates and a wallet-wide review threshold. It is changed only by `applyWalletPolicy` with an owner signature, its own `policyNonce`, `version` strictly increasing, lifetime ≤30 minutes. It works while paused or frozen and needs no MPC or backend consent.
+
+- At `activatePermit`: the Permit asset must have an AssetCap; Permit caps must not exceed the policy caps; every Permit recipient must be in the allowlist and none in the blocklist; Permit templates must be a subset of policy templates.
+- At every `execute`: the contract re-checks the current blocklist, asset caps (per transaction, wallet day and wallet week), template membership and review threshold. Tightening takes effect immediately for active Permits; loosening never enlarges a Permit beyond its own signed terms.
+- Policy updates do not change the epoch. A default policy equal to the S2 ceilings for DemoUSD, an empty template list and no review threshold is set at wallet creation.
+- Policy limits cannot exceed S2 ceilings; allowlist and blocklist hold at most 32 entries each; at most 8 templates.
+
+#### S9.5 Review thresholds and owner co-signature
+
+The effective threshold is `min(permit.reviewThreshold, policy.reviewThreshold)`. For PAY, TRANSFER, X402 and CALL, if the Action amount is above it, `execute` requires an owner signature over `Approval(actionDigest, expiresAt)` in domain 5, with `expiresAt ≤ action.deadline`. The contract verifies it against the immutable owner.
+
+1. The worker reserves budget, stores the immutable Action, sets `AWAITING_APPROVAL` and creates an approval request. Co-signed Actions and their Invoices may live up to 15 minutes.
+2. The owner's phone receives a push carrying only the approval ID, loads the request over the authenticated API, and the native module recomputes the Action digest from the displayed fields (provider, recipient address, asset, amount, task, untrusted agent rationale).
+3. After the owner signs, the worker requests the MPC executor signature and relays. Rejection or expiry releases the reservation (no executor signature exists) and records `OWNER_REJECTION`.
+
+Agent tokens cannot read or sign approvals. A direct contract call without the owner approval reverts.
+
+#### S9.6 Freeze versus pause and revoke
+
+- `FREEZE` (Admin command 5) stops `execute`, CALL and X402 immediately with `WalletFrozen`. Permits, counters and epoch stay unchanged; Permit expiry keeps running.
+- `UNFREEZE` (Admin command 6) restores execution of still-valid Permits without new approval.
+- `PAUSE`, `REVOKE`, `RECOVER` and `RECOVER_LIQUID` keep their existing epoch-invalidating behaviour.
+- Owner transfers, admin commands and policy updates work while frozen. Only the owner can freeze or unfreeze; the backend can set an off-chain inhibit (S9.11) but cannot freeze on chain.
+- The app explains the four separate effects: logout (API session), freeze (temporary stop, terms kept), pause/revoke (authority ended, new Permits needed) and owner transfer (funds moved, agents stopped).
+
+#### S9.7 Standing allowance
+
+`ALLOWANCE` (kind 3) is a long-lived spending permission for recurring service purchases. Lifetime ≤30 days; `periodSeconds` is 86400 or 604800; `periodCap` limits gross spend per period, where the period index is `(block.timestamp − startsAt) / periodSeconds`; `maxPayment`, `spendCap`, ≤4 allowlisted provider recipients and ≤200 actions also apply. Allowed operations are PAY, X402 and CLOSE. The `service-allowance` runbook lets the agent buy allowlisted provider capabilities on demand, each purchase going through the same quote, delivery check and evidence path as browser-check.
+
+#### S9.8 Call templates
+
+A CallTemplate allows one contract function: `target`, `selector`, the argument index holding the amount, the argument index holding a recipient with its rule (none, must equal the wallet, must be in the allowlist), `flags` and `maxAmount`.
+
+- Rejected at policy update: a target that is an agent asset token, the wallet, the factory or the anchor; selectors `approve`, `increaseAllowance`, `permit`, `transferFrom`, `setApprovalForAll`, `transfer` and `transferAndCall`; more than 8 templates.
+- Execution uses `operation = CALL`. `Action.target` is the template target, `Action.amount` the amount argument and `Action.inputHash = keccak256(callData)`. Calldata must be the selector plus at most 8 static 32-byte words, with no ETH value.
+- The contract checks the selector, the amount argument ≤ `min(maxAmount, Action.amount)` and the recipient rule. With `PULLS_ASSET`, it approves exactly the amount, calls, then resets the allowance to zero in the same transaction.
+- The contract measures every agent-asset balance before and after. Any decrease counts as gross outflow against the Permit, period and policy caps; a decrease above `Action.amount`, a liquid floor breach or any non-zero leftover allowance reverts the call.
+- CALL is allowed only for LIQUIDITY Permits whose `templatesHash` includes the template. The DemoVault deposit/withdraw operations remain; templates let the owner approve a second test vault or pool without new contract code.
+
+#### S9.9 Agent assets
+
+Manifest `agentAssets` lists DemoUSD and Base Sepolia test USDC. Resolve the USDC address from Circle's documentation at G0 and pin its code hash from chain; never trust it from configuration alone. Each Permit names one asset; Invoices carry the asset; counters are keyed per permit, per (executor, asset, day) and per (wallet, asset, day/week). The DemoVault underlying stays DemoUSD. Providers publish prices per asset. Imported personal tokens still never become agent assets.
+
+#### S9.10 x402 compatibility
+
+The provider's 402 response carries an x402-formatted `accepts` entry (scheme `exact`, network Base Sepolia, asset USDC, `payTo` = provider recipient, maximum amount, resource, description) alongside the signed Mandate Invoice for the same terms.
+
+- **Mandate-native settlement (required):** the agent's choice leads to a normal PAY with the Invoice; the provider verifies `ActionExecuted` and the Transfer.
+- **ERC-1271 settlement (gated):** an X402 Action binds the EIP-3009 authorization digest (amount, payTo, validAfter, validBefore, nonce) in `inputHash`. `execute` charges all counters, records the digest once and emits `X402Authorized`. `isValidSignature` returns the ERC-1271 magic value only for a recorded digest that has not passed `validBefore`; it rejects every other hash, so the wallet offers no general signing. Counters are never refunded if settlement does not happen.
+- **Gate X402-G:** confirm on chain that Base Sepolia USDC accepts ERC-1271 signatures in `transferWithAuthorization`, and settle one payment through the chosen facilitator or our own settlement call. Until the gate passes, the manifest records `x402.mode = 'MANDATE_NATIVE'` and the release only claims an x402-formatted 402 response.
+
+#### S9.11 Risk sentinel and screening (deterministic)
+
+The policy service runs these checks before the authorizer signs any agent Action; none uses an LLM.
+
+1. **Screening:** recipient, call target and x402 `payTo` against the WalletPolicy blocklist and the manifest screening list (`demo-screening-v1`, a labelled testnet fixture). A hit denies with SCREENING_HIT.
+2. **Simulation:** simulate the exact relayer transaction at the latest block through the independent RPC. Agent-asset balance changes of the wallet must equal the intended outflow exactly (PAY/TRANSFER: −amount; CALL: within amount; DEPOSIT/WITHDRAW: matching previews) with no other agent-asset change. Otherwise deny with SIMULATION_MISMATCH.
+3. **Velocity:** versioned rules `risk-rules-v1` (for example three denials for one wallet within 10 minutes, or spend rate above a configured fraction of the daily cap within an hour). A trigger sets an off-chain inhibit for that wallet (no new signing requests), records `RISK_ALERT` and pushes an alert recommending FREEZE. The inhibit can only stop; the owner lifts it in the app after authentication.
+
+#### S9.12 Permission tiers
+
+| Tier | Holder | Can | Cannot |
+| --- | --- | --- | --- |
+| T0 Observe | Agent token with `read`/`evidence` | Read wallet, task, delivery, evidence | Create or run anything |
+| T1 Propose | Agent token with `prepare`/`run`; the LLM agent | Create tasks, run approved tasks, answer bounded questions, request owner escalation | Sign; choose addresses, calldata or nonces; exceed bounds |
+| T2 Execute | MPC executor with the policy authorizer | Sign Actions within an active Permit, WalletPolicy and sentinel checks | Exceed any contract-enforced limit; sign Admin, Policy, Approval or OwnerTransfer |
+| T3 Owner review | Owner phone, per-Action Approval | Approve or reject an Action above the review threshold | — |
+| T4 Owner control | Owner key only | Permits, WalletPolicy, FREEZE/UNFREEZE, PAUSE/UNPAUSE, REVOKE, RECOVER, OwnerTransfer | — |
+
+Relayers, provider keys, the evidence signer, MPC initiator and backend have no financial tier: they pay gas, sign claims or authenticate requests. Only T4 can increase authority. T1 and T2 consume authority within limits; the backend can only reduce it (deny, inhibit).
+
+#### S9.13 Evidence and verifier additions
+
+New evidence event types, using the S6 envelope and schema 4: `INTENT_COMPILED`, `AGENT_QUESTION`, `AGENT_DECISION`, `AGENT_TIMEOUT`, `APPROVAL_REQUESTED`, `OWNER_APPROVAL`, `OWNER_REJECTION`, `RISK_ALERT`, `SCREENING_DENIAL`, `POLICY_UPDATED`, `WALLET_FROZEN`, `WALLET_UNFROZEN`, `CALL_EXECUTED`, `X402_AUTHORIZED`. `AGENT_DECISION` records `{questionId,optionId|amount,rationale,rationaleHash,runtime,sdkVersion,model,toolCallId}` with basis `recorder_assertion`; model output is never treated as proof.
+
+The verifier adds these checks: under **authority**, a valid owner Approval exists for every Action above the effective threshold at its block, and no agent Action executed while frozen; under **policy**, each Action respected the WalletPolicy version and blocklist in force at its block (from `WalletPolicyUpdated` events and calldata); under **settlement**, CALL outflows match `CallExecuted` and token Transfers, and X402 settlements match `X402Authorized`. AGENT_DECISION events are reported as assertions, never as PASS evidence.
+
+#### S9.14 Additional native and client interfaces
+
+```text
+signApproval(accountId,typedJson) -> {address,signature,digest}
+signWalletPolicy(accountId,typedJson,listsJson) -> {address,signature,digest}
+signAdmin(accountId,typedJson)    // now also FREEZE/UNFREEZE
+relayOwnerOperation(accountId,'ADMIN'|'OWNER_TRANSFER'|'WALLET_POLICY',typedJson,ownerSignature)
+NativePush.register(accountId) -> {pushToken}
+```
+
+Native recomputes the Approval digest from displayed Action fields and the WalletPolicy list hashes from the displayed lists before signing. Push messages carry only an ID; details are always fetched over the authenticated API. The `mandate` CLI (`apps/cli`) wraps the SDK for scripts and agents, reads its token from the environment, and never prints it.
+
+#### S9.15 Required agentic and policy acceptance cases
+
+AQ01 the Claude Agent SDK agent completes a browser-check purchase using MCP tools only while the phone is offline; AQ02 a provider page with prompt-injection text cannot add recipients, amounts or tools, and the result is an allowed option or a default; AQ03 an answer outside options or bounds is rejected, and a missed deadline applies the recorded default; AQ04 attempts to use built-in shell/file/web tools are denied and recorded; AQ05 the intent compiler's draft with an unknown provider, asset or template is rejected, and the native screen shows exactly the signed terms; AQ06 an Action above the threshold reverts on direct call without owner approval, succeeds with it, and owner rejection pays nothing and releases the reservation; AQ07 FREEZE blocks execution while Permits survive, UNFREEZE resumes them, and PAUSE still invalidates; AQ08 policy tightening applies immediately to active Permits and loosening does not enlarge them; AQ09 a blocklisted recipient is denied by the sentinel and by the contract; AQ10 ALLOWANCE period caps hold across a period boundary; AQ11 a banned selector is rejected at policy update, and a CALL with outflow above amount, floor breach or leftover allowance reverts; AQ12 DemoUSD and USDC counters and caps are independent; AQ13 Mandate-native x402 settlement works, ERC-1271 mode works only after gate X402-G, and `isValidSignature` rejects unrecorded digests; AQ14 a simulation mismatch denies signing, and a velocity trigger sets the inhibit and alerts the owner. Each case needs actual operation/hash or explicit failure evidence.
+
+#### S9.16 Owners
+
+| Area | Person1 | Person2 | Person3 | Person4 |
+| --- | --- | --- | --- | --- |
+| Types and contracts | v7 Permit/Action/Invoice/Approval/WalletPolicy/CallTemplate types, vectors, ABI; FREEZE, policy, co-sign, allowance, CALL, multi-asset, X402/ERC-1271 in MandateWallet | Consume vectors in policy/adapter | Consume vectors natively | Consume vectors in verifier/provider |
+| Agent and decisions | — | Question/answer storage and routes, agent-token scopes, compile route hosting | Show agent questions/decisions in task view | `apps/agent` on the Claude Agent SDK, MCP tools, runbook questions, intent compiler library, CLI |
+| Owner controls | Contract checks | Approval requests, push delivery, policy drafts, owner relays | Approval, policy editor, freeze controls, allowance approval, intent review screens | Approval/freeze scenarios |
+| Risk | — | Risk sentinel, screening, simulation, inhibit | Alert display and freeze action | Injection and malicious-provider fixtures |
+| Payments | Invoice domain 2, X402 path | USDC relaying and reservations per asset | Per-asset balances | x402-formatted provider responses, gate X402-G |
+| Evidence | Event ABI | Write S9.13 events | — | Verifier S9.13 checks |

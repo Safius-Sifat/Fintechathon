@@ -1,6 +1,6 @@
 # Mandate Wallet — fintechathon
 
-Owner-controlled agent wallet for PBCSF Topic F. Four-person implementation workspace, specificationv6, Base Sepolia84532.
+Owner-controlled agent wallet for PBCSF Topic F. Four-person implementation workspace, specification 7.0, Base Sepolia 84532. v7 adds a real LLM agent (Claude Agent SDK) and Cobo/Circle-class policy controls; see architecture A8/A9/S9 and FINAL PLAN section 9.
 
 ## Start here
 
@@ -8,6 +8,7 @@ Owner-controlled agent wallet for PBCSF Topic F. Four-person implementation work
 2. [Master plan](FINAL%20PLAN.md)
 3. [Complete app](docs/COMPLETE-APP.md) and [v6 migration](docs/PLAN-MIGRATION-v6.md)
 4. [PRD](PRD.md), [architecture](architecture.md), [pitch](pitch.md), [review](review.md)
+5. [Team coordination and merge rules](docs/COORDINATION-AND-MERGE-POLICY.md)
 
 | Person | Handoff | Owned result |
 | --- | --- | --- |

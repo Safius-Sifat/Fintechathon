@@ -1,3 +1,3 @@
 # mpc-adapter — Person2
 
-Implement the Go boundary from your handoff using the exact pinned MPCium source in `infra/mpcium.lock.json`. No signing executable or private keys are created by bootstrap. Go1.25.8 required; local older Go may download that toolchain when invoked. Keep authorizer private key only on host B; adapter initiator on A.
+Implement the Go boundary from your handoff using the exact pinned MPCium source in `infra/mpcium.lock.json`. No signing executable or private keys are created by bootstrap. Go1.25.8 required; local older Go may download that toolchain when invoked. For the competition PoC, keep the authorizer private key in the private policy service container and the initiator key in the adapter container. Both containers share the single Azure VM trust boundary; node shares use three separate encrypted persistent volumes. This layout demonstrates protocol quorum, not host-compromise resilience.
