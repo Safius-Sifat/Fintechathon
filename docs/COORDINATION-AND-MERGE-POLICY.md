@@ -48,17 +48,17 @@ Every consumer must test the same example. Do not use a local replacement fixtur
 
 ## 4. Work order
 
-Use these gates. Work can continue in parallel when the gate allows it.
+Use these merge stages. Work can continue in parallel when the stage allows it. Stages S-0 to S-4 describe how work merges; they are not the product gates W0–W5 and G0–G5 in FINAL PLAN. S-0 is the same freeze as W0.
 
-| Gate | Lead | Required result before the next gate |
+| Stage | Lead | Required result before the next stage |
 | --- | --- | --- |
-| W0 — Freeze interfaces | Person 1 | Schemas, typed data, ABI names, API samples, native bridge samples, receipt fields and manifest fields are in the repository. Each consumer records acceptance in its PR. |
-| W1 — Build components | Each owner | Each component passes its own tests against the W0 samples. Owners do not wait for a full application before they open PRs. |
-| W2 — Connect components | Persons 1 and 2 | The contract and API work on a local chain and a test database. The Android app and agent clients use the same API and schema. |
-| W3 — Test the full flow | Person 4 coordinates | A test owner permit, policy decision, payment, provider result and evidence inspection. Record real testnet transaction hashes for testnet runs. |
-| W4 — Release | All owners | Required tests pass. The app, backend, contracts and evidence use the same versioned interfaces. Record all known gaps. |
+| S-0 — Freeze interfaces (W0) | Person 1 | Schemas, typed data, ABI names, API samples, native bridge samples, receipt fields and manifest fields are in the repository. Each consumer records acceptance in its PR. |
+| S-1 — Build components | Each owner | Each component passes its own tests against the W0 samples. Owners do not wait for a full application before they open PRs. |
+| S-2 — Connect components | Persons 1 and 2 | The contract and API work on a local chain and a test database. The Android app and agent clients use the same API and schema. |
+| S-3 — Test the full flow | Person 4 coordinates | A test owner permit, policy decision, payment, provider result and evidence inspection. Record real testnet transaction hashes for testnet runs. |
+| S-4 — Release | All owners | Required tests pass. The app, backend, contracts and evidence use the same versioned interfaces. Record all known gaps. |
 
-An owner can work on code before W0 if the owner uses a sample from the plan. The owner must update the code and tests to the W0 interface before merge.
+An owner can work on code before S-0/W0 if the owner uses a sample from the plan. The owner must update the code and tests to the frozen interface before merge.
 
 ## 5. Branch and pull request rules
 

@@ -20,7 +20,7 @@ Run `make mpc-fetch` to clone pinned source into ignored `vendor/mpcium`. Fetch 
 
 ## Shared resources supplied by team
 
-Existing Azure Standard_B2als_v2 VM (2 vCPU/4 GiB RAM), private Docker networking and durable disk volumes; Base Sepolia RPC and independent RPC; test ETH for deployment/normal/emergency/anchor senders; HTTPS API/provider origins; Wallet Core package-read build credential; model API access; physical secure-screen-lock phone. Store node identities, passwords and shares outside Git and container images. The VM administrator can access all local node services and shares. Owner words only on phone.
+Existing Azure Standard_B2als_v2 VM (2 vCPU/4 GiB RAM), private Docker networking and durable disk volumes; Base Sepolia RPC and independent RPC; test ETH for deployment/normal/emergency/anchor senders; HTTPS API/provider origins; Wallet Core package-read build credential; Anthropic API key for the agent and intent compiler (server-side Key Vault secret only); Android push credentials for owner approval notifications; Base Sepolia test USDC from Circle's testnet faucet for agent and provider wallets; physical secure-screen-lock phone. Store node identities, passwords and shares outside Git and container images. The VM administrator can access all local node services and shares. Owner words only on phone.
 
 ## First connected gate
 
