@@ -1,0 +1,138 @@
+{
+  "schema": "mandate-manifest/1",
+  "note": "Fixture-only addresses and hashes; not a deployment.",
+  "valid": {
+    "schemaVersion": 4,
+    "walletDomainVersion": "5",
+    "loginDomainVersion": "2",
+    "invoiceDomainVersion": "2",
+    "chainId": 84532,
+    "sourceTag": "fixture-only",
+    "contracts": {
+      "factory": {
+        "address": "0x7777777777777777777777777777777777777777",
+        "deploymentBlock": "1",
+        "codeHash": "0x00000000000000000000000000000000000000000000000000000000000000f1"
+      },
+      "token": {
+        "address": "0x2222222222222222222222222222222222222222",
+        "deploymentBlock": "1",
+        "codeHash": "0x00000000000000000000000000000000000000000000000000000000000000f2"
+      },
+      "vault": {
+        "address": "0x4444444444444444444444444444444444444444",
+        "deploymentBlock": "1",
+        "codeHash": "0x00000000000000000000000000000000000000000000000000000000000000f3"
+      },
+      "anchor": {
+        "address": "0x8888888888888888888888888888888888888888",
+        "deploymentBlock": "1",
+        "codeHash": "0x00000000000000000000000000000000000000000000000000000000000000f4"
+      },
+      "walletImplementation": null
+    },
+    "providers": [
+      {
+        "providerId": "a",
+        "recipient": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+        "capabilities": [
+          "pageLoad",
+          "title"
+        ]
+      },
+      {
+        "providerId": "b",
+        "recipient": "0x6666666666666666666666666666666666666666",
+        "capabilities": [
+          "pageLoad",
+          "title",
+          "formSubmit"
+        ]
+      }
+    ],
+    "targets": [
+      {
+        "targetId": "checkout-healthy",
+        "url": "https://fixtures.mandate.example/healthy",
+        "expectedTitle": "Checkout"
+      }
+    ],
+    "origins": {
+      "api": "https://api.mandate.example",
+      "provider": "https://provider.mandate.example"
+    },
+    "mpc": {
+      "engine": "mpcium",
+      "commit": "90e3ee3c15e6698ade5626ff6c6b49d2453d8ce2",
+      "thresholdConfig": 1,
+      "nodeCount": 3,
+      "requiredParticipants": 2,
+      "deploymentMode": "competition-poc-single-vm-three-containers",
+      "initiatorPublicKey": "0x00000000000000000000000000000000000000000000000000000000000000e1",
+      "authorizerPublicKey": "0x00000000000000000000000000000000000000000000000000000000000000e2"
+    },
+    "evidence": {
+      "ed25519PublicKey": "0x00000000000000000000000000000000000000000000000000000000000000e3",
+      "publisher": "0x9999999999999999999999999999999999999999"
+    },
+    "runbooks": [
+      {
+        "schemaVersion": 4,
+        "runbookId": "browser-check",
+        "kind": 0,
+        "version": "1.0.0",
+        "entryArtifactHash": "0x0000000000000000000000000000000000000000000000000000000000000001",
+        "inputSchemaHash": "0x0000000000000000000000000000000000000000000000000000000000000002",
+        "outputSchemaHash": "0x0000000000000000000000000000000000000000000000000000000000000003",
+        "validatorArtifactHash": "0x0000000000000000000000000000000000000000000000000000000000000004",
+        "dependencyLockHash": "0x0000000000000000000000000000000000000000000000000000000000000005"
+      }
+    ],
+    "supportedTokens": [
+      {
+        "chainId": 84532,
+        "address": "0x2222222222222222222222222222222222222222",
+        "codeHash": "0x00000000000000000000000000000000000000000000000000000000000000f2",
+        "decimals": 6,
+        "symbol": "DUSD",
+        "transferMode": "STANDARD_ERC20"
+      }
+    ],
+    "agentAssets": [
+      {
+        "address": "0x2222222222222222222222222222222222222222",
+        "codeHash": "0x00000000000000000000000000000000000000000000000000000000000000f2",
+        "decimals": 6,
+        "symbol": "DUSD"
+      },
+      {
+        "address": "0x3333333333333333333333333333333333333333",
+        "codeHash": "0x00000000000000000000000000000000000000000000000000000000000000f5",
+        "decimals": 6,
+        "symbol": "USDC"
+      }
+    ],
+    "screening": {
+      "listId": "demo-screening-v1",
+      "listHash": "0x00000000000000000000000000000000000000000000000000000000000000e4"
+    },
+    "riskRules": {
+      "version": "risk-rules-v1",
+      "hash": "0x00000000000000000000000000000000000000000000000000000000000000e5"
+    },
+    "x402": {
+      "mode": "MANDATE_NATIVE",
+      "facilitator": null,
+      "gatePassed": false
+    },
+    "agent": {
+      "runtime": "claude-agent-sdk",
+      "sdkVersion": "0.0.0",
+      "model": "claude-opus-5-5",
+      "mcpToolsetHash": "0x00000000000000000000000000000000000000000000000000000000000000e6"
+    },
+    "dependencyPins": {
+      "mpcium": "90e3ee3c15e6698ade5626ff6c6b49d2453d8ce2"
+    }
+  }
+}

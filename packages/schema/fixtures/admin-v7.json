@@ -1,0 +1,318 @@
+{
+  "schema": "mandate-vector/1",
+  "primaryType": "Admin",
+  "valid": [
+    {
+      "id": "freeze",
+      "domain": {
+        "name": "MandateWallet",
+        "version": "5",
+        "chainId": 84532,
+        "verifyingContract": "0x1111111111111111111111111111111111111111"
+      },
+      "message": {
+        "command": 5,
+        "permitId": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "nonce": "0",
+        "issuedAt": "1793000200",
+        "deadline": "1793001000"
+      },
+      "typedData": {
+        "types": {
+          "EIP712Domain": [
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "version",
+              "type": "string"
+            },
+            {
+              "name": "chainId",
+              "type": "uint256"
+            },
+            {
+              "name": "verifyingContract",
+              "type": "address"
+            }
+          ],
+          "Admin": [
+            {
+              "name": "command",
+              "type": "uint8"
+            },
+            {
+              "name": "permitId",
+              "type": "bytes32"
+            },
+            {
+              "name": "nonce",
+              "type": "uint256"
+            },
+            {
+              "name": "issuedAt",
+              "type": "uint64"
+            },
+            {
+              "name": "deadline",
+              "type": "uint64"
+            }
+          ]
+        },
+        "primaryType": "Admin",
+        "domain": {
+          "name": "MandateWallet",
+          "version": "5",
+          "chainId": 84532,
+          "verifyingContract": "0x1111111111111111111111111111111111111111"
+        },
+        "message": {
+          "command": 5,
+          "permitId": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "nonce": "0",
+          "issuedAt": "1793000200",
+          "deadline": "1793001000"
+        }
+      },
+      "structHash": "0xb02fddc91d05f612a871bb22c0d396450208abaf4cec73bdbe057f14123e1d5f",
+      "domainSeparator": "0xa34ca99a0fbaf645168fa5e21ac311b27ffc06a966896fd0315ecfdaba1da25d",
+      "digest": "0x9d5bd424ae4ba233fc4ee3a5b26a76303521cab5d1d27989f0a29d19019ed382",
+      "abiEncoded": "0x000000000000000000000000000000000000000000000000000000000000000500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000006adf0308000000000000000000000000000000000000000000000000000000006adf0628",
+      "signer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "signature": "0x3079a0722c335dac75c2bb9fa3be798801649d7c6ebe81b42ad09352df3df76c6d25a1eb477434b64ec5c5af8b8bbcb279640a20b51defe63f1b79156b8260961b"
+    },
+    {
+      "id": "pause",
+      "domain": {
+        "name": "MandateWallet",
+        "version": "5",
+        "chainId": 84532,
+        "verifyingContract": "0x1111111111111111111111111111111111111111"
+      },
+      "message": {
+        "command": 0,
+        "permitId": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "nonce": "1",
+        "issuedAt": "1793000200",
+        "deadline": "1793001000"
+      },
+      "typedData": {
+        "types": {
+          "EIP712Domain": [
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "version",
+              "type": "string"
+            },
+            {
+              "name": "chainId",
+              "type": "uint256"
+            },
+            {
+              "name": "verifyingContract",
+              "type": "address"
+            }
+          ],
+          "Admin": [
+            {
+              "name": "command",
+              "type": "uint8"
+            },
+            {
+              "name": "permitId",
+              "type": "bytes32"
+            },
+            {
+              "name": "nonce",
+              "type": "uint256"
+            },
+            {
+              "name": "issuedAt",
+              "type": "uint64"
+            },
+            {
+              "name": "deadline",
+              "type": "uint64"
+            }
+          ]
+        },
+        "primaryType": "Admin",
+        "domain": {
+          "name": "MandateWallet",
+          "version": "5",
+          "chainId": 84532,
+          "verifyingContract": "0x1111111111111111111111111111111111111111"
+        },
+        "message": {
+          "command": 0,
+          "permitId": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "nonce": "1",
+          "issuedAt": "1793000200",
+          "deadline": "1793001000"
+        }
+      },
+      "structHash": "0x99e9783159e40d275b0f9e4f3441e5b706101a42f5dd941003df54e77dceda31",
+      "domainSeparator": "0xa34ca99a0fbaf645168fa5e21ac311b27ffc06a966896fd0315ecfdaba1da25d",
+      "digest": "0xdb7f17f309e9787bcf823a22f9e55c6e23af384bbab4d31f12f9220c475d57d8",
+      "abiEncoded": "0x000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000006adf0308000000000000000000000000000000000000000000000000000000006adf0628",
+      "signer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "signature": "0x4fb83873aded17b707a769efe5c12a8c43be6d2e491e22509aea9825dc3cda343b380ee2124994267cb4b7294a4e8051e55c75a7062e5aa8af098969ca5064f01b"
+    }
+  ],
+  "invalid": [
+    {
+      "id": "unknown-field",
+      "expect": "SCHEMA_REJECT",
+      "reason": "Unknown fields reject",
+      "domain": {
+        "name": "MandateWallet",
+        "version": "5",
+        "chainId": 84532,
+        "verifyingContract": "0x1111111111111111111111111111111111111111"
+      },
+      "message": {
+        "command": 5,
+        "permitId": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "nonce": "0",
+        "issuedAt": "1793000200",
+        "deadline": "1793001000",
+        "extra": "1"
+      }
+    },
+    {
+      "id": "null-field",
+      "expect": "SCHEMA_REJECT",
+      "reason": "null never replaces a required value",
+      "domain": {
+        "name": "MandateWallet",
+        "version": "5",
+        "chainId": 84532,
+        "verifyingContract": "0x1111111111111111111111111111111111111111"
+      },
+      "message": {
+        "command": 5,
+        "permitId": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "nonce": null,
+        "issuedAt": "1793000200",
+        "deadline": "1793001000"
+      }
+    },
+    {
+      "id": "missing-field",
+      "expect": "SCHEMA_REJECT",
+      "reason": "Every field is required",
+      "domain": {
+        "name": "MandateWallet",
+        "version": "5",
+        "chainId": 84532,
+        "verifyingContract": "0x1111111111111111111111111111111111111111"
+      },
+      "message": {
+        "permitId": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "nonce": "0",
+        "issuedAt": "1793000200",
+        "deadline": "1793001000"
+      }
+    },
+    {
+      "id": "wrong-chain",
+      "expect": "DOMAIN_REJECT",
+      "reason": "Only chainId 84532",
+      "domain": {
+        "name": "MandateWallet",
+        "version": "5",
+        "chainId": 8453,
+        "verifyingContract": "0x1111111111111111111111111111111111111111"
+      },
+      "message": {
+        "command": 5,
+        "permitId": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "nonce": "0",
+        "issuedAt": "1793000200",
+        "deadline": "1793001000"
+      }
+    },
+    {
+      "id": "old-domain-version",
+      "expect": "DOMAIN_REJECT",
+      "reason": "Bootstrap/old domain versions reject",
+      "domain": {
+        "name": "MandateWallet",
+        "version": "4",
+        "chainId": 84532,
+        "verifyingContract": "0x1111111111111111111111111111111111111111"
+      },
+      "message": {
+        "command": 5,
+        "permitId": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "nonce": "0",
+        "issuedAt": "1793000200",
+        "deadline": "1793001000"
+      }
+    },
+    {
+      "id": "one-unit-change",
+      "expect": "SIGNER_MISMATCH",
+      "reason": "Original signature must not authorize a 1-unit change",
+      "domain": {
+        "name": "MandateWallet",
+        "version": "5",
+        "chainId": 84532,
+        "verifyingContract": "0x1111111111111111111111111111111111111111"
+      },
+      "message": {
+        "command": 5,
+        "permitId": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "nonce": "1",
+        "issuedAt": "1793000200",
+        "deadline": "1793001000"
+      }
+    },
+    {
+      "id": "reordered-fields",
+      "expect": "SIGNER_MISMATCH",
+      "reason": "Field order is part of the type hash",
+      "domain": {
+        "name": "MandateWallet",
+        "version": "5",
+        "chainId": 84532,
+        "verifyingContract": "0x1111111111111111111111111111111111111111"
+      },
+      "message": {
+        "command": 5,
+        "permitId": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "nonce": "0",
+        "issuedAt": "1793000200",
+        "deadline": "1793001000"
+      },
+      "types": {
+        "Admin": [
+          {
+            "name": "deadline",
+            "type": "uint64"
+          },
+          {
+            "name": "issuedAt",
+            "type": "uint64"
+          },
+          {
+            "name": "nonce",
+            "type": "uint256"
+          },
+          {
+            "name": "permitId",
+            "type": "bytes32"
+          },
+          {
+            "name": "command",
+            "type": "uint8"
+          }
+        ]
+      }
+    }
+  ]
+}

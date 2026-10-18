@@ -24,8 +24,8 @@ typecheck:
 build:
 	$(PNPM) build
 check-schema:
-	$(PNPM) --filter @mandate/schema typecheck
-	node scripts/not-ready.mjs schema-acceptance
+	node scripts/check-suite.mjs node @mandate/schema
+	node scripts/check-suite.mjs forge packages/contracts test/MandateHashes.t.sol
 check-contracts:
 	$(PNPM) contracts:build
 	node scripts/not-ready.mjs contract-acceptance
