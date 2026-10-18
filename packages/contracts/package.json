@@ -11,9 +11,13 @@
     "build": "forge build",
     "test": "forge test",
     "abi": "forge build && node scripts/export-abi.mjs",
-    "abi:check": "forge build && node scripts/export-abi.mjs --check"
+    "abi:check": "forge build && node scripts/export-abi.mjs --check",
+    "deploy:record": "node scripts/record-deployment.mjs"
   },
   "dependencies": {
     "@openzeppelin/contracts": "5.4.0"
+  },
+  "devDependencies": {
+    "viem": "2.38.5"
   }
 }

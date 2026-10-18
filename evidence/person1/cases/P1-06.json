@@ -1,0 +1,132 @@
+[
+  {
+    "caseId": "P1-06.T01",
+    "taskId": "P1-06",
+    "status": "PASS",
+    "sourceCommit": "8b6d7ac74ecd03c9c100caf208653217225bbee2",
+    "workingTreeDigest": "see commit",
+    "schemaCommit": "8b6d7ac74ecd03c9c100caf208653217225bbee2",
+    "environment": {
+      "forge": "1.8.5",
+      "solc": "0.8.28 via_ir",
+      "chain": "local Foundry EVM / local anvil fork of Base Sepolia, chainId 84532"
+    },
+    "command": "forge test --root packages/contracts --match-contract DeployTest",
+    "testName": "test_P1_06_T01_wrongChainAbortsBeforeDeploy",
+    "exitCode": 0,
+    "expected": "RPC chain 1 or 11155111 aborts in preflight with WrongChain before any deployment",
+    "observed": "as expected; record-deployment.mjs also aborted on chain 11155111 and wrote nothing",
+    "startedAt": "2026-10-19T00:03:33+06:00",
+    "finishedAt": "2026-10-19T00:03:33+06:00",
+    "artifactRefs": [
+      "docs/contracts-deploy.md"
+    ],
+    "limitations": [
+      "Local EVM; nothing was signed or broadcast publicly"
+    ]
+  },
+  {
+    "caseId": "P1-06.T02",
+    "taskId": "P1-06",
+    "status": "PASS",
+    "sourceCommit": "8b6d7ac74ecd03c9c100caf208653217225bbee2",
+    "workingTreeDigest": "see commit",
+    "schemaCommit": "8b6d7ac74ecd03c9c100caf208653217225bbee2",
+    "environment": {
+      "forge": "1.8.5",
+      "solc": "0.8.28 via_ir",
+      "chain": "local Foundry EVM / local anvil fork of Base Sepolia, chainId 84532"
+    },
+    "command": "forge test --root packages/contracts --match-contract DeployTest",
+    "testName": "test_P1_06_T02_*",
+    "exitCode": 0,
+    "expected": "chain/USDC/publisher config mismatch aborts before deployment; readback rejects different factory wiring; committed config refuses until the publisher is supplied",
+    "observed": "as expected; a forge simulation against Base Sepolia (no broadcast) reverted ConfigMismatch(anchorPublisher); record-deployment.mjs rejected a changed publisher",
+    "startedAt": "2026-10-19T00:03:33+06:00",
+    "finishedAt": "2026-10-19T00:03:33+06:00",
+    "artifactRefs": [
+      "docs/contracts-deploy.md"
+    ],
+    "limitations": [
+      "Real provider/runbook values are not in the contract config; they are checked when the full manifest is assembled"
+    ]
+  },
+  {
+    "caseId": "P1-06.T03",
+    "taskId": "P1-06",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "8b6d7ac74ecd03c9c100caf208653217225bbee2",
+    "workingTreeDigest": "see commit",
+    "schemaCommit": "8b6d7ac74ecd03c9c100caf208653217225bbee2",
+    "environment": {
+      "forge": "1.8.5",
+      "solc": "0.8.28 via_ir",
+      "chain": "local Foundry EVM / local anvil fork of Base Sepolia, chainId 84532"
+    },
+    "command": "forge script script/Deploy.s.sol --broadcast (local anvil fork) + node scripts/record-deployment.mjs",
+    "testName": "dry run",
+    "exitCode": 0,
+    "expected": "11 contracts deployed on a local fork; runtimes equal linked compiled artifacts with immutables masked; factory wallet code equals linked MandateWallet creation code; wiring equals config",
+    "observed": "as expected",
+    "startedAt": "2026-10-19T00:03:33+06:00",
+    "finishedAt": "2026-10-19T00:03:33+06:00",
+    "artifactRefs": [
+      "docs/contracts-deploy.md"
+    ],
+    "limitations": [
+      "Local fork only; clean-clone rebuild and live Base Sepolia readback wait for the authorized deployment"
+    ]
+  },
+  {
+    "caseId": "P1-06.T04",
+    "taskId": "P1-06",
+    "status": "BLOCKED",
+    "sourceCommit": "8b6d7ac74ecd03c9c100caf208653217225bbee2",
+    "workingTreeDigest": "see commit",
+    "schemaCommit": "8b6d7ac74ecd03c9c100caf208653217225bbee2",
+    "environment": {
+      "forge": "1.8.5",
+      "solc": "0.8.28 via_ir",
+      "chain": "local Foundry EVM / local anvil fork of Base Sepolia, chainId 84532"
+    },
+    "command": null,
+    "testName": null,
+    "exitCode": null,
+    "expected": "actual agent PAY then owner pause/transfer on Base Sepolia",
+    "observed": "not run",
+    "startedAt": "2026-10-19T00:03:33+06:00",
+    "finishedAt": "2026-10-19T00:03:33+06:00",
+    "artifactRefs": [
+      "docs/contracts-deploy.md"
+    ],
+    "limitations": [
+      "Needs the authorized deployment, Person2 MPC executor and Person3 owner wallet"
+    ]
+  },
+  {
+    "caseId": "P1-06.T05",
+    "taskId": "P1-06",
+    "status": "NOT_RUN",
+    "sourceCommit": "8b6d7ac74ecd03c9c100caf208653217225bbee2",
+    "workingTreeDigest": "see commit",
+    "schemaCommit": "8b6d7ac74ecd03c9c100caf208653217225bbee2",
+    "environment": {
+      "forge": "1.8.5",
+      "solc": "0.8.28 via_ir",
+      "chain": "local Foundry EVM / local anvil fork of Base Sepolia, chainId 84532"
+    },
+    "command": null,
+    "testName": null,
+    "exitCode": null,
+    "expected": "release gate cannot report overall PASS with missing cases",
+    "observed": "not run",
+    "startedAt": "2026-10-19T00:03:33+06:00",
+    "finishedAt": "2026-10-19T00:03:33+06:00",
+    "artifactRefs": [
+      "docs/contracts-deploy.md"
+    ],
+    "limitations": [
+      "release-check wiring is part of P1-W03/release assembly"
+    ]
+  }
+]

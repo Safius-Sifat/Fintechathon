@@ -12,7 +12,10 @@ remappings = [
   "forge-std/=lib/forge-std/src/",
 ]
 # Golden vectors are read from the schema package (P1-01.T01).
-fs_permissions = [{ access = "read", path = "../schema/fixtures" }]
+fs_permissions = [
+  { access = "read", path = "../schema/fixtures" },
+  { access = "read", path = "../../deployments" },
+]
 
 [fuzz]
 runs = 1000
