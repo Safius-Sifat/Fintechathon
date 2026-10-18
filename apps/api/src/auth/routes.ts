@@ -1,4 +1,4 @@
-import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
+import type { FastifyInstance, FastifyRequest } from "fastify";
 import { z } from "zod";
 import {
   AuthChallengeRequestSchema,
@@ -42,50 +42,30 @@ export async function registerAuth(
           .send(apiError(new AuthError(401, "Login origin is invalid.")));
     });
     auth.setErrorHandler((error, _request, reply) => {
-      if (
-        error instanceof Error &&
-        "statusCode" in error &&
-        error.statusCode === 415
-      )
-        return reply
-          .code(415)
-          .send(
-            apiError(
-              new AuthError(
-                415,
-                "Authentication requests require application/json.",
-              ),
-            ),
-          );
       if (error instanceof AuthError)
         return reply.code(error.status).send(apiError(error));
-      if (
-        error instanceof Error &&
-        "statusCode" in error &&
-        error.statusCode === 413
-      )
-        return reply
-          .code(413)
-          .send(
-            apiError(
-              new AuthError(413, "Authentication request is too large."),
-            ),
+      const status =
+        error instanceof Error && "statusCode" in error
+          ? error.statusCode
+          : undefined;
+      let failure: AuthError;
+      switch (status) {
+        case 415:
+          failure = new AuthError(
+            415,
+            "Authentication requests require application/json.",
           );
-      if (
-        error instanceof Error &&
-        "statusCode" in error &&
-        error.statusCode === 400
-      )
-        return reply
-          .code(422)
-          .send(
-            apiError(new AuthError(422, "Authentication request is invalid.")),
-          );
-      return reply
-        .code(503)
-        .send(
-          apiError(new AuthError(503, "Authentication backend unavailable.")),
-        );
+          break;
+        case 413:
+          failure = new AuthError(413, "Authentication request is too large.");
+          break;
+        case 400:
+          failure = new AuthError(422, "Authentication request is invalid.");
+          break;
+        default:
+          failure = new AuthError(503, "Authentication backend unavailable.");
+      }
+      return reply.code(failure.status).send(apiError(failure));
     });
     const active = () => {
       if (!service)
@@ -118,7 +98,6 @@ export async function registerAuth(
     });
     const mutation = async (
       request: FastifyRequest,
-      _reply: FastifyReply,
       route: "/v1/auth/logout" | "/v1/auth/sessions/revoke",
     ) => {
       const current = active();
@@ -139,13 +118,11 @@ export async function registerAuth(
         );
       return current.mutate(context, route, key, body);
     };
-    auth.post("/v1/auth/logout", { bodyLimit: 8192 }, (request, reply) =>
-      mutation(request, reply, "/v1/auth/logout"),
+    auth.post("/v1/auth/logout", { bodyLimit: 8192 }, (request) =>
+      mutation(request, "/v1/auth/logout"),
     );
-    auth.post(
-      "/v1/auth/sessions/revoke",
-      { bodyLimit: 8192 },
-      (request, reply) => mutation(request, reply, "/v1/auth/sessions/revoke"),
+    auth.post("/v1/auth/sessions/revoke", { bodyLimit: 8192 }, (request) =>
+      mutation(request, "/v1/auth/sessions/revoke"),
     );
   });
 }

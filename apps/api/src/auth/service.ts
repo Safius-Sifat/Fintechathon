@@ -190,7 +190,7 @@ export class AuthService {
           signature,
         );
       } catch {
-        return denied("Login signature is invalid.");
+        denied("Login signature is invalid.");
       }
       if (signer.toLowerCase() !== challenge.owner_address)
         denied("Login signature does not match owner.");
@@ -365,7 +365,7 @@ export class AuthService {
         authTime: payload.auth_time,
       };
     } catch {
-      return denied();
+      denied();
     }
     const session = (
       await this.database.query<Session>(
