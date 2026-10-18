@@ -71,7 +71,6 @@
       "status": "IN_PROGRESS",
       "blockedBy": [
         "Owner authorization and funded deployer keystore",
-        "Anchor publisher address from Person2",
         "Provider, origin, MPC, runbook and agent values from Persons 2-4 for the full manifest"
       ]
     }
