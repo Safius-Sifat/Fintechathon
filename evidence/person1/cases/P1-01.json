@@ -1,0 +1,158 @@
+[
+  {
+    "caseId": "P1-01.T01",
+    "taskId": "P1-01",
+    "status": "PASS",
+    "sourceCommit": "54b661cafa276dc83ab0ed0907c1bd88f7bb3a91",
+    "workingTreeDigest": "c9b8ba9676a23af8ebcb056cbeee8604e62f5cba18fc09772c747c611db286ae",
+    "schemaCommit": "this change",
+    "environment": {
+      "node": "22.23.3",
+      "pnpm": "10.20.0",
+      "os": "darwin",
+      "forge": "not installed"
+    },
+    "command": "./scripts/pnpm.sh --filter @mandate/schema check",
+    "exitCode": 0,
+    "expected": "valid vectors recompute; signer recovers; Solidity type strings and struct order match",
+    "observed": "as expected",
+    "startedAt": "2026-10-18T15:08:36+06:00",
+    "finishedAt": "2026-10-18T15:08:36+06:00",
+    "artifactRefs": [
+      "packages/schema/fixtures/"
+    ],
+    "limitations": [
+      "Local deterministic test only; no chain, device or MPC involved"
+    ]
+  },
+  {
+    "caseId": "P1-01.T01-solidity",
+    "taskId": "P1-01",
+    "status": "NOT_RUN",
+    "sourceCommit": "54b661cafa276dc83ab0ed0907c1bd88f7bb3a91",
+    "workingTreeDigest": "c9b8ba9676a23af8ebcb056cbeee8604e62f5cba18fc09772c747c611db286ae",
+    "schemaCommit": "this change",
+    "environment": {
+      "node": "22.23.3",
+      "pnpm": "10.20.0",
+      "os": "darwin",
+      "forge": "not installed"
+    },
+    "command": "forge test --root packages/contracts --match-path test/MandateHashes.t.sol",
+    "exitCode": null,
+    "expected": "Solidity recomputes struct hash, domain, digest and ecrecover from fixtures",
+    "observed": "not run: Foundry not installed on the implementing machine",
+    "startedAt": "2026-10-18T15:08:36+06:00",
+    "finishedAt": "2026-10-18T15:08:36+06:00",
+    "artifactRefs": [
+      "packages/schema/fixtures/"
+    ],
+    "limitations": [
+      "Requires forge and forge-std"
+    ]
+  },
+  {
+    "caseId": "P1-01.T02",
+    "taskId": "P1-01",
+    "status": "PASS",
+    "sourceCommit": "54b661cafa276dc83ab0ed0907c1bd88f7bb3a91",
+    "workingTreeDigest": "c9b8ba9676a23af8ebcb056cbeee8604e62f5cba18fc09772c747c611db286ae",
+    "schemaCommit": "this change",
+    "environment": {
+      "node": "22.23.3",
+      "pnpm": "10.20.0",
+      "os": "darwin",
+      "forge": "not installed"
+    },
+    "command": "./scripts/pnpm.sh --filter @mandate/schema check",
+    "exitCode": 0,
+    "expected": "decimal, negative, leading-zero, number and overflow amounts reject; safeParse never throws",
+    "observed": "as expected",
+    "startedAt": "2026-10-18T15:08:36+06:00",
+    "finishedAt": "2026-10-18T15:08:36+06:00",
+    "artifactRefs": [
+      "packages/schema/fixtures/"
+    ],
+    "limitations": [
+      "Local deterministic test only; no chain, device or MPC involved"
+    ]
+  },
+  {
+    "caseId": "P1-01.T03",
+    "taskId": "P1-01",
+    "status": "PASS",
+    "sourceCommit": "54b661cafa276dc83ab0ed0907c1bd88f7bb3a91",
+    "workingTreeDigest": "c9b8ba9676a23af8ebcb056cbeee8604e62f5cba18fc09772c747c611db286ae",
+    "schemaCommit": "this change",
+    "environment": {
+      "node": "22.23.3",
+      "pnpm": "10.20.0",
+      "os": "darwin",
+      "forge": "not installed"
+    },
+    "command": "./scripts/pnpm.sh --filter @mandate/schema check",
+    "exitCode": 0,
+    "expected": "unknown fields and null mandatory values reject",
+    "observed": "as expected",
+    "startedAt": "2026-10-18T15:08:36+06:00",
+    "finishedAt": "2026-10-18T15:08:36+06:00",
+    "artifactRefs": [
+      "packages/schema/fixtures/"
+    ],
+    "limitations": [
+      "Local deterministic test only; no chain, device or MPC involved"
+    ]
+  },
+  {
+    "caseId": "P1-01.T04",
+    "taskId": "P1-01",
+    "status": "PASS",
+    "sourceCommit": "54b661cafa276dc83ab0ed0907c1bd88f7bb3a91",
+    "workingTreeDigest": "c9b8ba9676a23af8ebcb056cbeee8604e62f5cba18fc09772c747c611db286ae",
+    "schemaCommit": "this change",
+    "environment": {
+      "node": "22.23.3",
+      "pnpm": "10.20.0",
+      "os": "darwin",
+      "forge": "not installed"
+    },
+    "command": "./scripts/pnpm.sh --filter @mandate/schema check",
+    "exitCode": 0,
+    "expected": "wrong chain, old domain version, 1-unit change and reordered fields fail",
+    "observed": "as expected",
+    "startedAt": "2026-10-18T15:08:36+06:00",
+    "finishedAt": "2026-10-18T15:08:36+06:00",
+    "artifactRefs": [
+      "packages/schema/fixtures/"
+    ],
+    "limitations": [
+      "Local deterministic test only; no chain, device or MPC involved"
+    ]
+  },
+  {
+    "caseId": "P1-01.T05",
+    "taskId": "P1-01",
+    "status": "PASS",
+    "sourceCommit": "54b661cafa276dc83ab0ed0907c1bd88f7bb3a91",
+    "workingTreeDigest": "c9b8ba9676a23af8ebcb056cbeee8604e62f5cba18fc09772c747c611db286ae",
+    "schemaCommit": "this change",
+    "environment": {
+      "node": "22.23.3",
+      "pnpm": "10.20.0",
+      "os": "darwin",
+      "forge": "not installed"
+    },
+    "command": "./scripts/pnpm.sh --filter @mandate/schema check",
+    "exitCode": 0,
+    "expected": "noncanonical recipients reject; value changes alter hashes; key order does not",
+    "observed": "as expected",
+    "startedAt": "2026-10-18T15:08:36+06:00",
+    "finishedAt": "2026-10-18T15:08:36+06:00",
+    "artifactRefs": [
+      "packages/schema/fixtures/"
+    ],
+    "limitations": [
+      "Local deterministic test only; no chain, device or MPC involved"
+    ]
+  }
+]

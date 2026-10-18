@@ -6,7 +6,7 @@
   "sharedAppendixSha256": "51252dbd26a1c6630fd514dbb0e81798b540ce14b4308e16039ce2806702de84",
   "walletExtensionSha256": "f225c9488c2252a70a638645eee44bcf4587b4b74ca96896107f1b94ef3e1be2",
   "status": "specified-not-built",
-  "sourceMigration": "not-performed",
+  "sourceMigration": "w0-schema-implemented-solidity-vectors-not-run",
   "files": {
     "AGENTS.md": {
       "sha256": "625cc3d225ec396b1a28c8cdf5a0ad4e6de4661f5e05132025425102ab059427",
@@ -41,8 +41,8 @@
       "words": 192
     },
     "docs/PLAN-MIGRATION-v6.md": {
-      "sha256": "5b8a03f7125c693fa9fb3dc3c8b81f3dc3c30b4dd5f184ec41aa09dea8dcc3d9",
-      "words": 563
+      "sha256": "cbfe6d669b019e21c13f1128729e797cf8b5ec7615375f574bbd820c71593dab",
+      "words": 789
     },
     "docs/SETUP.md": {
       "sha256": "4c67681e7baa582288dee50f89e1c78bb8faa561bea3ff4bc28195eb17e6b489",
