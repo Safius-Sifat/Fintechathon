@@ -25,3 +25,5 @@ apps/mobile/android/.gradle/
 apps/mobile/android/local.properties
 apps/mobile/android/**/build/
 .DS_Store
+packages/contracts/broadcast/
+deployments/*.local.json
