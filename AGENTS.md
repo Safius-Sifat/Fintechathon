@@ -6,4 +6,18 @@ Ownership: Person1 contracts/schema/root workspace/deployments; Person2 API/sess
 
 Never introduce Circle custody, wallet or signing services (Circle-issued test USDC used as an ordinary token is allowed), ordinary executor key fallback, separate ECDSA guard signer, arbitrary raw signing, fake settlement/results or hardcoded wallet keys. Missing financial capabilities must fail explicitly; /healthz is process health and /readyz remains503 until real gates pass. Root acceptance commands must not report success for absent implementations.
 
-Preserve private .env, seeds, shares and backups; do not log or commit secrets. Do not deploy contracts, generate custody keys or publish without task authorization. Use current v7 plans/Complete App Plan and PLAN-MIGRATION-v6; The shared schema (`packages/schema`) is migrated to wallet 5/Login 2/Invoice 2 with golden vectors; wallet contracts, API, mobile, Go and verifier consumers are not yet implemented and must each confirm the fixture digests before financial signing. Bounded native personal transactions and specific owner-operation relays are required; no generic raw digest/backend owner signing. Local logout/API sessions are distinct from on-chain agent stop. All advertised required app features need actual acceptance.  docs/archive is historical only. No tests were added by bootstrap; implement/run acceptance tests when explicitly authorized. Typecheck is available separately and is not security qualification.
+Preserve private .env, seeds, shares and backups; do not log or commit secrets. Do not deploy contracts, generate custody keys or publish without task authorization. Use current v7 plans/Complete App Plan and PLAN-MIGRATION-v6; The shared schema (`packages/schema`) is migrated to wallet 5/Login 2/Invoice 2 with golden vectors; wallet contracts, API, mobile, Go and verifier consumers are not yet implemented and must each confirm the fixture digests before financial signing. Bounded native personal transactions and specific owner-operation relays are required; no generic raw digest/backend owner signing. Local logout/API sessions are distinct from on-chain agent stop. All advertised required app features need actual acceptance. docs/archive is historical only. No tests were added by bootstrap; implement/run acceptance tests when explicitly authorized. Typecheck is available separately and is not security qualification.
+
+Remove AI code slop
+Check the diff against main and remove AI-generated slop introduced in the branch.
+
+Focus Areas
+Extra comments that are unnecessary or inconsistent with local style
+Defensive checks or try/catch blocks that are abnormal for trusted code paths
+Casts to any used only to bypass type issues
+Deeply nested code that should be simplified with early returns
+Other patterns inconsistent with the file and surrounding codebase
+Guardrails
+Keep behavior unchanged unless fixing a clear bug.
+Prefer minimal, focused edits over broad rewrites.
+Keep the final summary concise (1-3 sentences).

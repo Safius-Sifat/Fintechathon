@@ -5,6 +5,7 @@ import {
   Hex32Schema,
   HexDataSchema,
   JsonObjectSchema,
+  Uint256,
   Uint64,
   UuidSchema,
 } from "./primitives.js";
@@ -32,6 +33,28 @@ export const V7_EVENT_TYPES = [
   "CALL_EXECUTED",
   "X402_AUTHORIZED",
 ] as const;
+
+// AGENT_DECISION payload (S9.13): binds each model decision to the agent credential
+// (agent token) and the exact MCP toolset it ran with. Basis is recorder_assertion.
+export const AgentDecisionPayloadSchema = z
+  .object({
+    questionId: UuidSchema,
+    optionId: z.string().nullable(),
+    amount: Uint256.nullable(),
+    rationale: z.string().max(2000),
+    rationaleHash: Hex32Schema,
+    runtime: z.string().min(1).max(64),
+    sdkVersion: z.string().regex(/^[0-9]+\.[0-9]+\.[0-9]+$/),
+    model: z.string().min(1).max(64),
+    toolCallId: z.string().min(1).max(128),
+    agentTokenId: UuidSchema,
+    mcpToolsetHash: Hex32Schema,
+  })
+  .strict()
+  .refine(
+    (d) => (d.optionId === null) !== (d.amount === null),
+    "Exactly one of optionId or amount",
+  );
 
 export const EvidenceEventSchema = z
   .object({

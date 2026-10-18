@@ -9,6 +9,7 @@ Owner-controlled agent wallet for PBCSF Topic F. Four-person implementation work
 3. [Complete app](docs/COMPLETE-APP.md) and [v6 migration](docs/PLAN-MIGRATION-v6.md)
 4. [PRD](PRD.md), [architecture](architecture.md), [pitch](pitch.md), [review](review.md)
 5. [Team coordination and merge rules](docs/COORDINATION-AND-MERGE-POLICY.md)
+6. [Security self-assessment](docs/security-self-assessment.md) and [contract security notes](docs/contracts-security.md)
 
 | Person | Handoff | Owned result |
 | --- | --- | --- |
