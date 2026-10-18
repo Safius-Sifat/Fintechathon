@@ -1,0 +1,20 @@
+{
+  "schema": "mandate-mpc-sign/1",
+  "note": "Go adapter fixture: Tx is the exact 32-byte Action digest; derivation path must be nil, not an empty list.",
+  "valid": {
+    "keyType": "secp256k1",
+    "networkInternalCode": "eip155:84532",
+    "txHex": "0xe58e0d97a74208502124fb04e58416f6dad21bccb944ba29f1184f1a58786c6a",
+    "derivationPath": null
+  },
+  "invalid": [
+    {
+      "id": "empty-derivation-path",
+      "derivationPath": []
+    },
+    {
+      "id": "rehashed-digest",
+      "txHex": "0x0990a962ffa0bfdd54a955f3849d0f15059809e1e399faa6d1d53d28c048d8a9"
+    }
+  ]
+}

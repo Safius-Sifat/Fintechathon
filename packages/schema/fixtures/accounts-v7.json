@@ -1,0 +1,32 @@
+{
+  "schema": "mandate-accounts/1",
+  "mnemonic": "test test test test test test test test test test test junk",
+  "note": "Public test mnemonic. Words alone with a different passphrase restore a different valid address.",
+  "noPassphrase": [
+    {
+      "index": 0,
+      "path": "m/44'/60'/0'/0/0",
+      "address": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+    },
+    {
+      "index": 1,
+      "path": "m/44'/60'/0'/0/1",
+      "address": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8"
+    }
+  ],
+  "withPassphrase": {
+    "passphrase": "mandate-public-test-passphrase",
+    "accounts": [
+      {
+        "index": 0,
+        "path": "m/44'/60'/0'/0/0",
+        "address": "0xE7D0B4E0a01336d96a4778A98C79850849844cA9"
+      },
+      {
+        "index": 1,
+        "path": "m/44'/60'/0'/0/1",
+        "address": "0xAA8AC37bdC2334d681c264828aC1780A5DA6Dfc2"
+      }
+    ]
+  }
+}

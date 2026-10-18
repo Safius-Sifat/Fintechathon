@@ -8,11 +8,15 @@
     "default": "./src/index.ts"
   },
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test test/*.test.ts",
+    "vectors": "tsx scripts/generate-vectors.ts",
+    "check": "tsc --noEmit && tsx --test test/*.test.ts"
   },
   "dependencies": {
-    "zod": "3.25.76",
+    "@scure/bip39": "1.6.0",
+    "json-canonicalize": "1.2.0",
     "viem": "2.38.5",
-    "json-canonicalize": "1.2.0"
+    "zod": "3.25.76"
   }
 }
