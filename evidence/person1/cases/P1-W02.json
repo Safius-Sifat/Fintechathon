@@ -1,0 +1,198 @@
+[
+  {
+    "caseId": "P1-W02.T01",
+    "taskId": "P1-W02",
+    "status": "PASS",
+    "sourceCommit": "ecfe0fe208fbf4bb07c22b36b30e017ddfb3236b",
+    "workingTreeDigest": "see commit",
+    "schemaCommit": "ecfe0fe208fbf4bb07c22b36b30e017ddfb3236b",
+    "environment": {
+      "forge": "1.8.5",
+      "forgeStd": "v1.17.0",
+      "solc": "0.8.28 via_ir",
+      "chain": "local Foundry EVM, chainId 84532"
+    },
+    "command": "forge test --root packages/contracts --match-contract \"OwnerTransferTest\"",
+    "testName": "test_P1_W02_T01_*",
+    "exitCode": 0,
+    "expected": "400000 sent below floor; nonce+1, epoch+1, paused; old Action rejects",
+    "observed": "as expected",
+    "startedAt": "2026-10-18T16:50:21+06:00",
+    "finishedAt": "2026-10-18T16:50:21+06:00",
+    "artifactRefs": [
+      "packages/contracts/test/",
+      "packages/contracts/abi/"
+    ],
+    "limitations": [
+      "Local Foundry EVM only; Base Sepolia transaction evidence comes with P1-06 deployment"
+    ]
+  },
+  {
+    "caseId": "P1-W02.T02",
+    "taskId": "P1-W02",
+    "status": "PASS",
+    "sourceCommit": "ecfe0fe208fbf4bb07c22b36b30e017ddfb3236b",
+    "workingTreeDigest": "see commit",
+    "schemaCommit": "ecfe0fe208fbf4bb07c22b36b30e017ddfb3236b",
+    "environment": {
+      "forge": "1.8.5",
+      "forgeStd": "v1.17.0",
+      "solc": "0.8.28 via_ir",
+      "chain": "local Foundry EVM, chainId 84532"
+    },
+    "command": "forge test --root packages/contracts --match-contract \"OwnerTransferTest\"",
+    "testName": "test_P1_W02_T02_*",
+    "exitCode": 0,
+    "expected": "replayed transfer/ID and executor signature reject",
+    "observed": "as expected",
+    "startedAt": "2026-10-18T16:50:21+06:00",
+    "finishedAt": "2026-10-18T16:50:21+06:00",
+    "artifactRefs": [
+      "packages/contracts/test/",
+      "packages/contracts/abi/"
+    ],
+    "limitations": [
+      "Local Foundry EVM only; Base Sepolia transaction evidence comes with P1-06 deployment"
+    ]
+  },
+  {
+    "caseId": "P1-W02.T03",
+    "taskId": "P1-W02",
+    "status": "PASS",
+    "sourceCommit": "ecfe0fe208fbf4bb07c22b36b30e017ddfb3236b",
+    "workingTreeDigest": "see commit",
+    "schemaCommit": "ecfe0fe208fbf4bb07c22b36b30e017ddfb3236b",
+    "environment": {
+      "forge": "1.8.5",
+      "forgeStd": "v1.17.0",
+      "solc": "0.8.28 via_ir",
+      "chain": "local Foundry EVM, chainId 84532"
+    },
+    "command": "forge test --root packages/contracts --match-contract \"OwnerTransferTest\"",
+    "testName": "test_P1_W02_T03_*",
+    "exitCode": 0,
+    "expected": "insufficient balance, reverting ETH recipient, expiry roll back nonce/epoch/pause/balances",
+    "observed": "as expected",
+    "startedAt": "2026-10-18T16:50:21+06:00",
+    "finishedAt": "2026-10-18T16:50:21+06:00",
+    "artifactRefs": [
+      "packages/contracts/test/",
+      "packages/contracts/abi/"
+    ],
+    "limitations": [
+      "Local Foundry EVM only; Base Sepolia transaction evidence comes with P1-06 deployment"
+    ]
+  },
+  {
+    "caseId": "P1-W02.T04",
+    "taskId": "P1-W02",
+    "status": "PASS",
+    "sourceCommit": "ecfe0fe208fbf4bb07c22b36b30e017ddfb3236b",
+    "workingTreeDigest": "see commit",
+    "schemaCommit": "ecfe0fe208fbf4bb07c22b36b30e017ddfb3236b",
+    "environment": {
+      "forge": "1.8.5",
+      "forgeStd": "v1.17.0",
+      "solc": "0.8.28 via_ir",
+      "chain": "local Foundry EVM, chainId 84532"
+    },
+    "command": "forge test --root packages/contracts --match-contract \"NativeReceiveTest\"",
+    "testName": "test_P1_W02_T04_*",
+    "exitCode": 0,
+    "expected": "reentrant recipient gets one transfer; inner call fails",
+    "observed": "as expected",
+    "startedAt": "2026-10-18T16:50:21+06:00",
+    "finishedAt": "2026-10-18T16:50:21+06:00",
+    "artifactRefs": [
+      "packages/contracts/test/",
+      "packages/contracts/abi/"
+    ],
+    "limitations": [
+      "Local Foundry EVM only; Base Sepolia transaction evidence comes with P1-06 deployment"
+    ]
+  },
+  {
+    "caseId": "P1-W02.T05",
+    "taskId": "P1-W02",
+    "status": "PASS",
+    "sourceCommit": "ecfe0fe208fbf4bb07c22b36b30e017ddfb3236b",
+    "workingTreeDigest": "see commit",
+    "schemaCommit": "ecfe0fe208fbf4bb07c22b36b30e017ddfb3236b",
+    "environment": {
+      "forge": "1.8.5",
+      "forgeStd": "v1.17.0",
+      "solc": "0.8.28 via_ir",
+      "chain": "local Foundry EVM, chainId 84532"
+    },
+    "command": "forge test --root packages/contracts --match-contract \"OwnerTransferTest\"",
+    "testName": "test_P1_W02_T05_*",
+    "exitCode": 0,
+    "expected": "vault share token, fee-on-transfer token and self-recipient reject",
+    "observed": "as expected",
+    "startedAt": "2026-10-18T16:50:21+06:00",
+    "finishedAt": "2026-10-18T16:50:21+06:00",
+    "artifactRefs": [
+      "packages/contracts/test/",
+      "packages/contracts/abi/"
+    ],
+    "limitations": [
+      "Local Foundry EVM only; Base Sepolia transaction evidence comes with P1-06 deployment"
+    ]
+  },
+  {
+    "caseId": "P1-W02.T06",
+    "taskId": "P1-W02",
+    "status": "PASS",
+    "sourceCommit": "ecfe0fe208fbf4bb07c22b36b30e017ddfb3236b",
+    "workingTreeDigest": "see commit",
+    "schemaCommit": "ecfe0fe208fbf4bb07c22b36b30e017ddfb3236b",
+    "environment": {
+      "forge": "1.8.5",
+      "forgeStd": "v1.17.0",
+      "solc": "0.8.28 via_ir",
+      "chain": "local Foundry EVM, chainId 84532"
+    },
+    "command": "forge test --root packages/contracts --match-contract \"OwnerTransferTest\"",
+    "testName": "test_P1_W02_T06_*",
+    "exitCode": 0,
+    "expected": "works while paused from an independent sender with no API/MPC",
+    "observed": "as expected",
+    "startedAt": "2026-10-18T16:50:21+06:00",
+    "finishedAt": "2026-10-18T16:50:21+06:00",
+    "artifactRefs": [
+      "packages/contracts/test/",
+      "packages/contracts/abi/"
+    ],
+    "limitations": [
+      "Local Foundry EVM only; Base Sepolia transaction evidence comes with P1-06 deployment"
+    ]
+  },
+  {
+    "caseId": "P1-W02.T07",
+    "taskId": "P1-W02",
+    "status": "PASS",
+    "sourceCommit": "ecfe0fe208fbf4bb07c22b36b30e017ddfb3236b",
+    "workingTreeDigest": "see commit",
+    "schemaCommit": "ecfe0fe208fbf4bb07c22b36b30e017ddfb3236b",
+    "environment": {
+      "forge": "1.8.5",
+      "forgeStd": "v1.17.0",
+      "solc": "0.8.28 via_ir",
+      "chain": "local Foundry EVM, chainId 84532"
+    },
+    "command": "forge test --root packages/contracts --match-contract \"OwnerTransferTest\"",
+    "testName": "test_P1_W02_T07_*",
+    "exitCode": 0,
+    "expected": "Action mined before settles; after is rejected",
+    "observed": "as expected",
+    "startedAt": "2026-10-18T16:50:21+06:00",
+    "finishedAt": "2026-10-18T16:50:21+06:00",
+    "artifactRefs": [
+      "packages/contracts/test/",
+      "packages/contracts/abi/"
+    ],
+    "limitations": [
+      "Local Foundry EVM only; Base Sepolia transaction evidence comes with P1-06 deployment"
+    ]
+  }
+]
