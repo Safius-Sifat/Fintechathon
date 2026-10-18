@@ -8,6 +8,8 @@ status: planning-review-only
 
 # Version6 — complete app review and decisions
 
+> **Historical (v6).** Superseded by the v7 plan and the 2026-10-18 review fixes (architecture S9 and A10). Kept for the record; where it conflicts with the current architecture, the architecture wins.
+
 User requested that everyday wallet capabilities become real required work in all plans. Prior v5 bootstrap/plans are archived; this is not implementation or security qualification.
 
 ## Fixed additions

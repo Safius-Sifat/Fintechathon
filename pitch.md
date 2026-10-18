@@ -1,8 +1,8 @@
 ---
 type: product-pitch
 title: Mandate — A Wallet for You and Your Agents
-version: "6.0"
-updated: 2026-10-17
+version: "7.0"
+updated: 2026-10-18
 status: proposed-release-not-built
 ---
 
@@ -38,9 +38,13 @@ Personal funds and agent-managed funds are separate balances/addresses with clea
 
 An owner manually sending from the managed wallet is different from an agent payment. OwnerTransfer uses its own signature/nonce and pauses prior grants; agents cannot invoke it or obtain owner privileges through an SDK token. A normal personal transfer signs locally and does not need MPC or backend consent.
 
+## Agent intelligence and owner policy (v7)
+
+A real LLM agent (Claude Agent SDK) does the judgement work: choosing offers, retrying or falling back, setting amounts within bounds and checking results. It can only choose among options the wallet's limits allow, so injected instructions cannot add recipients or amounts. The owner sets an on-chain wallet policy (per-asset daily/weekly caps, allowlist, blocklist, allowed contract templates), co-signs large actions from a push notification, and can freeze agents temporarily without losing their approved tasks. Agents pay x402 services in test USDC, with the wallet contract as the payer. A deterministic risk sentinel screens and simulates every payment before signing.
+
 ## Specialized workflows
 
-**Browser Check:** buy approved page/title/form observations, validate actual output, retrieve or use bounded fallback. **Liquidity Keeper:** one explicitly approved deposit/redeem in the controlled vault, preserving delegated floor/liquidity rules. **Scheduled Pay:** exact recipient/amount/windows/count, once per period, missed windows skipped. Each includes typed inputs, versioned code/input commitment, deterministic action/validator, stop conditions and skill guide. SDK/MCP run through the same permission boundary.
+**Browser Check:** buy approved page/title/form observations, validate actual output, retrieve or use bounded fallback. **Liquidity Keeper:** one explicitly approved deposit/redeem in the controlled vault, preserving delegated floor/liquidity rules. **Scheduled Pay:** exact recipient/amount/windows/count, once per period, missed windows skipped. **Service Allowance:** buy approved services on demand under a standing daily or weekly cap. Each includes typed inputs, versioned code/input commitment, deterministic action/validator, stop conditions and skill guide. SDK/MCP run through the same permission boundary.
 
 ## Inspectable outcomes
 

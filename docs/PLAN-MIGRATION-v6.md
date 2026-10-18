@@ -61,3 +61,10 @@ Clarifications fixed at W0:
 - Recipients, template IDs, asset caps and call templates must arrive sorted and unique; noncanonical input is rejected, never re-sorted.
 
 Consumers regenerate nothing: import `@mandate/schema` and test against the committed fixtures. Change vectors only through `pnpm --filter @mandate/schema vectors`, and review the diff.
+
+### 2026-10-18 review fixes
+
+- CallTemplate gains `targetCodeHash`; `templateId` is the content hash of the definition (`callTemplateId`), checked in schema and Solidity.
+- x402: `X402AcceptsSchema` follows x402 v2 (`network: "eip155:84532"`, `amount`, `extra` with the signed Mandate invoice). The EIP-3009 authorization is derived from the X402 Action (`x402Authorization`, `x402AuthorizationDigest`, `x402Signature`); the old free-form `ActionIntent.x402` field is removed. PAY and X402 intents require the invoice.
+- Provider check requests carry `asset`; new `PushRegisterRequestSchema` and `InhibitClearRequestSchema`.
+- New fixture `x402-v7.json`, pinned to the on-chain Base Sepolia USDC domain separator.
