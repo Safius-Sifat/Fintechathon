@@ -51,3 +51,35 @@ contract ReentrantRecipient {
     }
   }
 }
+
+/// Vault double whose redemption path misbehaves, for recovery tests.
+contract UnavailableVault is ERC20 {
+  enum Mode { Revert, BurnGas }
+  Mode public mode;
+  address public immutable asset;
+  uint256 public redeemCalls;
+
+  constructor(address asset_, Mode mode_) ERC20("Bad Vault", "BAD") {
+    asset = asset_;
+    mode = mode_;
+  }
+
+  function mintShares(address to, uint256 amount) external {
+    _mint(to, amount);
+  }
+
+  function convertToAssets(uint256 shares) external pure returns (uint256) {
+    return shares;
+  }
+
+  function maxRedeem(address owner) external view returns (uint256) {
+    return balanceOf(owner);
+  }
+
+  function redeem(uint256, address, address) external returns (uint256) {
+    redeemCalls++;
+    if (mode == Mode.Revert) revert("redeem unavailable");
+    while (true) {}
+    return 0;
+  }
+}

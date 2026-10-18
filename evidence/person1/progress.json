@@ -1,7 +1,7 @@
 {
   "owner": "Person1",
-  "updatedAt": "2026-10-18T16:50:21+06:00",
-  "milestone": "M1 / G1,W2",
+  "updatedAt": "2026-10-18T18:10:17+06:00",
+  "milestone": "M2/M3 contract side (P1-03, P1-04)",
   "tasks": {
     "P1-01": {
       "status": "IN_PROGRESS",
@@ -32,6 +32,19 @@
         "Public Base Sepolia hashes pending P1-06 deployment",
         "Person3 native relay review against generated ABI"
       ]
+    },
+    "P1-03": {
+      "status": "LOCAL_PASS",
+      "blockedBy": [
+        "Base Sepolia evidence pending P1-06"
+      ]
+    },
+    "P1-04": {
+      "status": "LOCAL_PASS",
+      "blockedBy": [
+        "Base Sepolia evidence pending P1-06",
+        "Review Person3 tools/relay-admin.ts against the ABI when it exists"
+      ]
     }
   },
   "files": [
@@ -48,6 +61,9 @@
     "packages/contracts/test/{Authority,Payment,Replay,OwnerTransfer,NativeReceive}.t.sol",
     "packages/contracts/abi/*.json",
     "packages/schema/src/generated/abi.ts",
-    "docs/owner-transfer.md"
+    "docs/owner-transfer.md",
+    "packages/contracts/src/DemoVault.sol",
+    "packages/contracts/test/{Vault,Schedule,Limits,Admin,Recovery,Epoch}.t.sol",
+    "docs/contracts-security.md"
   ]
 }

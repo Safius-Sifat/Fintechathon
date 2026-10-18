@@ -26,6 +26,9 @@ test("P1-02 generated ABI exposes the S3 wallet and factory interface", () => {
   );
   for (const name of [
     "applyOwnerTransfer",
+    "applyAdmin",
+    "periodUsed",
+    "revokedPermitId",
     "ownerTransferNonce",
     "usedOwnerTransfer",
     "getPermit",
@@ -61,6 +64,8 @@ test("P1-02 generated ABI exposes the S3 wallet and factory interface", () => {
     "PermitClosed",
     "WalletPaused",
     "OwnerTransferExecuted",
+    "PermitRevoked",
+    "Recovered",
   ])
     assert.ok(ev(mandateWalletAbi, name), name);
   assert.ok(

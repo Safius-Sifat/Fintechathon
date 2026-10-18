@@ -65,6 +65,32 @@
   },
   {
     "type": "function",
+    "name": "MAX_ADMIN_SECONDS",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint64",
+        "internalType": "uint64"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "MAX_ALLOCATION_BPS",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "MAX_BROWSER_PAYMENTS",
     "inputs": [],
     "outputs": [
@@ -183,6 +209,32 @@
   {
     "type": "function",
     "name": "MIN_LIQUID_FLOOR",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "RECOVER_REDEEM_GAS",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "RECOVER_VIEW_GAS",
     "inputs": [],
     "outputs": [
       {
@@ -398,6 +450,51 @@
       }
     ],
     "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "applyAdmin",
+    "inputs": [
+      {
+        "name": "a",
+        "type": "tuple",
+        "internalType": "struct MandateTypes.Admin",
+        "components": [
+          {
+            "name": "command",
+            "type": "uint8",
+            "internalType": "uint8"
+          },
+          {
+            "name": "permitId",
+            "type": "bytes32",
+            "internalType": "bytes32"
+          },
+          {
+            "name": "nonce",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "issuedAt",
+            "type": "uint64",
+            "internalType": "uint64"
+          },
+          {
+            "name": "deadline",
+            "type": "uint64",
+            "internalType": "uint64"
+          }
+        ]
+      },
+      {
+        "name": "ownerSignature",
+        "type": "bytes",
+        "internalType": "bytes"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
   },
   {
     "type": "function",
@@ -963,6 +1060,30 @@
   },
   {
     "type": "function",
+    "name": "periodUsed",
+    "inputs": [
+      {
+        "name": "",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      },
+      {
+        "name": "",
+        "type": "uint32",
+        "internalType": "uint32"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool",
+        "internalType": "bool"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "permitNonce",
     "inputs": [],
     "outputs": [
@@ -970,6 +1091,25 @@
         "name": "",
         "type": "uint256",
         "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "revokedPermitId",
+    "inputs": [
+      {
+        "name": "",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool",
+        "internalType": "bool"
       }
     ],
     "stateMutability": "view"
@@ -1238,6 +1378,50 @@
   },
   {
     "type": "event",
+    "name": "PermitRevoked",
+    "inputs": [
+      {
+        "name": "permitId",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "Recovered",
+    "inputs": [
+      {
+        "name": "liquidAssets",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "redeemedShares",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "redeemedAssets",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "vaultFailed",
+        "type": "bool",
+        "indexed": false,
+        "internalType": "bool"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
     "name": "WalletPaused",
     "inputs": [
       {
@@ -1273,6 +1457,17 @@
         "name": "asset",
         "type": "address",
         "internalType": "address"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "CommandNotSupported",
+    "inputs": [
+      {
+        "name": "command",
+        "type": "uint8",
+        "internalType": "uint8"
       }
     ]
   },
@@ -1315,6 +1510,11 @@
   {
     "type": "error",
     "name": "InvalidSignature",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "InvalidTarget",
     "inputs": []
   },
   {
@@ -1399,6 +1599,16 @@
   },
   {
     "type": "error",
+    "name": "PeriodAlreadyUsed",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "PermitIsRevoked",
+    "inputs": []
+  },
+  {
+    "type": "error",
     "name": "PermitNotActive",
     "inputs": []
   },
@@ -1441,7 +1651,28 @@
   },
   {
     "type": "error",
+    "name": "ScheduleInvalid",
+    "inputs": [
+      {
+        "name": "field",
+        "type": "string",
+        "internalType": "string"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "ScheduleMismatch",
+    "inputs": []
+  },
+  {
+    "type": "error",
     "name": "ScheduleNotZero",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "ScheduleWindow",
     "inputs": []
   },
   {
