@@ -30,7 +30,7 @@ flowchart TD
   Driver[Runbook library — Person4]
   AgentRT[LLM agent — Claude Agent SDK, Person4]
   MCP[Mandate MCP tools — scoped agent token]
-  Sentinel[Risk sentinel — screening, simulation, velocity]
+  Sentinel[Risk sentinel — screening, velocity]
   Adapter[Go adapter + initiator identity]
   N0[MPCium node0 + encrypted share 0]
   N1[MPCium node1 + encrypted share 1]
@@ -106,11 +106,11 @@ sequenceDiagram
  end
  W->>B: Exact authenticated signing request
  B->>B: Reload owner scope + chain state + reservation
- B->>B: Sentinel: screening, simulation, velocity
+ B->>B: Sentinel: policy, screening, velocity
  B-->>W: Authorization of bound request
  W->>M: Initiator + required authorizer signatures
  M-->>W: Threshold executor signature
- W->>W: Verify, simulate, journal raw relayer tx
+ W->>W: Verify signature; one simulation; journal raw tx
  W->>C: Broadcast execute(Action)
  C-->>W: Actual events/token movement
  W->>P: Retrieve by original invoice/request/payment
@@ -208,10 +208,11 @@ flowchart LR
  Permit --> Worker[Durable worker + runbook]
  Worker -->|AWAIT_AGENT question\noptions + bounds| Agent[LLM agent\nClaude Agent SDK]
  Agent -->|optionId or bounded amount\n+ rationale| Worker
- Worker --> Sentinel[Risk sentinel\nscreening, simulation, velocity]
+ Worker --> Sentinel[Risk sentinel\nscreening, velocity]
  Sentinel --> Auth[Policy authorizer]
  Auth --> MPC[MPC executor 2-of-3]
- MPC --> Wallet[Wallet contract\nfinal enforcement]
+ MPC --> Sim[Worker: one post-sign simulation]
+ Sim --> Wallet[Wallet contract\nfinal enforcement]
  Worker -->|above threshold| Phone[Owner co-signature]
  Phone --> Wallet
 ```
@@ -222,7 +223,7 @@ flowchart LR
 
 - **Off-the-shelf agent runtime.** The Claude Agent SDK supplies the agent loop, tool calling, hooks and sessions, so the team writes tools and prompts, not orchestration. Built-in file, shell and web tools are disabled; a pre-tool-use hook allows only `mandate_*` tools. Other MCP runtimes (GitHub Copilot SDK, Claude Desktop) can use the same tools and are equally constrained.
 - **Questions, not free actions.** The worker asks bounded questions (S9.2) and applies a deterministic default on timeout, so a model outage slows the task but never blocks owner control or causes an unsafe action.
-- **Deterministic risk control.** Screening, exact-effect simulation and velocity rules run in the policy service without an LLM, so risk decisions are explainable and reproducible.
+- **Deterministic risk control.** The policy service checks permissions, balances/reservations, screening and velocity before signing. The worker runs one exact simulation after signing and before broadcast; vault and CALL operations add effect checks within that request. Neither step uses an LLM.
 - **Human review where it matters.** Above the review threshold the owner co-signs the exact Action on the phone; the contract checks the co-signature.
 - **Evidence.** Each question, answer, default, approval and alert is a hash-chained evidence event. Model rationale is stored as an assertion, never as proof.
 
@@ -436,7 +437,7 @@ type TaskView = {taskId:string; chainTaskId:Hex32; walletId:string;
 
 Native methods are the account-aware interfaces in S8.6 plus S9.14: native profile/accounts, specific Login2/Permit5/Admin5/OwnerTransfer5/Approval5/WalletPolicy5 signing, semantic personal transaction builder/journal, protected NativeSession and QR receive-request validation. Recovery words/private keys never cross RN bridge. Native scope/domain/actual-field confirmation remains mandatory; no generic raw digest method exists.
 
-Errors: `{code,message,actionId:string|null,evidenceId:string|null,retryable:boolean}`. 401 auth,403 scope/tenant,409 idempotency/state conflict,422 invalid policy/input,503 unavailable dependency. Error codes include AUTH_SCOPE, PERMIT_INACTIVE, SCOPE_MISMATCH, RUNBOOK_VERSION, RECIPIENT_DENIED, PAYMENT_CAP, DAILY_CAP, LIQUID_FLOOR, RESERVATION_CONFLICT, QUOTE_EXPIRED, DUPLICATE_REQUEST, SCHEDULE_WINDOW, STALE_SIGNAL, MPC_UNAVAILABLE, SIGNING_UNKNOWN, SIMULATION_REVERT, SETTLEMENT_UNKNOWN, DELIVERY_INVALID, EVIDENCE_UNAVAILABLE, POLICY_VIOLATION, SCREENING_HIT, SIMULATION_MISMATCH, REVIEW_REQUIRED, OWNER_REJECTED, WALLET_FROZEN, WALLET_INHIBITED, TEMPLATE_DENIED, PERIOD_CAP, AGENT_ANSWER_INVALID, INTENT_INVALID. Never automatically retry a new financial request after UNKNOWN.
+Errors: `{code,message,actionId:string|null,evidenceId:string|null,retryable:boolean}`. 401 auth,403 scope/tenant,409 idempotency/state conflict,422 invalid policy/input,503 unavailable dependency. Error codes include AUTH_SCOPE, PERMIT_INACTIVE, SCOPE_MISMATCH, RUNBOOK_VERSION, RECIPIENT_DENIED, PAYMENT_CAP, DAILY_CAP, LIQUID_FLOOR, RESERVATION_CONFLICT, QUOTE_EXPIRED, DUPLICATE_REQUEST, SCHEDULE_WINDOW, STALE_SIGNAL, MPC_UNAVAILABLE, SIGNING_UNKNOWN, SIMULATION_REVERT, SIMULATION_UNAVAILABLE, SETTLEMENT_UNKNOWN, DELIVERY_INVALID, EVIDENCE_UNAVAILABLE, POLICY_VIOLATION, SCREENING_HIT, SIMULATION_MISMATCH, REVIEW_REQUIRED, OWNER_REJECTED, WALLET_FROZEN, WALLET_INHIBITED, TEMPLATE_DENIED, PERIOD_CAP, AGENT_ANSWER_INVALID, INTENT_INVALID. Never automatically retry a new financial request after UNKNOWN.
 
 ### S5. Worker ↔ runbook boundary
 
@@ -658,7 +659,7 @@ This section is required implementation work. It adds a real LLM agent and the p
 | Allowed contracts | Allowed contracts list | Owner-approved call templates with argument bounds and outflow metering (S9.8) |
 | Stablecoin payments | USDC agent payments | Base Sepolia test USDC as a second agent asset (S9.9) |
 | Machine payments | x402 | x402 `exact` (EIP-3009) USDC payments with the wallet as ERC-1271 payer, using the official `@x402/*` packages (S9.10) |
-| Pre-broadcast screening | Sanctions/risk screening | Deterministic risk sentinel: screening, simulation, velocity (S9.11) |
+| Pre-broadcast screening | Sanctions/risk screening | Pre-sign deterministic risk checks; one post-sign simulation, with advanced effect checks (S9.11) |
 | Agent tooling | CLI/SDK for agents | MCP toolset, SDK and `mandate` CLI with scoped agent tokens (S9.2, S9.14) |
 
 #### S9.1 Agent runtime
@@ -784,23 +785,29 @@ So FREEZE, PAUSE, REVOKE, CLOSE, epoch changes and policy tightening stop an aut
 
 **Gate X402-G:** settle one payment end to end through the chosen facilitator (Coinbase CDP facilitator or the open-source facilitator from the x402 repository) on Base Sepolia, and confirm it accepts the contract payer and the 65-byte signature. Until it passes, `x402.mode` stays `MANDATE_NATIVE`: providers still return the official x402 402 response, payment uses a normal PAY with the Invoice, and the release does not claim x402 settlement interoperability.
 
-#### S9.11 Risk sentinel and screening (deterministic)
+#### S9.11 Risk checks and one pre-broadcast simulation
 
-The policy service runs these checks before the authorizer signs any agent Action; none uses an LLM.
+**Before signing — policy service.** Reconstruct the immutable Action and check the current Permit, WalletPolicy, recipient, asset, scope, expiry, owner Approval when required, caps, floor, balance and durable reservation. Screen recipient, call target and x402 `payTo` against the WalletPolicy blocklist and manifest `demo-screening-v1`; a hit denies with SCREENING_HIT. Apply versioned deterministic `risk-rules-v1` velocity checks; a trigger inhibits new signing, records RISK_ALERT and alerts the owner. Only the owner can clear the inhibit through the recent-login route in S4. No LLM or transaction simulation is used to authorize signing.
 
-1. **Screening:** recipient, call target and x402 `payTo` against the WalletPolicy blocklist and the manifest screening list (`demo-screening-v1`, a labelled testnet fixture). A hit denies with SCREENING_HIT.
-2. **Simulation, in two stages,** using `eth_simulateV1` on the independent RPC. It executes a sequence of calls against one simulated state and returns each call's status, return data and logs (with `traceTransfers: true`, also native-ETH transfer logs). Verified on 2026-10-18 against `https://sepolia.base.org`: a USDC balance read after a simulated transfer in the same `blockStateCalls` entry returned the updated balance. Separate `eth_call`s cannot do this, because their state changes do not persist.
-   - **Before signing (policy service).** One `eth_simulateV1` request at the latest block, `validation: false`, every call `from` the wallet address:
-     1. `balanceOf(wallet)` for every agent asset;
-     2. the inner effect: `transfer(to, amount)` on `Permit.asset` for PAY, TRANSFER and X402 (X402's settled effect is the same transfer); for CALL with `PULLS_ASSET`, `approve(target, amount)` → template call → `approve(target, 0)`; for CALL without it, the template call alone; for DEPOSIT/WITHDRAW, the vault call;
-     3. `balanceOf(wallet)` for every agent asset again; for CALL, also `allowance(wallet, target)`.
+**After signing — worker.** Verify and persist the MPC executor signature, build the exact `execute` calldata including Invoice, owner Approval and CALL data, then perform one simulation at the latest block before broadcast. Use the real wallet and relayer addresses and exact signed financial inputs. Journal the actual relayer transaction before sending. Simulation checks proposed execution at one chain state; it does not guarantee later execution, replace contract enforcement or prevent a compromised sender from bypassing this worker check.
 
-     Every call must return status `0x1`. Decoded deltas must show only `Permit.asset` decreasing, by exactly the intended outflow (by no more than `Action.amount` for CALL), with zero leftover allowance. The Transfer logs must agree with the deltas. Any mismatch, revert or malformed response denies with SIMULATION_MISMATCH and nothing is signed.
-   - **After signing, before broadcast (worker).** One `eth_simulateV1` request: the exact signed relayer `execute` call `from` the relayer, with `validation: true` for that call. For X402, add the USDC `transferWithAuthorization(..., signature)` that the facilitator will submit. Then the same balance reads. Effects must match the pre-sign result. A failure blocks broadcast with SIMULATION_REVERT.
-   - **Isolation.** Simulation uses no state overrides that grant authority, never feeds results into signing input, and runs only on the independent RPC. A simulation pass never substitutes for any live contract check.
-   - **Capability.** The independent RPC must support `eth_simulateV1`, checked at startup and readiness. Without it the policy service fails closed with an MPC_UNAVAILABLE-class retryable denial.
-   - **Reservations after a failed post-sign simulation** stay held. They are released only by chain reconciliation (A3): after the Action's deadline, a scan up to a finalized block must show no `ActionExecuted` for its `requestId` and `usedRequest(requestId) == false`. The deadline passing alone never releases them, because the payment may have been mined before expiry.
-3. **Velocity:** versioned rules `risk-rules-v1` (for example three denials for one wallet within 10 minutes, or spend rate above a configured fraction of the daily cap within an hour). A trigger sets an off-chain inhibit for that wallet (no new signing requests), records `RISK_ALERT` and pushes an alert recommending FREEZE. The inhibit can only stop; the owner lifts it through `POST /wallets/:walletId/inhibit/clear` with a recent signed login.
+| Operation | One simulation request | Required result |
+| --- | --- | --- |
+| PAY / TRANSFER / CLOSE | `eth_call` of the exact `execute` from the intended relayer, with the actual value and gas parameters | No revert; decode the result where applicable. The wallet contract enforces recipient, amount, caps and floor; no separate inner-transfer simulation or extra balance-reading pass is required. CLOSE moves no assets. |
+| DEPOSIT / WITHDRAW / CALL | One `eth_simulateV1` request with balance reads, the exact `execute`, then balance/allowance reads in the same simulated state | Every call succeeds and the operation-specific effects below hold. |
+| X402 | One `eth_simulateV1` request with USDC balance reads, the exact `execute` registration, the facilitator's USDC `transferWithAuthorization` call, then balance and `authorizationState` reads | Registration and settlement succeed; wallet USDC debit and the Invoice recipient's credit both equal Action.amount; expected authorization nonce is consumed. The facilitator sender is the same one used by the qualified X402-G integration. |
+
+For advanced requests, use one `blockStateCalls` entry at `latest`, with `validation: false` for the request. This is an execution preflight: its simulated calls carry the real executor/owner signatures in calldata, which the wallet contract checks; verify the actual relayer transaction's outer signature, nonce, gas and balance separately. Do not invent a per-call `validation` option. Use no authority-granting state overrides. A live wallet or token rule must never be skipped because simulation succeeded.
+
+**Operation-specific effects, checked within that one request:**
+- **DEPOSIT:** wallet `Permit.asset` decreases by Action.amount; approved vault shares increase by the shares recorded in the simulated ActionExecuted event and at least minOutput. Other agent-asset balances do not change. Simulate `execute` itself so its exact approve/deposit/reset sequence runs; the final allowance to the vault is zero.
+- **WITHDRAW:** Action.amount is vault shares. Wallet shares decrease by that amount; underlying `Permit.asset` increases by the assets recorded in the simulated ActionExecuted event and at least minOutput. Other agent-asset balances do not change. Incoming assets are not payment outflow and never replenish gross-spend counters.
+- **CALL:** only `Permit.asset` may decrease, by no more than Action.amount. Other agent assets cannot decrease. Check the signed template/recipient/output constraints and remaining liquid floor. The exact approve/call/reset sequence inside `execute` must leave zero allowance when PULLS_ASSET is used.
+- Decode balance/allowance reads and operation return values; malformed responses, reverts or mismatching effects fail. Transfer logs support the balance checks but do not replace them. All reads and effects in a request share the same simulated state; separate `eth_call` requests cannot measure before/after effects.
+
+**Failure and availability:** a revert blocks broadcast with SIMULATION_REVERT; malformed or mismatching effects use SIMULATION_MISMATCH; unavailable/unsupported RPC uses SIMULATION_UNAVAILABLE. The worker sends nothing through any relayer and never silently skips a required check. Do not sign a replacement Action to work around failure. Retain the existing signature and reservation; retry only the same immutable Action and recheck current policy before any later submission. Deadline alone never releases the reservation: A3 finalized-history reconciliation must show no earlier execution, with a finalized block timestamp at or after the deadline and `usedRequest(requestId) == false`, or establish another effective invalidation and reconcile earlier history.
+
+**Capability and cost:** standard payments need only ordinary `eth_call`; lack of `eth_simulateV1` disables only the advanced operations that require it, with explicit capability/readiness reporting. A release advertising those advanced operations must qualify that RPC capability. One attempt runs one post-sign simulation request; a successful fresh result is not followed by a second inner-effect simulation. A retry after failure or a stale result requires a fresh check. Reuse the S2 chain snapshot freshness bound (15 seconds); changed signed fields require a new owner/executor approval flow. Record operation/request ID, signed-input digest, RPC identity, block number/hash, time, method and outcome without secrets; simulation results remain recorder assertions, not proof of settlement.
 
 #### S9.12 Permission tiers
 
@@ -834,7 +841,7 @@ Native recomputes the Approval digest from displayed Action fields and the Walle
 
 #### S9.15 Required agentic and policy acceptance cases
 
-AQ01 the Claude Agent SDK agent completes a browser-check purchase using MCP tools only while the phone is offline; AQ02 a provider page with prompt-injection text cannot add recipients, amounts or tools, and the result is an allowed option or a default; AQ03 an answer outside options or bounds is rejected, and a missed deadline applies the recorded default; AQ04 attempts to use built-in shell/file/web tools are denied and recorded; AQ05 the intent compiler's draft with an unknown provider, asset or template is rejected, and the native screen shows exactly the signed terms; AQ06 an Action above the threshold reverts on direct call without owner approval, succeeds with it, and owner rejection pays nothing and releases the reservation; AQ07 FREEZE blocks execution while Permits survive, UNFREEZE resumes them, and PAUSE still invalidates; AQ08 policy tightening applies immediately to active Permits and loosening does not enlarge them; removing the last allowlist entry turns filtering off with an editor warning, while a blocklist entry stops the recipient; AQ09 a blocklisted recipient is denied by the sentinel and by the contract; AQ10 ALLOWANCE period caps hold across a period boundary; AQ11 a banned selector is rejected at policy update, and a CALL with outflow above amount, floor breach or leftover allowance reverts; AQ12 DemoUSD and USDC counters and caps are independent; AQ13 an X402 payment settles through the facilitator; changing any authorization field fails; `isValidSignature` rejects unrecorded digests and recorded ones after freeze, pause, revoke, epoch change, allowlist removal, perTx tightening below the amount, asset-cap removal, or review-threshold tightening without a recorded owner approval, and still accepts after daily-cap tightening (no double charge); two outstanding authorizations plus a PAY cannot break the floor; MANDATE_NATIVE fallback works; AQ14 a simulation mismatch denies signing, and a velocity trigger sets the inhibit and alerts the owner. Each case needs actual operation/hash or explicit failure evidence.
+AQ01 the Claude Agent SDK agent completes a browser-check purchase using MCP tools only while the phone is offline; AQ02 a provider page with prompt-injection text cannot add recipients, amounts or tools, and the result is an allowed option or a default; AQ03 an answer outside options or bounds is rejected, and a missed deadline applies the recorded default; AQ04 attempts to use built-in shell/file/web tools are denied and recorded; AQ05 the intent compiler's draft with an unknown provider, asset or template is rejected, and the native screen shows exactly the signed terms; AQ06 an Action above the threshold reverts on direct call without owner approval, succeeds with it, and owner rejection pays nothing and releases the reservation; AQ07 FREEZE blocks execution while Permits survive, UNFREEZE resumes them, and PAUSE still invalidates; AQ08 policy tightening applies immediately to active Permits and loosening does not enlarge them; removing the last allowlist entry turns filtering off with an editor warning, while a blocklist entry stops the recipient; AQ09 a blocklisted recipient is denied by the sentinel and by the contract; AQ10 ALLOWANCE period caps hold across a period boundary; AQ11 a banned selector is rejected at policy update, and a CALL with outflow above amount, floor breach or leftover allowance reverts; AQ12 DemoUSD and USDC counters and caps are independent; AQ13 an X402 payment settles through the facilitator; changing any authorization field fails; `isValidSignature` rejects unrecorded digests and recorded ones after freeze, pause, revoke, epoch change, allowlist removal, perTx tightening below the amount, asset-cap removal, or review-threshold tightening without a recorded owner approval, and still accepts after daily-cap tightening (no double charge); two outstanding authorizations plus a PAY cannot break the floor; MANDATE_NATIVE fallback works; AQ14 screening/velocity denial prevents signing; standard PAY uses one post-sign eth_call; vault/CALL/X402 uses one advanced request with the defined effects; valid withdrawal is accepted; a simulation mismatch, revert or unavailable RPC blocks broadcast and retains the signed Action/reservation until reconciliation; missing advanced RPC capability does not disable ordinary eth_call payments; a velocity trigger inhibits new signing and alerts the owner. Each case needs actual operation/hash or explicit failure evidence.
 
 #### S9.16 Owners
 
@@ -843,6 +850,6 @@ AQ01 the Claude Agent SDK agent completes a browser-check purchase using MCP too
 | Types and contracts | v7 Permit/Action/Invoice/Approval/WalletPolicy/CallTemplate types, vectors, ABI; FREEZE, policy, co-sign, allowance, CALL, multi-asset, X402/ERC-1271 in MandateWallet | Consume vectors in policy/adapter | Consume vectors natively | Consume vectors in verifier/provider |
 | Agent and decisions | — | Question/answer storage and routes, agent-token scopes, compile route hosting | Show agent questions/decisions in task view | `apps/agent` on the Claude Agent SDK, MCP tools, runbook questions, intent compiler library, CLI |
 | Owner controls | Contract checks | Approval requests, push delivery, policy drafts, owner relays | Approval, policy editor, freeze controls, allowance approval, intent review screens | Approval/freeze scenarios |
-| Risk | — | Risk sentinel, screening, simulation, inhibit | Alert display and freeze action | Injection and malicious-provider fixtures |
+| Risk | Contract checks and effect vectors | Policy screening/velocity/inhibit; worker post-sign simulation and reconciliation | Alert display and freeze action | Injection, effect-mismatch and one-simulation fixtures |
 | Payments | Invoice domain 2, X402 path | USDC relaying and reservations per asset | Per-asset balances | x402-formatted provider responses, gate X402-G |
 | Evidence | Event ABI | Write S9.13 events | — | Verifier S9.13 checks |

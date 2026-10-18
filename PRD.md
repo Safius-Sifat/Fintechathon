@@ -55,7 +55,7 @@ Personal EOA and managed contract have different addresses/funds/fee payers; app
 | F19 Standing Allowance | ALLOWANCE Permit ≤30 days with daily/weekly period cap; service-allowance runbook | 1;4 runbook;3 approval |
 | F20 Call Templates | Allowed contract functions with argument bounds, exact approve/reset and outflow metering | 1;2 sentinel;3 editor;4 runbook |
 | F21 Stablecoins and x402 | Base Sepolia test USDC as second agent asset; x402 `exact` USDC payments (official `@x402/*` packages) with the managed wallet as ERC-1271 payer; token side verified on a Base Sepolia fork, facilitator path behind gate X402-G; Mandate-native PAY as fallback | 1;2;4 |
-| F22 Risk Sentinel | Deterministic screening, exact-effect simulation and velocity rules with off-chain inhibit and owner alert | 2;3 alerts;4 fixtures |
+| F22 Transaction Safety | Pre-sign policy/balance/reservation, screening and velocity checks; one exact post-sign simulation before broadcast, with extra effect checks for vault/CALL and x402 settlement; inhibit and owner alerts | 2;1 effect vectors;3 alerts;4 fixtures |
 | F13 Complete App Delivery | Reachable screen inventory, funding/help/settings, secure account/cache behavior, cancellation/error/offline/reorg states, installed APK | 3;all qualify |
 
 Four handoffs remain the distribution units: [Person1](docs/plans/01%20-%20Contracts%20and%20Shared%20Interfaces.md), [Person2](docs/plans/02%20-%20Platform%20Policy%20and%20MPCium.md), [Person3](docs/plans/03%20-%20Android%20Owner%20Wallet.md), [Person4](docs/plans/04%20-%20Agents%20Services%20Inspection%20and%20Demo.md). Every person supplies their own implementation/tests/security/deploy evidence.
@@ -75,6 +75,8 @@ Agent limits stay max0.50/payment,2/task,5/executor/day,10/wallet/day, liquid fl
 Personal manual sends use owner EOA and own ETH gas, native real recipient/asset/amount/nonce/fee review, exact raw-tx retry after durable signing, unknown state reconciliation and explicit replacement winner. Gas includes Base L1 data cost; estimates are not guaranteed final cost. Managed OwnerTransfer bypasses delegated caps/floor as owner control and, on successful chain execution, pauses/increments epoch; native UI states this before signature. Existing in-flight agent transactions may settle earlier in chain order.
 
 Backend refresh/session/logout/local removal are not on-chain revocation. Stop Agents needs actual confirmed chain action. An agent token alone has no owner financial authority. Local personal wallet may function with API down through RPC; offline internet/chain access still prevents broadcast. Full restored history may be temporarily unavailable and must show coverage/gaps rather than false empty data.
+
+**Simulation requirement:** ordinary agent payments use one exact eth_call after MPC signing and before broadcast. Vault operations, CALL templates and x402 settlement use one advanced simulation request with the operation-specific balance/output checks in architecture S9.11. No pre-sign simulation is required. A failed, malformed or unavailable simulation blocks broadcast and retains the signed Action/reservation pending reconciliation. Missing advanced RPC support affects advanced operations, not standard payments. Simulation is an execution preflight, not a guarantee of future chain state or a replacement for MPC, owner authorization and on-chain enforcement.
 
 ## 4a. Permission tiers
 

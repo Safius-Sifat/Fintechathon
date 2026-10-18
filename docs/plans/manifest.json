@@ -3,7 +3,7 @@
   "walletDomainVersion": "5",
   "loginDomainVersion": "2",
   "evidenceSchemaVersion": 4,
-  "sharedAppendixSha256": "54a8127e14d5f788d8a29bb41928685651f5875f42345f5bbd290aee43737d3d",
+  "sharedAppendixSha256": "cd01ef34873d957c3bbbb56cc587095a12aa7cfca7330b1b87c25bfd7a9366c5",
   "walletExtensionSha256": "53a06607f8829baa21f38eb340b81ed1adee92a3b9ea1b9241d7f5e6f19e5497",
   "status": "specified-not-built",
   "sourceMigration": "w0-schema-implemented-consumer-acceptance-pending",
@@ -13,20 +13,20 @@
       "words": 290
     },
     "FINAL PLAN.md": {
-      "sha256": "0427930d4ac974acb6ceac62ecbbda7d1532a35d80e753332066a197b70affe5",
-      "words": 2725
+      "sha256": "c38c18e3d87db9c0ce436431ba3d49affc50dc00564c6767a5d7bc84e01a5183",
+      "words": 2747
     },
     "PRD.md": {
-      "sha256": "85dacdecd8ff3ea74b5c33f4a1e5a60444119fd59c2dcdc5dea96f3584678306",
-      "words": 1926
+      "sha256": "b0df3fe940efcea68e2ae88bf9d23ec3e484d7f0fe8d34143cf44f2a0b11d587",
+      "words": 2027
     },
     "README.md": {
       "sha256": "b023c2023aae79b6a34ef255f9a6ba691a3a6c0c995bb645beb85d55a6697a20",
       "words": 445
     },
     "architecture.md": {
-      "sha256": "e7fee66b1929b0d33056333de598c7388bf3a06d17c6403c1c7ee75c9f18a46f",
-      "words": 14026
+      "sha256": "8a5a4564595d816a6391d9704ecea1deeccbcd74c9e8ea5344a470e892056b32",
+      "words": 14419
     },
     "docs/BOOTSTRAP-STATUS.md": {
       "sha256": "117ee8e70d52d7e3b8f9e5edd109061973be2b4bbbf434646d331339b68069ba",
@@ -49,24 +49,24 @@
       "words": 750
     },
     "docs/plans/01 - Contracts and Shared Interfaces.md": {
-      "sha256": "2547589eba9e767be947f0cf55fbb2d78abdbb9d41eaf95cf8df5e86123da513",
-      "words": 21844
+      "sha256": "0dfa357fa1f0a8273763d5c8907a03a0093993af299112708e308ba507d3a5e4",
+      "words": 22216
     },
     "docs/plans/02 - Platform Policy and MPCium.md": {
-      "sha256": "2fbf4ff00f2426304499e3b3f16e95ed2890b9ddd2008729339061cdbcfa5f25",
-      "words": 23955
+      "sha256": "a368815ae66807ddac71967fc60113d0193d5b925d849c2e34f2b9504fa06b6e",
+      "words": 24540
     },
     "docs/plans/03 - Android Owner Wallet.md": {
-      "sha256": "50119750d463af1be130c86927e753fa504cb08b6b1968d8c697e2d24aa2c99f",
-      "words": 22691
+      "sha256": "9863caafef1aa9be68af3765a180e0097ee6b4785623f6b2174b1072a30f4063",
+      "words": 23063
     },
     "docs/plans/04 - Agents Services Inspection and Demo.md": {
-      "sha256": "c62a17d1ee965bdf42c2257533bf62357cc47642f000f83b5f31574c56f3e50a",
-      "words": 22354
+      "sha256": "9bf5a493854e16508234d0d72769c31e7a47c82c5531879cc4bc475d85e807a4",
+      "words": 22726
     },
     "pitch.md": {
-      "sha256": "b1aa068e0f21ffe28eaac942525462225d325c1a263235946f53b17ef97e400e",
-      "words": 959
+      "sha256": "17e3eccad67df5a8d60edcddcbc17431d78f002d8b786465d4c7bb62937b4441",
+      "words": 979
     },
     "review.md": {
       "sha256": "dee1a3f2d0dad88582530ef40140ce3bb0af0393df7228872979ab5682a0935e",
@@ -76,7 +76,7 @@
   "handoffRevision": "agent-prompt-2026-10-18-v7-review",
   "promptCoverage": {
     "taskCount": 50,
-    "specifiedCaseCount": 317,
+    "specifiedCaseCount": 321,
     "milestoneCount": 28,
     "perDocument": {
       "01 - Contracts and Shared Interfaces.md": {
@@ -86,7 +86,7 @@
       },
       "02 - Platform Policy and MPCium.md": {
         "tasks": 13,
-        "specifiedCaseIds": 86,
+        "specifiedCaseIds": 90,
         "milestones": 7
       },
       "03 - Android Owner Wallet.md": {
@@ -103,7 +103,7 @@
     "implementationTestsExecutedByThisRevision": false
   },
   "invoiceDomainVersion": "2",
-  "agenticExtensionSha256": "85f61f0d0a0d497fcd684ae61b0aa197e1153806bf16fc21769d31d7740ab9e4",
+  "agenticExtensionSha256": "fdd0acd2a11e8e0b932d3483b7c214bc8979bddd8bcaf2c14d612242770578f2",
   "appendixHashMethod": "sha256 of UTF-8 text: shared = from the shared-contract heading to before '### S8. '; wallet = '### S8. ' to before '### S9. '; agentic = '### S9. ' to end of file",
   "updated": "2026-10-18"
 }
