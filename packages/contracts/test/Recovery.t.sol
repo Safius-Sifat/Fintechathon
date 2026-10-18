@@ -89,4 +89,12 @@ contract RecoveryTest is MandateFixture {
     assertEq(vault.balanceOf(address(wallet)), shares); // unrecovered position stays visible
     assertEq(token.balanceOf(ownerAddr), 9_000_000);
   }
+
+  function test_P1_04_T04_returnBombVaultCannotInflateRecovery() public {
+    (MandateWallet w,) = _badVaultWallet(UnavailableVault.Mode.ReturnBomb);
+    uint256 gasBefore = gasleft();
+    _recoverOn(w, T.CMD_RECOVER);
+    assertLt(gasBefore - gasleft(), 400_000); // measured ~205k: returned data is bounded by the forwarded gas
+    assertEq(token.balanceOf(ownerAddr), 5_000_000);
+  }
 }

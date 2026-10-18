@@ -1391,7 +1391,7 @@ A CallTemplate allows one contract function: `target`, the target's runtime `tar
 - Execution uses `operation = CALL`. `Action.target` is the template target, `Action.amount` the amount argument and `Action.inputHash = keccak256(callData)`. Calldata must be the selector plus at most 8 static 32-byte words, with no ETH value.
 - The contract checks the selector, the amount argument ≤ `min(maxAmount, Action.amount)` and the recipient rule. With `PULLS_ASSET`, it approves exactly the amount of `Permit.asset`, calls, then resets the allowance to zero in the same transaction.
 - **Single-asset metering.** The contract measures every agent-asset balance before and after. Only `Permit.asset` may decrease; any decrease of another agent asset reverts. The `Permit.asset` decrease counts as gross outflow against the Permit, period and policy caps for that asset only; a decrease above `Action.amount`, a liquid floor breach or any non-zero leftover allowance reverts. `CallExecuted` names the asset.
-- CALL is allowed only for LIQUIDITY Permits whose `templatesHash` includes the template. LIQUIDITY Permits that use DemoVault DEPOSIT/WITHDRAW must name DemoUSD as their asset. The DemoVault deposit/withdraw operations remain; templates let the owner approve a second test vault or pool without new contract code.
+- CALL is allowed only for LIQUIDITY Permits whose `templatesHash` includes the template. Such a Permit sets `spendCap` (≤ the 2,000,000 task ceiling) as its CALL outflow budget; a LIQUIDITY Permit without templates keeps `spendCap = 0`. The template for a CALL is the Permit's one template with that `(target, selector)`; activation rejects a Permit whose templates repeat a pair. LIQUIDITY Permits that use DemoVault DEPOSIT/WITHDRAW must name DemoUSD as their asset. The DemoVault deposit/withdraw operations remain; templates let the owner approve a second test vault or pool without new contract code.
 
 #### S9.9 Agent assets
 
@@ -1416,9 +1416,9 @@ Mandate implements the official x402 v2 `exact` scheme on EVM with the EIP-3009 
 
 The digest is `keccak256("\x19\x01" ‖ USDC.DOMAIN_SEPARATOR() ‖ hashStruct)`. The Permit asset and Invoice asset must be USDC. `execute` applies every PAY check (Invoice binding, caps, period, floor, co-signature) and then:
 
-1. Records the authorization `{digest, permitId, epoch, asset, recipient, amount, validBefore, requestId, ownerApproved}` (`ownerApproved` is true when a valid owner Approval for this Action was verified at `execute`) and emits `X402Authorized`. At most 8 authorizations may be outstanding per wallet.
+1. Records the authorization `{digest, permitId, epoch, asset, recipient, amount, validBefore, requestId, ownerApproved}`, emits `ActionExecuted` with `assets = 0` (nothing moves until the USDC Transfer) (`ownerApproved` is true when a valid owner Approval for this Action was verified at `execute`) and emits `X402Authorized`. At most 8 authorizations may be outstanding per wallet.
 2. Charges gross counters immediately. Gross counters are never refunded.
-3. Counts outstanding unexpired, unsettled authorizations as committed outflow. Liquid funds available for the floor check and every other spend are `balance − outstanding`. Each `execute` prunes entries that expired or whose nonce USDC reports as used (`authorizationState(wallet, nonce)`).
+3. Counts outstanding unexpired, unsettled authorizations as committed outflow. Liquid funds available for the floor check and every other spend are `balance − outstanding`. Each `execute` prunes entries that expired, whose nonce USDC reports as used (`authorizationState(wallet, nonce)`), or that can never become valid again (older epoch, or Permit closed, revoked or expired). Entries made ineligible only by policy stay reserved, since a later policy can make them valid again. If USDC's `authorizationState` call fails, the entry is treated as still outstanding and unrelated payments continue.
 
 `isValidSignature(digest, signature)` returns `0x1626ba7e` only when **all** of these hold, and `0xffffffff` otherwise:
 - the digest is recorded and `block.timestamp < validBefore`;

@@ -8,6 +8,7 @@ import {MandateWallet} from "../../src/MandateWallet.sol";
 import {WalletFactory} from "../../src/WalletFactory.sol";
 import {DemoUSD} from "../../src/DemoUSD.sol";
 import {DemoVault} from "../../src/DemoVault.sol";
+import {MockUSDC} from "../mocks/MockUSDC.sol";
 
 /// Shared setup: public Anvil test keys only; wallet funded with 10,000,000 DemoUSD units.
 abstract contract MandateFixture is Test {
@@ -24,7 +25,7 @@ abstract contract MandateFixture is Test {
   address internal relayer = makeAddr("relayer");
 
   DemoUSD internal token;
-  DemoUSD internal usdc; // stands in for Base Sepolia test USDC (6 decimals)
+  MockUSDC internal usdc; // EIP-3009 stand-in for Base Sepolia USDC
   DemoVault internal vault;
   WalletFactory internal factory;
   MandateWallet internal wallet;
@@ -34,7 +35,7 @@ abstract contract MandateFixture is Test {
     vm.chainId(84532);
     vm.warp(START);
     token = new DemoUSD();
-    usdc = new DemoUSD();
+    usdc = new MockUSDC();
     vault = new DemoVault(token);
     factory = new WalletFactory(address(token), address(usdc), address(vault));
     wallet = MandateWallet(payable(factory.createWallet(ownerAddr)));
@@ -349,5 +350,80 @@ abstract contract MandateFixture is Test {
     p.spendCap = 20_000_000;
     p.periodCap = periodCap;
     p.periodSeconds = periodSeconds;
+  }
+
+  // ------------------------------------------------------------------ P1-A03 helpers
+
+  function _withTemplate(T.CallTemplate memory c) internal view returns (Lists memory l) {
+    l = _lists();
+    c.templateId = H.callTemplateId(c);
+    l.templates = new T.CallTemplate[](1);
+    l.templates[0] = c;
+  }
+
+  function _templatePermit(bytes32 taskId, bytes32 templateId, uint256 spendCap) internal view returns (T.Permit memory p) {
+    p = _liquidityPermit(taskId, 0, 0);
+    bytes32[] memory ids = new bytes32[](1);
+    ids[0] = templateId;
+    p.templatesHash = keccak256(abi.encode(ids));
+    p.spendCap = spendCap;
+  }
+
+  function _activateTemplate(T.Permit memory p, bytes32 templateId) internal returns (bytes32) {
+    bytes32[] memory ids = new bytes32[](1);
+    ids[0] = templateId;
+    vm.prank(relayer);
+    return wallet.activatePermit(p, new address[](0), _zeroSchedule(), ids, _signPermit(p, OWNER_PK));
+  }
+
+  function _callAction(bytes32 permitId, address target, uint256 amount, bytes memory callData)
+    internal
+    returns (T.Action memory a, bytes memory sig)
+  {
+    requestCounter++;
+    a = T.Action({
+      permitId: permitId,
+      requestId: keccak256(abi.encode("call", requestCounter)),
+      operation: T.OP_CALL,
+      target: target,
+      amount: amount,
+      minOutput: 0,
+      invoiceId: bytes32(0),
+      inputHash: keccak256(callData),
+      period: 0,
+      issuedAt: uint64(vm.getBlockTimestamp()),
+      deadline: uint64(vm.getBlockTimestamp() + 60)
+    });
+    sig = _signAction(a, EXECUTOR_PK);
+  }
+
+  function _runCall(T.Action memory a, bytes memory sig, bytes memory callData) internal {
+    T.Invoice memory noInvoice;
+    T.Approval memory noApproval;
+    vm.prank(relayer);
+    wallet.execute(a, sig, noInvoice, "", noApproval, "", callData);
+  }
+
+  function _usdcPermit(bytes32 taskId) internal view returns (T.Permit memory p) {
+    p = _permit(taskId);
+    p.asset = address(usdc);
+  }
+
+  function _x402(bytes32 permitId, uint256 amount, address provider, uint256 providerPk) internal returns (Pay memory x) {
+    x = _pay(permitId, amount, provider, providerPk);
+    x.action.operation = T.OP_X402;
+    x.executorSig = _signAction(x.action, EXECUTOR_PK);
+  }
+
+  function _x402Digest(T.Action memory a) internal view returns (bytes32) {
+    return H.x402Digest(usdc.DOMAIN_SEPARATOR(), address(wallet), a);
+  }
+
+  function _x402Sig(T.Action memory a) internal pure returns (bytes memory) {
+    return abi.encodePacked(a.requestId, a.permitId, uint8(1));
+  }
+
+  function _settle(T.Action memory a) internal {
+    usdc.transferWithAuthorization(address(wallet), a.target, a.amount, 0, a.deadline, a.requestId, _x402Sig(a));
   }
 }

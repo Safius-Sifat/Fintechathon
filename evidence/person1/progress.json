@@ -1,7 +1,7 @@
 {
   "owner": "Person1",
-  "updatedAt": "2026-10-18T18:56:22+06:00",
-  "milestone": "MA (P1-A02)",
+  "updatedAt": "2026-10-18T19:55:32+06:00",
+  "milestone": "MA (P1-A03)",
   "tasks": {
     "P1-01": {
       "status": "IN_PROGRESS",
@@ -52,6 +52,13 @@
         "Base Sepolia evidence pending P1-06",
         "Real USDC address/code hash pinned at deployment"
       ]
+    },
+    "P1-A03": {
+      "status": "LOCAL_PASS",
+      "blockedBy": [
+        "Gate X402-G facilitator settlement on Base Sepolia with Person4",
+        "Base Sepolia deployment evidence pending P1-06"
+      ]
     }
   },
   "files": [
@@ -73,6 +80,9 @@
     "packages/contracts/test/{Vault,Schedule,Limits,Admin,Recovery,Epoch}.t.sol",
     "docs/contracts-security.md",
     "packages/contracts/test/{Policy,Cosign,Freeze,Allowance,MultiAsset}.t.sol",
-    "packages/contracts/test/invariant/PolicyInvariants.t.sol"
+    "packages/contracts/test/invariant/PolicyInvariants.t.sol",
+    "packages/contracts/src/lib/{CallTemplateLib,X402Lib,ActivationLib}.sol",
+    "packages/contracts/test/{CallTemplate,X402}.t.sol",
+    "packages/contracts/test/fork/X402Fork.t.sol"
   ]
 }

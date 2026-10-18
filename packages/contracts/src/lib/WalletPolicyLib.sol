@@ -55,6 +55,32 @@ library WalletPolicyLib {
     }
   }
 
+  function isAgentAsset(address asset, address token, address usdc) internal pure returns (bool) {
+    return asset == token || (usdc != address(0) && asset == usdc);
+  }
+
+  /// Current AssetCap for an agent asset; `ok` is false when the asset is not an agent asset or has no cap.
+  function capOf(address asset, address token, address usdc) internal view returns (Cap memory cap, bool ok) {
+    Store storage s = store();
+    cap = s.cap[s.policy.version][asset];
+    ok = cap.set && isAgentAsset(asset, token, usdc);
+  }
+
+  /// Zero when the current policy allows `recipient`, otherwise the violated rule (S9.4).
+  function recipientViolation(address recipient) internal view returns (bytes32) {
+    Store storage s = store();
+    uint64 v = s.policy.version;
+    if (s.blocked[v][recipient]) return "blocklist";
+    if (s.allowCount[v] != 0 && !s.allow[v][recipient]) return "allowlist";
+    return bytes32(0);
+  }
+
+  /// Effective review threshold: the lower of the Permit's and the policy's (S9.5).
+  function reviewThreshold(uint256 permitThreshold) internal view returns (uint256) {
+    uint256 policyThreshold = store().policy.reviewThreshold;
+    return permitThreshold < policyThreshold ? permitThreshold : policyThreshold;
+  }
+
   /// Default policy (S9.4): DemoUSD at the S2 ceilings only, empty lists, no review threshold.
   function initDefault(address token) internal {
     Store storage s = store();
@@ -139,7 +165,7 @@ library WalletPolicyLib {
   }
 
   function _isAgentAsset(address asset, Config memory cfg) private pure returns (bool) {
-    return asset == cfg.token || (cfg.usdc != address(0) && asset == cfg.usdc);
+    return isAgentAsset(asset, cfg.token, cfg.usdc);
   }
 
   function _requireSigner(bytes32 digest, bytes calldata signature, address expected) private pure {
