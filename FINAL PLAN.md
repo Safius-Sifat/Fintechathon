@@ -98,7 +98,7 @@ All times Dhaka (UTC+6). Internal completion remains Oct18; official submission 
 | G0 | Oct17 15:30 | Shared schemas/examples/ABI, existing Azure VM, private container network, secrets/funding, phone/native package access |
 | G1 | Oct17 18:00 | Local contract pay, native owner signature/restore, actual three-node/two-participant MPC signature and mandatory authorization denial, real browser fixture |
 | G2 | Oct18 02:00 | Phone owner approval→public-testnet MPC payment→actual browser output→durable export→initial independent inspection |
-| G3 | Oct18 10:00 | Three runbooks, bounded fallback, restart/reservations, owner stop/recovery, SDK/MCP, six-finding inspector |
+| G3 | Oct18 10:00 | Four runbooks, bounded fallback, restart/reservations, owner stop/recovery, SDK/MCP, six-finding inspector |
 | G4 | Oct18 15:00 | Q01–Q14/evaluation and defect fixes, node/DB/RPC/outage recovery, APK installation/rebuild |
 | G5 | Oct18 18:00 | Tagged complete source/APK/manifest, measured evidence, English deck/demo/security/deploy docs |
 | Upload | Oct20 18:00 | Complete latest package uploaded and receipt checked before official cutoff |
