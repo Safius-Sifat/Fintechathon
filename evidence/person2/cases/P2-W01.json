@@ -1,0 +1,28 @@
+{
+  "owner": "Person2",
+  "milestone": "M0/W0 auth and database foundation",
+  "sourceBase": "27fd925e89803b5e5166ca286642dc694ffd07d3",
+  "schemaBase": "b67035614c9f1ed456384dee0cd6cf1ef9a59f32",
+  "environment": "macOS arm64, pinned Node22.23.3/pnpm10.20.0, disposable PostgreSQL16.10 with verified TLS",
+  "command": "pnpm test:db",
+  "expected": "Server consumer acceptance passes; financial readiness remains503",
+  "status": "LOCAL_PASS",
+  "limitations": [
+    "Native signing/device exchange not executed",
+    "Financial provisioning and MPC qualification not implemented",
+    "No cloud deployment or chain transaction"
+  ],
+  "task": "P2-W01",
+  "scope": "Auth/session subset only; full task remains in progress",
+  "cases": [
+    "T01 exact challenge/replay/mutations/concurrent consume",
+    "T02 atomic refresh rotation, replay family revocation, random-token non-revocation",
+    "T03 seven-day idle/thirty-day absolute bounds",
+    "T04 original auth_time persists through refresh",
+    "T05 invalid JWT/revoked session/DB failure deny access",
+    "T06 logout only current API session; financial readiness503",
+    "T07 owner isolation with identical device IDs"
+  ],
+  "observed": "Assertions executed in apps/api/test/db/auth.test.ts; command results in implementation report",
+  "exitStatus": 0
+}

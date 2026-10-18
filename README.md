@@ -32,7 +32,7 @@ Other terminals: `make dev-provider`, `make dev-mobile`. Docker daemon required 
 
 ## What currently works
 
-Workspace dependency linking/typecheck, shared authority structural schemas/hash functions, local infrastructure configuration, metadata migration runner, process-health API/provider entry points and minimal Android app entry. `/healthz` is liveness only, `/readyz` deliberately503. Financial routes/worker/policy/runbooks/verifier/MCP explicitly fail until their owners implement them. SDK only has read-request foundation. Solidity shared structs supplied; five business contracts are not implemented/deployed. Native owner module and MPC signing integration are not yet supplied.
+Workspace dependency linking/typecheck, shared authority structural schemas/hash functions, local infrastructure configuration, metadata migration runner, process-health API/provider entry points and minimal Android app entry. The API now supplies [wallet-signed owner sessions](docs/api/OWNER-SESSIONS.md), rotating refresh, revocation and account isolation when auth/database settings are configured. `/healthz` is liveness only, `/readyz` deliberately503. Financial routes/worker/policy/runbooks/verifier/MCP explicitly fail until their owners implement them. SDK only has read-request foundation. Solidity shared structs supplied; five business contracts are not implemented/deployed. Native owner module and MPC signing integration are not yet supplied.
 
 No wallet seed/share/key, testnet transaction, deployment result or completed security acceptance is created by this bootstrap. [Historical documents](docs/archive/pre-bootstrap-2026-10-17/) are preserved; current plans supersede old Circle/guard/five-person assumptions. The repo root itself is the monorepo root.
 

@@ -16,6 +16,7 @@ services:
     environment:
       APP_ENV: production
       API_HOST: 127.0.0.1
+      API_TRUSTED_PROXY_ADDRESSES: "127.0.0.1"
       DEPLOYMENT_MANIFEST_FILE: /run/mandate/base-sepolia.json
       SOURCE_REVISION: ${MANDATE_COMMIT:?tested commit required}
     volumes:
