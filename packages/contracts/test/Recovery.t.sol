@@ -28,7 +28,7 @@ contract RecoveryTest is MandateFixture {
 
   function _badVaultWallet(UnavailableVault.Mode mode) internal returns (MandateWallet w, UnavailableVault bad) {
     bad = new UnavailableVault(address(token), mode);
-    w = new MandateWallet(ownerAddr, address(token), address(bad));
+    w = new MandateWallet(ownerAddr, address(token), address(usdc), address(bad));
     token.mint(address(w), 5_000_000);
     bad.mintShares(address(w), 1_000);
   }

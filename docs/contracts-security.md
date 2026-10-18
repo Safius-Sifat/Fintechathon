@@ -1,6 +1,6 @@
 # Contract security notes (Person1)
 
-Scope: `packages/contracts/src/{MandateWallet,WalletFactory,DemoUSD,DemoVault}.sol` as of the P1-03/P1-04 milestone. These are local test results only; there is no audit and no mainnet use.
+Scope: `packages/contracts/src/{MandateWallet,WalletFactory,DemoUSD,DemoVault}.sol` as of the P1-A02 milestone. These are local test results only; there is no audit and no mainnet use.
 
 ## Authority model
 
@@ -14,7 +14,7 @@ Scope: `packages/contracts/src/{MandateWallet,WalletFactory,DemoUSD,DemoVault}.s
 
 ## Limits enforced on chain
 
-Per payment 500,000; per task 2,000,000; per executor per UTC day 5,000,000; per wallet per UTC day 10,000,000 and per week 25,000,000 (per agent asset); liquid floor ≥ 3,000,000; ≤ 20 actions per Permit, ≤ 3 browser payments; Permit lifetime ≤ 24 h; Action and Invoice ≤ 60 s (≤ 15 min when owner co-signed); Admin ≤ 30 min; OwnerTransfer ≤ 10 min. Deposits keep vault assets ≤ 20% of liquid + vault (checked after the deposit from real balances) and have their own `depositCap`; withdrawals have `withdrawCap`. Gross spend is never decreased by refunds or withdrawals.
+Owner WalletPolicy (S9.4) can only tighten these: per-asset per-transaction/day/week caps, allowlist (empty means off), blocklist, call templates and a wallet-wide review threshold; the most restrictive of Permit and policy applies at activation and again at every execution. Ceilings: per payment 500,000; per task 2,000,000; per executor per UTC day 5,000,000; per wallet per UTC day 10,000,000 and per week 25,000,000 (per agent asset); liquid floor ≥ 3,000,000; ≤ 20 actions per Permit, ≤ 3 browser payments; Permit lifetime ≤ 24 h; Action and Invoice ≤ 60 s (≤ 15 min when owner co-signed); Admin ≤ 30 min; OwnerTransfer ≤ 10 min. Deposits keep vault assets ≤ 20% of liquid + vault (checked after the deposit from real balances) and have their own `depositCap`; withdrawals have `withdrawCap`. Gross spend is never decreased by refunds or withdrawals.
 
 ## Stop and recovery
 
@@ -30,6 +30,14 @@ Per payment 500,000; per task 2,000,000; per executor per UTC day 5,000,000; per
 - The wallet refuses to deploy unless `block.chainid == 84532`, so domain-84532 signatures cannot be replayed on another chain.
 - Reentrancy: `execute`, `applyAdmin` and `applyOwnerTransfer` are `nonReentrant`; IDs and counters are written before token transfers.
 - Token approvals to the vault are exact and reset to zero in the same transaction; actual balance deltas must match the requested amounts, so fee-on-transfer tokens are rejected.
-- Not yet implemented (reverts explicitly): ALLOWANCE Permits, CALL, X402, FREEZE/UNFREEZE, WalletPolicy and non-DemoUSD agent assets.
+- `FREEZE` stops agent execution without touching Permits, counters or epoch; `UNFREEZE` resumes. Owner transfers, admin commands and policy updates still work while frozen.
+- ALLOWANCE Permits last up to 30 days with a per-day or per-week period cap; DemoUSD and USDC have separate counters, and USDC is unusable until the owner adds a USDC AssetCap.
+- Not yet implemented (reverts explicitly): CALL execution and X402.
+
+## Code size and structure
+
+EIP-170 limits deployed runtime code to 24,576 bytes; the local test EVM does not enforce it, so `test/Size.t.sol` asserts it. `MandateWallet` keeps its own state and entry points; large self-contained logic runs in external libraries by DELEGATECALL in the wallet's context: `PermitTermsLib` (pure Permit checks), `WalletPolicyLib` (policy storage at the fixed slot `keccak256("mandate.wallet.policy.v1")` and `applyWalletPolicy`), `VaultLib` (DEPOSIT/WITHDRAW) and `AssetsLib` (OwnerTransfer and RECOVER asset movement). Libraries hold no state of their own and have no privileged entry points; deployment must link them. `WalletFactory` stores the wallet creation code in two code-only data contracts (runtime `0x00 || data`, never executable) and reassembles it for `CREATE2`, keeping its runtime at about 1.4 KB.
+
+Sizes at this commit: MandateWallet 23,201 bytes runtime; WalletFactory 1,355 bytes runtime (27,387 bytes initcode, under the 49,152-byte EIP-3860 cap).
 
 Tests: `packages/contracts/test/*.t.sol` (run `make check-contracts`).

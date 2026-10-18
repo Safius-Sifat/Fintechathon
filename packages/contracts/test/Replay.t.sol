@@ -71,13 +71,13 @@ contract ReplayTest is MandateFixture {
   function test_P1_02_T03_invoiceBindingAndProviderSignature() public {
     Pay memory x = _pay(permitId, 200_000, providerA, PROVIDER_A_PK);
     x.invoice.wallet = address(0xBEEF);
-    vm.expectRevert(abi.encodeWithSelector(MandateWallet.InvoiceMismatch.selector, "wallet"));
+    vm.expectRevert(abi.encodeWithSelector(MandateWallet.InvoiceMismatch.selector, bytes32("wallet")));
     _execute(x);
     _assertNothingConsumed(x);
 
     x = _pay(permitId, 200_000, providerA, PROVIDER_A_PK);
     x.invoice.taskId = keccak256("other-task");
-    vm.expectRevert(abi.encodeWithSelector(MandateWallet.InvoiceMismatch.selector, "taskId"));
+    vm.expectRevert(abi.encodeWithSelector(MandateWallet.InvoiceMismatch.selector, bytes32("taskId")));
     _execute(x);
     _assertNothingConsumed(x);
 
