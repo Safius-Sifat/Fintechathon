@@ -1,0 +1,274 @@
+{
+  "schema": "mandate-vector/1",
+  "primaryType": "Login",
+  "valid": [
+    {
+      "id": "login2",
+      "domain": {
+        "name": "MandateLogin",
+        "version": "2",
+        "chainId": 84532,
+        "verifyingContract": "0x0000000000000000000000000000000000000000"
+      },
+      "message": {
+        "origin": "https://api.mandate.example",
+        "nonce": "0x0000000000000000000000000000000000000000000000000000000000000010",
+        "deviceId": "0x00000000000000000000000000000000000000000000000000000000000000de",
+        "issuedAt": "1793000000",
+        "expiresAt": "1793000300"
+      },
+      "typedData": {
+        "types": {
+          "EIP712Domain": [
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "version",
+              "type": "string"
+            },
+            {
+              "name": "chainId",
+              "type": "uint256"
+            },
+            {
+              "name": "verifyingContract",
+              "type": "address"
+            }
+          ],
+          "Login": [
+            {
+              "name": "origin",
+              "type": "string"
+            },
+            {
+              "name": "nonce",
+              "type": "bytes32"
+            },
+            {
+              "name": "deviceId",
+              "type": "bytes32"
+            },
+            {
+              "name": "issuedAt",
+              "type": "uint64"
+            },
+            {
+              "name": "expiresAt",
+              "type": "uint64"
+            }
+          ]
+        },
+        "primaryType": "Login",
+        "domain": {
+          "name": "MandateLogin",
+          "version": "2",
+          "chainId": 84532,
+          "verifyingContract": "0x0000000000000000000000000000000000000000"
+        },
+        "message": {
+          "origin": "https://api.mandate.example",
+          "nonce": "0x0000000000000000000000000000000000000000000000000000000000000010",
+          "deviceId": "0x00000000000000000000000000000000000000000000000000000000000000de",
+          "issuedAt": "1793000000",
+          "expiresAt": "1793000300"
+        }
+      },
+      "structHash": "0xc87f21606184a46c448fd0531c7eb59f85aec4a2c7d7ec90a9c2474baa1d1083",
+      "domainSeparator": "0x1d3edb347564f1a2b5f4e64dcd1b42d5c517be55e61e10a2034b8022960f6de3",
+      "digest": "0x8a1812b26b5a59464c0738a4b28b9ede8dc8482de8a7a4e3a49d193b1d37e86b",
+      "abiEncoded": "0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000a0000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000de000000000000000000000000000000000000000000000000000000006adf0240000000000000000000000000000000000000000000000000000000006adf036c000000000000000000000000000000000000000000000000000000000000001b68747470733a2f2f6170692e6d616e646174652e6578616d706c650000000000",
+      "signer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "signature": "0xc25a71f0acdc74ba6f067c9004113d19be7be2f1a7539e749b1c76eafa40fe8d6699eca421fa24f8ce751fdbc9927380039ca729ed252d860113b0f8a651df8f1b"
+    }
+  ],
+  "invalid": [
+    {
+      "id": "unknown-field",
+      "expect": "SCHEMA_REJECT",
+      "reason": "Unknown fields reject",
+      "domain": {
+        "name": "MandateLogin",
+        "version": "2",
+        "chainId": 84532,
+        "verifyingContract": "0x0000000000000000000000000000000000000000"
+      },
+      "message": {
+        "origin": "https://api.mandate.example",
+        "nonce": "0x0000000000000000000000000000000000000000000000000000000000000010",
+        "deviceId": "0x00000000000000000000000000000000000000000000000000000000000000de",
+        "issuedAt": "1793000000",
+        "expiresAt": "1793000300",
+        "extra": "1"
+      }
+    },
+    {
+      "id": "null-field",
+      "expect": "SCHEMA_REJECT",
+      "reason": "null never replaces a required value",
+      "domain": {
+        "name": "MandateLogin",
+        "version": "2",
+        "chainId": 84532,
+        "verifyingContract": "0x0000000000000000000000000000000000000000"
+      },
+      "message": {
+        "origin": "https://api.mandate.example",
+        "nonce": "0x0000000000000000000000000000000000000000000000000000000000000010",
+        "deviceId": "0x00000000000000000000000000000000000000000000000000000000000000de",
+        "issuedAt": null,
+        "expiresAt": "1793000300"
+      }
+    },
+    {
+      "id": "missing-field",
+      "expect": "SCHEMA_REJECT",
+      "reason": "Every field is required",
+      "domain": {
+        "name": "MandateLogin",
+        "version": "2",
+        "chainId": 84532,
+        "verifyingContract": "0x0000000000000000000000000000000000000000"
+      },
+      "message": {
+        "nonce": "0x0000000000000000000000000000000000000000000000000000000000000010",
+        "deviceId": "0x00000000000000000000000000000000000000000000000000000000000000de",
+        "issuedAt": "1793000000",
+        "expiresAt": "1793000300"
+      }
+    },
+    {
+      "id": "wrong-chain",
+      "expect": "DOMAIN_REJECT",
+      "reason": "Only chainId 84532",
+      "domain": {
+        "name": "MandateLogin",
+        "version": "2",
+        "chainId": 8453,
+        "verifyingContract": "0x0000000000000000000000000000000000000000"
+      },
+      "message": {
+        "origin": "https://api.mandate.example",
+        "nonce": "0x0000000000000000000000000000000000000000000000000000000000000010",
+        "deviceId": "0x00000000000000000000000000000000000000000000000000000000000000de",
+        "issuedAt": "1793000000",
+        "expiresAt": "1793000300"
+      }
+    },
+    {
+      "id": "old-domain-version",
+      "expect": "DOMAIN_REJECT",
+      "reason": "Bootstrap/old domain versions reject",
+      "domain": {
+        "name": "MandateLogin",
+        "version": "1",
+        "chainId": 84532,
+        "verifyingContract": "0x0000000000000000000000000000000000000000"
+      },
+      "message": {
+        "origin": "https://api.mandate.example",
+        "nonce": "0x0000000000000000000000000000000000000000000000000000000000000010",
+        "deviceId": "0x00000000000000000000000000000000000000000000000000000000000000de",
+        "issuedAt": "1793000000",
+        "expiresAt": "1793000300"
+      }
+    },
+    {
+      "id": "one-unit-change",
+      "expect": "SIGNER_MISMATCH",
+      "reason": "Original signature must not authorize a 1-unit change",
+      "domain": {
+        "name": "MandateLogin",
+        "version": "2",
+        "chainId": 84532,
+        "verifyingContract": "0x0000000000000000000000000000000000000000"
+      },
+      "message": {
+        "origin": "https://api.mandate.example",
+        "nonce": "0x0000000000000000000000000000000000000000000000000000000000000010",
+        "deviceId": "0x00000000000000000000000000000000000000000000000000000000000000de",
+        "issuedAt": "1793000001",
+        "expiresAt": "1793000300"
+      }
+    },
+    {
+      "id": "reordered-fields",
+      "expect": "SIGNER_MISMATCH",
+      "reason": "Field order is part of the type hash",
+      "domain": {
+        "name": "MandateLogin",
+        "version": "2",
+        "chainId": 84532,
+        "verifyingContract": "0x0000000000000000000000000000000000000000"
+      },
+      "message": {
+        "origin": "https://api.mandate.example",
+        "nonce": "0x0000000000000000000000000000000000000000000000000000000000000010",
+        "deviceId": "0x00000000000000000000000000000000000000000000000000000000000000de",
+        "issuedAt": "1793000000",
+        "expiresAt": "1793000300"
+      },
+      "types": {
+        "Login": [
+          {
+            "name": "expiresAt",
+            "type": "uint64"
+          },
+          {
+            "name": "issuedAt",
+            "type": "uint64"
+          },
+          {
+            "name": "deviceId",
+            "type": "bytes32"
+          },
+          {
+            "name": "nonce",
+            "type": "bytes32"
+          },
+          {
+            "name": "origin",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "id": "device-changed",
+      "expect": "SIGNER_MISMATCH",
+      "reason": "deviceId is signed",
+      "domain": {
+        "name": "MandateLogin",
+        "version": "2",
+        "chainId": 84532,
+        "verifyingContract": "0x0000000000000000000000000000000000000000"
+      },
+      "message": {
+        "origin": "https://api.mandate.example",
+        "nonce": "0x0000000000000000000000000000000000000000000000000000000000000010",
+        "deviceId": "0x00000000000000000000000000000000000000000000000000000000000000df",
+        "issuedAt": "1793000000",
+        "expiresAt": "1793000300"
+      }
+    },
+    {
+      "id": "origin-changed",
+      "expect": "SIGNER_MISMATCH",
+      "reason": "origin is signed",
+      "domain": {
+        "name": "MandateLogin",
+        "version": "2",
+        "chainId": 84532,
+        "verifyingContract": "0x0000000000000000000000000000000000000000"
+      },
+      "message": {
+        "origin": "https://evil.example",
+        "nonce": "0x0000000000000000000000000000000000000000000000000000000000000010",
+        "deviceId": "0x00000000000000000000000000000000000000000000000000000000000000de",
+        "issuedAt": "1793000000",
+        "expiresAt": "1793000300"
+      }
+    }
+  ]
+}

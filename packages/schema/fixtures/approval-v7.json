@@ -1,0 +1,187 @@
+{
+  "schema": "mandate-vector/1",
+  "primaryType": "Approval",
+  "valid": [
+    {
+      "id": "cosign-pay-provider-a",
+      "domain": {
+        "name": "MandateWallet",
+        "version": "5",
+        "chainId": 84532,
+        "verifyingContract": "0x1111111111111111111111111111111111111111"
+      },
+      "message": {
+        "actionDigest": "0xe58e0d97a74208502124fb04e58416f6dad21bccb944ba29f1184f1a58786c6a",
+        "expiresAt": "1793000160"
+      },
+      "typedData": {
+        "types": {
+          "EIP712Domain": [
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "version",
+              "type": "string"
+            },
+            {
+              "name": "chainId",
+              "type": "uint256"
+            },
+            {
+              "name": "verifyingContract",
+              "type": "address"
+            }
+          ],
+          "Approval": [
+            {
+              "name": "actionDigest",
+              "type": "bytes32"
+            },
+            {
+              "name": "expiresAt",
+              "type": "uint64"
+            }
+          ]
+        },
+        "primaryType": "Approval",
+        "domain": {
+          "name": "MandateWallet",
+          "version": "5",
+          "chainId": 84532,
+          "verifyingContract": "0x1111111111111111111111111111111111111111"
+        },
+        "message": {
+          "actionDigest": "0xe58e0d97a74208502124fb04e58416f6dad21bccb944ba29f1184f1a58786c6a",
+          "expiresAt": "1793000160"
+        }
+      },
+      "structHash": "0x52bb14e6c5fc86f735f3a410ce1d9121551b1e32f8ceab93508a139f3606a372",
+      "domainSeparator": "0xa34ca99a0fbaf645168fa5e21ac311b27ffc06a966896fd0315ecfdaba1da25d",
+      "digest": "0x949985a0eb76270f24b354b4531cada7cc8a87a788085a5a7d0fbdba6470fdb5",
+      "abiEncoded": "0xe58e0d97a74208502124fb04e58416f6dad21bccb944ba29f1184f1a58786c6a000000000000000000000000000000000000000000000000000000006adf02e0",
+      "signer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      "signature": "0xdc0a85bd80fccd77b42a7b78036556bbc964895b261697c781fde49b1be5256362638ce80e492cd2315438b2bff84adef135e9352bc5a5a98278ca309291921a1c"
+    }
+  ],
+  "invalid": [
+    {
+      "id": "unknown-field",
+      "expect": "SCHEMA_REJECT",
+      "reason": "Unknown fields reject",
+      "domain": {
+        "name": "MandateWallet",
+        "version": "5",
+        "chainId": 84532,
+        "verifyingContract": "0x1111111111111111111111111111111111111111"
+      },
+      "message": {
+        "actionDigest": "0xe58e0d97a74208502124fb04e58416f6dad21bccb944ba29f1184f1a58786c6a",
+        "expiresAt": "1793000160",
+        "extra": "1"
+      }
+    },
+    {
+      "id": "null-field",
+      "expect": "SCHEMA_REJECT",
+      "reason": "null never replaces a required value",
+      "domain": {
+        "name": "MandateWallet",
+        "version": "5",
+        "chainId": 84532,
+        "verifyingContract": "0x1111111111111111111111111111111111111111"
+      },
+      "message": {
+        "actionDigest": "0xe58e0d97a74208502124fb04e58416f6dad21bccb944ba29f1184f1a58786c6a",
+        "expiresAt": null
+      }
+    },
+    {
+      "id": "missing-field",
+      "expect": "SCHEMA_REJECT",
+      "reason": "Every field is required",
+      "domain": {
+        "name": "MandateWallet",
+        "version": "5",
+        "chainId": 84532,
+        "verifyingContract": "0x1111111111111111111111111111111111111111"
+      },
+      "message": {
+        "expiresAt": "1793000160"
+      }
+    },
+    {
+      "id": "wrong-chain",
+      "expect": "DOMAIN_REJECT",
+      "reason": "Only chainId 84532",
+      "domain": {
+        "name": "MandateWallet",
+        "version": "5",
+        "chainId": 8453,
+        "verifyingContract": "0x1111111111111111111111111111111111111111"
+      },
+      "message": {
+        "actionDigest": "0xe58e0d97a74208502124fb04e58416f6dad21bccb944ba29f1184f1a58786c6a",
+        "expiresAt": "1793000160"
+      }
+    },
+    {
+      "id": "old-domain-version",
+      "expect": "DOMAIN_REJECT",
+      "reason": "Bootstrap/old domain versions reject",
+      "domain": {
+        "name": "MandateWallet",
+        "version": "4",
+        "chainId": 84532,
+        "verifyingContract": "0x1111111111111111111111111111111111111111"
+      },
+      "message": {
+        "actionDigest": "0xe58e0d97a74208502124fb04e58416f6dad21bccb944ba29f1184f1a58786c6a",
+        "expiresAt": "1793000160"
+      }
+    },
+    {
+      "id": "one-unit-change",
+      "expect": "SIGNER_MISMATCH",
+      "reason": "Original signature must not authorize a 1-unit change",
+      "domain": {
+        "name": "MandateWallet",
+        "version": "5",
+        "chainId": 84532,
+        "verifyingContract": "0x1111111111111111111111111111111111111111"
+      },
+      "message": {
+        "actionDigest": "0xe58e0d97a74208502124fb04e58416f6dad21bccb944ba29f1184f1a58786c6a",
+        "expiresAt": "1793000161"
+      }
+    },
+    {
+      "id": "reordered-fields",
+      "expect": "SIGNER_MISMATCH",
+      "reason": "Field order is part of the type hash",
+      "domain": {
+        "name": "MandateWallet",
+        "version": "5",
+        "chainId": 84532,
+        "verifyingContract": "0x1111111111111111111111111111111111111111"
+      },
+      "message": {
+        "actionDigest": "0xe58e0d97a74208502124fb04e58416f6dad21bccb944ba29f1184f1a58786c6a",
+        "expiresAt": "1793000160"
+      },
+      "types": {
+        "Approval": [
+          {
+            "name": "expiresAt",
+            "type": "uint64"
+          },
+          {
+            "name": "actionDigest",
+            "type": "bytes32"
+          }
+        ]
+      }
+    }
+  ]
+}

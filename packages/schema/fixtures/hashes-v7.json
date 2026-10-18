@@ -1,0 +1,178 @@
+{
+  "schema": "mandate-hashes/1",
+  "recipients": {
+    "input": [
+      "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+      "0x6666666666666666666666666666666666666666"
+    ],
+    "hash": "0x670d710de9a802307c730e3bf46431fee52af09c62a2b1800cfbe92256d3f04d",
+    "rejected": [
+      [
+        "0x6666666666666666666666666666666666666666",
+        "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC"
+      ],
+      [
+        "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+        "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC"
+      ]
+    ]
+  },
+  "schedule": {
+    "zero": {
+      "recipient": "0x0000000000000000000000000000000000000000",
+      "amount": "0",
+      "start": "0",
+      "interval": 0,
+      "window": 0,
+      "periods": 0
+    },
+    "zeroHash": "0x1e990e27f0d7976bf2adbd60e20384da0125b76e2885a96aa707bcb054108b0d"
+  },
+  "templateIds": {
+    "empty": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "single": {
+      "input": [
+        "0x0000000000000000000000000000000000000000000000000000000000000051"
+      ],
+      "hash": "0x4ccd39a6967b1b6a4fd3ba973c7820818ed982a2af3f3f8ab17119d06636adc8"
+    }
+  },
+  "assetCaps": {
+    "input": [
+      {
+        "asset": "0x2222222222222222222222222222222222222222",
+        "perTx": "500000",
+        "daily": "10000000",
+        "weekly": "25000000"
+      },
+      {
+        "asset": "0x3333333333333333333333333333333333333333",
+        "perTx": "500000",
+        "daily": "5000000",
+        "weekly": "20000000"
+      }
+    ],
+    "hash": "0xfa56ab30469af3603948cf8263165e58ade3c2c5fdfb8d144c53ed514b2a15e7"
+  },
+  "callTemplates": {
+    "input": [
+      {
+        "templateId": "0x0000000000000000000000000000000000000000000000000000000000000051",
+        "target": "0x5555555555555555555555555555555555555555",
+        "selector": "0x6e553f65",
+        "amountArg": 0,
+        "recipientArg": 1,
+        "recipientRule": 1,
+        "flags": 1,
+        "maxAmount": "1000000"
+      }
+    ],
+    "hash": "0xc56525754de386cb676eb8e62b05a57f50a18f6e29e431013e3e02123cc65a41"
+  },
+  "walletPolicyLists": {
+    "input": {
+      "assetCaps": [
+        {
+          "asset": "0x2222222222222222222222222222222222222222",
+          "perTx": "500000",
+          "daily": "10000000",
+          "weekly": "25000000"
+        },
+        {
+          "asset": "0x3333333333333333333333333333333333333333",
+          "perTx": "500000",
+          "daily": "5000000",
+          "weekly": "20000000"
+        }
+      ],
+      "allowlist": [
+        "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+        "0x6666666666666666666666666666666666666666"
+      ],
+      "blocklist": [
+        "0x000000000000000000000000000000000000dEaD"
+      ],
+      "templates": [
+        {
+          "templateId": "0x0000000000000000000000000000000000000000000000000000000000000051",
+          "target": "0x5555555555555555555555555555555555555555",
+          "selector": "0x6e553f65",
+          "amountArg": 0,
+          "recipientArg": 1,
+          "recipientRule": 1,
+          "flags": 1,
+          "maxAmount": "1000000"
+        }
+      ]
+    },
+    "hashes": {
+      "assetCapsHash": "0xfa56ab30469af3603948cf8263165e58ade3c2c5fdfb8d144c53ed514b2a15e7",
+      "allowlistHash": "0x670d710de9a802307c730e3bf46431fee52af09c62a2b1800cfbe92256d3f04d",
+      "blocklistHash": "0x0f1b5dba665c47ac96cf9dcd2297ead9a0b080433cc07aaee4e95e9c4d443be8",
+      "templatesHash": "0xc56525754de386cb676eb8e62b05a57f50a18f6e29e431013e3e02123cc65a41"
+    }
+  },
+  "conditions": {
+    "input": {
+      "schemaVersion": 4,
+      "runbookId": "browser-check",
+      "browser": {
+        "targetId": "checkout-healthy",
+        "checks": [
+          "pageLoad",
+          "title"
+        ],
+        "providerIds": [
+          "a",
+          "b"
+        ],
+        "maxPaidAttempts": 3,
+        "maxSteps": 8,
+        "taskDeadline": "1793000600",
+        "resultMaxAgeSeconds": 300
+      },
+      "liquidity": null,
+      "schedule": null,
+      "allowance": null,
+      "calls": null
+    },
+    "reorderedKeys": {
+      "calls": null,
+      "allowance": null,
+      "schedule": null,
+      "liquidity": null,
+      "browser": {
+        "targetId": "checkout-healthy",
+        "checks": [
+          "pageLoad",
+          "title"
+        ],
+        "providerIds": [
+          "a",
+          "b"
+        ],
+        "maxPaidAttempts": 3,
+        "maxSteps": 8,
+        "taskDeadline": "1793000600",
+        "resultMaxAgeSeconds": 300
+      },
+      "runbookId": "browser-check",
+      "schemaVersion": 4
+    },
+    "hash": "0xc876cc81c36c31836fddefb2477e97885a264ff1162624d621a202e1166b0010"
+  },
+  "runbookManifest": {
+    "input": {
+      "schemaVersion": 4,
+      "runbookId": "browser-check",
+      "kind": 0,
+      "version": "1.0.0",
+      "entryArtifactHash": "0x0000000000000000000000000000000000000000000000000000000000000001",
+      "inputSchemaHash": "0x0000000000000000000000000000000000000000000000000000000000000002",
+      "outputSchemaHash": "0x0000000000000000000000000000000000000000000000000000000000000003",
+      "validatorArtifactHash": "0x0000000000000000000000000000000000000000000000000000000000000004",
+      "dependencyLockHash": "0x0000000000000000000000000000000000000000000000000000000000000005"
+    },
+    "hash": "0xb261a9ae6c3f0922fca12faa9ef4c173d3239cac5bd6fdba64d4a6748695d5bd"
+  }
+}

@@ -1,0 +1,255 @@
+{
+  "schema": "mandate-vector/1",
+  "primaryType": "DeliveryReceipt",
+  "valid": [
+    {
+      "id": "provider-a-delivery",
+      "domain": {
+        "name": "MandateDelivery",
+        "version": "1",
+        "chainId": 84532,
+        "verifyingContract": "0x1111111111111111111111111111111111111111"
+      },
+      "message": {
+        "invoiceId": "0x000000000000000000000000000000000000000000000000000000000000001f",
+        "requestId": "0x00000000000000000000000000000000000000000000000000000000000000a1",
+        "inputHash": "0x000000000000000000000000000000000000000000000000000000000000001e",
+        "resultHash": "0x000000000000000000000000000000000000000000000000000000000000002e",
+        "paymentTxHash": "0x000000000000000000000000000000000000000000000000000000000000007e",
+        "completedAt": "1793000190"
+      },
+      "typedData": {
+        "types": {
+          "EIP712Domain": [
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "version",
+              "type": "string"
+            },
+            {
+              "name": "chainId",
+              "type": "uint256"
+            },
+            {
+              "name": "verifyingContract",
+              "type": "address"
+            }
+          ],
+          "DeliveryReceipt": [
+            {
+              "name": "invoiceId",
+              "type": "bytes32"
+            },
+            {
+              "name": "requestId",
+              "type": "bytes32"
+            },
+            {
+              "name": "inputHash",
+              "type": "bytes32"
+            },
+            {
+              "name": "resultHash",
+              "type": "bytes32"
+            },
+            {
+              "name": "paymentTxHash",
+              "type": "bytes32"
+            },
+            {
+              "name": "completedAt",
+              "type": "uint64"
+            }
+          ]
+        },
+        "primaryType": "DeliveryReceipt",
+        "domain": {
+          "name": "MandateDelivery",
+          "version": "1",
+          "chainId": 84532,
+          "verifyingContract": "0x1111111111111111111111111111111111111111"
+        },
+        "message": {
+          "invoiceId": "0x000000000000000000000000000000000000000000000000000000000000001f",
+          "requestId": "0x00000000000000000000000000000000000000000000000000000000000000a1",
+          "inputHash": "0x000000000000000000000000000000000000000000000000000000000000001e",
+          "resultHash": "0x000000000000000000000000000000000000000000000000000000000000002e",
+          "paymentTxHash": "0x000000000000000000000000000000000000000000000000000000000000007e",
+          "completedAt": "1793000190"
+        }
+      },
+      "structHash": "0x0eaa0fce665b274e694134bfeb2837472ddc96a4dd64daa0756097c5e6e9e29c",
+      "domainSeparator": "0xfc47d4a4a4841a31de1b88ca3bfccc591e08a8ad9ed9a4cecdcc39bc0f79114b",
+      "digest": "0xec2ff607039257a5790889c67ee543f50d8f35591d8308412faf9043cef19eac",
+      "abiEncoded": "0x000000000000000000000000000000000000000000000000000000000000001f00000000000000000000000000000000000000000000000000000000000000a1000000000000000000000000000000000000000000000000000000000000001e000000000000000000000000000000000000000000000000000000000000002e000000000000000000000000000000000000000000000000000000000000007e000000000000000000000000000000000000000000000000000000006adf02fe",
+      "signer": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+      "signature": "0xfdb5714fb711b036a48b0f119edc85b6196c8be3c2d3c3bf9cc250f1ff87b9e24db74cb8eb3ea99a07d2c1472daebf52ee229a8cea4b888580203c177a994a3a1b"
+    }
+  ],
+  "invalid": [
+    {
+      "id": "unknown-field",
+      "expect": "SCHEMA_REJECT",
+      "reason": "Unknown fields reject",
+      "domain": {
+        "name": "MandateDelivery",
+        "version": "1",
+        "chainId": 84532,
+        "verifyingContract": "0x1111111111111111111111111111111111111111"
+      },
+      "message": {
+        "invoiceId": "0x000000000000000000000000000000000000000000000000000000000000001f",
+        "requestId": "0x00000000000000000000000000000000000000000000000000000000000000a1",
+        "inputHash": "0x000000000000000000000000000000000000000000000000000000000000001e",
+        "resultHash": "0x000000000000000000000000000000000000000000000000000000000000002e",
+        "paymentTxHash": "0x000000000000000000000000000000000000000000000000000000000000007e",
+        "completedAt": "1793000190",
+        "extra": "1"
+      }
+    },
+    {
+      "id": "null-field",
+      "expect": "SCHEMA_REJECT",
+      "reason": "null never replaces a required value",
+      "domain": {
+        "name": "MandateDelivery",
+        "version": "1",
+        "chainId": 84532,
+        "verifyingContract": "0x1111111111111111111111111111111111111111"
+      },
+      "message": {
+        "invoiceId": "0x000000000000000000000000000000000000000000000000000000000000001f",
+        "requestId": "0x00000000000000000000000000000000000000000000000000000000000000a1",
+        "inputHash": "0x000000000000000000000000000000000000000000000000000000000000001e",
+        "resultHash": "0x000000000000000000000000000000000000000000000000000000000000002e",
+        "paymentTxHash": "0x000000000000000000000000000000000000000000000000000000000000007e",
+        "completedAt": null
+      }
+    },
+    {
+      "id": "missing-field",
+      "expect": "SCHEMA_REJECT",
+      "reason": "Every field is required",
+      "domain": {
+        "name": "MandateDelivery",
+        "version": "1",
+        "chainId": 84532,
+        "verifyingContract": "0x1111111111111111111111111111111111111111"
+      },
+      "message": {
+        "requestId": "0x00000000000000000000000000000000000000000000000000000000000000a1",
+        "inputHash": "0x000000000000000000000000000000000000000000000000000000000000001e",
+        "resultHash": "0x000000000000000000000000000000000000000000000000000000000000002e",
+        "paymentTxHash": "0x000000000000000000000000000000000000000000000000000000000000007e",
+        "completedAt": "1793000190"
+      }
+    },
+    {
+      "id": "wrong-chain",
+      "expect": "DOMAIN_REJECT",
+      "reason": "Only chainId 84532",
+      "domain": {
+        "name": "MandateDelivery",
+        "version": "1",
+        "chainId": 8453,
+        "verifyingContract": "0x1111111111111111111111111111111111111111"
+      },
+      "message": {
+        "invoiceId": "0x000000000000000000000000000000000000000000000000000000000000001f",
+        "requestId": "0x00000000000000000000000000000000000000000000000000000000000000a1",
+        "inputHash": "0x000000000000000000000000000000000000000000000000000000000000001e",
+        "resultHash": "0x000000000000000000000000000000000000000000000000000000000000002e",
+        "paymentTxHash": "0x000000000000000000000000000000000000000000000000000000000000007e",
+        "completedAt": "1793000190"
+      }
+    },
+    {
+      "id": "old-domain-version",
+      "expect": "DOMAIN_REJECT",
+      "reason": "Bootstrap/old domain versions reject",
+      "domain": {
+        "name": "MandateDelivery",
+        "version": "4",
+        "chainId": 84532,
+        "verifyingContract": "0x1111111111111111111111111111111111111111"
+      },
+      "message": {
+        "invoiceId": "0x000000000000000000000000000000000000000000000000000000000000001f",
+        "requestId": "0x00000000000000000000000000000000000000000000000000000000000000a1",
+        "inputHash": "0x000000000000000000000000000000000000000000000000000000000000001e",
+        "resultHash": "0x000000000000000000000000000000000000000000000000000000000000002e",
+        "paymentTxHash": "0x000000000000000000000000000000000000000000000000000000000000007e",
+        "completedAt": "1793000190"
+      }
+    },
+    {
+      "id": "one-unit-change",
+      "expect": "SIGNER_MISMATCH",
+      "reason": "Original signature must not authorize a 1-unit change",
+      "domain": {
+        "name": "MandateDelivery",
+        "version": "1",
+        "chainId": 84532,
+        "verifyingContract": "0x1111111111111111111111111111111111111111"
+      },
+      "message": {
+        "invoiceId": "0x000000000000000000000000000000000000000000000000000000000000001f",
+        "requestId": "0x00000000000000000000000000000000000000000000000000000000000000a1",
+        "inputHash": "0x000000000000000000000000000000000000000000000000000000000000001e",
+        "resultHash": "0x000000000000000000000000000000000000000000000000000000000000002e",
+        "paymentTxHash": "0x000000000000000000000000000000000000000000000000000000000000007e",
+        "completedAt": "1793000191"
+      }
+    },
+    {
+      "id": "reordered-fields",
+      "expect": "SIGNER_MISMATCH",
+      "reason": "Field order is part of the type hash",
+      "domain": {
+        "name": "MandateDelivery",
+        "version": "1",
+        "chainId": 84532,
+        "verifyingContract": "0x1111111111111111111111111111111111111111"
+      },
+      "message": {
+        "invoiceId": "0x000000000000000000000000000000000000000000000000000000000000001f",
+        "requestId": "0x00000000000000000000000000000000000000000000000000000000000000a1",
+        "inputHash": "0x000000000000000000000000000000000000000000000000000000000000001e",
+        "resultHash": "0x000000000000000000000000000000000000000000000000000000000000002e",
+        "paymentTxHash": "0x000000000000000000000000000000000000000000000000000000000000007e",
+        "completedAt": "1793000190"
+      },
+      "types": {
+        "DeliveryReceipt": [
+          {
+            "name": "completedAt",
+            "type": "uint64"
+          },
+          {
+            "name": "paymentTxHash",
+            "type": "bytes32"
+          },
+          {
+            "name": "resultHash",
+            "type": "bytes32"
+          },
+          {
+            "name": "inputHash",
+            "type": "bytes32"
+          },
+          {
+            "name": "requestId",
+            "type": "bytes32"
+          },
+          {
+            "name": "invoiceId",
+            "type": "bytes32"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "owner": "Person1",
+  "updatedAt": "2026-10-18T15:08:36+06:00",
+  "milestone": "M0 / W0",
+  "tasks": {
+    "P1-01": {
+      "status": "IN_PROGRESS",
+      "blockedBy": [
+        "Consumer acceptance from Persons 2, 3, 4 pending"
+      ]
+    },
+    "P1-W01": {
+      "status": "IN_PROGRESS",
+      "blockedBy": [
+        "Native (Kotlin/Wallet Core) and Go consumers must confirm the same digests"
+      ]
+    },
+    "P1-A01": {
+      "status": "IN_PROGRESS",
+      "blockedBy": []
+    }
+  },
+  "files": [
+    "packages/schema/src/*.ts",
+    "packages/schema/scripts/{vectors,generate-vectors}.ts",
+    "packages/schema/fixtures/*-v7.json",
+    "packages/schema/test/*.test.ts",
+    "packages/contracts/src/{MandateTypes,MandateHashes}.sol",
+    "packages/contracts/test/MandateHashes.t.sol",
+    "scripts/check-suite.mjs",
+    "Makefile",
+    "foundation.yml"
+  ]
+}

@@ -31,6 +31,7 @@ jobs:
       - run: pnpm test:ops
       - run: pnpm test:migrations
       - run: pnpm test:db
+      - run: pnpm --filter @mandate/schema check
       - name: Build backend image
         run: |
           # Match the private umask used by the production release checkout.

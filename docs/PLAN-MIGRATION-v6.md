@@ -40,3 +40,24 @@ Runtime `DOMAIN_VERSION='4'`, Login schema/type list and original Solidity layou
 W0 exact fixtures/types before new signing; W1 personal wallet/source separation; W2 owner transfer/managed funds; W3 history/session/restart/outage; W4 full-app navigation/permission/confirmation qualification; W5 installed full release. Preserve original agent G/Q cases and add WQ01–WQ14. Cases specified in plans are not results from this update.
 
 The internal Oct18/official Oct20 deadline remains; expanded mandatory scope does not certify delivery capacity. Record actual gate times and feature completeness. Every advertised core screen needs actual behavior; no wallet/executor/custody key is generated or published by this plan migration.
+
+## 5. W0 schema migration record (v7)
+
+The shared schema now implements wallet domain 5, Login 2, Invoice 2, Delivery 1 and evidence schema 4 with the v7 types. Bootstrap `DOMAIN_VERSION = "4"` and the Login1 layout are removed; old domains are rejected, not rewritten.
+
+| Area | Files |
+| --- | --- |
+| Types and domains | `packages/schema/src/{runtime,primitives,domains,authority,policy}.ts` |
+| Hashing | `packages/schema/src/hashing.ts` (EIP-712 typed data, struct hashes, digests, signer recovery, RFC 8785, list hashes) |
+| DTOs | `packages/schema/src/{conditions,provider,agent,evidence,api,runbook,accounts,assets,activity,sessions,manifest}.ts` |
+| Vectors | `packages/schema/fixtures/*-v7.json`, built by `packages/schema/scripts/vectors.ts` with public Anvil test keys only |
+| Solidity | `packages/contracts/src/{MandateTypes,MandateHashes}.sol`, `packages/contracts/test/MandateHashes.t.sol` |
+| Checks | `make check-schema` → `scripts/check-suite.mjs` (fails on zero tests or a missing toolchain); CI runs the schema suite |
+
+Clarifications fixed at W0:
+- Fixture files are named `<object>-v7.json` (specification 7.0), replacing the `-v5.json` names in the Person1 deliverables table.
+- `Conditions.liquidity.amountUnits` is the owner-approved maximum; the agent's `SET_AMOUNT` answer must not exceed it.
+- `Permit.templatesHash` is the zero hash when no templates are used; WalletPolicy list hashes always hash the array encoding, including an empty list.
+- Recipients, template IDs, asset caps and call templates must arrive sorted and unique; noncanonical input is rejected, never re-sorted.
+
+Consumers regenerate nothing: import `@mandate/schema` and test against the committed fixtures. Change vectors only through `pnpm --filter @mandate/schema vectors`, and review the diff.
