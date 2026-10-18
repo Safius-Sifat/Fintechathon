@@ -16,7 +16,7 @@ contract VaultTest is MandateFixture {
   function test_P1_03_T01_allocationBoundary() public {
     // 10,000,000 total: depositing 2,000,001 would put the vault above 20%.
     (T.Action memory over, bytes memory overSig) = _vaultAction(permitId, T.OP_DEPOSIT, 2_000_001, 1);
-    vm.expectRevert(abi.encodeWithSelector(MandateWallet.LimitExceeded.selector, "allocation"));
+    vm.expectRevert(abi.encodeWithSelector(MandateWallet.LimitExceeded.selector, bytes32("allocation")));
     _run(over, overSig);
 
     uint256 expectedShares = vault.previewDeposit(2_000_000);
@@ -39,7 +39,7 @@ contract VaultTest is MandateFixture {
   function test_P1_03_T02_minOutputAboveActualSharesIsAtomic() public {
     uint256 shares = vault.previewDeposit(1_000_000);
     (T.Action memory a, bytes memory sig) = _vaultAction(permitId, T.OP_DEPOSIT, 1_000_000, shares + 1);
-    vm.expectRevert(abi.encodeWithSelector(MandateWallet.LimitExceeded.selector, "minOutput"));
+    vm.expectRevert(abi.encodeWithSelector(MandateWallet.LimitExceeded.selector, bytes32("minOutput")));
     _run(a, sig);
     assertEq(token.balanceOf(address(wallet)), 10_000_000);
     assertEq(vault.balanceOf(address(wallet)), 0);
@@ -55,7 +55,7 @@ contract VaultTest is MandateFixture {
     uint256 assets = vault.previewRedeem(shares);
 
     (T.Action memory w, bytes memory wsig) = _vaultAction(permitId, T.OP_WITHDRAW, shares, assets + 1);
-    vm.expectRevert(abi.encodeWithSelector(MandateWallet.LimitExceeded.selector, "minOutput"));
+    vm.expectRevert(abi.encodeWithSelector(MandateWallet.LimitExceeded.selector, bytes32("minOutput")));
     _run(w, wsig);
 
     (w, wsig) = _vaultAction(permitId, T.OP_WITHDRAW, shares, assets);
@@ -98,13 +98,13 @@ contract VaultTest is MandateFixture {
   function test_P1_03_depositAndWithdrawCaps() public {
     bytes32 small = _activateLiquidity("small-caps", 500_000, 100_000);
     (T.Action memory a, bytes memory sig) = _vaultAction(small, T.OP_DEPOSIT, 500_001, 1);
-    vm.expectRevert(abi.encodeWithSelector(MandateWallet.LimitExceeded.selector, "depositCap"));
+    vm.expectRevert(abi.encodeWithSelector(MandateWallet.LimitExceeded.selector, bytes32("depositCap")));
     _run(a, sig);
     (a, sig) = _vaultAction(small, T.OP_DEPOSIT, 500_000, 1);
     _run(a, sig);
     uint256 shares = vault.balanceOf(address(wallet));
     (a, sig) = _vaultAction(small, T.OP_WITHDRAW, shares, 1);
-    vm.expectRevert(abi.encodeWithSelector(MandateWallet.LimitExceeded.selector, "withdrawCap"));
+    vm.expectRevert(abi.encodeWithSelector(MandateWallet.LimitExceeded.selector, bytes32("withdrawCap")));
     _run(a, sig);
   }
 

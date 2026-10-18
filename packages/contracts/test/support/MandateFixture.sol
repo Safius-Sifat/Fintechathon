@@ -24,6 +24,7 @@ abstract contract MandateFixture is Test {
   address internal relayer = makeAddr("relayer");
 
   DemoUSD internal token;
+  DemoUSD internal usdc; // stands in for Base Sepolia test USDC (6 decimals)
   DemoVault internal vault;
   WalletFactory internal factory;
   MandateWallet internal wallet;
@@ -33,10 +34,12 @@ abstract contract MandateFixture is Test {
     vm.chainId(84532);
     vm.warp(START);
     token = new DemoUSD();
+    usdc = new DemoUSD();
     vault = new DemoVault(token);
-    factory = new WalletFactory(address(token), address(vault));
+    factory = new WalletFactory(address(token), address(usdc), address(vault));
     wallet = MandateWallet(payable(factory.createWallet(ownerAddr)));
     token.mint(address(wallet), 10_000_000);
+    usdc.mint(address(wallet), 10_000_000);
   }
 
   function _sign(uint256 pk, bytes32 digest) internal pure returns (bytes memory) {
@@ -102,7 +105,7 @@ abstract contract MandateFixture is Test {
       invoiceId: keccak256(abi.encode("invoice", requestCounter)),
       taskId: p.taskId,
       wallet: address(wallet),
-      asset: address(token),
+      asset: p.asset,
       recipient: provider,
       amount: amount,
       inputHash: keccak256(abi.encode("input", requestCounter)),
@@ -285,5 +288,66 @@ abstract contract MandateFixture is Test {
     (T.Admin memory a, bytes memory sig) = _admin(command, permitId);
     vm.prank(relayer);
     wallet.applyAdmin(a, sig);
+  }
+
+  // ------------------------------------------------------------------ P1-A02 helpers
+
+  struct Lists {
+    T.AssetCap[] caps;
+    address[] allowlist;
+    address[] blocklist;
+    T.CallTemplate[] templates;
+  }
+
+  function _defaultCaps() internal view returns (T.AssetCap[] memory caps) {
+    caps = new T.AssetCap[](2);
+    T.AssetCap memory a = T.AssetCap(address(token), 500_000, 10_000_000, 25_000_000);
+    T.AssetCap memory b = T.AssetCap(address(usdc), 500_000, 10_000_000, 25_000_000);
+    (caps[0], caps[1]) = address(token) < address(usdc) ? (a, b) : (b, a);
+  }
+
+  function _lists() internal view returns (Lists memory l) {
+    l.caps = _defaultCaps();
+  }
+
+  function _signedPolicy(Lists memory l, uint256 reviewThreshold)
+    internal
+    view
+    returns (T.WalletPolicy memory p, bytes memory sig)
+  {
+    p = T.WalletPolicy({
+      version: wallet.walletPolicy().version + 1,
+      assetCapsHash: keccak256(abi.encode(l.caps)),
+      allowlistHash: keccak256(abi.encode(l.allowlist)),
+      blocklistHash: keccak256(abi.encode(l.blocklist)),
+      templatesHash: keccak256(abi.encode(l.templates)),
+      reviewThreshold: reviewThreshold,
+      nonce: wallet.policyNonce(),
+      issuedAt: uint64(vm.getBlockTimestamp()),
+      deadline: uint64(vm.getBlockTimestamp() + 600)
+    });
+    sig = _sign(OWNER_PK, H.digest(wallet.domainSeparator(), H.hash(p)));
+  }
+
+  function _applyPolicy(Lists memory l, uint256 reviewThreshold) internal {
+    (T.WalletPolicy memory p, bytes memory sig) = _signedPolicy(l, reviewThreshold);
+    vm.prank(relayer);
+    wallet.applyWalletPolicy(p, l.caps, l.allowlist, l.blocklist, l.templates, sig);
+  }
+
+  function _one(address a) internal pure returns (address[] memory r) {
+    r = new address[](1);
+    r[0] = a;
+  }
+
+  function _allowancePermit(bytes32 taskId, uint256 periodCap, uint32 periodSeconds) internal view returns (T.Permit memory p) {
+    p = _permit(taskId);
+    p.kind = T.KIND_ALLOWANCE;
+    p.expiresAt = uint64(vm.getBlockTimestamp() + 30 days);
+    p.maxActions = 200;
+    p.maxPayments = 150;
+    p.spendCap = 20_000_000;
+    p.periodCap = periodCap;
+    p.periodSeconds = periodSeconds;
   }
 }

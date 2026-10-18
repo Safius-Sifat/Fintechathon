@@ -82,19 +82,19 @@ contract ScheduleTest is MandateFixture {
     address[] memory r = new address[](1);
     r[0] = payee;
     bytes memory sig = _signPermit(p, OWNER_PK);
-    vm.expectRevert(abi.encodeWithSelector(MandateWallet.ScheduleInvalid.selector, "maxPayments"));
+    vm.expectRevert(abi.encodeWithSelector(MandateWallet.ScheduleInvalid.selector, bytes32("maxPayments")));
     wallet.activatePermit(p, r, bad, new bytes32[](0), sig);
 
     T.Schedule memory late = _schedule(payee, 100_000, uint64(START + 3500), 600, 120, 3);
     p = _schedulePermit("too-late", late);
     sig = _signPermit(p, OWNER_PK);
-    vm.expectRevert(abi.encodeWithSelector(MandateWallet.ScheduleInvalid.selector, "fit"));
+    vm.expectRevert(abi.encodeWithSelector(MandateWallet.ScheduleInvalid.selector, bytes32("fit")));
     wallet.activatePermit(p, r, late, new bytes32[](0), sig);
 
     T.Schedule memory wide = _schedule(payee, 100_000, uint64(START + 60), 600, 601, 1);
     p = _schedulePermit("wide-window", wide);
     sig = _signPermit(p, OWNER_PK);
-    vm.expectRevert(abi.encodeWithSelector(MandateWallet.ScheduleInvalid.selector, "window"));
+    vm.expectRevert(abi.encodeWithSelector(MandateWallet.ScheduleInvalid.selector, bytes32("window")));
     wallet.activatePermit(p, r, wide, new bytes32[](0), sig);
   }
 

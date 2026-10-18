@@ -89,7 +89,7 @@ contract OwnerTransferTest is MandateFixture {
   function test_P1_W02_T05_vaultSharesAndInexactTokensRejected() public {
     // A wallet configured with a vault share token cannot sweep shares directly.
     DemoUSD shares = new DemoUSD();
-    MandateWallet vaultWallet = new MandateWallet(ownerAddr, address(token), address(shares));
+    MandateWallet vaultWallet = new MandateWallet(ownerAddr, address(token), address(usdc), address(shares));
     shares.mint(address(vaultWallet), 1_000);
     T.OwnerTransfer memory t = T.OwnerTransfer("shares", address(shares), recipient, 1_000, 0, 0, uint64(vm.getBlockTimestamp()), uint64(vm.getBlockTimestamp() + 300));
     bytes memory sig = _sign(OWNER_PK, H.digest(vaultWallet.domainSeparator(), H.hash(t)));

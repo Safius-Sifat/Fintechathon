@@ -13,3 +13,8 @@ remappings = [
 ]
 # Golden vectors are read from the schema package (P1-01.T01).
 fs_permissions = [{ access = "read", path = "../schema/fixtures" }]
+
+[invariant]
+runs = 64
+depth = 64
+fail_on_revert = false

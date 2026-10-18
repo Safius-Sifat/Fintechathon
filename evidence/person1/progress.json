@@ -1,7 +1,7 @@
 {
   "owner": "Person1",
-  "updatedAt": "2026-10-18T18:10:17+06:00",
-  "milestone": "M2/M3 contract side (P1-03, P1-04)",
+  "updatedAt": "2026-10-18T18:56:22+06:00",
+  "milestone": "MA (P1-A02)",
   "tasks": {
     "P1-01": {
       "status": "IN_PROGRESS",
@@ -45,6 +45,13 @@
         "Base Sepolia evidence pending P1-06",
         "Review Person3 tools/relay-admin.ts against the ABI when it exists"
       ]
+    },
+    "P1-A02": {
+      "status": "LOCAL_PASS",
+      "blockedBy": [
+        "Base Sepolia evidence pending P1-06",
+        "Real USDC address/code hash pinned at deployment"
+      ]
     }
   },
   "files": [
@@ -64,6 +71,8 @@
     "docs/owner-transfer.md",
     "packages/contracts/src/DemoVault.sol",
     "packages/contracts/test/{Vault,Schedule,Limits,Admin,Recovery,Epoch}.t.sol",
-    "docs/contracts-security.md"
+    "docs/contracts-security.md",
+    "packages/contracts/test/{Policy,Cosign,Freeze,Allowance,MultiAsset}.t.sol",
+    "packages/contracts/test/invariant/PolicyInvariants.t.sol"
   ]
 }
