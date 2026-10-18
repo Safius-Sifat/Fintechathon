@@ -4,7 +4,7 @@ import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { resolve } from "node:path";
 
 const root = resolve(import.meta.dirname, "..");
-const CONTRACTS = ["MandateWallet", "WalletFactory", "DemoUSD", "DemoVault"];
+const CONTRACTS = ["MandateWallet", "WalletFactory", "DemoUSD", "DemoVault", "EvidenceAnchor"];
 const check = process.argv.includes("--check");
 const abis = Object.fromEntries(
   CONTRACTS.map((name) => [name, JSON.parse(readFileSync(resolve(root, `out/${name}.sol/${name}.json`), "utf8")).abi]),

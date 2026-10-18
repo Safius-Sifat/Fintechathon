@@ -1,0 +1,52 @@
+{
+  "sourceCommit": "f55299e7cb6b14d51f86b700338233770f415c3d",
+  "recordedAt": "2026-10-18T23:37:23+06:00",
+  "forge": "1.8.5",
+  "forgeStd": "v1.17.0",
+  "solc": "0.8.28 via_ir",
+  "config": {
+    "fuzz.runs": 1000,
+    "invariant.runs": 256,
+    "invariant.depth": 64,
+    "invariant.fail_on_revert": false
+  },
+  "seed": "forge default (randomised per run); counterexamples are shrunk and reported on failure",
+  "suites": {
+    "totalTests": 131,
+    "passed": 130,
+    "skipped": [
+      "X402ForkTest (needs BASE_SEPOLIA_RPC_URL; passed against Base Sepolia on 2026-10-18)"
+    ]
+  },
+  "invariants": {
+    "InvariantTest": {
+      "runs": 256,
+      "calls": 16384,
+      "handlerReverts": 0,
+      "depth": 64
+    },
+    "PolicyInvariantsTest": {
+      "runs": 256,
+      "calls": 16384,
+      "handlerReverts": 0,
+      "depth": 64
+    }
+  },
+  "properties": [
+    "no duplicate request pays twice",
+    "unauthorized recipient never gains delegated funds",
+    "failed calls are atomic",
+    "gross spend never decreases and equals the sum of successful payments",
+    "delegated spend respects the liquid floor (owner transfer/recovery modelled as the exception)",
+    "deposit cap holds",
+    "stranger-signed owner commands never succeed",
+    "every payment allowed by the public views succeeds (liveness)",
+    "policy: no outflow while frozen, perTx respected, gross within caps, eligible payments succeed"
+  ],
+  "fuzzNote": "No parameterised fuzz tests exist yet; fuzz.runs=1000 applies to any added. Properties are exercised through the invariant handlers above.",
+  "failuresAndFixes": [
+    "PolicyInvariants: first version was vacuous (no payment ever succeeded); found by a non-vacuity check and replaced by a liveness invariant",
+    "FinancialInvariants: trivial afterInvariant check replaced by a liveness invariant plus a scripted eligibility test",
+    "EIP-170: wallet 30,968 B and factory 33,936 B could not deploy; fixed by library split and SSTORE2 factory; Size test added"
+  ]
+}

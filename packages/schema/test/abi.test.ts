@@ -1,6 +1,10 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { mandateWalletAbi, walletFactoryAbi } from "../src/index.js";
+import {
+  evidenceAnchorAbi,
+  mandateWalletAbi,
+  walletFactoryAbi,
+} from "../src/index.js";
 
 const fn = (abi: readonly any[], name: string) =>
   abi.find((e) => e.type === "function" && e.name === name);
@@ -85,5 +89,18 @@ test("P1-02 generated ABI exposes the S3 wallet and factory interface", () => {
   assert.ok(
     fn(walletFactoryAbi, "createWallet") &&
       fn(walletFactoryAbi, "walletForOwner"),
+  );
+});
+
+test("P1-05 generated ABI exposes the EvidenceAnchor interface (S6)", () => {
+  assert.deepEqual(
+    fn(evidenceAnchorAbi, "anchor").inputs.map((i: any) => i.type),
+    ["bytes32", "bytes32", "uint64"],
+  );
+  assert.deepEqual(
+    ev(evidenceAnchorAbi, "Anchored").inputs.map(
+      (i: any) => `${i.type}${i.indexed ? " indexed" : ""}`,
+    ),
+    ["bytes32 indexed", "bytes32", "uint64", "address"],
   );
 });

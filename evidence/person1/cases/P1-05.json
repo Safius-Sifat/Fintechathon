@@ -1,0 +1,164 @@
+[
+  {
+    "caseId": "P1-05.T01",
+    "taskId": "P1-05",
+    "status": "PASS",
+    "sourceCommit": "f55299e7cb6b14d51f86b700338233770f415c3d",
+    "workingTreeDigest": "see commit",
+    "schemaCommit": "f55299e7cb6b14d51f86b700338233770f415c3d",
+    "environment": {
+      "forge": "1.8.5",
+      "forgeStd": "v1.17.0",
+      "solc": "0.8.28 via_ir",
+      "chain": "local Foundry EVM, chainId 84532"
+    },
+    "command": "forge test --root packages/contracts --match-contract \"ViewsTest\"",
+    "testName": "test_P1_05_T01_refundNeverReplenishesGross",
+    "exitCode": 0,
+    "expected": "refund raises balance but task/executor/wallet gross stay 200000",
+    "observed": "as expected",
+    "startedAt": "2026-10-18T23:37:23+06:00",
+    "finishedAt": "2026-10-18T23:37:23+06:00",
+    "artifactRefs": [
+      "evidence/person1/contract-results.json"
+    ],
+    "limitations": [
+      "Local Foundry EVM only"
+    ]
+  },
+  {
+    "caseId": "P1-05.T02",
+    "taskId": "P1-05",
+    "status": "PASS",
+    "sourceCommit": "f55299e7cb6b14d51f86b700338233770f415c3d",
+    "workingTreeDigest": "see commit",
+    "schemaCommit": "f55299e7cb6b14d51f86b700338233770f415c3d",
+    "environment": {
+      "forge": "1.8.5",
+      "forgeStd": "v1.17.0",
+      "solc": "0.8.28 via_ir",
+      "chain": "local Foundry EVM, chainId 84532"
+    },
+    "command": "forge test --root packages/contracts --match-contract \"ViewsTest\"",
+    "testName": "test_P1_05_T02_viewsAfterSuccessFailureAndOwnerTransfer",
+    "exitCode": 0,
+    "expected": "views match stored state after success, failure and owner transfer; owner outflow is not agent spend",
+    "observed": "as expected",
+    "startedAt": "2026-10-18T23:37:23+06:00",
+    "finishedAt": "2026-10-18T23:37:23+06:00",
+    "artifactRefs": [
+      "evidence/person1/contract-results.json"
+    ],
+    "limitations": [
+      "Local Foundry EVM only"
+    ]
+  },
+  {
+    "caseId": "P1-05.T03",
+    "taskId": "P1-05",
+    "status": "PASS",
+    "sourceCommit": "f55299e7cb6b14d51f86b700338233770f415c3d",
+    "workingTreeDigest": "see commit",
+    "schemaCommit": "f55299e7cb6b14d51f86b700338233770f415c3d",
+    "environment": {
+      "forge": "1.8.5",
+      "forgeStd": "v1.17.0",
+      "solc": "0.8.28 via_ir",
+      "chain": "local Foundry EVM, chainId 84532"
+    },
+    "command": "forge test --root packages/contracts --match-contract \"InvariantTest\"",
+    "testName": "invariant_P1_05_T03_*",
+    "exitCode": 0,
+    "expected": "256 runs x depth 64: no double pay, no unauthorized recipient, atomic failures, monotonic gross, floor, deposit cap, no stranger privilege, liveness",
+    "observed": "as expected",
+    "startedAt": "2026-10-18T23:37:23+06:00",
+    "finishedAt": "2026-10-18T23:37:23+06:00",
+    "artifactRefs": [
+      "evidence/person1/contract-results.json"
+    ],
+    "limitations": [
+      "Local Foundry EVM only"
+    ]
+  },
+  {
+    "caseId": "P1-05.T04",
+    "taskId": "P1-05",
+    "status": "PASS",
+    "sourceCommit": "f55299e7cb6b14d51f86b700338233770f415c3d",
+    "workingTreeDigest": "see commit",
+    "schemaCommit": "f55299e7cb6b14d51f86b700338233770f415c3d",
+    "environment": {
+      "forge": "1.8.5",
+      "forgeStd": "v1.17.0",
+      "solc": "0.8.28 via_ir",
+      "chain": "local Foundry EVM, chainId 84532"
+    },
+    "command": "forge test --root packages/contracts --match-contract \"AnchorTest\"",
+    "testName": "test_P1_05_T04_*",
+    "exitCode": 0,
+    "expected": "only publisher; zero task/digest and non-increasing or duplicate sequence rejected; digest never overwritten; exact event",
+    "observed": "as expected",
+    "startedAt": "2026-10-18T23:37:23+06:00",
+    "finishedAt": "2026-10-18T23:37:23+06:00",
+    "artifactRefs": [
+      "evidence/person1/contract-results.json"
+    ],
+    "limitations": [
+      "Local Foundry EVM only"
+    ]
+  },
+  {
+    "caseId": "P1-05.T05",
+    "taskId": "P1-05",
+    "status": "PASS",
+    "sourceCommit": "f55299e7cb6b14d51f86b700338233770f415c3d",
+    "workingTreeDigest": "see commit",
+    "schemaCommit": "f55299e7cb6b14d51f86b700338233770f415c3d",
+    "environment": {
+      "forge": "1.8.5",
+      "forgeStd": "v1.17.0",
+      "solc": "0.8.28 via_ir",
+      "chain": "local Foundry EVM, chainId 84532"
+    },
+    "command": "pnpm --filter @mandate/contracts abi:check",
+    "testName": "pnpm --filter @mandate/contracts abi:check",
+    "exitCode": 0,
+    "expected": "regenerated ABI identical to committed ABI",
+    "observed": "as expected",
+    "startedAt": "2026-10-18T23:37:23+06:00",
+    "finishedAt": "2026-10-18T23:37:23+06:00",
+    "artifactRefs": [
+      "evidence/person1/contract-results.json"
+    ],
+    "limitations": [
+      "Local Foundry EVM only"
+    ]
+  },
+  {
+    "caseId": "P1-05.EVENTS",
+    "taskId": "P1-05",
+    "status": "BLOCKED",
+    "sourceCommit": "f55299e7cb6b14d51f86b700338233770f415c3d",
+    "workingTreeDigest": "see commit",
+    "schemaCommit": "f55299e7cb6b14d51f86b700338233770f415c3d",
+    "environment": {
+      "forge": "1.8.5",
+      "forgeStd": "v1.17.0",
+      "solc": "0.8.28 via_ir",
+      "chain": "local Foundry EVM, chainId 84532"
+    },
+    "command": null,
+    "testName": "-",
+    "exitCode": null,
+    "expected": "public chain receipt/event examples for PAY/DEPOSIT/WITHDRAW/TRANSFER/CLOSE/PAUSE/REVOKE/RECOVER/anchor",
+    "observed": "not run",
+    "startedAt": "2026-10-18T23:37:23+06:00",
+    "finishedAt": "2026-10-18T23:37:23+06:00",
+    "artifactRefs": [
+      "evidence/person1/contract-results.json"
+    ],
+    "limitations": [
+      "Needs the Base Sepolia deployment (P1-06), which needs owner authorization and a funded deployer key"
+    ]
+  }
+]
