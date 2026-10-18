@@ -1,6 +1,13 @@
 {
   "schemaVersion": 1,
   "migrations": {
-    "0001_bootstrap.sql": { "kind": "expand", "transaction": "required" }
+    "0001_bootstrap.sql": {
+      "kind": "expand",
+      "transaction": "required"
+    },
+    "0002_auth_sessions.sql": {
+      "kind": "expand",
+      "transaction": "required"
+    }
   }
 }

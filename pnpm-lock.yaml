@@ -29,6 +29,28 @@ importers:
       '@mandate/platform':
         specifier: workspace:*
         version: link:../../packages/platform
+      '@mandate/schema':
+        specifier: workspace:*
+        version: link:../../packages/schema
+      fastify:
+        specifier: 5.6.2
+        version: 5.6.2
+      jose:
+        specifier: 6.1.0
+        version: 6.1.0
+      pg:
+        specifier: 8.16.3
+        version: 8.16.3
+      zod:
+        specifier: 3.25.76
+        version: 3.25.76
+    devDependencies:
+      '@types/pg':
+        specifier: 8.15.5
+        version: 8.15.5
+      viem:
+        specifier: 2.38.5
+        version: 2.38.5(typescript@5.9.3)(zod@3.25.76)
 
   apps/mcp:
     dependencies:
@@ -2015,6 +2037,9 @@ packages:
 
   jimp-compact@0.16.1:
     resolution: {integrity: sha512-dZ6Ra7u1G8c4Letq/B5EzAxj4tLFHL+cGtdpR+PVm4yzPDj+lCk+AbivWt1eOM+ikzkowtyV7qSqX6qr3t71Ww==}
+
+  jose@6.1.0:
+    resolution: {integrity: sha512-TTQJyoEoKcC1lscpVDCSsVgYzUDg/0Bt3WE//WiTPK6uOCQC2KZS4MpugbMWt/zyjkopgZoXhZuCi00gLudfUA==}
 
   js-tokens@4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
@@ -5475,6 +5500,8 @@ snapshots:
       supports-color: 8.1.1
 
   jimp-compact@0.16.1: {}
+
+  jose@6.1.0: {}
 
   js-tokens@4.0.0: {}
 

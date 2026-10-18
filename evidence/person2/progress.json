@@ -1,0 +1,28 @@
+{
+  "owner": "Person2",
+  "updatedAt": "2026-10-18T12:53:35.984557+00:00",
+  "milestone": "M0/W0 auth/session foundation",
+  "tasks": {
+    "P2-03": {
+      "status": "IN_PROGRESS",
+      "localEvidence": [
+        "Forward-only auth/session migration and shared Login2 consumer acceptance",
+        "Authenticated owner mutation idempotency"
+      ],
+      "blockedBy": [
+        "Financial business tables, provisioning, worker/outbox and financial acceptance remain later work"
+      ]
+    },
+    "P2-W01": {
+      "status": "IN_PROGRESS",
+      "localEvidence": [
+        "Server session rotation/revocation/account-isolation cases pass against real PostgreSQL"
+      ],
+      "blockedBy": [
+        "Person3 native signing/NativeSession integration and installed-device acceptance pending"
+      ]
+    }
+  },
+  "financialReadiness": false,
+  "mpcQualification": "NOT_IMPLEMENTED"
+}

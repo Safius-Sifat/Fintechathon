@@ -149,7 +149,13 @@ try {
   const status = await new Promise((resolveExit, reject) => {
     const child = spawn(
       process.execPath,
-      ["--import", "tsx", "--test", "packages/platform/test/db/*.test.ts"],
+      [
+        "--import",
+        "tsx",
+        "--test",
+        "packages/platform/test/db/*.test.ts",
+        "apps/api/test/db/*.test.ts",
+      ],
       {
         cwd: root,
         env: {

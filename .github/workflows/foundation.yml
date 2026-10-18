@@ -34,6 +34,7 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm test:ops
       - run: pnpm test:migrations
+      - run: pnpm --filter @mandate/api check
       - run: pnpm test:db
       - run: pnpm --filter @mandate/schema check
       - name: Contract tests and ABI sync
