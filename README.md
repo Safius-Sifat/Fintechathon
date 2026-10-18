@@ -39,7 +39,7 @@ No wallet seed/share/key, testnet transaction, deployment result or completed se
 
 ## Required complete-app scope, not yet implemented
 
-Plans6 now require personal ETH/ERC20 and managed-owner sends, QR/contacts/token import/history, multiple accounts/backup/restore, pending/replacement/cancel, device/API sessions and local security. Personal transactions sign locally; managed OwnerTransfer5 stops old agents; agent spending remains under its own Permit5/MPC controls. Current bootstrap domain4/Login1 source must follow W0 migration before signing; this planning update did not implement those features. WalletConnect/external dApp connections are deferred; no WalletKit dependency or Reown projectId is required. No all-network/DeFi MetaMask parity is claimed.
+Plans6 now require personal ETH/ERC20 and managed-owner sends, QR/contacts/token import/history, multiple accounts/backup/restore, pending/replacement/cancel, device/API sessions and local security. Personal transactions sign locally; managed OwnerTransfer5 stops old agents; agent spending remains under its own Permit5/MPC controls. The shared schema is migrated to wallet domain 5/Login 2/Invoice 2 with TS and Solidity golden vectors; contracts, API, mobile and other consumers still need implementation and consumer acceptance before signing; this planning update did not implement those features. WalletConnect/external dApp connections are deferred; no WalletKit dependency or Reown projectId is required. No all-network/DeFi MetaMask parity is claimed.
 
 ## Automatic testnet delivery
 

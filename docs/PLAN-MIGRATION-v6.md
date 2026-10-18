@@ -25,7 +25,7 @@ Person1 first updates `packages/schema/src/{authority,hashing,runtime}.ts`, Soli
 |3 |Expo App status screen and native README |Native profile/accounts/backup/signing/personal transfer journal, sessions, QR/assets/activity/security controls |
 |4 |Runbook/verifier/MCP fail-closed entries and read SDK |Real services/runbooks/verifier; OwnerTransfer attribution; payment-request fixtures and complete-app evaluation |
 
-Runtime `DOMAIN_VERSION='4'`, Login schema/type list and original Solidity layouts currently remain bootstrap values. `/readyz` must remain503; no financial route should be advertised as compatible until W0 migration and actual acceptance pass. No stubs become successful mock signing/payment routes.
+*(Historical, before 2026-10-18.)* The bootstrap used `DOMAIN_VERSION='4'`, Login 1 and the original Solidity layouts; section 5 records their replacement. `/readyz` must remain503; no financial route should be advertised as compatible until W0 migration and actual acceptance pass. No stubs become successful mock signing/payment routes.
 
 ## 3. Resource and deployment additions
 
@@ -42,6 +42,8 @@ W0 exact fixtures/types before new signing; W1 personal wallet/source separation
 The internal Oct18/official Oct20 deadline remains; expanded mandatory scope does not certify delivery capacity. Record actual gate times and feature completeness. Every advertised core screen needs actual behavior; no wallet/executor/custody key is generated or published by this plan migration.
 
 ## 5. W0 schema migration record (v7)
+
+**Status:** the shared-schema part of W0 is complete (TypeScript and Solidity agree on all vectors). The W0 gate as a whole is **not** complete: Go, Kotlin/Wallet Core, API and verifier consumers must still reproduce the fixture digests, and wallet contract enforcement, API, mobile and agent work remain unimplemented.
 
 The shared schema now implements wallet domain 5, Login 2, Invoice 2, Delivery 1 and evidence schema 4 with the v7 types. Bootstrap `DOMAIN_VERSION = "4"` and the Login1 layout are removed; old domains are rejected, not rewritten.
 
