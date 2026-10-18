@@ -8,6 +8,7 @@ import {
   x402Authorization,
   x402AuthorizationDigest,
   AgentAnswerSchema,
+  AgentDecisionPayloadSchema,
   ApiErrorSchema,
   AgentQuestionSchema,
   DeploymentManifestSchema,
@@ -319,4 +320,30 @@ test("S9.11 simulation error codes are part of the API contract", () => {
       true,
       code,
     );
+});
+
+test("S9.13 AGENT_DECISION payload binds the decision to the agent's credential and toolset", () => {
+  const payload = {
+    questionId: "7c1d2b9e-3f4a-4b5c-8d6e-0f1a2b3c4d5e",
+    optionId: "quote-a",
+    amount: null,
+    rationale: "Cheaper and capable.",
+    rationaleHash: "0x" + "11".repeat(32),
+    runtime: "claude-agent-sdk",
+    sdkVersion: "1.0.0",
+    model: "claude-opus-5-5",
+    toolCallId: "call_1",
+    agentTokenId: "8d2e3c0f-4a5b-4c6d-9e7f-1a2b3c4d5e6f",
+    mcpToolsetHash: "0x" + "22".repeat(32),
+  };
+  assert.equal(AgentDecisionPayloadSchema.safeParse(payload).success, true);
+  const { agentTokenId: _t, ...noToken } = payload;
+  assert.equal(AgentDecisionPayloadSchema.safeParse(noToken).success, false);
+  const { mcpToolsetHash: _h, ...noToolset } = payload;
+  assert.equal(AgentDecisionPayloadSchema.safeParse(noToolset).success, false);
+  assert.equal(
+    AgentDecisionPayloadSchema.safeParse({ ...payload, optionId: null })
+      .success,
+    false,
+  ); // needs option or amount
 });
