@@ -1,7 +1,7 @@
 {
   "owner": "Person1",
-  "updatedAt": "2026-10-18T15:08:36+06:00",
-  "milestone": "M0 / W0",
+  "updatedAt": "2026-10-18T16:50:21+06:00",
+  "milestone": "M1 / G1,W2",
   "tasks": {
     "P1-01": {
       "status": "IN_PROGRESS",
@@ -18,6 +18,20 @@
     "P1-A01": {
       "status": "IN_PROGRESS",
       "blockedBy": []
+    },
+    "P1-02": {
+      "status": "LOCAL_PASS",
+      "blockedBy": [
+        "Public Base Sepolia hashes pending P1-06 deployment",
+        "Person2/4 integration confirmation"
+      ]
+    },
+    "P1-W02": {
+      "status": "LOCAL_PASS",
+      "blockedBy": [
+        "Public Base Sepolia hashes pending P1-06 deployment",
+        "Person3 native relay review against generated ABI"
+      ]
     }
   },
   "files": [
@@ -29,6 +43,11 @@
     "packages/contracts/test/MandateHashes.t.sol",
     "scripts/check-suite.mjs",
     "Makefile",
-    "foundation.yml"
+    "foundation.yml",
+    "packages/contracts/src/{MandateWallet,WalletFactory,DemoUSD}.sol",
+    "packages/contracts/test/{Authority,Payment,Replay,OwnerTransfer,NativeReceive}.t.sol",
+    "packages/contracts/abi/*.json",
+    "packages/schema/src/generated/abi.ts",
+    "docs/owner-transfer.md"
   ]
 }
