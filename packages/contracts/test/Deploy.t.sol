@@ -48,11 +48,11 @@ contract DeployTest is Test {
     script.preflight(c);
   }
 
-  function test_P1_06_T02_committedConfigRefusesUntilPublisherIsSupplied() public {
+  function test_P1_06_T02_committedConfigIsTheApprovedOne() public {
     Deploy.Config memory c = script.loadConfig("../../deployments/base-sepolia.config.json");
     assertEq(c.chainId, 84_532);
     assertEq(c.usdc, USDC);
-    vm.expectRevert(abi.encodeWithSelector(Deploy.ConfigMismatch.selector, bytes32("anchorPublisher")));
+    assertEq(c.anchorPublisher, 0x5cCEfD0Ac77088d72d38047856f4045E5ae56a95); // Person2 worker
     script.preflight(c);
   }
 

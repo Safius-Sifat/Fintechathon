@@ -4,7 +4,7 @@
 
 ## Approved configuration
 
-`deployments/base-sepolia.config.json` holds the values the deployment must use: chain 84532, Base Sepolia USDC, and the EvidenceAnchor publisher. The publisher is the Person2 worker address. It is the zero address until Person2 supplies it, so the script refuses to deploy. Change this file only through a reviewed commit.
+`deployments/base-sepolia.config.json` holds the values the deployment must use: chain 84532, Base Sepolia USDC, and the EvidenceAnchor publisher. The publisher is the Person2 worker address (`0x5cCEfD0Ac77088d72d38047856f4045E5ae56a95`); a zero publisher makes the script refuse to deploy. Change this file only through a reviewed commit.
 
 ## Guarantees
 
