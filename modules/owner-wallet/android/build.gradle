@@ -1,0 +1,31 @@
+plugins {
+  id 'com.android.library'
+  id 'expo-module-gradle-plugin'
+}
+
+// Trust Wallet Core is downloaded from GitHub Packages; app.plugin.js adds the
+// repository and its credentials to the generated project.
+def walletCoreVersion = '4.8.4'
+
+group = 'com.mandate.ownerwallet'
+version = '0.0.0'
+
+android {
+  namespace 'com.mandate.ownerwallet'
+  defaultConfig {
+    versionCode 1
+    versionName '0.0.0'
+    buildConfigField 'String', 'WALLET_CORE_VERSION', "\"${walletCoreVersion}\""
+    testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+  }
+  buildFeatures {
+    buildConfig true
+  }
+}
+
+dependencies {
+  implementation "com.trustwallet:wallet-core:${walletCoreVersion}"
+
+  androidTestImplementation 'androidx.test:runner:1.6.2'
+  androidTestImplementation 'androidx.test.ext:junit:1.2.1'
+}
