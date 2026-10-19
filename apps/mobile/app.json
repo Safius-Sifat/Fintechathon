@@ -21,7 +21,8 @@
           }
         }
       ],
-      "./plugins/withFontScaleLayout"
+      "./plugins/withFontScaleLayout",
+      "@mandate/owner-wallet"
     ]
   }
 }

@@ -1,0 +1,110 @@
+{
+  "task": "P3-01",
+  "checkpoint": "1: native module registration and Wallet Core library load",
+  "status": "REVIEW",
+  "summary": "Native loading verified on an emulator. Physical-device, iOS and the remaining P3-01 gates are incomplete.",
+  "recordedAt": "2026-10-19T15:05:00+06:00",
+  "note": "Checkpoint evidence, kept outside evidence/person3/cases/. P3-01.T01 also needs a physical Android 12+ phone and the public account/profile bridge, so no case record is written yet.",
+  "sourceCommit": "99b72c33e4e297b1885aa3201ee90855eccb7a14",
+  "baseCommit": "04f80a06aef361b305d20f6e371862939a4ec1ba",
+  "nativeDependency": {
+    "artifact": "com.trustwallet:wallet-core:4.8.4",
+    "license": "Apache-2.0",
+    "repository": "https://maven.pkg.github.com/trustwallet/wallet-core (exclusiveContent, group com.trustwallet only)",
+    "credentials": "gpr.user / gpr.key from the builder's ~/.gradle/gradle.properties; names checked, values never read",
+    "iosParity": "TrustWalletCore CocoaPod 4.8.4 exists (CocoaPods trunk, 2026-09-24)"
+  },
+  "bridge": {
+    "methods": ["getNativeStatus"],
+    "fields": [
+      "platform",
+      "walletCoreVersion",
+      "walletCoreLoaded",
+      "keccakSelfTest",
+      "ethereumDerivationPath",
+      "error"
+    ],
+    "secretFields": "none",
+    "s86Note": "getNativeStatus is a diagnostic addition to the S8.6 native interface, not a wallet capability. It carries no key material and creates, stores or signs nothing."
+  },
+  "checks": [
+    {
+      "check": "Instrumentation test before implementation (red)",
+      "command": "./gradlew :owner-wallet:connectedDebugAndroidTest -PreactNativeArchitectures=x86_64",
+      "result": "FAIL (expected)",
+      "observed": "1 of 2 failed: AssertionError: Wallet Core JNI library did not load: not implemented",
+      "artifact": "evidence/person3/p3-01/test-results/red-NativeBoundaryTest.xml"
+    },
+    {
+      "check": "Instrumentation test after implementation (green)",
+      "command": "./gradlew :owner-wallet:connectedDebugAndroidTest -PreactNativeArchitectures=x86_64",
+      "result": "PASS",
+      "observed": "2 of 2: P3_01_T01_walletCoreLoadsAndComputes (library loads, keccak256('') equals c5d24601...a470, derivation path m/44'/60'/0'/0/0, no error); P3_01_T01_bridgeStatusHasOnlyPublicFields (exact field allowlist)",
+      "artifact": "evidence/person3/p3-01/test-results/green-NativeBoundaryTest.xml"
+    },
+    {
+      "check": "Expo autolinking",
+      "command": "npx expo-modules-autolinking resolve -p android",
+      "result": "PASS",
+      "observed": "One Gradle project :owner-wallet registering com.mandate.ownerwallet.OwnerWalletModule"
+    },
+    {
+      "check": "Debug app build (expo prebuild --clean, assembleDebug, x86_64)",
+      "result": "PASS",
+      "observed": "APK contains lib/x86_64/libTrustWalletCore.so (19,163,440 bytes)",
+      "apkSha256": "9a692d1d2efce4a93417ad3f26c06a387cf8e956100c71616a403669b73c135f",
+      "sourceNote": "Built from the working tree whose module and app sources equal the source commit; only progress.json formatting and the module .gitignore changed before commit"
+    },
+    {
+      "check": "Installed app on emulator: Settings shows the live native status",
+      "result": "PASS",
+      "observed": "Native wallet module: Loaded, 'Wallet Core 4.8.4 loaded and passed its self-test. No keys exist yet.' Owner key, app unlock, recovery backup and signing remain 'Not available yet'.",
+      "screens": [
+        "evidence/person3/p3-01/screens/01-settings-native-module-loaded.png",
+        "evidence/person3/p3-01/screens/02-settings-scrolled.png"
+      ]
+    },
+    {
+      "check": "Android loader log",
+      "command": "adb logcat -d --pid=<app pid>",
+      "result": "PASS",
+      "observed": "nativeloader: Load .../base.apk!/lib/x86_64/libTrustWalletCore.so ... : ok; no UnsatisfiedLinkError, FATAL or ReactNativeJS errors"
+    },
+    {
+      "check": "pnpm typecheck (all workspace packages)",
+      "result": "PASS"
+    },
+    {
+      "check": "pnpm check:repository",
+      "result": "PASS",
+      "observed": "checkedFiles 350, failures []"
+    },
+    {
+      "check": "prettier --check on changed text files",
+      "result": "PASS"
+    },
+    {
+      "check": "Lockfile",
+      "result": "PASS",
+      "observed": "9 added lines, 0 removed: the @mandate/owner-wallet workspace link and the module's expo peer, resolved to the same expo@54.0.33 instance as apps/mobile"
+    }
+  ],
+  "device": {
+    "kind": "emulator",
+    "serial": "emulator-5554",
+    "avd": "Medium_Phone",
+    "android": "16",
+    "api": 36,
+    "abi": "x86_64",
+    "physicalPhone": "NOT RUN"
+  },
+  "notBuiltAndNotClaimed": [
+    "Wallet creation, recovery words, seed storage, unlock and signing",
+    "OwnerWalletPackage, SeedStore, AppLock, RecoveryActivity and SeedStoreTest (later P3-01 checkpoints)",
+    "JVM unit-test target and make check-mobile wiring",
+    "iOS module (P3-X01, deferred)"
+  ],
+  "knownIssues": [
+    "Running connectedDebugAndroidTest while other adb servers were running hung for about 20 minutes (three adb server processes competed for port 5037). Restarting a single adb server fixed it."
+  ]
+}

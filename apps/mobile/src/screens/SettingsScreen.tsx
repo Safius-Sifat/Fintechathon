@@ -7,6 +7,10 @@ import {
   type Capability,
 } from "../config/capabilities";
 import { network } from "../config/network";
+import {
+  nativeModuleCapability,
+  useNativeModuleState,
+} from "../state/nativeStatus";
 
 const NETWORK_ROW: Capability = {
   id: "network",
@@ -18,6 +22,7 @@ const NETWORK_ROW: Capability = {
 };
 
 export function SettingsScreen() {
+  const nativeModule = nativeModuleCapability(useNativeModuleState());
   return (
     <Screen
       title="Settings"
@@ -30,6 +35,7 @@ export function SettingsScreen() {
 
       <SectionTitle>Wallet security</SectionTitle>
       <Card>
+        <CapabilityRow capability={nativeModule} />
         {securityCapabilities.map((capability) => (
           <CapabilityRow key={capability.id} capability={capability} />
         ))}
@@ -44,8 +50,8 @@ export function SettingsScreen() {
 
       <SectionTitle>About</SectionTitle>
       <Card>
-        <DetailRow label="Build" value="UI preview" />
-        <DetailRow label="Milestone" value="UI-01.1" />
+        <DetailRow label="Build" value="Development preview" />
+        <DetailRow label="Milestone" value="P3-01 checkpoint 1" />
       </Card>
     </Screen>
   );
