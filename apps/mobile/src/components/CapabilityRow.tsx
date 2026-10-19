@@ -8,11 +8,12 @@ import { StatusTag, statusLabel } from "./StatusTag";
 export function CapabilityRow({ capability }: { capability: Capability }) {
   const { fontScale } = useWindowDimensions();
   const stacked = fontScale > stackedFontScale;
+  const label = capability.stateLabel ?? statusLabel(capability.state);
   return (
     <View
       style={styles.row}
       accessible
-      accessibilityLabel={`${capability.title}. ${statusLabel(capability.state)}. ${capability.detail}`}
+      accessibilityLabel={`${capability.title}. ${label}. ${capability.detail}`}
     >
       <IconTile icon={capability.icon} tone={capability.tone} />
       <View style={[styles.body, !stacked && styles.bodyInline]}>
@@ -20,7 +21,7 @@ export function CapabilityRow({ capability }: { capability: Capability }) {
           <Text style={styles.title}>{capability.title}</Text>
           <Text style={styles.detail}>{capability.detail}</Text>
         </View>
-        <StatusTag state={capability.state} />
+        <StatusTag state={capability.state} label={capability.stateLabel} />
       </View>
     </View>
   );

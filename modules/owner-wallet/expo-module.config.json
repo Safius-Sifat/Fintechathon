@@ -1,0 +1,7 @@
+{
+  "platforms": ["android"],
+  "android": {
+    "name": "owner-wallet",
+    "modules": ["com.mandate.ownerwallet.OwnerWalletModule"]
+  }
+}
