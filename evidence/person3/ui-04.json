@@ -83,25 +83,48 @@
       "screens": ["15-close-back-home.png"]
     },
     {
-      "check": "Decoding a real QR code and the 'QR code read' result sheet",
-      "result": "NOT VERIFIED",
-      "observed": "A test QR was placed on the emulator virtual-scene wall and table posters, but the virtual camera could not be turned toward them from the console (orientation sensor changes do not move the scene camera). No code was decoded, so the result sheet has not been seen on a device."
+      "check": "Real QR decoding by the camera",
+      "result": "NOT_RUN",
+      "observed": "A known nonsensitive test QR (text 'Mandate scanner test') was placed on the emulator virtual-scene posters, but the virtual camera could not be turned toward it from the console. No code has been decoded. Stays NOT_RUN until observed, on a physical phone or a controllable emulator camera, with known nonsensitive test codes only."
+    },
+    {
+      "check": "Result sheet layout, UI preview using a development sample (not proof of decoding)",
+      "result": "PASS (UI preview only)",
+      "observed": "A __DEV__-only button on the scanner loads a built-in sample text; the sheet titles it 'Sample result' and tags it 'Development sample, not scanned'. Release builds do not contain the button. Long text scrolls inside a bounded box so the actions stay on screen, at 1.0 and 2.0.",
+      "screens": [
+        "31-scanner-with-dev-button.png",
+        "32-sample-result-1x.png",
+        "33-sample-result-scrolled-1x.png",
+        "35-2x-scanner-dev-button.png",
+        "36-2x-sample-result.png"
+      ]
+    },
+    {
+      "check": "Allow camera screen at font scale 2.0 (permission reset with pm clear)",
+      "result": "PASS",
+      "screens": ["34-2x-allow-camera.png"]
+    },
+    {
+      "check": "Large-text fixes found in this pass",
+      "result": "FIXED",
+      "observed": "StatusTag label overflowed the sheet at 2.0 (now wraps inside the tag; shared component). Development button text touched its border at 2.0 (vertical padding added)."
     },
     {
       "check": "Large text, font scale 2.0, cold start: Home header, Receive, Scan permission screen and live scanner reflow without clipped or broken words",
       "result": "PASS",
-      "observed": "The permission screen captured at 2.0 is the permanently-denied variant; the Allow camera intro was checked at 1.0.",
+      "observed": "The Allow camera screen at 2.0 is recorded separately below.",
       "screens": [
         "20-2x-home.png",
         "21-2x-receive.png",
         "22-2x-receive-mid.png",
         "23-2x-receive-end.png",
-        "24-2x-scan-intro.png",
+
         "25-2x-scanner.png"
       ]
     }
   ],
   "pending": [
+    "Mobile test harness (owned setup): Node's test runner through the pinned tsx, 'test': 'tsx --test test/*.test.ts' in apps/mobile (plan, Agent execution instructions). Must exist before functional QR/amount validation work",
     "Real QR decode and result sheet on a physical phone",
     "Physical Android phone check",
     "iOS simulator and physical iPhone checks (expo-camera supports iOS; untested)",

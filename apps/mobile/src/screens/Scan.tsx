@@ -9,6 +9,7 @@ import {
   AppState,
   Linking,
   Pressable,
+  ScrollView,
   StatusBar,
   StyleSheet,
   Text,
@@ -20,6 +21,7 @@ import { Card } from "../components/Card";
 import { Icon } from "../components/Icon";
 import { IconTile } from "../components/IconTile";
 import { Screen } from "../components/Screen";
+import { StatusTag } from "../components/StatusTag";
 import type { RootStackParamList } from "../navigation/RootNavigator";
 import { colors, fonts, radius, space, touchTarget, type } from "../theme";
 
@@ -125,11 +127,26 @@ function PermissionView({
   );
 }
 
+// Development builds only: previews the result sheet without a camera scan,
+// e.g. on an emulator whose virtual camera cannot be pointed at a code. The
+// sheet labels it as a sample; release builds do not contain the button.
+const DEV_SAMPLE =
+  "MANDATE DEVELOPMENT SAMPLE. This text is built into development builds " +
+  "to preview the scan result layout. It was not read by the camera and is " +
+  "not a payment request or an address. Long-text check: " +
+  "abcdefghijklmnopqrstuvwxyz-0123456789-".repeat(4);
+
+interface ScanResult {
+  text: string;
+  sample: boolean;
+}
+
 function Scanner({ onClose }: { onClose: () => void }) {
   const insets = useSafeAreaInsets();
-  const [scanned, setScanned] = useState<string | null>(null);
+  const [scanned, setScanned] = useState<ScanResult | null>(null);
 
-  const onScanned = (result: BarcodeScanningResult) => setScanned(result.data);
+  const onScanned = (result: BarcodeScanningResult) =>
+    setScanned({ text: result.data, sample: false });
 
   return (
     <View style={styles.scanner}>
@@ -165,6 +182,20 @@ function Scanner({ onClose }: { onClose: () => void }) {
             <Text style={styles.hintText}>
               Scanning only reads the code. It never pays or signs anything.
             </Text>
+            {__DEV__ ? (
+              <Pressable
+                accessibilityRole="button"
+                onPress={() => setScanned({ text: DEV_SAMPLE, sample: true })}
+                style={({ pressed }) => [
+                  styles.devSample,
+                  pressed && styles.pressed,
+                ]}
+              >
+                <Text style={styles.devSampleText}>
+                  Development build: preview the result with a sample
+                </Text>
+              </Pressable>
+            ) : null}
           </View>
         </>
       ) : (
@@ -175,13 +206,21 @@ function Scanner({ onClose }: { onClose: () => void }) {
           <View style={styles.resultHeader}>
             <IconTile icon="qrcode-scan" tone="green" />
             <Text style={styles.resultTitle} accessibilityRole="header">
-              QR code read
+              {scanned.sample ? "Sample result" : "QR code read"}
             </Text>
           </View>
+          {scanned.sample ? (
+            <StatusTag
+              state="unavailable"
+              label="Development sample, not scanned"
+            />
+          ) : null}
           <Text style={styles.resultLabel}>Content</Text>
-          <Text style={styles.resultData} numberOfLines={4}>
-            {scanned}
-          </Text>
+          <ScrollView style={styles.resultBox} nestedScrollEnabled>
+            <Text style={styles.resultData} selectable>
+              {scanned.text}
+            </Text>
+          </ScrollView>
           <View style={styles.notice}>
             <Icon
               name="information-outline"
@@ -253,13 +292,34 @@ const styles = StyleSheet.create({
   resultHeader: { flexDirection: "row", alignItems: "center", gap: space.md },
   resultTitle: { ...type.heading, color: colors.ink, flex: 1 },
   resultLabel: { ...type.label, color: colors.textMuted },
+  // Long content scrolls inside the box instead of pushing the actions off
+  // screen.
+  resultBox: {
+    maxHeight: 160,
+    borderRadius: radius.md,
+    backgroundColor: colors.surfaceMuted,
+  },
   resultData: {
     ...type.body,
     fontFamily: fonts.mono,
     color: colors.ink,
     padding: space.md,
+  },
+  devSample: {
+    marginTop: space.sm,
+    minHeight: touchTarget,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: space.sm,
     borderRadius: radius.md,
-    backgroundColor: colors.surfaceMuted,
+    borderWidth: 1,
+    borderColor: colors.heroLine,
+  },
+  devSampleText: {
+    ...type.label,
+    color: colors.onDark,
+    textAlign: "center",
+    paddingHorizontal: space.sm,
   },
   notice: { flexDirection: "row", alignItems: "flex-start", gap: space.sm },
   noticeText: { ...type.small, color: colors.textMuted, flex: 1 },
