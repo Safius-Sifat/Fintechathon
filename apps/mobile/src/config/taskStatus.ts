@@ -67,7 +67,8 @@ export const ACTION_INFO: Record<ActionState, StateInfo> = {
   DENIED: { label: "Denied before signing", group: "problem" },
   REJECTED: { label: "Rejected by you", group: "ended" },
   REVERTED: { label: "Failed on chain", group: "problem" },
-  // The reservation is kept and the payment is never retried automatically.
+  // The reservation is kept while the recorded operation is reconciled; no
+  // new, duplicate payment is created automatically (plan S4, S5).
   UNKNOWN: { label: "Status unknown", group: "unknown" },
 };
 

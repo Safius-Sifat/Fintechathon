@@ -226,7 +226,8 @@ export const SAMPLE_TASKS: readonly SampleTask[] = [
         state: "UNKNOWN",
         delivery: "NONE",
         hash: "Not known yet",
-        deliveryNote: "Waiting until the payment status is known.",
+        deliveryNote:
+          "Delivery waits until this recorded payment is reconciled.",
       },
     ],
     delivery: "PENDING",

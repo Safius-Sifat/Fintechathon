@@ -12,7 +12,7 @@
     "TaskCreate (browser-check runbook): goal kept as a note; page from the manifest target IDs; checks and providers as checkboxes kept in schema order (pageLoad,title,formSubmit; a,b); agent asset DemoUSD or test USDC ('Needs a wallet policy cap'); spend cap; paid attempts 1-3; 10-minute limit; prices 'quote unavailable'; nothing is checked; Review enabled only when goal, a check, a provider and a spend cap are present",
     "Schedule (scheduled-pay runbook): fixed recipient, asset, amount per payment, Daily/Weekly/Demo (fast); demo timing shows an 'Accelerated demo schedule' callout; first payment, window, count; total gross cap 'Unavailable'; 'A missed window is skipped. The agent never catches up by paying twice.'; payment status unavailable; __DEV__-only sample with Paid, Missed (skipped), Due and Upcoming periods",
     "Approval: the owner's request next to 'Terms you would sign'; every signed term 'Not drafted yet' (the service drafts, the phone checks); what the agent can and cannot do; 'Approve on this phone' disabled; edits need a new review and approval",
-    "Task (reachable only from development samples): goal as a note; Outcome, Spending permission, Payments and Delivery as separate cards; each payment shows its payment state and its own delivery state; gross spend counts failed deliveries; INCLUDED is 'not final yet'; UNKNOWN keeps the reservation and is never retried; negative form result shown as a valid delivery",
+    "Task (reachable only from development samples): goal as a note; Outcome, Spending permission, Payments and Delivery as separate cards; each payment shows its payment state and its own delivery state; gross spend counts failed deliveries; INCLUDED is 'not final yet'; UNKNOWN keeps the reservation while the recorded payment is reconciled and no new duplicate payment is created automatically; negative form result shown as a valid delivery",
     "Inspector (reachable only from development samples): Mandate service view and Independent report kept apart; independent report 'Not loaded' (mandate-verify runs outside the app); all six categories always listed; state, reason, basis, rule and evidence per finding; assertion-only findings flagged; summary is never 'All six checks passed' unless all six pass on non-assertion evidence; Export evidence disabled",
     "config/taskStatus.ts labels every shared OUTCOME_STATES, AUTHORITY_STATES, ACTION_STATES and delivery state; config/findings.ts summarises findings; state/taskDraft.ts holds the two form drafts in memory per account and network",
     "Segmented gained a 'compact' option for short labels; it widens and wraps whole at large text"
@@ -122,7 +122,7 @@
       ]
     },
     {
-      "check": "Task at 1.0: A paid but not delivered, B delivered, gross 0.55; COMPLETED with CLOSING authority; INCLUDED not final; negative form result valid; UNKNOWN payment keeps its reservation",
+      "check": "Task at 1.0: A paid but not delivered, B delivered, gross 0.55; COMPLETED with CLOSING authority; INCLUDED not final; negative form result valid; UNKNOWN payment keeps its reservation while it is reconciled, with no automatic duplicate payment",
       "result": "PASS",
       "screens": [
         "40-task-fallback-top.png",

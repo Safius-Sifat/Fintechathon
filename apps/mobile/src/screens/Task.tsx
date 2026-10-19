@@ -199,8 +199,9 @@ function PaymentRow({
           <View style={styles.calloutText}>
             <Text style={styles.calloutTitle}>Status unknown</Text>
             <Text style={styles.calloutBody}>
-              The budget stays reserved. This payment is never retried or paid
-              again automatically.
+              Its budget stays reserved while this recorded payment is checked
+              and reconciled. No new, duplicate payment is created automatically
+              in the meantime.
             </Text>
           </View>
         </View>
