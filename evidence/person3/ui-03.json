@@ -1,0 +1,85 @@
+{
+  "task": "UI-03",
+  "title": "Home and Accounts (layout and navigation only)",
+  "status": "REVIEW",
+  "recordedAt": "2026-10-19T15:55:00+06:00",
+  "note": "UI evidence only, kept outside evidence/*/cases/. Not a P3-W01 or device-acceptance result: no account, address or balance exists, and adding or renaming accounts is not implemented.",
+  "baseCommit": "c6ec9e53005b7cf610470653f774ff7d49a81cd1",
+  "dependency": "Built on UI-02 (PR #30, unmerged): uses its navigation and Set up screen. Until #30 merges, this branch's diff against main also contains UI-02; the UI-03 change is the diff against c6ec9e5.",
+  "planReference": "docs/plans/03 - Android Owner Wallet.md v7.1, S8.1 Accounts/Home screen group (account switch/add/rename; separate Personal account and Agent wallet cards with address, chain and per-source spendable balance)",
+  "implemented": [
+    "Home: account row (No account yet) opening Accounts",
+    "Home: Personal account card (renamed from Personal wallet) with Address Not created and Spendable Unavailable; Receive and Send still disabled",
+    "Home: Agent wallet card (singular, one per account) with Address Not created and Spendable Unavailable; Not connected",
+    "Accounts: empty state, Set up a wallet (opens Set up directly), How accounts work, Add account and Rename account shown as Not available yet",
+    "Screen: optional back button and bottom inset for screens pushed over the tabs",
+    "Large text: the hero Address/Spendable tiles stack above font scale 1.3 instead of breaking words"
+  ],
+  "fabricated": "none: no account names, addresses, balances or successful actions",
+  "dependencies": "No new packages; package.json, app.json, lockfile and native code unchanged",
+  "files": [
+    "apps/mobile/src/screens/HomeScreen.tsx",
+    "apps/mobile/src/screens/Accounts.tsx",
+    "apps/mobile/src/navigation/RootNavigator.tsx",
+    "apps/mobile/src/components/Screen.tsx"
+  ],
+  "checks": [
+    { "check": "pnpm typecheck (all workspace packages)", "result": "PASS" },
+    {
+      "check": "pnpm check:repository",
+      "result": "PASS",
+      "observed": "checkedFiles 374, failures []"
+    },
+    { "check": "prettier --check on changed files", "result": "PASS" },
+    {
+      "check": "Unit tests",
+      "result": "NOT RUN",
+      "observed": "apps/mobile has no test runner yet"
+    }
+  ],
+  "device": {
+    "kind": "emulator",
+    "serial": "emulator-5554",
+    "android": "16",
+    "api": 36,
+    "screen": "1080x2400 @ 420dpi",
+    "build": "Existing dev-client APK; JS served by Metro from this branch. No native change.",
+    "physicalPhone": "NOT RUN",
+    "ios": "NOT RUN"
+  },
+  "runtimeChecks": [
+    {
+      "check": "Home and Accounts at font scale 1.0",
+      "result": "PASS",
+      "screens": ["01-home.png", "03-accounts.png", "04-accounts-scrolled.png"]
+    },
+    {
+      "check": "Navigation: Home account row -> Accounts -> Set up a wallet -> Set up (no step progress) -> back -> Accounts (scroll kept) -> back -> Home -> back leaves the app",
+      "result": "PASS",
+      "observed": "launcher became topResumedActivity",
+      "screens": [
+        "05-setup-from-accounts.png",
+        "06-back-to-accounts.png",
+        "07-back-to-home.png"
+      ]
+    },
+    {
+      "check": "Large text, font scale 2.0, cold start: Home and Accounts reflow without clipped or broken words",
+      "result": "PASS after fix",
+      "observed": "First run showed the side-by-side hero tiles breaking words (Unavailabl/e); fixed by stacking them above the large-text threshold, then rechecked",
+      "screens": [
+        "10-2x-home.png",
+        "10b-2x-home-facts.png",
+        "13-2x-accounts.png",
+        "15-2x-accounts-end.png"
+      ]
+    }
+  ],
+  "pending": [
+    "iOS simulator and physical iPhone checks",
+    "Physical Android phone check",
+    "Screen-reader pass with TalkBack/VoiceOver",
+    "Functional accounts: create/restore, derive indexes 0..19, switch, add, rename and account-scoped data clearing (P3-01, P3-W01)",
+    "Real addresses and balances (P3-W02) and agent wallet connection (P3-03, Person2 API)"
+  ]
+}

@@ -1,25 +1,53 @@
 import type { ReactNode } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { colors, gradients, space, type } from "../theme";
+import { colors, gradients, shadows, space, touchTarget, type } from "../theme";
+import { Icon } from "./Icon";
 
 interface ScreenProps {
   title: string;
   subtitle?: string;
   // Replaces the plain title, e.g. the Home brand row.
   header?: ReactNode;
+  // For screens pushed over the tabs: shows a back button and pads for the
+  // bottom inset, which no tab bar covers there.
+  onBack?: () => void;
   children: ReactNode;
 }
 
-// Scrollable tab screen on the glow canvas. The top inset sits outside the
+// Scrollable screen on the glow canvas. The top inset sits outside the
 // scroll view so content never scrolls under the transparent edge-to-edge
-// status bar. The tab bar owns the bottom inset.
-export function Screen({ title, subtitle, header, children }: ScreenProps) {
+// status bar. On tab screens the tab bar owns the bottom inset.
+export function Screen({
+  title,
+  subtitle,
+  header,
+  onBack,
+  children,
+}: ScreenProps) {
   const insets = useSafeAreaInsets();
   return (
     <View style={[styles.root, { paddingTop: insets.top }]}>
       <View style={styles.canvas} pointerEvents="none" />
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
+      {onBack ? (
+        <View style={styles.backRow}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Back"
+            onPress={onBack}
+            style={({ pressed }) => [styles.back, pressed && styles.pressed]}
+          >
+            <Icon name="chevron-left" size={28} color={colors.ink} />
+          </Pressable>
+        </View>
+      ) : null}
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={[
+          styles.content,
+          onBack && { paddingBottom: space.xxxl + insets.bottom },
+        ]}
+      >
         {header ?? (
           <View style={styles.titleBlock}>
             <Text style={styles.title} accessibilityRole="header">
@@ -40,6 +68,17 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     experimental_backgroundImage: gradients.canvas,
   },
+  backRow: { paddingTop: space.sm, paddingHorizontal: space.lg },
+  back: {
+    width: touchTarget,
+    height: touchTarget,
+    borderRadius: touchTarget / 2,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: colors.surface,
+    boxShadow: shadows.card,
+  },
+  pressed: { opacity: 0.7 },
   scroll: { flex: 1 },
   content: {
     paddingTop: space.md,
