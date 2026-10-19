@@ -1,35 +1,45 @@
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useState } from "react";
+import { useEffect } from "react";
 import { StyleSheet, Text, TextInput, View } from "react-native";
 import { Banner } from "../components/Banner";
-import { OutlineButton, PrimaryButton } from "../components/Button";
+import { OutlineButton, PrimaryButton, TextButton } from "../components/Button";
 import { Card, DetailRow } from "../components/Card";
 import { Icon } from "../components/Icon";
 import { Screen } from "../components/Screen";
 import { Segmented } from "../components/Segmented";
-import {
-  FEE_PAYER,
-  SOURCE_LABELS,
-  type TransferAsset,
-  type TransferSource,
-} from "../config/transfer";
+import { FEE_PAYER, SOURCE_LABELS } from "../config/transfer";
 import { network } from "../config/network";
 import type { RootStackParamList } from "../navigation/RootNavigator";
+import {
+  clearDraft,
+  isDraftComplete,
+  updateDraft,
+  type SendDraft,
+} from "../state/sendDraft";
+import { currentDraftContext, useSendDraft } from "../state/useSendDraft";
 import { colors, fonts, radius, space, tones, type } from "../theme";
 
 // Send form preview. The fields work locally so the layout can be reviewed,
 // but nothing typed here is checked: there is no balance, fee quote, address
 // or amount validation, and no signing. The form never sends anything.
+// The draft lives in an in-memory store (state/sendDraft.ts) so it survives
+// a font-size remount and Review -> Edit; leaving Send discards it.
 
 type Props = NativeStackScreenProps<RootStackParamList, "Send">;
 
 export function SendScreen({ navigation }: Props) {
-  const [source, setSource] = useState<TransferSource>("personal");
-  const [asset, setAsset] = useState<TransferAsset>("ETH");
-  const [recipient, setRecipient] = useState("");
-  const [amount, setAmount] = useState("");
+  const context = currentDraftContext;
+  const { source, asset, recipient, amount } = useSendDraft(context);
+  const set = (patch: Partial<SendDraft>) => updateDraft(context, patch);
+  const canReview = isDraftComplete({ source, asset, recipient, amount });
 
-  const canReview = recipient.trim() !== "" && amount.trim() !== "";
+  // Leaving Send by any route (back button, Android back, gesture) cancels
+  // the draft. A font-size remount unmounts without removing the screen, so
+  // it keeps the draft.
+  useEffect(
+    () => navigation.addListener("beforeRemove", () => clearDraft(context)),
+    [navigation, context],
+  );
 
   return (
     <Screen
@@ -49,7 +59,7 @@ export function SendScreen({ navigation }: Props) {
             },
           ]}
           selected={source}
-          onSelect={setSource}
+          onSelect={(key) => set({ source: key })}
         />
         <DetailRow
           label={source === "personal" ? "Account" : "Agent wallet"}
@@ -68,7 +78,7 @@ export function SendScreen({ navigation }: Props) {
             { key: "DemoUSD", label: "DemoUSD" },
           ]}
           selected={asset}
-          onSelect={setAsset}
+          onSelect={(key) => set({ asset: key })}
         />
         <Text style={styles.caption}>
           {asset === "ETH"
@@ -84,7 +94,7 @@ export function SendScreen({ navigation }: Props) {
         <TextInput
           accessibilityLabelledBy="recipient-label"
           value={recipient}
-          onChangeText={setRecipient}
+          onChangeText={(text) => set({ recipient: text })}
           placeholder={`0x… address on ${network.name}`}
           placeholderTextColor={colors.textSubtle}
           autoCapitalize="none"
@@ -120,7 +130,7 @@ export function SendScreen({ navigation }: Props) {
           <TextInput
             accessibilityLabelledBy="amount-label"
             value={amount}
-            onChangeText={setAmount}
+            onChangeText={(text) => set({ amount: text })}
             placeholder="0.0"
             placeholderTextColor={colors.textSubtle}
             keyboardType="decimal-pad"
@@ -155,14 +165,12 @@ export function SendScreen({ navigation }: Props) {
             ? "Shows the transfer details. Nothing is sent."
             : "Enter a recipient and an amount first."
         }
-        onPress={() =>
-          navigation.navigate("TransferReview", {
-            source,
-            asset,
-            recipient: recipient.trim(),
-            amount: amount.trim(),
-          })
-        }
+        onPress={() => navigation.navigate("TransferReview")}
+      />
+      <TextButton
+        label="Discard draft"
+        accessibilityHint="Clears the recipient, amount and choices"
+        onPress={() => clearDraft(context)}
       />
 
       <Banner
@@ -175,6 +183,7 @@ export function SendScreen({ navigation }: Props) {
 }
 
 // Sending from the agent wallet is owner governance, not a normal payment.
+// The effect only follows a successful, confirmed transfer.
 export function OwnerTransferNote() {
   return (
     <View style={styles.callout}>
@@ -182,8 +191,9 @@ export function OwnerTransferNote() {
       <View style={styles.calloutText}>
         <Text style={styles.calloutTitle}>This is an owner transfer</Text>
         <Text style={styles.calloutBody}>
-          Sending from the agent wallet pauses it and ends every active agent
-          permission. Agents need new approvals afterwards.
+          A successful owner transfer pauses agents and invalidates their
+          existing permissions. Choosing or reviewing it does not stop anything
+          yet.
         </Text>
       </View>
     </View>

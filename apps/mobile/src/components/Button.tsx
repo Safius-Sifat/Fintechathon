@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, Text } from "react-native";
+import { Pressable, StyleSheet, Text, useWindowDimensions } from "react-native";
 import { colors, radius, shadows, space, touchTarget, type } from "../theme";
 import { Icon, type IconName } from "./Icon";
 
@@ -116,6 +116,10 @@ export function OutlineButton({
   onPress,
 }: OutlineButtonProps) {
   const fg = disabled ? colors.textDisabled : colors.ink;
+  // The minimum width grows with the text size, so side-by-side buttons
+  // wrap onto their own rows instead of breaking a label mid-word.
+  const { fontScale } = useWindowDimensions();
+  const minWidth = OUTLINE_MIN_WIDTH * Math.max(1, fontScale);
   return (
     <Pressable
       accessibilityRole="button"
@@ -125,6 +129,7 @@ export function OutlineButton({
       onPress={onPress}
       style={({ pressed }) => [
         styles.outline,
+        { minWidth },
         disabled && styles.outlineDisabled,
         pressed && styles.pressed,
       ]}
@@ -135,11 +140,12 @@ export function OutlineButton({
   );
 }
 
+const OUTLINE_MIN_WIDTH = 120;
+
 const styles = StyleSheet.create({
   outline: {
     flexGrow: 1,
     flexBasis: 0,
-    minWidth: 120,
     minHeight: touchTarget,
     flexDirection: "row",
     alignItems: "center",

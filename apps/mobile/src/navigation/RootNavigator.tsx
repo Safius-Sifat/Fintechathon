@@ -1,7 +1,6 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import type { NavigatorScreenParams } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import type { TransferAsset, TransferSource } from "../config/transfer";
 import { AccountsScreen } from "../screens/Accounts";
 import { ActivityScreen } from "../screens/ActivityScreen";
 import { HomeScreen } from "../screens/HomeScreen";
@@ -31,12 +30,8 @@ export type RootStackParamList = {
   Receive: undefined;
   Scan: undefined;
   Send: undefined;
-  TransferReview: {
-    source: TransferSource;
-    asset: TransferAsset;
-    recipient: string;
-    amount: string;
-  };
+  // Reads the Send draft from state/sendDraft.ts.
+  TransferReview: undefined;
 };
 
 const TAB_META: Record<keyof TabParamList, TabMeta> = {

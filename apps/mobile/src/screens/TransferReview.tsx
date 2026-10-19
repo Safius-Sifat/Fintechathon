@@ -9,16 +9,18 @@ import { FEE_PAYER, SOURCE_LABELS } from "../config/transfer";
 import { network } from "../config/network";
 import type { RootStackParamList } from "../navigation/RootNavigator";
 import { colors, fonts, radius, space, type } from "../theme";
+import { currentDraftContext, useSendDraft } from "../state/useSendDraft";
 import { OwnerTransferNote } from "./Send";
 
-// Review preview. Shows the form's values exactly as typed, marked as not
+// Review preview. Reads the Send draft from the in-memory store and shows its values exactly as typed, marked as not
 // checked, with no fee or total. Confirming is disabled: this build cannot
 // sign, and nothing here is ever sent.
 
 type Props = NativeStackScreenProps<RootStackParamList, "TransferReview">;
 
-export function TransferReviewScreen({ navigation, route }: Props) {
-  const { source, asset, recipient, amount } = route.params;
+export function TransferReviewScreen({ navigation }: Props) {
+  const { source, asset, recipient, amount } =
+    useSendDraft(currentDraftContext);
   return (
     <Screen
       title="Review transfer"
@@ -30,7 +32,7 @@ export function TransferReviewScreen({ navigation, route }: Props) {
       <Card>
         <Text style={styles.label}>You send</Text>
         <Text style={styles.amount}>
-          {amount} {asset}
+          {amount.trim()} {asset}
         </Text>
         <StatusTag state="unavailable" label="Amount not checked" />
         <Divider />
@@ -43,7 +45,7 @@ export function TransferReviewScreen({ navigation, route }: Props) {
         <View style={styles.recipient}>
           <Text style={styles.label}>To</Text>
           <Text style={styles.address} selectable>
-            {recipient}
+            {recipient.trim()}
           </Text>
           <StatusTag state="unavailable" label="Address not checked" />
         </View>

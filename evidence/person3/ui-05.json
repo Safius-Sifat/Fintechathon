@@ -8,23 +8,30 @@
   "dependency": "Built on UI-04 (PR #32), on UI-03 (#31), on UI-02 (#30); all unmerged. The UI-05 change is the diff against c86d205.",
   "planReference": "docs/plans/03 - Android Owner Wallet.md v7.1, S8.1 Send screen group, S8.2 (personal transfer preview fields; token amount never added to ETH), S8.3 (owner transfer pauses the managed wallet and increments authorityEpoch)",
   "implemented": [
-    "Send: From selector separates Personal account and Agent wallet; the Agent wallet choice shows the owner-transfer warning (pauses the agent wallet, ends active permissions); account and spendable shown as unavailable",
+    "Send: From selector separates Personal account and Agent wallet; the Agent wallet choice shows a conditional owner-transfer warning ('A successful owner transfer pauses agents and invalidates their existing permissions. Choosing or reviewing it does not stop anything yet.'); account and spendable shown as unavailable",
+    "Draft store (state/sendDraft.ts): in-memory only, keyed by account and chain; keeps source, asset, recipient and amount through font-size remounts and Send -> Review -> Edit; cleared by Discard draft, by leaving Send (back button, Android back, gesture), by account/network switch (switchContext) and by lock/logout/wallet removal (clearAllDrafts). Holds only those four public form fields",
+    "Mobile test harness: apps/mobile 'test': 'tsx --test test/*.test.ts' using the workspace's pinned tsx and Node's test runner; tests load pure state modules only, no React Native screens",
     "Send: asset selector ETH/DemoUSD; To and Amount text fields work locally; Scan, Contacts and Max disabled with reasons; captions state that addresses and amounts are not checked",
     "Send: network fee 'Quote unavailable' and fee payer by source; Review enabled only when both fields have text",
     "Transfer Review: values shown exactly as typed and tagged 'Amount not checked' / 'Address not checked'; From, account, network; fee, payer and total unavailable; token amount and ETH fee stated as never added together",
-    "Transfer Review: 'Confirm and send' disabled with the reason; Edit returns to the form with entries kept; no success screen exists",
+    "Transfer Review: reads the draft from the store (no transfer values in navigation params); 'Confirm and send' disabled with the reason; Edit returns to the same draft; no success screen exists",
     "Home: Send button opens Send",
     "Segmented control moved to components/Segmented.tsx and shared by Receive and Send; PrimaryButton gains a disabled state"
   ],
   "fabricated": "none: no balance, fee, validation result, signature or successful transfer",
   "sampleInput": "Typed for the screenshots only: recipient 'sample-recipient-not-checked', amount '0.01'. Neither is stored or sent.",
-  "dependencies": "No new packages; package.json, app.json, lockfile and native code unchanged",
+  "dependencies": "No new packages. apps/mobile/package.json gains only the 'test' script (uses the root's pinned tsx 4.20.6, as packages/schema does). app.json, lockfile, root configuration and native code unchanged",
+  "rootWrapperNote": "Root 'make check-mobile' and any root test wrapper belong to Person1 and are unchanged; wiring apps/mobile 'test' into them is a coordination request, not part of this change",
   "files": [
+    "apps/mobile/src/state/sendDraft.ts",
+    "apps/mobile/src/state/useSendDraft.ts",
+    "apps/mobile/test/sendDraft.test.ts",
+    "apps/mobile/package.json (test script)",
     "apps/mobile/src/screens/Send.tsx",
     "apps/mobile/src/screens/TransferReview.tsx",
     "apps/mobile/src/config/transfer.ts",
     "apps/mobile/src/components/Segmented.tsx",
-    "apps/mobile/src/components/Button.tsx",
+    "apps/mobile/src/components/Button.tsx (PrimaryButton disabled state; OutlineButton minimum width scales with text size)",
     "apps/mobile/src/components/Screen.tsx (keyboardShouldPersistTaps)",
     "apps/mobile/src/screens/Receive.tsx (uses shared Segmented)",
     "apps/mobile/src/screens/HomeScreen.tsx",
@@ -39,9 +46,9 @@
     },
     { "check": "prettier --check on changed files", "result": "PASS" },
     {
-      "check": "Unit tests",
-      "result": "NOT RUN",
-      "observed": "apps/mobile has no test runner yet (MOBILE-TEST-HARNESS in progress.json)"
+      "check": "pnpm --filter @mandate/mobile test",
+      "result": "PASS",
+      "observed": "10/10 tests in test/sendDraft.test.ts (fields kept, stable snapshot, no cross-account or cross-network leak, cancel clears one context, account switch cancels the old draft, lock/logout clears all, completeness, listeners, field allowlist). Written with the store, not run red first."
     }
   ],
   "device": {
@@ -71,32 +78,77 @@
     {
       "check": "Agent wallet + DemoUSD at 1.0: owner-transfer warning on Send and Review; fee payer sponsor/personal unavailable; DemoUSD amount and ETH fee stated as separate",
       "result": "PASS",
-      "screens": [
-        "12-send-agent-demousd.png",
-        "14-review-agent.png",
-        "15-review-agent-bottom.png"
-      ]
+      "observed": "Screens re-captured after the conditional warning wording change",
+      "screens": ["12-send-agent-demousd.png", "14-review-agent.png"]
     },
     {
       "check": "Large text, font scale 2.0: Send and Transfer Review reflow without clipping; selectors wrap; disabled Review shown",
-      "result": "PASS",
+      "result": "PASS (after the OutlineButton fix below)",
       "screens": [
-        "20-2x-review-agent-top.png",
-        "21-2x-review-agent-mid.png",
         "23-2x-send-top.png",
-        "26-2x-send-end.png"
+        "26-2x-send-end.png",
+        "41-draft-2x-top.png",
+        "44-review-2x-top.png",
+        "50-2x-to-card-fixed.png"
       ]
     },
     {
-      "check": "Changing the system font size while Send has typed entries",
-      "result": "FAIL (known limitation)",
-      "observed": "The entries are cleared and the From/Asset choices reset. App.tsx remounts the navigation tree on a font-scale change (UI-01.1 fix); navigation state and route params survive, local screen state does not. Recorded in UI-01 as harmless until forms existed. Not fixed in this checkpoint; needs a decision."
+      "check": "Changing the system font size while Send has typed entries (first run)",
+      "result": "FAIL, then fixed",
+      "observed": "First run: entries cleared, because App.tsx remounts the navigation tree on a font-scale change and local screen state was lost. Fixed by moving the draft into the in-memory store (owner chose option 1)."
+    },
+    {
+      "check": "Draft survives font scale 1.0 -> 2.0 -> 1.0 on Send (Agent wallet, DemoUSD, recipient, 0.01)",
+      "result": "PASS",
+      "observed": "Same process (pid 16255) throughout; every field and choice kept at 2.0 and back at 1.0",
+      "screens": [
+        "40-draft-1x-fields.png",
+        "41-draft-2x-top.png",
+        "42-draft-2x-fields.png",
+        "43-draft-back-1x-fields.png"
+      ]
+    },
+    {
+      "check": "Draft survives font scale 1.0 -> 2.0 -> 1.0 on Transfer Review, and Edit returns to the same draft",
+      "result": "PASS",
+      "screens": [
+        "44-review-2x-top.png",
+        "45-review-back-1x.png",
+        "46-edit-returns-fields.png"
+      ]
+    },
+    {
+      "check": "Explicit clearing: Discard draft empties the form; leaving Send by the header back button or Android back, then reopening Send, shows an empty form",
+      "result": "PASS",
+      "observed": "UI dump: the typed text was present before leaving and absent after reopening (0 matches) for both routes",
+      "screens": [
+        "47-discard-button.png",
+        "48-after-discard.png",
+        "49-reopen-after-android-back.png"
+      ]
+    },
+    {
+      "check": "Account/network context separation",
+      "result": "PASS (unit tests only)",
+      "observed": "No account exists in the app, so the emulator has a single context (no-account@84532). Separation, account-switch cancellation and lock/logout clearing are covered by the unit tests; they are wired to real account, lock and session events when those are built (P3-W01, P3-W03)."
+    },
+    {
+      "check": "Sending stays disabled",
+      "result": "PASS",
+      "observed": "Confirm and send is disabled on Review; no success state exists; no new financial capability was added"
+    },
+    {
+      "check": "Large-text fix found in this pass",
+      "result": "FIXED",
+      "observed": "At 2.0 the Contacts button split its label ('Contact/s', visible in 42-draft-2x-fields.png). OutlineButton's minimum width now scales with the text size so paired buttons stack instead (50-2x-to-card-fixed.png). Also applies to Receive's Copy/Share.",
+      "screens": ["42-draft-2x-fields.png", "50-2x-to-card-fixed.png"]
     }
   ],
   "pending": [
-    "Decision on keeping form state across a system font-size change",
     "Physical Android phone, iOS simulator and iPhone, screen-reader pass",
-    "Exact BigInt amount parsing and EIP-55 address validation with tests (P3-W02; needs MOBILE-TEST-HARNESS)",
+    "Exact BigInt amount parsing and EIP-55 address validation with tests (P3-W02; the harness now exists)",
+    "Wire switchContext/clearAllDrafts to real account switch, app lock, logout and wallet removal when those exist (P3-W01, P3-W03)",
+    "Ask Person1 to add the apps/mobile test script to the root check wrapper (make check-mobile)",
     "Balances, fee quotes (OP-stack incl. L1 fee), simulation, native confirmation and signing, submitted/pending/detail states (P3-W02, P3-02)",
     "Managed owner transfer draft/submit via Person2 API and its native confirmation (S8.3, P3-02; Person2 API unverified)"
   ]
