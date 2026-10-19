@@ -1,0 +1,187 @@
+{
+  "task": "UI-01.1",
+  "title": "App shell (Home / Activity / Settings tabs) and Home preview",
+  "status": "REVIEW",
+  "recordedAt": "2026-10-19",
+  "note": "UI preview evidence only. Not a P3-01, P3-W01, P3-W02, P3-W04 or device-acceptance result. Kept outside evidence/*/cases/ on purpose.",
+  "sourceRevision": {
+    "baseCommit": "3249c89f551d31cf6c27030f75636dc6fd0b9473",
+    "note": "Built and run from the real branch working tree (not a temporary copy). The PR commit contains exactly these file contents.",
+    "files": {
+      "apps/mobile/App.tsx": "8d4fb09850feed0efd38b47da386a1de7972f5c993b1d6b22062d5833a84b990",
+      "apps/mobile/app.json": "0129d87fd76951a5f676dcf9c64a357aa9dd9f7f2485278ac441269a5c4b824d",
+      "apps/mobile/package.json": "b86d38cf32359a039a7bf9b6a287df36e59f4335a3ebc711eff2f4074b3b3fd7",
+      "apps/mobile/.gitignore": "4fc66f487cf684276c7d0da998f9c394305097f8db3131fffc7511e9c94cd824",
+      "pnpm-lock.yaml": "b64e18f32a9ee27a2d2b09f733572c0013b2688b78d3577a3509a09228e7e73c",
+      "docs/mobile-build.md": "b98cecc2d4cfb64c642da08fe4f69c87ae85981249934bc14bd7899db7dc7c2e",
+      "apps/mobile/plugins/withFontScaleLayout.js": "dd3297f6a6090cf73b4cdd355589f638c90fc2f3742f61cb0817cf42aa9a51a0",
+      "apps/mobile/src/components/Banner.tsx": "007d4f1c2f94e91843e2b2d8996af038e219fc4626a89753293e0175867d28b1",
+      "apps/mobile/src/components/Button.tsx": "253fff8ecf7f0a1ea3a349b6790c5915e16b51f70905a9eb188f4792ff01a910",
+      "apps/mobile/src/components/CapabilityRow.tsx": "fa411352a6b7f4b19c613673fcae53c2c43b87514e6e89cb2664d49d170ed5fe",
+      "apps/mobile/src/components/Card.tsx": "b68797130ec2b1f0c7f9e5767069b61b44502b9b20be4721f8ab1d8e21f7c6b5",
+      "apps/mobile/src/components/ChainChip.tsx": "180eb1a5f148b18d77c4d5b595342a40c129abeb39c58b9a3b892a52383a72b0",
+      "apps/mobile/src/components/Icon.tsx": "5847270430b95e2f2a88cdf4e1805549eaccacfd7b1e3930853471acaa25acbd",
+      "apps/mobile/src/components/IconTile.tsx": "fdee178c8c2dbc3e74cb073aedb31990985e9fb6e10fb7192a4c48fdf98a22a7",
+      "apps/mobile/src/components/Screen.tsx": "8008ee907ae15ee1ae5a9c944312b9e7385377e23d6951868cf28f8b79a02b15",
+      "apps/mobile/src/components/StateView.tsx": "8a0109e61184579c87fe29e58d1fc9b4b6139a0d23143e2b0485ce8fa8eb4a9f",
+      "apps/mobile/src/components/StatusTag.tsx": "624a904fe17fef60effeadbc789e7ea2d367a588f2a77dc8d31b3d59bbd9c607",
+      "apps/mobile/src/config/activity.ts": "860525e3c4bc34635794fd69218558289c5f314649dac981ccfca94d0bbd13a8",
+      "apps/mobile/src/config/capabilities.ts": "ac03424c5424061e6b73824bd634673e1f248b1eba8219fbfbc24e4d896653ba",
+      "apps/mobile/src/config/network.ts": "c57aeb0cd3ef09c44e44fe4b2d3af94b71dcc95d50fb1f6cf1f4c1bc6996d0ff",
+      "apps/mobile/src/navigation/RootNavigator.tsx": "60e263e31cde3ec312a7c40af6cf9cee5a3217cc7da3c73051e582c449ab8078",
+      "apps/mobile/src/navigation/TabBar.tsx": "fe01b794b14f1bce0b0b27ebe836bfda02c31816435e6bf274f62214a58ed4bd",
+      "apps/mobile/src/screens/ActivityScreen.tsx": "b822c08a66b3224455ce871e5eaf04bb5159a60ff39cbbc996d94a9d00e4440a",
+      "apps/mobile/src/screens/HomeScreen.tsx": "0c2ca42386cae46f4c64e2a588e6bd7c6b5f300e01257b7147e4af3f948dafd3",
+      "apps/mobile/src/screens/SettingsScreen.tsx": "d945437cf76aa1a27c017d45307d2a5f65cd436a81190aa64abbc89b393711df",
+      "apps/mobile/src/theme.ts": "2c25f37423abeaff2a93b673e317f1df15cb5033646ebd89c35cfde719a54bb1"
+    }
+  },
+  "dependencyConfiguration": {
+    "authorization": "User-authorized narrow exception: Person3 may change apps/mobile/package.json and pnpm-lock.yaml for this milestone.",
+    "addedToAppsMobilePackageJson": {
+      "@expo/vector-icons": "15.1.1",
+      "@react-navigation/bottom-tabs": "7.21.0",
+      "@react-navigation/native": "7.5.1",
+      "@react-navigation/native-stack": "7.21.0",
+      "react-native-safe-area-context": "5.6.2",
+      "react-native-screens": "4.16.0"
+    },
+    "lockfile": "Additive only (0 removed lines): the six packages and their transitive dependencies. No existing package version changed.",
+    "unchanged": ".npmrc, root package.json, schemas, contracts, backend",
+    "compatibilityChecks": [
+      {
+        "check": "Versions within expo@54.0.33 bundledNativeModules.json",
+        "result": "PASS",
+        "observed": "react-native-safe-area-context ~5.6.0 -> 5.6.2; react-native-screens ~4.16.0 -> 4.16.0; @expo/vector-icons ^15.0.3 -> 15.1.1"
+      },
+      {
+        "check": "React Navigation peer dependencies",
+        "result": "PASS",
+        "observed": "bottom-tabs/native-stack 7.21.0 need @react-navigation/native ^7.5.1, react-native-screens >=4.0.0, react-native-safe-area-context >=4.0.0"
+      },
+      {
+        "check": "expo install --check",
+        "result": "WARN",
+        "observed": "No new package flagged. Pre-existing pins flagged: expo 54.0.33 (expected ~54.0.37), expo-dev-client 6.0.20 (expected ~6.0.21). Left unchanged (Person1 pins)."
+      }
+    ]
+  },
+  "staticChecks": [
+    { "check": "pnpm typecheck (all workspace packages)", "result": "PASS" },
+    { "check": "pnpm check:repository", "result": "PASS", "observed": "checkedFiles 336, failures []" },
+    {
+      "check": "prettier --check on every changed Person3 file",
+      "result": "PASS"
+    },
+    {
+      "check": "pnpm format:check (whole repo)",
+      "result": "FAIL (pre-existing)",
+      "observed": "Failures are identical with and without this change: other owners' files (e.g. packages/schema) and git-ignored build output under apps/mobile/android. No committed Person3 file is flagged."
+    },
+    {
+      "check": "Unit tests",
+      "result": "NOT RUN",
+      "observed": "apps/mobile has no test runner yet"
+    }
+  ],
+  "build": {
+    "type": "Expo dev client debug build (not Expo Go), CNG prebuild --clean, x86_64",
+    "where": "real branch working tree, D:\\projects\\shenzen fintech\\Fintechathon (path with a space, pnpm isolated layout)",
+    "windowsLocalSetup": "Android SDK CMake 3.31.6 (ninja 1.12.1) via git-ignored android/local.properties cmake.dir; see docs/mobile-build.md. No repository or shared configuration change.",
+    "gradle": "8.14.3",
+    "jdk": "17.0.17",
+    "compileSdk": 36,
+    "targetSdk": 36,
+    "minSdk": 31,
+    "ndk": "27.1.12297006",
+    "result": "PASS",
+    "apkSha256": "6e42debc7799e18593bba9a2300842a0046592c5f6f8252380b7900cfc041995",
+    "prebuildSideEffect": "expo prebuild adds \"ios\": \"expo run:ios\" to apps/mobile/package.json; reverted before hashing (documented)"
+  },
+  "device": {
+    "kind": "emulator",
+    "serial": "emulator-5554",
+    "model": "sdk_gphone64_x86_64",
+    "android": "16",
+    "api": 36,
+    "screen": "1080x2400 @ 420dpi",
+    "physicalPhone": "NOT RUN (emulator results do not satisfy physical-phone acceptance)"
+  },
+  "runtimeChecks": [
+    {
+      "check": "Home: Personal wallet hero and separate Agent wallets card, no balance, no address, Receive/Send disabled with reason, funds-separation note",
+      "result": "PASS",
+      "screens": ["01-home.png", "02-home-scrolled.png"]
+    },
+    {
+      "check": "Activity: history is shown as Unavailable, explicitly not as empty, with its two missing sources",
+      "result": "PASS",
+      "screens": ["03-activity.png", "03b-activity-scrolled.png"]
+    },
+    {
+      "check": "Settings: only Network is Configured; owner key, app unlock, recovery backup, signing Not available yet; Mandate service and agent wallets Not connected",
+      "result": "PASS",
+      "screens": ["04-settings.png", "05-settings-scrolled.png"]
+    },
+    {
+      "check": "Android back from Settings returns to Home",
+      "result": "PASS",
+      "screens": ["06-back-from-settings.png"]
+    },
+    {
+      "check": "Android back on Home leaves the app",
+      "result": "PASS",
+      "observed": "launcher became topResumedActivity; process stayed in the background",
+      "screens": ["07-back-on-home.png"]
+    },
+    {
+      "check": "System font size changed 1.0 -> 2.0 -> 1.0 while the app runs",
+      "result": "PASS",
+      "observed": "Same process before and after (pid unchanged, no restart). Visible and previously hidden tabs re-lay out at 2.0 with no clipped text, and return to normal at 1.0. The selected tab is kept.",
+      "screens": [
+        "08-runtime-2x-settings.png",
+        "08b-runtime-2x-home-was-hidden.png",
+        "08c-runtime-2x-activity.png",
+        "08d-runtime-back-to-1x-activity.png",
+        "08e-runtime-back-to-1x-home.png"
+      ]
+    },
+    {
+      "check": "Large text, font scale 2.0, cold start",
+      "result": "PASS",
+      "screens": [
+        "09-cold-2x-home.png",
+        "10-cold-2x-home-scrolled.png",
+        "11-cold-2x-activity.png",
+        "12-cold-2x-settings.png"
+      ]
+    },
+    {
+      "check": "Tab touch targets",
+      "result": "PASS",
+      "observed": "each tab spans one third of the bar width and at least 60 dp tall (minimum 48 dp); selected state exposed to accessibility"
+    }
+  ],
+  "fontScaleFix": {
+    "cause": "React Native 0.81.5 ships enableFontScaleChangesUpdatingLayout=false, the activity is recreated on fontScale changes, and Fabric only reads the font scale when the root view is re-measured.",
+    "fix": [
+      "plugins/withFontScaleLayout.js enables enableFontScaleChangesUpdatingLayout, keeping every other Stable flag",
+      "adds fontScale to MainActivity configChanges",
+      "MainActivity.onConfigurationChanged requests a root re-layout, then emits didUpdateDimensions to JS after that layout pass",
+      "App.tsx remounts the navigation tree on a fontScale change, preserving navigation state, so hidden tabs re-measure"
+    ],
+    "revisit": "Re-check on any React Native upgrade; the flag API is internal."
+  },
+  "notBuiltAndNotClaimed": [
+    "Native owner wallet module, key storage, unlock, backup, signing (P3-01, P3-W01)",
+    "Mandate service connection and agent wallets (Person2 backend; Person1 contracts)",
+    "Any balance, address or activity data"
+  ],
+  "designReferenceAddressCheck": {
+    "0x7a3Fc2E90b4d1A6e83F5277bD0a19C8e91c2": "INVALID: 36 hex characters",
+    "0x3e88D1f0A72c94bB5e0C6d31F9a2E4471B0c5d9E": "40 hex characters, but the mixed case is not a valid EIP-55 checksum",
+    "0xD7a0E2c19B44f6A0c3E8115b92dF07Ae3C1b6F20": "40 hex characters, but the mixed case is not a valid EIP-55 checksum",
+    "usedInApp": "none"
+  },
+  "secretsInScreens": "none; no secret-bearing native screens exist in this milestone"
+}
