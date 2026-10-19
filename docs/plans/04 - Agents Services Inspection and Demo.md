@@ -74,6 +74,7 @@ Commands in task blocks are **required implementation targets**, not claims that
 - Solidity: Solidity 0.8.28 Foundry configuration and OZ5.4.0 already exist. Add `forge-std` from its official repository with a recorded exact commit/remapping; record the Foundry toolchain version. `forge build`, named `forge test` suites and invariants are all required. No business contract is currently supplied.
 - MPC: run actual pinned Go1.25.8 tests in both modules plus an isolated node-qualification runner. Mock signatures are insufficient for the real MPC gate. Pin and inspect dependency/source/configuration before starting nodes.
 - Android: define native library Gradle project `:owner-wallet`, JVM tests, connected instrumentation and an installed-app flow runner. Record generated native project/module wiring and dependency pins. Implement and pin the Maestro CLI prerequisites for the listed installed-app flows; biometric/device-credential/restore cases may require a recorded human operator, and an omitted manual step cannot pass. JVM/RN mocks cannot qualify Keystore, biometric cancellation, restore or physical signing. Device-only cases require the actual device record.
+- iOS: implement the same module in Swift under `modules/owner-wallet/ios` with XCTest unit tests, Maestro flows on the iOS simulator and a recorded operator on a physical iPhone. Record the generated Xcode project wiring and pod pins. Simulator results cannot qualify Secure Enclave, Face ID cancellation, restore or physical signing.
 - Cross-owner integration: Person4 supplies scenario definitions and the runner; each owner supplies assertions for their component. `make check-integration` must run the scenarios against real configured services and a real testnet manifest, or fail with the unmet prerequisite. CI/local deterministic tests use isolated local fixtures. Testnet faults use valueless test assets; public chain reorgs are modelled on an isolated local chain, never induced on public infrastructure.
 - `make release-check` is a separate evidence/artifact gate. Passing unit tests or `/healthz` does not satisfy it. `/readyz` stays503 until required service dependencies, versions and applicable qualification gates actually pass.
 
@@ -107,7 +108,7 @@ Task-level case IDs and public/device evidence below are the gate criteria. Refe
 | M2 / G2 | `P4-02/03/05` | Actual public payment unlocks one real output; authentic export independently inspected and correct provisional/unverifiable facts retained. |
 | M3 / G3,W2/W3 | `P4-03/04/05, P4-W02` | Three bounded workflows/skills, external SDK/MCP, paid-failure fallback and owner/manual attribution integrated. |
 | M4 / G4,W4 | `P4-06, P4-W03` | 24 declared agent evaluation outcomes plus separate WQ01–14 evidence; security/denial/failure results and denominators preserved. |
-| M5 / G5,W5 | `P4-06, P4-W03` | Complete actual source/APK/deploy/security/evaluation/receipts/verifier/deck/video packet, hashes and known gaps verified; upload receipt only if actually uploaded. |
+| M5 / G5,W5 | `P4-06, P4-W03` | Complete actual source/APK/iOS build/deploy/security/evaluation/receipts/verifier/deck/video packet, hashes and known gaps verified; upload receipt only if actually uploaded. |
 | MA / W0–W4 (v7) | `P4-A01, P4-A02, P4-A03` | Claude Agent SDK agent completes real tasks through MCP only; injection, bounds, x402 and verifier v7 cases PASS; AQ01–AQ14 evaluation assembled. |
 
 ## Start here — current release scope and task order
@@ -473,8 +474,8 @@ make check-agents
 - [ ] Record the complete-wallet≤4:45 script in P4-W03; it replaces the earlier agent-only clip plan. Use actual transfers/outputs and label cuts, test tokens, fixtures and prior finalized transactions.
 - [ ] Demo controls are operator-authenticated fixture switches only. Near-cap scenario uses actual chain spends/refunds or local test specifically labelled; no hidden DB balance edits. Independent receipt tampering changes a copy, never original ledger.
 - [ ] Assemble English deck target9min including3min demo excerpt: job/problem; product flow; architecture; named control layers; actual application; measured results; inspection; risks; contribution/next step. Competition maximum10min presentation, optional video5min.
-- [ ] `submission/` contains README/deploy/test instructions, tagged source link/license notices, APK/hash from Person3, architecture/core algorithm/security report, deployment manifest/public tx index from Person1/2, evaluation JSON/report, authentic receipt bundle+verifier report, video/deck, known-risk list and actual upload receipt. Exclude mnemonics/share backups/PATs/API tokens/private keys. Assign each report section to its implementing owner; you assemble and check consistency.
-- [ ] `make release-check` verifies file manifest/checksums, source tag, ABI/schema/native/MPC pins, APK install proof and links. Actual public uploads/submission use user-authorized competition workflow; do not message third parties or publish secrets as part of implementing this handoff.
+- [ ] `submission/` contains README/deploy/test instructions, tagged source link/license notices, APK/iOS build/hash from Person3, architecture/core algorithm/security report, deployment manifest/public tx index from Person1/2, evaluation JSON/report, authentic receipt bundle+verifier report, video/deck, known-risk list and actual upload receipt. Exclude mnemonics/share backups/PATs/API tokens/private keys. Assign each report section to its implementing owner; you assemble and check consistency.
+- [ ] `make release-check` verifies file manifest/checksums, source tag, ABI/schema/native/MPC pins, APK/iOS build install proof and links. Actual public uploads/submission use user-authorized competition workflow; do not message third parties or publish secrets as part of implementing this handoff.
 
 
 #### Required execution contract — P4-06
@@ -491,8 +492,8 @@ make check-agents
 Run18category variants=2targets x3variants x3repeats: standard capable providers, capability-filterB, insufficient-budget correct denial. Add2paidfailure,2contention/restart,1asset,1schedule runs.
 Use actual testnet wallet/executor groups with sufficient remaining on-chain daily/task budgets; record each initial balance/spend/funding. If cumulative runs exceed5/executor/day or10/wallet/day, use another legitimately created/qualified wallet/executor or wait for actual UTC day. Never reset DB counters, fabricate history or claim refunds replenish caps.
 Measure attempted/delivered/denied/failed/duplicate/intervention/fees/gross and time-to-inclusion/output with denominators. Denial is not successful delivery. Payment-only baseline is an explicitly labelled internal comparison under same safety rules.
-Assemble source tag/ABI/deploy/security/permission tiers/known risks/APK/hash/deck/video/evaluation/authentic receipts/verifier report/public tx index/license notices. Show valueless assets, fixture risk/accelerated schedule and labelled earlier finalized txs.
-Release checker verifies actual required files/hashes/case statuses/source and schema/manifest/APK pins; no fake passing scripts. Upload/submission only through session-authorized workflow.
+Assemble source tag/ABI/deploy/security/permission tiers/known risks/APK/iOS build/hash/deck/video/evaluation/authentic receipts/verifier report/public tx index/license notices. Show valueless assets, fixture risk/accelerated schedule and labelled earlier finalized txs.
+Release checker verifies actual required files/hashes/case statuses/source and schema/manifest/APK/iOS build pins; no fake passing scripts. Upload/submission only through session-authorized workflow.
 ```
 
 **Mandatory tests — implement each ID as an independently reported case:**
@@ -503,7 +504,7 @@ Release checker verifies actual required files/hashes/case statuses/source and s
 | `P4-06.T02` | Remaining executor daily cap exhausted mid-evaluation | Scenario denies/uses valid separate funded test wallet; never resets chain/DB totals or hides denial. |
 | `P4-06.T03` | PaidA failure+Bsuccess compared with payment-only fixture | Actual0.55gross/failure/result cost reported; no production competitor benchmark claim. |
 | `P4-06.T04` | Node/DB/RPC/process outage and owner-stop scenarios | Each owner produces actual expected states/receipts; no mock substitute for integration gate. |
-| `P4-06.T05` | Remove required artifact/case/ABI/APK hash or mismatch source/schema | release-check nonzero with named missing/mismatch; stale green output not accepted. |
+| `P4-06.T05` | Remove required artifact/case/ABI/APK/iOS build hash or mismatch source/schema | release-check nonzero with named missing/mismatch; stale green output not accepted. |
 | `P4-06.T06` | Final public tx index | Each hash resolves on84532 with purpose/amount/outcome/finality; pending/failures labelled. |
 | `P4-06.T07` | Submission deck/video package | English presentation<=10min and demo<=5min; no secrets, unsupported functionality or guaranteed competition outcome. |
 
@@ -669,9 +670,9 @@ make check-integration
 - [ ] Required journey: create+backup→receive native/DemoUSD→personal send→fund managed wallet→approve offline-owner task→inspect paid result/fallback→managed owner send pauses old authority→restore/account switch/history→QR receive request/invalid-request rejection. Retain raw results and hashes for all cases; edited video need not show every action at full duration.
 - [ ] Fit≤4:45 demo: personal receive/send/backup status0:40; task approval and phone closes0:35; actual paid browser result+failed-provider recovery1:05; assets/schedule0:35; owner managed transfer/epoch stop0:35; account switch/history+invalid QR0:30; portable receipt/cost/limitations0:45. Show earlier finalized transactions labelled; no compressed clip implies unmeasured response time.
 - [ ] Update English deck, pitch/security/permissions docs and submission checklist: include actual app inventory, dual-source funds/fee payer, supported QR/manual transfer forms, session versus financial authority and honest gaps. No MetaMask feature parity, full multichain/DeFi, audited security or winning guarantee.
-- [ ] Confirm other owners provided WQ and original gates before release complete-app status. WalletCore/package existence or TypeScript success alone cannot satisfy app acceptance. Source/manifest/APK must all agree on domain5/new schema signatures.
+- [ ] Confirm other owners provided WQ and original gates before release complete-app status. WalletCore/package existence or TypeScript success alone cannot satisfy app acceptance. Source/manifest/APK/iOS build must all agree on domain5/new schema signatures.
 
-**Finished:** an unfamiliar user can follow real receive/send/agent/control/recovery/session journeys in installed APK, and the recorded proof uses actual functionality. You coordinate integration; each owner fixes their code.
+**Finished:** an unfamiliar user can follow real receive/send/agent/control/recovery/session journeys in installed APK/iOS build, and the recorded proof uses actual functionality. You coordinate integration; each owner fixes their code.
 
 
 ---
@@ -679,7 +680,7 @@ make check-integration
 
 #### Required execution contract — P4-W03
 
-**Prerequisites / blockers:** All original Q gates and each owner WQ evidence plus installed release APK and current actual manifest.
+**Prerequisites / blockers:** All original Q gates and each owner WQ evidence plus installed release APK/iOS build and current actual manifest.
 
 **Required source and test files:** `evaluation/wallet-cases.json`; `evaluation/test/complete-app.test.ts`; `demo/script.md`; `submission/manifest.json`; `evidence/person4/complete-app-report.json`.
 
@@ -691,18 +692,18 @@ make check-integration
 Required full journey: create/backup->receive ETH/DemoUSD->personal send->fund managed wallet->approve task/phonecloses->real paid result/fallback->owner managed send stops old grants->restore/accountswitch/history->valid/invalid receiveQR.
 Also qualify pending/restart/replacement/cancel, session/logout/revoke, API-offline personal/owner paths, history gaps and native permission/accessibility cases.
 Record<=4:45 demonstration: wallet0:40; approval/close0:35; paid work/fallback1:05; vault/schedule0:35; owner transfer/stop0:35; account/history/invalidQR0:30; independent inspection/cost/limits0:45. Edited durations are not runtime latency claims.
-Build release capability inventory from actual APK behavior and case results. Any missing core feature remains incomplete; WalletConnect is deferred, not a hidden blocker or advertised capability.
+Build release capability inventory from actual APK/iOS build behavior and case results. Any missing core feature remains incomplete; WalletConnect is deferred, not a hidden blocker or advertised capability.
 ```
 
 **Mandatory tests — implement each ID as an independently reported case:**
 
 | Case ID | Exact setup / action | Required assertion / observed outcome |
 | --- | --- | --- |
-| `P4-W03.T01` | Full journey on final APK without developer-only controls | Actual personal/managed transfers and useful work/owner authority verified; record operator assistance/failures. |
+| `P4-W03.T01` | Full journey on final APK/iOS build without developer-only controls | Actual personal/managed transfers and useful work/owner authority verified; record operator assistance/failures. |
 | `P4-W03.T02` | Each WQ01–WQ14 assigned an actual owner/test/evidence reference | No unspecified, unrun-as-PASS or borrowed debug-only result. |
 | `P4-W03.T03` | Cancel/deny/invalid QR/API outage/unknown/reorg/restore paths | No false success, auto-payment, account regeneration or lost authority; exact expected observations recorded. |
 | `P4-W03.T04` | Authentic then altered receipt inspected without backend | Correct supported facts and tamper detection; provisional/unverifiable remain explicit rather than forced all-green. |
-| `P4-W03.T05` | Video/source/APK/manifest/case hashes disagree or required gate blocked | W5/release fails with exact unresolved dependency; do not remove required scenario to ship a green report. |
+| `P4-W03.T05` | Video/source/APK/iOS build/manifest/case hashes disagree or required gate blocked | W5/release fails with exact unresolved dependency; do not remove required scenario to ship a green report. |
 | `P4-W03.T06` | Review advertised capabilities and dependencies | No WalletKit/dApp pairing claim; external agent SDK/MCP remains tested through scoped permission path. |
 
 **Task execution checklist:**
@@ -914,18 +915,18 @@ This appendix is identical in the four documents. Specification 7.0, dated 2026-
 
 ### S1. Product, boundary and ownership
 
-Build **Mandate Wallet**: an Android personal ETH/ERC20 wallet with receive/send/history/accounts and local security; a separately funded managed wallet delegates bounded tasks to an online LLM agent (S9) that chooses among policy-bounded options; the agent buys real browser checks, spends a standing service allowance, operates approved vault/call templates and makes fixed scheduled payments under an owner wallet policy, review thresholds and freeze controls. Payments and useful delivery are recorded separately. An independent verifier reconstructs permission, spending and delivery from an export and public chain data.
+Build **Mandate Wallet**: an Android and iOS personal ETH/ERC20 wallet with receive/send/history/accounts and local security; a separately funded managed wallet delegates bounded tasks to an online LLM agent (S9) that chooses among policy-bounded options; the agent buys real browser checks, spends a standing service allowance, operates approved vault/call templates and makes fixed scheduled payments under an owner wallet policy, review thresholds and freeze controls. Payments and useful delivery are recorded separately. An independent verifier reconstructs permission, spending and delivery from an export and public chain data.
 
 | Person | Sole write ownership | Outputs consumed by others |
 | --- | --- | --- |
 | 1 | `packages/contracts`, `packages/schema`, `deployments`, root workspace/CI configuration | ABI, schemas, fixtures, deployment manifest, chain validation |
 | 2 | `apps/api`, `apps/worker`, `services/policy`, `services/mpc-adapter`, `services/mpc-authorizer`, `infra`, migrations, evidence writer | Public API, durable execution, three-node/two-participant MPCium PoC, policy authorization, exports |
-| 3 | `apps/mobile`, `modules/owner-wallet`, `tools/relay-admin.ts` | Complete personal/managed owner wallet, local transactions/sessions/security, installed APK, independent recovery sender |
+| 3 | `apps/mobile`, `modules/owner-wallet`, `tools/relay-admin.ts` | Complete personal/managed owner wallet, local transactions/sessions/security, installed Android and iOS apps, independent recovery sender |
 | 4 | `packages/runbooks`, `apps/provider`, `packages/sdk`, `apps/mcp`, `apps/agent`, `apps/cli`, `packages/verifier`, `demo`, `evaluation`, submission assembly | Runbook driver, reference LLM agent, intent compiler library, paid/x402-formatted browser services, SDK/MCP/CLI integrations, standalone inspector, recorded demonstration |
 
 Person 2 owns the worker process; Person 4 supplies its runbook library. Person 2 writes evidence; Person 4 verifies it independently. Person 1 owns ABI/schema generation; other owners never hand-maintain copies. Each owner supplies tests, deployment instructions, known risks and screenshots/logs for their own deliverable. No unassigned fifth person is required.
 
-Use one monorepo `./`, Node 22, TypeScript, pnpm workspaces with a checked-in lockfile; Solidity 0.8.28/OZ 5.x/Foundry; PostgreSQL 16; React Native with Expo 54 native Android build; Go 1.25.8 for MPCium; the Claude Agent SDK for TypeScript (`@anthropic-ai/claude-agent-sdk`, exact version pinned) with model `claude-opus-5-5` for the reference agent, and the Anthropic TypeScript SDK (`@anthropic-ai/sdk`) structured outputs for the intent compiler. No LangChain or hand-written agent loop. Person1 creates the workspace. All filenames here are relative to it and are planned files, not claims that source already exists. Pin resolved package versions in lockfiles; container images use resolved digests in the release manifest. Keep secrets out of Git and frontend bundles.
+Use one monorepo `./`, Node 22, TypeScript, pnpm workspaces with a checked-in lockfile; Solidity 0.8.28/OZ 5.x/Foundry; PostgreSQL 16; React Native with Expo 54 native Android and iOS builds; Go 1.25.8 for MPCium; the Claude Agent SDK for TypeScript (`@anthropic-ai/claude-agent-sdk`, exact version pinned) with model `claude-opus-5-5` for the reference agent, and the Anthropic TypeScript SDK (`@anthropic-ai/sdk`) structured outputs for the intent compiler. No LangChain or hand-written agent loop. Person1 creates the workspace. All filenames here are relative to it and are planned files, not claims that source already exists. Pin resolved package versions in lockfiles; container images use resolved digests in the release manifest. Keep secrets out of Git and frontend bundles.
 
 `DeploymentManifest` includes `{schemaVersion:4,walletDomainVersion:"5",loginDomainVersion:"2",chainId:84532,sourceTag,contracts:{factory,token,vault,anchor,walletImplementation:null},providers,targets,origins,mpc,evidence,runbooks,supportedTokens,dependencyPins}`. Each non-null contract is `{address,deploymentBlock,codeHash}`; providers are `{providerId,recipient,capabilities}`; targets are `{targetId,url,expectedTitle}`; origins are `{api,provider}`; mpc is `{engine:'mpcium',commit,thresholdConfig:1,nodeCount:3,requiredParticipants:2,deploymentMode:'competition-poc-single-vm-three-containers',initiatorPublicKey,authorizerPublicKey}`; evidence is `{ed25519PublicKey,publisher}`; runbooks is list of full hashed manifests. v7 adds `agentAssets:[{address,codeHash,decimals,symbol}]` (DemoUSD and Base Sepolia test USDC, S9.9), `screening:{listId:'demo-screening-v1',listHash}`, `riskRules:{version:'risk-rules-v1',hash}`, `x402:{mode:'MANDATE_NATIVE'|'ERC1271',facilitator:null|string,gatePassed:boolean}` and `agent:{runtime:'claude-agent-sdk',sdkVersion,model,mcpToolsetHash}`. supportedTokens is a reviewed registry of {chainId,address,codeHash,decimals,symbol,transferMode:'STANDARD_ERC20'}; unknown imports remain watch-only. Strings for times/blocks, strict validated keys/addresses/hashes. Per-wallet mapping is `{walletId,owner,walletAddress,deploymentBlock,codeHash,mpcWalletId,executorAddress,executorPublicKey,keyVersion}` checked against factory and signed Permit. Keys in these structures are public only. Resolve real deployment addresses/versions at setup gates; do not fabricate them to fill the manifest.
 
@@ -1058,7 +1059,7 @@ All endpoints under `/v1`. Mutations except challenge/verify/refresh require UUI
 | GET `/approvals` / GET `/approvals/:approvalId` | owner JWT; pending co-signature requests with action, invoice, typedData, digest, untrusted agent rationale (S9.5) |
 | POST `/approvals/:approvalId/sign` / `/reject` | owner JWT; `{ownerSignature}` / `{}` → `{state}` |
 | POST `/wallets/:walletId/policy/draft` / `/submit` | owner JWT; `{policy,assetCaps,allowlist,blocklist,templates}` → `{draftId,typedData,digest,effects}`; submit `{draftId,ownerSignature}` → `{txHash,version}` (S9.4) |
-| POST `/devices/push` | owner JWT; `{deviceId,pushToken}` → `{registered:true}`; bound to the JWT's owner address and session; deleted on logout, session revoke or token rotation; push payload carries only an approval/alert ID |
+| POST `/devices/push` | owner JWT; `{deviceId,platform:'android'|'ios',pushToken}` → `{registered:true}`; the server delivers through FCM or APNs by platform; bound to the JWT's owner address and session; deleted on logout, session revoke or token rotation; push payload carries only an approval/alert ID |
 | POST `/wallets/:walletId/inhibit/clear` | owner JWT with original signed-login `auth_time` ≤5 min (else REAUTH_REQUIRED); `{alertId}` → `{inhibited:false}`; agent tokens 403 |
 
 `terms` is exactly `{asset,startsAt,expiresAt,maxActions,maxPayments,maxPayment,spendCap,liquidFloor,depositCap,withdrawCap,reviewThreshold,periodCap,periodSeconds,recipients,schedule,templateIds}` using Permit/Schedule types. All fields required; kind-inapplicable fields zero. Server derives issuedAt/executor/kind/task ID/hashes/nonce/epoch from verified state and checks recipients/Schedule equal Conditions and trusted provider bindings, and checks every term against the current WalletPolicy (S9.4) before returning a draft. Unknown/redundant mismatched fields fail. At most one outstanding Permit draft per wallet; refreshed terms require new native confirmation. Admin nonce/lane is separate.
@@ -1143,7 +1144,7 @@ Export ZIP: `manifest.json`, `events.jsonl`, `checkpoint.json`, `checkpoint.sig`
 | G2, Oct18 02:00 | One phone-approved real Base Sepolia purchase, actual browser output, durable export, initial independent report |
 | G3, Oct18 10:00 | All four runbooks, fallback, reservations/restart, pause/recovery, SDK/MCP, full inspector |
 | G4, Oct18 15:00 | Adversarial/evaluation results and fixes, rebuild/install/recovery evidence |
-| G5, Oct18 18:00 | Tagged APK/source, manifest, deck, ≤5min demo, submission package frozen |
+| G5, Oct18 18:00 | Tagged APK, iOS build and source, manifest, deck, ≤5min demo, submission package frozen |
 | Submission, Oct20 18:00 target | Upload and verify receipt; official cutoff Oct20 21:59 Dhaka /23:59 Beijing |
 
 These are aggressive targets from Oct17, not estimates backed by an existing implementation. Record actual pass times; a failed gate remains incomplete. Keep a single scope and fix the blocker. No hidden ordinary-key MPC fallback, fabricated test results or guarantee of winning. Tests below are instructions for implementers; this documentation task does not run implementation tests.
@@ -1152,7 +1153,7 @@ Every owner contributes to Q01 native recovery, Q02 MPC isolation, Q03 scope, Q0
 
 ### S8. Complete wallet application — required v6 extension
 
-This section is required implementation work, not an optional UI upgrade. It extends the agent wallet into a usable Android wallet on **Base Sepolia84532**. Documentation is6.0; newly deployed MandateWallet domain is**5**; MandateLogin domain is**2**; existing runbook/evidence payload schema remains4. Existing bootstrap TS/Solidity layouts/domain constants are pre-v6 scaffolds and must be migrated before financial signing. No contract is currently deployed, so no live migration is claimed. Imported accounts/assets do not grant agents new powers.
+This section is required implementation work, not an optional UI upgrade. It extends the agent wallet into a usable Android and iOS wallet on **Base Sepolia84532**. Documentation is6.0; newly deployed MandateWallet domain is**5**; MandateLogin domain is**2**; existing runbook/evidence payload schema remains4. Existing bootstrap TS/Solidity layouts/domain constants are pre-v6 scaffolds and must be migrated before financial signing. No contract is currently deployed, so no live migration is claimed. Imported accounts/assets do not grant agents new powers.
 
 #### S8.1 Accounts, funds and screens
 
@@ -1291,7 +1292,7 @@ A future wallet-side integration must keep owner signing native, select personal
 | W2 — managed funds | OwnerTransfer/receive/event/epoch contract | Owner relay/inhibit and history attribution | Managed send/funding/native approval/independent relay | Verifier OWNER_CONTROL attribution |
 | W3 — continuity | Nonce/replay/epoch outcomes | Refresh rotation/revocation/pagination/reorg | Lock/restore/retry/cancel/activity/security screens | Reconnect/outage/same-seed restoration cases |
 | W4 — whole-app qualification | Transfer/admin/replay vectors | Outage/history/session error states | Navigation, lock, camera permission and secure confirmation | Receive-request fixtures and end-to-end app cases |
-| W5 — release | Chain/ABI/type manifest | Deploy/session/indexer actual status | Signed installed APK with all flows | Complete app demo/evaluation assembled |
+| W5 — release | Chain/ABI/type manifest | Deploy/session/indexer actual status | Signed installed Android and iOS apps with all flows | Complete app demo/evaluation assembled |
 
 W0 precedes new signing; W1/W2 run alongside existing G1–G3; W3/W4 before release G4/G5. Original Oct18 internal target/Oct20 official deadline remain, but scope expansion does not establish capacity or guaranteed completion. Record actual gate times/failures and use submission buffer; no passing result or complete-app claim from a scaffold.
 

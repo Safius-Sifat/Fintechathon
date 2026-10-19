@@ -15,7 +15,7 @@ Owner-controlled agent wallet for PBCSF Topic F. Four-person implementation work
 | --- | --- | --- |
 | 1 | [Contracts/shared interfaces](docs/plans/01%20-%20Contracts%20and%20Shared%20Interfaces.md) | Financial/owner-transfer contracts, schemas/ABI and deployment |
 | 2 | [Platform/policy/MPCium](docs/plans/02%20-%20Platform%20Policy%20and%20MPCium.md) | Runtime, sessions/history/owner relay, signing and infrastructure |
-| 3 | [Android wallet](docs/plans/03%20-%20Android%20Owner%20Wallet.md) | Complete local wallet/send/receive/accounts/sessions/security/recovery |
+| 3 | [Mobile wallet (Android, iOS)](docs/plans/03%20-%20Android%20Owner%20Wallet.md) | Complete local wallet/send/receive/accounts/sessions/security/recovery |
 | 4 | [Agents/services/inspection/demo](docs/plans/04%20-%20Agents%20Services%20Inspection%20and%20Demo.md) | Real tasks/providers/payment-request fixtures/integrations/independent evidence/complete-app demo |
 
 ## Local startup
@@ -29,7 +29,7 @@ make db-migrate
 make dev-platform
 ```
 
-Other terminals: `make dev-provider`, `make dev-mobile`. Docker daemon required for infrastructure; Android native tooling/device required for installed app. Full details/environment and ownership in [SETUP](docs/SETUP.md).
+Other terminals: `make dev-provider`, `make dev-mobile`. Docker daemon required for infrastructure; Android or iOS native tooling and a device required for the installed app. Full details/environment and ownership in [SETUP](docs/SETUP.md).
 
 ## What currently works
 

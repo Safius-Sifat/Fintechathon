@@ -10,6 +10,7 @@ import {
   AgentAnswerSchema,
   AgentDecisionPayloadSchema,
   ApiErrorSchema,
+  PushRegisterRequestSchema,
   AgentQuestionSchema,
   DeploymentManifestSchema,
   PersonalTransferRequestSchema,
@@ -346,4 +347,16 @@ test("S9.13 AGENT_DECISION payload binds the decision to the agent's credential 
       .success,
     false,
   ); // needs option or amount
+});
+
+test("S4 push registration names the platform so the server picks FCM or APNs", () => {
+  const base = { deviceId: `0x${"1".repeat(64)}`, pushToken: "t".repeat(32) };
+  for (const platform of ["android", "ios"])
+    assert.ok(
+      PushRegisterRequestSchema.safeParse({ ...base, platform }).success,
+    );
+  assert.ok(!PushRegisterRequestSchema.safeParse(base).success);
+  assert.ok(
+    !PushRegisterRequestSchema.safeParse({ ...base, platform: "web" }).success,
+  );
 });

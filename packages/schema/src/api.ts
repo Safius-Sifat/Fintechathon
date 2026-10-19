@@ -325,7 +325,11 @@ export const PolicyDraftSchema = z
 
 // S4 v7 routes (R08): push registration and risk-inhibit clearing.
 export const PushRegisterRequestSchema = z
-  .object({ deviceId: Hex32Schema, pushToken: z.string().min(16).max(4096) })
+  .object({
+    deviceId: Hex32Schema,
+    platform: z.enum(["android", "ios"]),
+    pushToken: z.string().min(16).max(4096),
+  })
   .strict();
 export const InhibitClearRequestSchema = z
   .object({ alertId: UuidSchema })

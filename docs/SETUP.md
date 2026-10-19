@@ -11,7 +11,7 @@ Workspace/dependency pins, shared authority layouts/structural schemas/hash help
 3. Start Docker Desktop/daemon, then `make infra-up`. This starts only local Postgres, NATS/JetStream and Consul. MPC node setup is a separate Person2 gate. Infrastructure ports bind localhost.
 4. Run `make db-migrate`. Only metadata migration is currently supplied; Person2 owns business tables.
 5. Separate terminals: `make dev-platform` (API3000), `make dev-provider` (provider3001). `/healthz` shows process status; `/readyz` returns503 and financial routes501 until implemented. These services cannot pay or produce browser results yet.
-6. Person3: `make dev-mobile` starts Metro for native development build. After implementing native module/build settings, `pnpm --filter @mandate/mobile android` builds/installs on physical device. Expo Go is not used. Keep generated Android source/build configuration under team control; do not run destructive prebuild clean over hand-written native code.
+6. Person3: `make dev-mobile` starts Metro for native development build. After implementing native module/build settings, `pnpm --filter @mandate/mobile android` builds/installs on a physical Android device; `npx expo run:ios --device` does the same on a physical iPhone (Xcode required; a paid Apple Developer Program membership for APNs and TestFlight). Expo Go is not used. Keep generated Android source/build configuration under team control; do not run destructive prebuild clean over hand-written native code.
 7. `pnpm typecheck` checks TS workspace. `make check-*`/`release-check` deliberately fail for absent acceptance suites; no green security claim comes from typechecking.
 
 ## MPCium setup

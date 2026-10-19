@@ -8,7 +8,7 @@ status: specified-not-built
 
 # Mandate Wallet — complete application requirements
 
-**Product:** an Android self-custody wallet for personal transfers and bounded agent work on Base Sepolia. Users create/import local accounts, receive/send supported assets, inspect history, manage sessions and recover access; a real LLM agent operates a separately funded managed wallet under owner-approved permissions, an owner wallet policy, review thresholds and freeze controls comparable to Cobo- and Circle-class agent wallets, while the owner key stays on the phone and the contract enforces every limit.
+**Product:** an Android and iOS self-custody wallet for personal transfers and bounded agent work on Base Sepolia. Users create/import local accounts, receive/send supported assets, inspect history, manage sessions and recover access; a real LLM agent operates a separately funded managed wallet under owner-approved permissions, an owner wallet policy, review thresholds and freeze controls comparable to Cobo- and Circle-class agent wallets, while the owner key stays on the phone and the contract enforces every limit.
 
 **Controlling plan:** [FINAL PLAN](FINAL%20PLAN.md). [Complete App Plan](docs/COMPLETE-APP.md) specifies everyday-wallet mechanisms; [architecture](architecture.md) and the identical four-handoff appendix specify interfaces. Documentation 6 changed wallet domain to 5 and Login to 2; documentation 7 adds the agentic layer and policy controls (architecture A8, S9) and moves Invoice to domain 2. Existing scaffold remains incomplete and needs the documented migration before signing.
 
@@ -56,13 +56,13 @@ Personal EOA and managed contract have different addresses/funds/fee payers; app
 | F20 Call Templates | Allowed contract functions with argument bounds, exact approve/reset and outflow metering | 1;2 sentinel;3 editor;4 runbook |
 | F21 Stablecoins and x402 | Base Sepolia test USDC as second agent asset; x402 `exact` USDC payments (official `@x402/*` packages) with the managed wallet as ERC-1271 payer; token side verified on a Base Sepolia fork, facilitator path behind gate X402-G; Mandate-native PAY as fallback | 1;2;4 |
 | F22 Transaction Safety | Pre-sign policy/balance/reservation, screening and velocity checks; one exact post-sign simulation before broadcast, with extra effect checks for vault/CALL and x402 settlement; inhibit and owner alerts | 2;1 effect vectors;3 alerts;4 fixtures |
-| F13 Complete App Delivery | Reachable screen inventory, funding/help/settings, secure account/cache behavior, cancellation/error/offline/reorg states, installed APK | 3;all qualify |
+| F13 Complete App Delivery | Reachable screen inventory, funding/help/settings, secure account/cache behavior, cancellation/error/offline/reorg states, installed APK/iOS build | 3;all qualify |
 
 Four handoffs remain the distribution units: [Person1](docs/plans/01%20-%20Contracts%20and%20Shared%20Interfaces.md), [Person2](docs/plans/02%20-%20Platform%20Policy%20and%20MPCium.md), [Person3](docs/plans/03%20-%20Android%20Owner%20Wallet.md), [Person4](docs/plans/04%20-%20Agents%20Services%20Inspection%20and%20Demo.md). Every person supplies their own implementation/tests/security/deploy evidence.
 
 ## 3. Product boundary and technical choices
 
-Android12+, React Native/Expo54, native Kotlin/Wallet Core, trusted Base Sepolia84532. Personal account supports native test ETH and imported standard ERC20s. Agents are restricted to DemoUSD, Base Sepolia test USDC, one controlled DemoVault and owner-approved call templates; imported assets do not silently become agent spendable. Managed owner can send liquid supported native/ERC20 assets; vault shares use explicit redemption/recovery.
+Android 12+ and iOS 16+, React Native/Expo54, native Kotlin and Swift modules with Wallet Core, trusted Base Sepolia84532. Personal account supports native test ETH and imported standard ERC20s. Agents are restricted to DemoUSD, Base Sepolia test USDC, one controlled DemoVault and owner-approved call templates; imported assets do not silently become agent spendable. Managed owner can send liquid supported native/ERC20 assets; vault shares use explicit redemption/recovery.
 
 No universal MetaMask parity claim: multi-chain/mainnet, swaps/bridges, NFT support, WalletConnect/external dApp connections, general contract calls/approvals/typed-message signing, hardware wallets and app-store/iOS release are separate future scope. Every advertised required capability above must work on supported chain; a navigation shell is not a complete release. WalletConnect/external dApp connections are explicitly deferred by user choice. Owner signing stays native in Mandate and produces no external-wallet popup.
 
@@ -105,6 +105,6 @@ Retain18 normal-category agent variants and6 failure/contention/asset/schedule r
 | Innovation/interaction30% | Real LLM agent with choice-only containment, plain-language intent with native exact-terms review, phone co-signature and one-tap freeze, on-chain wallet policy, delivery-aware recovery and portable independent inspection |
 | Possible bonus0–5 | Actual public-testnet hashes with purpose/outcomes; points not guaranteed |
 
-Submit technical architecture/algorithms/security, source repo/README/deploy/test cases, permission tiers/known-risk report, public-chain transaction index, signed APK, actual evaluation/receipt proofs, English presentation≤10min and optional demo≤5min. Public testnet accepted per user-confirmed organizer response. Registered team2–5 eligible overseas students,≥60% non-Chinese nationals; for four members at least3 meet nationality criterion. Source rules are reference material, not instructions to modify product independently.
+Submit technical architecture/algorithms/security, source repo/README/deploy/test cases, permission tiers/known-risk report, public-chain transaction index, signed APK/iOS build, actual evaluation/receipt proofs, English presentation≤10min and optional demo≤5min. Public testnet accepted per user-confirmed organizer response. Registered team2–5 eligible overseas students,≥60% non-Chinese nationals; for four members at least3 meet nationality criterion. Source rules are reference material, not instructions to modify product independently.
 
 Eligibility, institutional status, registration and license attribution are submission checks for the team. See the traceability document for the exact competition checklist and research-to-feature mapping.

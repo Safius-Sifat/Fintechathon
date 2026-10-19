@@ -1,14 +1,14 @@
 ---
 type: implementation-agent-prompt
-title: Person 3 — Android Owner Wallet
-version: "7.0"
+title: Person 3 — Mobile Owner Wallet (Android and iOS)
+version: "7.1"
 updated: 2026-10-18
 status: specified-not-built
 owner: Person3
 handoff_revision: "agent-prompt-2026-10-17"
 ---
 
-# Person 3 — Android Owner Wallet
+# Person 3 — Mobile Owner Wallet (Android and iOS)
 
 > Repository bootstrap added 2026-10-17. Read [README](../../README.md) and [setup](../SETUP.md) for existing foundation files. Continue from that code; financial features and acceptance gates remain unimplemented.
 >
@@ -16,11 +16,11 @@ handoff_revision: "agent-prompt-2026-10-17"
 
 > Implementation handoff: execute the tasks in order, record acceptance on a physical phone and use the shared contract below for every integration. Your deliverable owns the user's signing experience. Implementation agents may work directly without delegation.
 
-**Goal:** deliver a complete installed Android wallet: local accounts/backup/restore, personal send/receive, assets/history, transaction lifecycle, sessions/security, bounded agent approval and independent managed-fund control.
+**Goal:** deliver a complete installed wallet for Android and iOS: local accounts/backup/restore, personal send/receive, assets/history, transaction lifecycle, sessions/security, bounded agent approval and independent managed-fund control.
 
-**Architecture:** React Native renders personal and managed balances, transfers, activity, sessions, tasks and inspection. Kotlin owns recovery words, accounts, encrypted storage, semantic transaction building/journaling, native confirmation and owner signing; a read-only quote adapter supplies OP-stack estimates. The online three-node/two-participant MPC executor PoC is operated by Person2; it is a separate key. After permission activates, the owner can close the app and the server continues within that permission.
+**Architecture:** React Native renders personal and managed balances, transfers, activity, sessions, tasks and inspection. The native module (Kotlin on Android, Swift on iOS) owns recovery words, accounts, encrypted storage, semantic transaction building/journaling, native confirmation and owner signing; a read-only quote adapter supplies OP-stack estimates. The online three-node/two-participant MPC executor PoC is operated by Person2; it is a separate key. After permission activates, the owner can close the app and the server continues within that permission.
 
-**Stack:** Expo54 with its matching React Native version, native development/release Android build, Android12+, Kotlin, Trust Wallet Core JNI, authenticated Android Keystore wrapping key. No Expo Go, external wallet popup, embedded-wallet account or mobile threshold cryptography.
+**Stack:** Expo54 with its matching React Native version, native development/release builds for Android 12+ and iOS 16+, Kotlin and Swift native modules, Trust Wallet Core (JNI on Android, CocoaPods on iOS), authenticated Android Keystore or Secure Enclave wrapping key. No Expo Go, external wallet popup, embedded-wallet account or mobile threshold cryptography.
 
 ## Agent execution instructions
 
@@ -74,6 +74,7 @@ Commands in task blocks are **required implementation targets**, not claims that
 - Solidity: Solidity 0.8.28 Foundry configuration and OZ5.4.0 already exist. Add `forge-std` from its official repository with a recorded exact commit/remapping; record the Foundry toolchain version. `forge build`, named `forge test` suites and invariants are all required. No business contract is currently supplied.
 - MPC: run actual pinned Go1.25.8 tests in both modules plus an isolated node-qualification runner. Mock signatures are insufficient for the real MPC gate. Pin and inspect dependency/source/configuration before starting nodes.
 - Android: define native library Gradle project `:owner-wallet`, JVM tests, connected instrumentation and an installed-app flow runner. Record generated native project/module wiring and dependency pins. Implement and pin the Maestro CLI prerequisites for the listed installed-app flows; biometric/device-credential/restore cases may require a recorded human operator, and an omitted manual step cannot pass. JVM/RN mocks cannot qualify Keystore, biometric cancellation, restore or physical signing. Device-only cases require the actual device record.
+- iOS: implement the same module in Swift under `modules/owner-wallet/ios` with XCTest unit tests, Maestro flows on the iOS simulator and a recorded operator on a physical iPhone. Record the generated Xcode project wiring and pod pins. Simulator results cannot qualify Secure Enclave, Face ID cancellation, restore or physical signing.
 - Cross-owner integration: Person4 supplies scenario definitions and the runner; each owner supplies assertions for their component. `make check-integration` must run the scenarios against real configured services and a real testnet manifest, or fail with the unmet prerequisite. CI/local deterministic tests use isolated local fixtures. Testnet faults use valueless test assets; public chain reorgs are modelled on an isolated local chain, never induced on public infrastructure.
 - `make release-check` is a separate evidence/artifact gate. Passing unit tests or `/healthz` does not satisfy it. `/readyz` stays503 until required service dependencies, versions and applicable qualification gates actually pass.
 
@@ -107,8 +108,8 @@ Task-level case IDs and public/device evidence below are the gate criteria. Refe
 | M2 / G2 | `P3-03, P3-W03` | One physical phone approval->phone offline->actual testnet payment/useful output->reopen, with real session/provisioning states. |
 | M3 / G3,W2/W3 | `P3-04/05 plus wallet tasks` | All task/asset/schedule/inspection/history screens, managed owner send, confirmed stop and independent recovery with correct fee/source/authority distinctions. |
 | M4 / G4,W4 | `P3-W04 and all native/mobile failure cases` | Device cancellation/backup/account/cache/permission/accessibility/pending/replace/reorg/API-outage cases have observed evidence. |
-| M5 / G5,W5 | `P3-06, P3-W05` | Signed release APK rebuilt/installed; complete journey rerun with final hashes/manifest; every mandatory mobile and wallet case is accounted for. |
-| MA / W0–W4 (v7) | `P3-A01, P3-A02` | Approval, freeze, policy, allowance and intent-review flows work on the installed APK; AQ05–AQ08 and AQ10 device cases PASS. |
+| M5 / G5,W5 | `P3-06, P3-W05` | Signed release APK and iOS build rebuilt/installed; complete journey rerun with final hashes/manifest; every mandatory mobile and wallet case is accounted for. |
+| MA / W0–W4 (v7) | `P3-A01, P3-A02` | Approval, freeze, policy, allowance and intent-review flows work on the installed Android and iOS apps; AQ05–AQ08 and AQ10 device cases PASS. |
 
 ## Start here — current release scope and task order
 
@@ -122,10 +123,93 @@ Sections 2–6 and the wallet tasks in section 7 are one delivery. Follow the se
 | Manual transfers and owner approval | `P3-02 + P3-W02` | Use W0 domain5/Login2 vectors and S8.6 interfaces; ship receive/QR, real personal ETH/reviewed ERC20 send, nonce journal and managed OwnerTransfer. |
 | Connected account and agent flows | `P3-03 + P3-W03` | Use native-protected refresh/session handling, factory wallet discovery, scoped task approval and verified activity. |
 | Inspect and independently recover | `P3-04 + P3-05` | Show actual work/payment/authority separately; independent Admin/OwnerTransfer relay works without API/MPC. |
-| Whole-app release | `P3-W04 + P3-06 + P3-W05` | Qualify every required screen and WQ case on a physical device, then produce the signed APK and reproducible build instructions. |
+| Whole-app release | `P3-W04 + P3-06 + P3-W05` | Qualify every required screen and WQ case on a physical device, then produce the signed APK and iOS build with reproducible build instructions. |
+| iOS parity | `P3-X01` | Runs alongside every task: the Swift module matches the Kotlin module vector for vector, and the iOS build passes the same journey. |
 | Owner controls for agents | `P3-A01 + P3-A02` | Approval/alert/freeze screens first, then wallet policy editor, allowance and intent review. |
 
 **Completion record:** for each task record source commit, shared-schema commit, command/device or chain reference, observed result and known gaps. Unrun or failed cases stay incomplete. Both original G/Q and wallet W/WQ gates apply; no acceptance or implementation tests were executed by updating this document.
+
+## Cross-platform delivery — Android and iOS (v7.1)
+
+The owner wallet is one Expo/React Native app that ships on **Android 12+ and iOS 16+**. Every screen, flow and `P3-*` case in this plan is required on both platforms. Where a task below names only an Android mechanism (Kotlin, Keystore, `FLAG_SECURE`, APK), the iOS equivalent in the table below is equally required. Record each result per platform (`environment.platform: "android" | "ios"`). A case passes only when both platforms pass; until then it stays `LOCAL_PASS` or `BLOCKED`.
+
+**The native boundary does not change.** `modules/owner-wallet` is one Expo module with two implementations, Kotlin (`android/`) and Swift (`ios/`), behind the same TypeScript interface (S8.6).
+- Both use Trust Wallet Core at the same pinned version: the Android Maven artifact and the iOS CocoaPods pod `TrustWalletCore`.
+- Recovery words, seeds and private keys never enter JavaScript.
+- The module signs only the bounded typed operations in S3 and S8.6, never an arbitrary digest. Shared React Native packages handle only non-secret work.
+
+| Concern | Android | iOS |
+| --- | --- | --- |
+| Native module | Kotlin, `modules/owner-wallet/android` | Swift, `modules/owner-wallet/ios` (Expo Modules API) |
+| Wallet Core | Maven artifact (GitHub Packages) | CocoaPods `TrustWalletCore`, same version |
+| Seed wrapping key | Android Keystore AES-256, non-exportable, needs user authentication | Secure Enclave P-256 key (`kSecAttrTokenIDSecureEnclave`, access control `.privateKeyUsage` + `.biometryCurrentSet`); the seed is sealed with `eciesEncryptionCofactorVariableIVX963SHA256AESGCM` |
+| Encrypted seed storage | App-private file, excluded from cloud backup and device transfer | Keychain item `kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly`: never synced, never restored to another device |
+| Biometric change | Key invalidated by new enrollment | `.biometryCurrentSet` invalidates the key; restore from words |
+| Native confirmation | `NativeApprovalActivity` | Native `UIViewController` presented by the module; JS cannot change the displayed fields |
+| Secret screens | `FLAG_SECURE` blocks screenshots and recording | Content hidden while `UIScreen.isCaptured`; screenshot detection warns the user. iOS cannot block screenshots (see section 6) |
+| Unlock | BiometricPrompt / device credential | LocalAuthentication (Face ID / Touch ID / passcode) |
+| Push (IDs only) | FCM | APNs, through `expo-notifications` |
+| Flow tests | JVM tests, instrumentation, Maestro on device | XCTest unit tests, Maestro on the simulator, recorded operator on a physical iPhone |
+| Release artifact | Signed APK | Signed iOS build (development/ad-hoc install, or TestFlight) |
+
+**Shared packages.** Use these for non-secret work on both platforms, at exact pins:
+- `expo-local-authentication`: unlock gating only; the key stays sealed natively.
+- `expo-screen-capture`: capture state and screenshot events.
+- `expo-notifications`: push.
+- `expo-camera`: QR scan.
+- `expo-clipboard`: addresses only, never secrets.
+- `react-native-safe-area-context`, `react-native-screens` and React Navigation: navigation and layout.
+
+Do not use `expo-secure-store` or `react-native-keychain` for recovery words or seeds, because both pass the secret through JavaScript.
+
+**MetaMask Mobile as a design reference, never as source.** The `MetaMask/metamask-mobile` license allows only inspection and study: it grants no right to copy, modify or create derivative works.
+- **Study it for UX and flow patterns:**
+  - onboarding and the recovery-phrase backup quiz
+  - auto-lock and biometric unlock
+  - account and network lists
+  - decoded transaction review
+  - pending, speed-up and cancel states
+  - notification handling
+- **Write our implementation independently.** In the PR, name the MetaMask screen or flow you studied.
+- **MetaMask's open libraries may be used as dependencies:** `MetaMask/core` (MIT), `@metamask/key-tree` (MIT), `@metamask/eth-sig-util` (ISC) and `@metamask/keyring-eth-hd` (ISC).
+  - Only where no key enters JavaScript, for example signature recovery in a JS cross-check.
+  - Prefer libraries the repository already uses (`viem`, `@scure/*`).
+  - Record each license in the dependency notice.
+- **Do not adopt MetaMask's JavaScript keyring or vault model.** It keeps keys in JavaScript, which conflicts with our native bounded-signing rule.
+
+**Apple prerequisites.**
+- **Simulator UI work:** needs only Xcode.
+- **Installing on your own iPhone:** a free Apple ID works for a development build.
+- **APNs push and TestFlight:** need a paid Apple Developer Program membership.
+- **Missing prerequisites:** without the account or a physical iPhone with a passcode, the affected iOS cases are `BLOCKED`, never `PASS`.
+
+### P3-X01. iOS native parity, W0–W5
+
+**Create:** `modules/owner-wallet/ios/` (Swift module, podspec pinning `TrustWalletCore`), iOS native confirmation and recovery views, XCTest targets, iOS Maestro flows, and an iOS section in `docs/mobile-build.md`. Generated `apps/mobile/ios/` stays uncommitted (Continuous Native Generation), like `android/`.
+
+**Consumes:** the same Person1 fixtures and S8.6 interface as the Kotlin module. **Produces:** identical results to the Android module for every vector, and an installed iOS build that runs the complete owner journey.
+
+- [ ] Implement every S8.6 native function in Swift with the same names, argument shapes, errors and bounds as Kotlin. A shared TypeScript contract test runs against both.
+- [ ] Seal the seed under a Secure Enclave key, as in the table above. Decrypting needs user presence. A tampered ciphertext, a missing Keychain item or an invalidated key fails safely and never silently creates a new owner.
+- [ ] Present native confirmation and recovery views from Swift. Hide secret content while the screen is captured, warn after a screenshot, and never put secrets on the pasteboard, in logs or in backups.
+- [ ] Register for APNs and send `{deviceId, platform: "ios", pushToken}` (S4). With push denied, the app still works through in-app refresh.
+- [ ] Build the release-mode iOS app, install it on a physical iPhone and rerun the P3-W05 journey. Record the build hash, iOS version, device model and Xcode version.
+
+#### Required execution contract — P3-X01
+
+**Prerequisites / blockers:** Xcode matching Expo SDK 54; Trust Wallet Core pod at the Android version; a physical iPhone with a passcode for device cases; a paid Apple Developer Program membership for APNs and TestFlight.
+
+**Required source and test files:** `modules/owner-wallet/ios/*.swift`, `modules/owner-wallet/ios/OwnerWallet.podspec`, `modules/owner-wallet/ios/Tests/*.swift`, `apps/mobile/e2e/ios/*.yaml`, `evidence/person3/cases/P3-X01.json`.
+
+| Case ID | Exact setup / action | Required assertion / observed outcome |
+| --- | --- | --- |
+| `P3-X01.T01` | Run every Person1 account/Login2/Permit5/Admin5/OwnerTransfer5 vector through the Swift module | Addresses, digests and 65-byte signatures equal the fixtures and the Kotlin results byte for byte. |
+| `P3-X01.T02` | Tamper the sealed seed, delete the Keychain item or remove the Secure Enclave key | Unlock fails with an explicit error; no new owner is created; restore from words still works. |
+| `P3-X01.T03` | Change Face ID / Touch ID enrollment after setup | The wrapping key is invalidated; the app requires restore from words and keeps the same owner address after restore. |
+| `P3-X01.T04` | Record the screen, mirror it, or take a screenshot on seed and approval views | Secret content is hidden while captured; a screenshot shows a warning; pasteboard, logs and backups contain no secret. |
+| `P3-X01.T05` | Call the module with an arbitrary digest, an unsupported type or out-of-bounds fields | Rejected exactly as on Android; nothing is signed. |
+| `P3-X01.T06` | Approval push via APNs, then push permission denied | With push, the ID-only notification opens native confirmation. Without it, the same approval is reachable in-app. |
+| `P3-X01.T07` | Release iOS build on a physical iPhone runs the P3-W05 journey | Personal send/receive, agent approval, owner transfer, freeze and recovery all succeed with recorded hashes; any skipped step stays incomplete. |
 
 ## 1. Complete deliverables
 
@@ -135,7 +219,8 @@ Sections 2–6 and the wallet tasks in section 7 are one delivery. Follow the se
 | Owner module | `modules/owner-wallet/android/src/main/java/com/mandate/ownerwallet/{OwnerWalletModule,WalletProfile,AccountStore,SeedStore,TypedSigner,ScopeValidator,PersonalTransferBuilder,FeeEstimator,NativeTransactionJournal,NonceCoordinator,OwnerOperationRelay,NativeSession,AppLock,NativeApprovalActivity,RecoveryActivity}.kt` | Accounts/backup/import, semantic sends/replacement/cancel, protected sessions and native confirmation |
 | Screens | `apps/mobile/src/screens/{Onboarding,Accounts,Home,Receive,Scan,Send,TransferReview,TransactionDetail,TokenDetails,Contacts,Activity,Security,TaskCreate,Approval,Task,Assets,Schedule,Inspector,Control,Recovery,Network,Help}.tsx` | Complete flow with real API and actual chain states |
 | Independent sender | `tools/relay-admin.ts` and README | Submit exported Admin/OwnerTransfer through another RPC with backend offline; native personal-gas relay is also required |
-| Release | `apps/mobile/android`, `docs/mobile-build.md`, `evidence/person3` | Installable APK, exact native dependency pins, restore/control evidence |
+| iOS owner module | `modules/owner-wallet/ios/*.swift` mirroring every Kotlin file above | Same interface, vectors and bounds as Android (P3-X01) |
+| Release | `apps/mobile/android`, `apps/mobile/ios` (generated), `docs/mobile-build.md`, `evidence/person3` | Installable APK and iOS build, exact native dependency pins, restore/control evidence |
 
 Person1 supplies schema/ABI/trusted manifest. Person2 supplies public API. Person4 supplies typed task inputs/results and inspection findings. You do not reimplement policy/backend or embed the server's MPC shares in the app.
 
@@ -526,9 +611,9 @@ Each check records case, device, commit, expected/observed result and reference 
 
 ## 6. Limits to state accurately
 
-Keystore protects AES wrapping key; Ethereum signing takes place in native memory. Rooted/compromised app processes can still threaten unlocked secrets/transaction display. Recovery words and device loss have normal self-custody consequences. The owner uses conventional local signing, not MPC; online executor uses MPCium. Public-testnet funds/vault/risk fixtures do not demonstrate audited real-money custody.
+Keystore (Android) or the Secure Enclave (iOS) protects the wrapping key; Ethereum signing takes place in native memory on both. iOS cannot block screenshots, only hide secrets while the screen is captured and warn after a screenshot. Rooted/compromised app processes can still threaten unlocked secrets/transaction display. Recovery words and device loss have normal self-custody consequences. The owner uses conventional local signing, not MPC; online executor uses MPCium. Public-testnet funds/vault/risk fixtures do not demonstrate audited real-money custody.
 
-Primary integration references: [Wallet Core Android](https://developer.trustwallet.com/developer/wallet-core/integration-guide/android-guide), [typed-message API](https://github.com/trustwallet/wallet-core/blob/master/include/TrustWalletCore/TWEthereumMessageSigner.h), [Android Keystore](https://developer.android.com/privacy-and-security/keystore), [EIP712](https://eips.ethereum.org/EIPS/eip-712). Pin actual working native artifacts during G1; these references do not substitute for phone qualification.
+Primary integration references: [Wallet Core Android](https://developer.trustwallet.com/developer/wallet-core/integration-guide/android-guide), [Wallet Core iOS](https://developer.trustwallet.com/developer/wallet-core/integration-guide/ios-guide), [Secure Enclave keys](https://developer.apple.com/documentation/security/protecting-keys-with-the-secure-enclave), [Keychain accessibility](https://developer.apple.com/documentation/security/ksecattraccessiblewhenpasscodesetthisdeviceonly), [Expo Modules API](https://docs.expo.dev/modules/overview/), [typed-message API](https://github.com/trustwallet/wallet-core/blob/master/include/TrustWalletCore/TWEthereumMessageSigner.h), [Android Keystore](https://developer.android.com/privacy-and-security/keystore), [EIP712](https://eips.ethereum.org/EIPS/eip-712). Pin actual working native artifacts during G1; these references do not substitute for phone qualification.
 
 ## 7. Complete Android wallet — required v6 tasks
 
@@ -955,18 +1040,18 @@ This appendix is identical in the four documents. Specification 7.0, dated 2026-
 
 ### S1. Product, boundary and ownership
 
-Build **Mandate Wallet**: an Android personal ETH/ERC20 wallet with receive/send/history/accounts and local security; a separately funded managed wallet delegates bounded tasks to an online LLM agent (S9) that chooses among policy-bounded options; the agent buys real browser checks, spends a standing service allowance, operates approved vault/call templates and makes fixed scheduled payments under an owner wallet policy, review thresholds and freeze controls. Payments and useful delivery are recorded separately. An independent verifier reconstructs permission, spending and delivery from an export and public chain data.
+Build **Mandate Wallet**: an Android and iOS personal ETH/ERC20 wallet with receive/send/history/accounts and local security; a separately funded managed wallet delegates bounded tasks to an online LLM agent (S9) that chooses among policy-bounded options; the agent buys real browser checks, spends a standing service allowance, operates approved vault/call templates and makes fixed scheduled payments under an owner wallet policy, review thresholds and freeze controls. Payments and useful delivery are recorded separately. An independent verifier reconstructs permission, spending and delivery from an export and public chain data.
 
 | Person | Sole write ownership | Outputs consumed by others |
 | --- | --- | --- |
 | 1 | `packages/contracts`, `packages/schema`, `deployments`, root workspace/CI configuration | ABI, schemas, fixtures, deployment manifest, chain validation |
 | 2 | `apps/api`, `apps/worker`, `services/policy`, `services/mpc-adapter`, `services/mpc-authorizer`, `infra`, migrations, evidence writer | Public API, durable execution, three-node/two-participant MPCium PoC, policy authorization, exports |
-| 3 | `apps/mobile`, `modules/owner-wallet`, `tools/relay-admin.ts` | Complete personal/managed owner wallet, local transactions/sessions/security, installed APK, independent recovery sender |
+| 3 | `apps/mobile`, `modules/owner-wallet`, `tools/relay-admin.ts` | Complete personal/managed owner wallet, local transactions/sessions/security, installed Android and iOS apps, independent recovery sender |
 | 4 | `packages/runbooks`, `apps/provider`, `packages/sdk`, `apps/mcp`, `apps/agent`, `apps/cli`, `packages/verifier`, `demo`, `evaluation`, submission assembly | Runbook driver, reference LLM agent, intent compiler library, paid/x402-formatted browser services, SDK/MCP/CLI integrations, standalone inspector, recorded demonstration |
 
 Person 2 owns the worker process; Person 4 supplies its runbook library. Person 2 writes evidence; Person 4 verifies it independently. Person 1 owns ABI/schema generation; other owners never hand-maintain copies. Each owner supplies tests, deployment instructions, known risks and screenshots/logs for their own deliverable. No unassigned fifth person is required.
 
-Use one monorepo `./`, Node 22, TypeScript, pnpm workspaces with a checked-in lockfile; Solidity 0.8.28/OZ 5.x/Foundry; PostgreSQL 16; React Native with Expo 54 native Android build; Go 1.25.8 for MPCium; the Claude Agent SDK for TypeScript (`@anthropic-ai/claude-agent-sdk`, exact version pinned) with model `claude-opus-5-5` for the reference agent, and the Anthropic TypeScript SDK (`@anthropic-ai/sdk`) structured outputs for the intent compiler. No LangChain or hand-written agent loop. Person1 creates the workspace. All filenames here are relative to it and are planned files, not claims that source already exists. Pin resolved package versions in lockfiles; container images use resolved digests in the release manifest. Keep secrets out of Git and frontend bundles.
+Use one monorepo `./`, Node 22, TypeScript, pnpm workspaces with a checked-in lockfile; Solidity 0.8.28/OZ 5.x/Foundry; PostgreSQL 16; React Native with Expo 54 native Android and iOS builds; Go 1.25.8 for MPCium; the Claude Agent SDK for TypeScript (`@anthropic-ai/claude-agent-sdk`, exact version pinned) with model `claude-opus-5-5` for the reference agent, and the Anthropic TypeScript SDK (`@anthropic-ai/sdk`) structured outputs for the intent compiler. No LangChain or hand-written agent loop. Person1 creates the workspace. All filenames here are relative to it and are planned files, not claims that source already exists. Pin resolved package versions in lockfiles; container images use resolved digests in the release manifest. Keep secrets out of Git and frontend bundles.
 
 `DeploymentManifest` includes `{schemaVersion:4,walletDomainVersion:"5",loginDomainVersion:"2",chainId:84532,sourceTag,contracts:{factory,token,vault,anchor,walletImplementation:null},providers,targets,origins,mpc,evidence,runbooks,supportedTokens,dependencyPins}`. Each non-null contract is `{address,deploymentBlock,codeHash}`; providers are `{providerId,recipient,capabilities}`; targets are `{targetId,url,expectedTitle}`; origins are `{api,provider}`; mpc is `{engine:'mpcium',commit,thresholdConfig:1,nodeCount:3,requiredParticipants:2,deploymentMode:'competition-poc-single-vm-three-containers',initiatorPublicKey,authorizerPublicKey}`; evidence is `{ed25519PublicKey,publisher}`; runbooks is list of full hashed manifests. v7 adds `agentAssets:[{address,codeHash,decimals,symbol}]` (DemoUSD and Base Sepolia test USDC, S9.9), `screening:{listId:'demo-screening-v1',listHash}`, `riskRules:{version:'risk-rules-v1',hash}`, `x402:{mode:'MANDATE_NATIVE'|'ERC1271',facilitator:null|string,gatePassed:boolean}` and `agent:{runtime:'claude-agent-sdk',sdkVersion,model,mcpToolsetHash}`. supportedTokens is a reviewed registry of {chainId,address,codeHash,decimals,symbol,transferMode:'STANDARD_ERC20'}; unknown imports remain watch-only. Strings for times/blocks, strict validated keys/addresses/hashes. Per-wallet mapping is `{walletId,owner,walletAddress,deploymentBlock,codeHash,mpcWalletId,executorAddress,executorPublicKey,keyVersion}` checked against factory and signed Permit. Keys in these structures are public only. Resolve real deployment addresses/versions at setup gates; do not fabricate them to fill the manifest.
 
@@ -1099,7 +1184,7 @@ All endpoints under `/v1`. Mutations except challenge/verify/refresh require UUI
 | GET `/approvals` / GET `/approvals/:approvalId` | owner JWT; pending co-signature requests with action, invoice, typedData, digest, untrusted agent rationale (S9.5) |
 | POST `/approvals/:approvalId/sign` / `/reject` | owner JWT; `{ownerSignature}` / `{}` → `{state}` |
 | POST `/wallets/:walletId/policy/draft` / `/submit` | owner JWT; `{policy,assetCaps,allowlist,blocklist,templates}` → `{draftId,typedData,digest,effects}`; submit `{draftId,ownerSignature}` → `{txHash,version}` (S9.4) |
-| POST `/devices/push` | owner JWT; `{deviceId,pushToken}` → `{registered:true}`; bound to the JWT's owner address and session; deleted on logout, session revoke or token rotation; push payload carries only an approval/alert ID |
+| POST `/devices/push` | owner JWT; `{deviceId,platform:'android'|'ios',pushToken}` → `{registered:true}`; the server delivers through FCM or APNs by platform; bound to the JWT's owner address and session; deleted on logout, session revoke or token rotation; push payload carries only an approval/alert ID |
 | POST `/wallets/:walletId/inhibit/clear` | owner JWT with original signed-login `auth_time` ≤5 min (else REAUTH_REQUIRED); `{alertId}` → `{inhibited:false}`; agent tokens 403 |
 
 `terms` is exactly `{asset,startsAt,expiresAt,maxActions,maxPayments,maxPayment,spendCap,liquidFloor,depositCap,withdrawCap,reviewThreshold,periodCap,periodSeconds,recipients,schedule,templateIds}` using Permit/Schedule types. All fields required; kind-inapplicable fields zero. Server derives issuedAt/executor/kind/task ID/hashes/nonce/epoch from verified state and checks recipients/Schedule equal Conditions and trusted provider bindings, and checks every term against the current WalletPolicy (S9.4) before returning a draft. Unknown/redundant mismatched fields fail. At most one outstanding Permit draft per wallet; refreshed terms require new native confirmation. Admin nonce/lane is separate.
@@ -1184,7 +1269,7 @@ Export ZIP: `manifest.json`, `events.jsonl`, `checkpoint.json`, `checkpoint.sig`
 | G2, Oct18 02:00 | One phone-approved real Base Sepolia purchase, actual browser output, durable export, initial independent report |
 | G3, Oct18 10:00 | All four runbooks, fallback, reservations/restart, pause/recovery, SDK/MCP, full inspector |
 | G4, Oct18 15:00 | Adversarial/evaluation results and fixes, rebuild/install/recovery evidence |
-| G5, Oct18 18:00 | Tagged APK/source, manifest, deck, ≤5min demo, submission package frozen |
+| G5, Oct18 18:00 | Tagged APK, iOS build and source, manifest, deck, ≤5min demo, submission package frozen |
 | Submission, Oct20 18:00 target | Upload and verify receipt; official cutoff Oct20 21:59 Dhaka /23:59 Beijing |
 
 These are aggressive targets from Oct17, not estimates backed by an existing implementation. Record actual pass times; a failed gate remains incomplete. Keep a single scope and fix the blocker. No hidden ordinary-key MPC fallback, fabricated test results or guarantee of winning. Tests below are instructions for implementers; this documentation task does not run implementation tests.
@@ -1193,7 +1278,7 @@ Every owner contributes to Q01 native recovery, Q02 MPC isolation, Q03 scope, Q0
 
 ### S8. Complete wallet application — required v6 extension
 
-This section is required implementation work, not an optional UI upgrade. It extends the agent wallet into a usable Android wallet on **Base Sepolia84532**. Documentation is6.0; newly deployed MandateWallet domain is**5**; MandateLogin domain is**2**; existing runbook/evidence payload schema remains4. Existing bootstrap TS/Solidity layouts/domain constants are pre-v6 scaffolds and must be migrated before financial signing. No contract is currently deployed, so no live migration is claimed. Imported accounts/assets do not grant agents new powers.
+This section is required implementation work, not an optional UI upgrade. It extends the agent wallet into a usable Android and iOS wallet on **Base Sepolia84532**. Documentation is6.0; newly deployed MandateWallet domain is**5**; MandateLogin domain is**2**; existing runbook/evidence payload schema remains4. Existing bootstrap TS/Solidity layouts/domain constants are pre-v6 scaffolds and must be migrated before financial signing. No contract is currently deployed, so no live migration is claimed. Imported accounts/assets do not grant agents new powers.
 
 #### S8.1 Accounts, funds and screens
 
@@ -1332,7 +1417,7 @@ A future wallet-side integration must keep owner signing native, select personal
 | W2 — managed funds | OwnerTransfer/receive/event/epoch contract | Owner relay/inhibit and history attribution | Managed send/funding/native approval/independent relay | Verifier OWNER_CONTROL attribution |
 | W3 — continuity | Nonce/replay/epoch outcomes | Refresh rotation/revocation/pagination/reorg | Lock/restore/retry/cancel/activity/security screens | Reconnect/outage/same-seed restoration cases |
 | W4 — whole-app qualification | Transfer/admin/replay vectors | Outage/history/session error states | Navigation, lock, camera permission and secure confirmation | Receive-request fixtures and end-to-end app cases |
-| W5 — release | Chain/ABI/type manifest | Deploy/session/indexer actual status | Signed installed APK with all flows | Complete app demo/evaluation assembled |
+| W5 — release | Chain/ABI/type manifest | Deploy/session/indexer actual status | Signed installed Android and iOS apps with all flows | Complete app demo/evaluation assembled |
 
 W0 precedes new signing; W1/W2 run alongside existing G1–G3; W3/W4 before release G4/G5. Original Oct18 internal target/Oct20 official deadline remain, but scope expansion does not establish capacity or guaranteed completion. Record actual gate times/failures and use submission buffer; no passing result or complete-app claim from a scaffold.
 
