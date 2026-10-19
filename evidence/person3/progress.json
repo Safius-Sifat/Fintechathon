@@ -1,39 +1,39 @@
 {
   "owner": "Person3",
   "plan": "docs/plans/03 - Android Owner Wallet.md (v7.1)",
-  "updatedAt": "2026-10-19T16:50:00+06:00",
-  "currentCheckpoint": "UI-05 Send and Transfer Review (UI-first order). P3-01 checkpoint 1 is in review as #29: native loading verified on an emulator; physical-device and iOS gates incomplete.",
+  "updatedAt": "2026-10-20T16:00:00+06:00",
+  "currentCheckpoint": "UI-06 Activity, Transaction Details, Assets and Token Details: visually approved, submitted as a draft PR. Next: UI-07.",
   "priority": "Person3 owner decision 2026-10-19: screens, layouts and UI/UX first. Wallet, security and backend functionality is deferred, not dropped; every task below stays required for the final deliverable.",
   "acceptanceRule": "UI checkpoints are layout and navigation previews. They complete no P3 case: every case below stays open until its own functional, device and iOS evidence exists.",
   "uiCheckpoints": [
     {
       "id": "UI-02",
       "screens": "Onboarding.tsx",
-      "status": "IN_REVIEW #30",
+      "status": "MERGED #30",
       "preparesCases": "P3-01, P3-W01 (create/import, backup, restore consequences)"
     },
     {
       "id": "UI-03",
       "screens": "HomeScreen.tsx, Accounts.tsx",
-      "status": "IN_REVIEW #31 (depends on #30)",
+      "status": "MERGED #31",
       "preparesCases": "P3-W01 (accounts 0..19, switch/add/rename), P3-W02 (balances)"
     },
     {
       "id": "UI-04",
       "screens": "Receive.tsx, Scan.tsx",
-      "status": "IN_REVIEW (depends on #31, #30); real QR decoding NOT_RUN",
+      "status": "MERGED #32 (real QR decoding NOT_RUN)",
       "preparesCases": "P3-W02, WQ03, WQ14 (receive, QR, camera permission)"
     },
     {
       "id": "UI-05",
       "screens": "Send.tsx, TransferReview.tsx",
-      "status": "IN_PROGRESS",
+      "status": "MERGED #33",
       "preparesCases": "P3-W02 (personal send/review), P3-02 and S8.3 (managed OwnerTransfer review), WQ04, WQ05, WQ07"
     },
     {
       "id": "UI-06",
       "screens": "Activity, TransactionDetail, Assets, TokenDetails",
-      "status": "NOT_STARTED",
+      "status": "IN_REVIEW (visually approved, draft PR)",
       "preparesCases": "P3-W02, P3-W03, WQ06, WQ11, WQ13"
     },
     {
@@ -64,15 +64,17 @@
   "setupTasks": {
     "MOBILE-TEST-HARNESS": {
       "owner": "Person3",
-      "status": "NOT_STARTED",
+      "status": "DONE",
       "approach": "Plan, Agent execution instructions: Node's test runner through the existing pinned tsx; apps/mobile script 'test': 'tsx --test test/*.test.ts'; test names contain the exact case ID; pure domain/view-model/API logic only (no React Native screens in Node).",
       "requiredBefore": "Functional QR and amount validation: apps/mobile/src/domain/{amounts,qr,assets}.ts with apps/mobile/test/{amounts,qr,assets}.test.ts (P3-W02, WQ03, WQ14)",
-      "dependencyNote": "Uses the tsx version already pinned in the workspace; any new test dependency is recorded in the lockfile through the agreed narrow exception"
+      "dependencyNote": "Uses the tsx version already pinned in the workspace; any new test dependency is recorded in the lockfile through the agreed narrow exception",
+      "observed": "apps/mobile 'test' and 'check' (tsx/Node test runner) merged in #33; root make check-mobile runs them since #34, then fails on the native gate by design. 14 tests as of UI-06."
     }
   },
   "platformRule": "v7.1: a case passes only when Android and iOS both pass. Current work is Android only, so Android results are recorded as LOCAL_PASS until P3-X01 exists.",
   "completedMilestones": {
-    "UI-01.1": "App shell and honest Home/Activity/Settings preview, merged in #27 (50d948a). UI only; no case IDs."
+    "UI-01.1": "App shell and honest Home/Activity/Settings preview, merged in #27 (50d948a). UI only; no case IDs.",
+    "P3-01 checkpoint 1": "Native module registration and Wallet Core 4.8.4 load, emulator only; merged #29 (446609a). Diagnostic getNativeStatus only."
   },
   "tasks": {
     "P3-01": {

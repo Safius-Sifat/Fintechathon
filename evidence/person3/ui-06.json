@@ -5,7 +5,7 @@
   "recordedAt": "2026-10-20T15:20:00+06:00",
   "note": "UI evidence, kept outside evidence/*/cases/. Completes no P3 case: P3-W02, P3-W03, WQ06, WQ11 and WQ13 stay open. No real transaction, balance or verified token metadata is shown.",
   "baseCommit": "fb4dc6c",
-  "dependency": "Built on UI-05 (PR #33), on UI-04 (#32), UI-03 (#31) and UI-02 (#30); all unmerged. The UI-06 change is the diff against fb4dc6c.",
+  "dependency": "Parents #29-#33 were squash-merged into main on 2026-10-19 (#33 at 19027d5), and Person1's check-mobile change merged as #34 (95e91fb). This branch merges origin/main 95e91fb, so it has no remaining PR dependency.",
   "planReference": "docs/plans/03 - Android Owner Wallet.md v7.1, S8.1 Assets and Activity screen groups, S8.2 transaction states, S8.4 (history never shown as verified empty; watch-only vs send-enabled tokens; no fabricated APY)",
   "implemented": [
     "Activity: Personal account / Agent wallet selector; the two histories are separate lists; each shows 'History unavailable', stated as not an empty history",
@@ -54,13 +54,19 @@
       "result": "PASS",
       "observed": "14/14 tests (4 txStatus + 10 sendDraft), typecheck clean"
     },
-    { "check": "pnpm typecheck (all workspace packages)", "result": "PASS" },
+    {
+      "check": "pnpm typecheck (all workspace packages)",
+      "result": "PASS"
+    },
     {
       "check": "pnpm check:repository",
       "result": "PASS",
       "observed": "checkedFiles 455, failures []"
     },
-    { "check": "prettier --check on changed files", "result": "PASS" }
+    {
+      "check": "prettier --check on changed files",
+      "result": "PASS"
+    }
   ],
   "device": {
     "kind": "emulator",
@@ -129,5 +135,44 @@
     "Pending/replacement/rebroadcast lifecycle from the native journal (P3-W02, WQ06)",
     "Explorer links, search/filter and exports",
     "Physical Android phone, iOS simulator and iPhone, screen-reader pass"
-  ]
+  ],
+  "integration": {
+    "mergedMain": "95e91fb",
+    "conflicts": "apps/mobile/app.json (kept main's @mandate/owner-wallet plugin from #29 alongside expo-camera); apps/mobile/src/navigation/RootNavigator.tsx and screens/HomeScreen.tsx (main's versions are byte-identical to the UI-05 tip fb4dc6c, so the UI-06 versions were kept). Caused by the squash merges, not by competing changes.",
+    "diffAgainstMain": "apps/mobile/** UI-06 files, evidence/person3/ui-06*, and 3 lockfile lines (@mandate/schema workspace link)",
+    "checks": [
+      {
+        "check": "pnpm install --frozen-lockfile",
+        "result": "PASS"
+      },
+      {
+        "check": "pnpm --filter @mandate/mobile check",
+        "result": "PASS",
+        "observed": "14/14 tests, typecheck clean"
+      },
+      {
+        "check": "pnpm typecheck (all workspace packages)",
+        "result": "PASS"
+      },
+      {
+        "check": "pnpm check:repository",
+        "result": "PASS",
+        "observed": "checkedFiles 471, failures []"
+      },
+      {
+        "check": "prettier --check on files changed against main",
+        "result": "PASS"
+      },
+      {
+        "check": "check-mobile step 1: scripts/check-suite.mjs node @mandate/mobile (WSL Ubuntu clone of 9b8ebe9)",
+        "result": "PASS",
+        "observed": "check-suite: node @mandate/mobile passed 14 tests. make is not installed in WSL, so the two Makefile steps were run directly."
+      },
+      {
+        "check": "check-mobile step 2: scripts/not-ready.mjs check-mobile-native",
+        "result": "FAILS AS INTENDED",
+        "observed": "Exit 1 on Windows with pinned Node 22.23.3. Under WSL the exit code read through wsl.exe was 0 even for process.exit(3), so WSL exit codes from this session are not evidence. make check-mobile therefore still fails overall until native/device suites exist."
+      }
+    ]
+  }
 }
