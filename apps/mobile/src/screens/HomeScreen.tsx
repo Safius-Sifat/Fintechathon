@@ -92,6 +92,15 @@ export function HomeScreen() {
         </Text>
       </Card>
 
+      <NavRow
+        icon="clipboard-text-clock-outline"
+        tone="amber"
+        label="Agent tasks"
+        value="Tasks unavailable"
+        accessibilityHint="Opens agent tasks"
+        onPress={() => navigation.navigate("AgentTasks")}
+      />
+
       <View style={styles.note}>
         <IconTile icon="call-split" tone="slate" size={36} />
         <Text style={styles.noteText}>

@@ -1,5 +1,18 @@
-import { Pressable, StyleSheet, Text, View } from "react-native";
-import { colors, radius, space, touchTarget, type } from "../theme";
+import {
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  useWindowDimensions,
+} from "react-native";
+import {
+  colors,
+  radius,
+  space,
+  stackedFontScale,
+  touchTarget,
+  type,
+} from "../theme";
 
 export interface SegmentOption<K extends string> {
   key: K;
@@ -14,6 +27,8 @@ interface SegmentedProps<K extends string> {
   options: readonly SegmentOption<K>[];
   selected: K;
   onSelect: (key: K) => void;
+  // Narrower options for short labels such as digits.
+  compact?: boolean;
 }
 
 // Labelled single-choice control. Options wrap onto new rows at large text.
@@ -22,7 +37,16 @@ export function Segmented<K extends string>({
   options,
   selected,
   onSelect,
+  compact = false,
 }: SegmentedProps<K>) {
+  // Compact options grow with the text size, so at large text they wrap
+  // onto new rows instead of breaking a label mid-word. Wrapped rows size
+  // from their content: a zero flex basis lets a wrapped row overflow.
+  const { fontScale } = useWindowDimensions();
+  const compactStyle = {
+    minWidth: COMPACT_MIN_WIDTH * Math.max(1, fontScale),
+    flexBasis: fontScale > stackedFontScale ? ("auto" as const) : 0,
+  };
   return (
     <View style={styles.block}>
       <Text style={styles.label}>{label}</Text>
@@ -38,7 +62,11 @@ export function Segmented<K extends string>({
               accessibilityHint={option.detail}
               disabled={disabled}
               onPress={() => onSelect(option.key)}
-              style={[styles.item, isSelected && styles.itemSelected]}
+              style={[
+                styles.item,
+                compact && compactStyle,
+                isSelected && styles.itemSelected,
+              ]}
             >
               <Text
                 style={[
@@ -61,6 +89,8 @@ export function Segmented<K extends string>({
     </View>
   );
 }
+
+const COMPACT_MIN_WIDTH = 72;
 
 const styles = StyleSheet.create({
   block: { gap: space.xs },

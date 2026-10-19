@@ -2,14 +2,20 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import type { NavigatorScreenParams } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { AccountsScreen } from "../screens/Accounts";
+import { AgentTasksScreen } from "../screens/AgentTasks";
+import { ApprovalScreen } from "../screens/Approval";
 import { ActivityScreen } from "../screens/ActivityScreen";
 import { AssetsScreen } from "../screens/Assets";
 import { HomeScreen } from "../screens/HomeScreen";
+import { InspectorScreen } from "../screens/Inspector";
 import { IntroScreen, SetupScreen, WelcomeScreen } from "../screens/Onboarding";
 import { ReceiveScreen } from "../screens/Receive";
 import { ScanScreen } from "../screens/Scan";
+import { ScheduleScreen } from "../screens/Schedule";
 import { SendScreen } from "../screens/Send";
 import { SettingsScreen } from "../screens/SettingsScreen";
+import { TaskScreen } from "../screens/Task";
+import { TaskCreateScreen } from "../screens/TaskCreate";
 import { TokenDetailsScreen } from "../screens/TokenDetails";
 import { TransactionDetailScreen } from "../screens/TransactionDetail";
 import { TransferReviewScreen } from "../screens/TransferReview";
@@ -39,6 +45,14 @@ export type RootStackParamList = {
   TransactionDetail: { sampleId: string };
   Assets: undefined;
   TokenDetails: { token: "ETH" | "DemoUSD" | "sample" };
+  AgentTasks: undefined;
+  // The two forms read their drafts from state/taskDraft.ts.
+  TaskCreate: undefined;
+  Schedule: undefined;
+  Approval: { kind: "browser" | "schedule" };
+  // Development samples only until real tasks exist.
+  Task: { sampleId: string };
+  Inspector: { sampleId: string };
 };
 
 const TAB_META: Record<keyof TabParamList, TabMeta> = {
@@ -97,6 +111,12 @@ export function RootNavigator() {
       />
       <Stack.Screen name="Assets" component={AssetsScreen} />
       <Stack.Screen name="TokenDetails" component={TokenDetailsScreen} />
+      <Stack.Screen name="AgentTasks" component={AgentTasksScreen} />
+      <Stack.Screen name="TaskCreate" component={TaskCreateScreen} />
+      <Stack.Screen name="Schedule" component={ScheduleScreen} />
+      <Stack.Screen name="Approval" component={ApprovalScreen} />
+      <Stack.Screen name="Task" component={TaskScreen} />
+      <Stack.Screen name="Inspector" component={InspectorScreen} />
     </Stack.Navigator>
   );
 }

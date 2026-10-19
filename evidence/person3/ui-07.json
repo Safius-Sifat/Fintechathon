@@ -1,0 +1,172 @@
+{
+  "task": "UI-07",
+  "title": "Agent tasks: TaskCreate, Approval, Task, Schedule and Inspector (layout and navigation only)",
+  "status": "REVIEW",
+  "recordedAt": "2026-10-20T16:50:00+06:00",
+  "note": "UI evidence, kept outside evidence/*/cases/. Completes no P3 case: P3-03 and P3-04 stay open. No task, permission, payment, approval, schedule or inspection result is created or shown as real.",
+  "baseCommit": "b281e78",
+  "dependency": "Branched from work/person3-mobile-ui06-activity-assets (PR #35, open draft, not merged). origin/main is 95e91fb. If #35 merges first, this branch is rebased onto main by merging origin/main; otherwise #35 must merge before this one.",
+  "planReference": "docs/plans/03 - Android Owner Wallet.md v7.1: P3-03 (task create and approval), P3-04 (Task outcome/authority/settlement/delivery separation, Schedule, Inspector six findings), S4 TaskView/Finding, S5 outcome/authority/action states, S9.3 goal next to signed terms, S9.12 permission tiers",
+  "implemented": [
+    "Agent tasks hub (new, reached from a Home row under the Agent wallet card): 'Tasks unavailable', stated as not an empty list; Browser check and Scheduled payment forms; Service allowance and Liquidity keeper shown 'Not available yet'; __DEV__-only labelled sample tasks",
+    "TaskCreate (browser-check runbook): goal kept as a note; page from the manifest target IDs; checks and providers as checkboxes kept in schema order (pageLoad,title,formSubmit; a,b); agent asset DemoUSD or test USDC ('Needs a wallet policy cap'); spend cap; paid attempts 1-3; 10-minute limit; prices 'quote unavailable'; nothing is checked; Review enabled only when goal, a check, a provider and a spend cap are present",
+    "Schedule (scheduled-pay runbook): fixed recipient, asset, amount per payment, Daily/Weekly/Demo (fast); demo timing shows an 'Accelerated demo schedule' callout; first payment, window, count; total gross cap 'Unavailable'; 'A missed window is skipped. The agent never catches up by paying twice.'; payment status unavailable; __DEV__-only sample with Paid, Missed (skipped), Due and Upcoming periods",
+    "Approval: the owner's request next to 'Terms you would sign'; every signed term 'Not drafted yet' (the service drafts, the phone checks); what the agent can and cannot do; 'Approve on this phone' disabled; edits need a new review and approval",
+    "Task (reachable only from development samples): goal as a note; Outcome, Spending permission, Payments and Delivery as separate cards; each payment shows its payment state and its own delivery state; gross spend counts failed deliveries; INCLUDED is 'not final yet'; UNKNOWN keeps the reservation and is never retried; negative form result shown as a valid delivery",
+    "Inspector (reachable only from development samples): Mandate service view and Independent report kept apart; independent report 'Not loaded' (mandate-verify runs outside the app); all six categories always listed; state, reason, basis, rule and evidence per finding; assertion-only findings flagged; summary is never 'All six checks passed' unless all six pass on non-assertion evidence; Export evidence disabled",
+    "config/taskStatus.ts labels every shared OUTCOME_STATES, AUTHORITY_STATES, ACTION_STATES and delivery state; config/findings.ts summarises findings; state/taskDraft.ts holds the two form drafts in memory per account and network",
+    "Segmented gained a 'compact' option for short labels; it widens and wraps whole at large text"
+  ],
+  "fixtures": "config/taskSamples.ts: three sample tasks (A fails then B delivers, gross 0.55; negative form check; unknown payment with a failed integrity finding) and one accelerated sample schedule, shown only in __DEV__ builds and always labelled 'Development sample'. Hashes and evidence IDs are words, never hex or UUIDs.",
+  "fabricated": "none outside the labelled development samples",
+  "security": "No signing, no native call, no network request, no secrets. Drafts hold only public form text in memory and are never written to disk.",
+  "dependencyChange": "none (type-only imports from the existing @mandate/schema devDependency; no lockfile or native change)",
+  "files": [
+    "apps/mobile/src/screens/AgentTasks.tsx",
+    "apps/mobile/src/screens/TaskCreate.tsx",
+    "apps/mobile/src/screens/Schedule.tsx",
+    "apps/mobile/src/screens/Approval.tsx",
+    "apps/mobile/src/screens/Task.tsx",
+    "apps/mobile/src/screens/Inspector.tsx",
+    "apps/mobile/src/screens/HomeScreen.tsx (Agent tasks row)",
+    "apps/mobile/src/config/taskStatus.ts",
+    "apps/mobile/src/config/findings.ts",
+    "apps/mobile/src/config/taskLabels.ts",
+    "apps/mobile/src/config/taskSamples.ts",
+    "apps/mobile/src/state/taskDraft.ts",
+    "apps/mobile/src/state/useTaskDrafts.ts",
+    "apps/mobile/src/components/TaskStateChip.tsx",
+    "apps/mobile/src/components/FindingList.tsx",
+    "apps/mobile/src/components/ToggleRow.tsx",
+    "apps/mobile/src/components/Segmented.tsx (compact option)",
+    "apps/mobile/src/navigation/RootNavigator.tsx",
+    "apps/mobile/test/taskStatus.test.ts",
+    "apps/mobile/test/findings.test.ts",
+    "apps/mobile/test/taskDraft.test.ts"
+  ],
+  "checks": [
+    {
+      "check": "UI-07 tests before implementation (red, against stub modules)",
+      "command": "pnpm --filter @mandate/mobile test",
+      "result": "FAIL (expected)",
+      "observed": "17 of the 21 new tests failed with assertion errors. 4 passed against the stubs because the stub values happened to satisfy them (empty drafts equal the empty default, an empty label contains no 'closed', the stub summary returns allPassed for six passes, switching contexts on a stub leaves nothing).",
+      "artifact": "evidence/person3/ui-07/red-run.txt"
+    },
+    {
+      "check": "pnpm --filter @mandate/mobile check (after implementation)",
+      "result": "PASS",
+      "observed": "35/35 tests (21 UI-07 + 4 txStatus + 10 sendDraft), typecheck clean"
+    },
+    { "check": "pnpm typecheck (all workspace packages)", "result": "PASS" },
+    {
+      "check": "pnpm check:repository",
+      "result": "PASS",
+      "observed": "checkedFiles 490, failures []"
+    },
+    {
+      "check": "prettier --check on changed and new files",
+      "result": "PASS"
+    },
+    {
+      "check": "make check-mobile",
+      "result": "NOT_RUN",
+      "observed": "Step 1 is the same mobile test suite (35 pass above); step 2 fails by design until native suites exist. make is not available on this Windows host."
+    }
+  ],
+  "device": {
+    "kind": "emulator",
+    "serial": "emulator-5554",
+    "android": "16",
+    "api": 36,
+    "build": "Existing dev-client APK; JS from this branch. No native change.",
+    "physicalPhone": "NOT RUN",
+    "ios": "NOT RUN",
+    "screenReader": "NOT RUN"
+  },
+  "runtimeChecks": [
+    {
+      "check": "Home row and Agent tasks hub at 1.0: unavailable list, two forms, two not-available task types, labelled samples",
+      "result": "PASS",
+      "screens": [
+        "01-home-agent-tasks-row.png",
+        "02-agent-tasks-top.png",
+        "04-agent-tasks-samples.png"
+      ]
+    },
+    {
+      "check": "TaskCreate at 1.0: empty form with Review disabled, then filled form with Review enabled",
+      "result": "PASS",
+      "screens": [
+        "10-taskcreate-top.png",
+        "12-taskcreate-filled-top.png",
+        "15-taskcreate-review-enabled.png"
+      ]
+    },
+    {
+      "check": "Approval at 1.0 (browser and schedule): request next to undrafted terms; approve disabled",
+      "result": "PASS",
+      "screens": [
+        "20-approval-browser-top.png",
+        "22-approval-browser-agent.png",
+        "36-approval-schedule-top.png",
+        "38-approval-schedule-agent.png"
+      ]
+    },
+    {
+      "check": "Schedule at 1.0: demo timing labelled accelerated; gross cap and status unavailable; no catch-up; labelled sample periods",
+      "result": "PASS",
+      "screens": [
+        "30-schedule-top.png",
+        "33-schedule-review.png",
+        "35-schedule-sample-periods.png"
+      ]
+    },
+    {
+      "check": "Task at 1.0: A paid but not delivered, B delivered, gross 0.55; COMPLETED with CLOSING authority; INCLUDED not final; negative form result valid; UNKNOWN payment keeps its reservation",
+      "result": "PASS",
+      "screens": [
+        "40-task-fallback-top.png",
+        "42-task-fallback-payments.png",
+        "44-task-fallback-bottom.png",
+        "46-task-negative-delivery.png",
+        "47-task-unknown-authority.png",
+        "48-task-unknown-payment.png"
+      ]
+    },
+    {
+      "check": "Inspector at 1.0: service view vs independent report; pending/unverifiable gives 'Not fully verified'; FAIL gives 'At least one check failed'",
+      "result": "PASS",
+      "screens": [
+        "50-inspector-service.png",
+        "52-inspector-findings-2.png",
+        "54-inspector-independent.png",
+        "55-inspector-failed.png"
+      ]
+    },
+    {
+      "check": "Large text, font scale 2.0: hub, TaskCreate, Schedule, Approval, Task and Inspector reflow without clipping",
+      "result": "PASS",
+      "observed": "Detail rows stack; chips wrap; compact segmented options wrap whole (found and fixed in this pass: 'Weekly' broke mid-word, then the wrapped option overflowed its track). Emulator restored to 1.0.",
+      "screens": [
+        "61-2x-task-payment.png",
+        "62-2x-task-payment-2.png",
+        "65-2x-inspector-findings.png",
+        "67-2x-hub-start.png",
+        "69-2x-taskcreate-attempts.png",
+        "70-2x-schedule-repeats.png",
+        "72-2x-schedule-paywith.png",
+        "73-2x-schedule-sample.png",
+        "75-2x-approval-terms.png",
+        "76-2x-approval-bottom.png"
+      ]
+    }
+  ],
+  "pending": [
+    "Real POST /tasks, permit draft, native signPermit and activation with idempotency and lost-response retry (P3-03.T01-T06)",
+    "Task screen from real TaskView polling; Schedule from chain state; Inspector from real findings and an imported verifier report; evidence export (P3-04.T01-T06)",
+    "Native approval screen showing the exact signed Permit fields (P3-02)",
+    "Amount parsing and total gross cap calculation (P3-W02 domain code)",
+    "Service allowance and Liquidity keeper forms (P3-A02 AllowanceApproval; P3-04 Assets liquidity)",
+    "Physical Android phone, iOS, screen-reader pass"
+  ]
+}

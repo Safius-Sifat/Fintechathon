@@ -1,0 +1,40 @@
+Red run of the UI-07 tests against stub modules, before implementation.
+Command: pnpm --filter @mandate/mobile test (exit 1). Paths and stack traces removed.
+
+not ok 1 - UI-07 findings: the six categories match the shared Finding schema in order
+  Expected values to be strictly deep-equal: + actual - expected + [] - [ -   'integrity', -   'authority', -   'policy', -   'settlement', -   'delivery', -   'completion' - ]
+not ok 3 - UI-07 findings: PENDING or UNVERIFIABLE is incomplete, never all passed
+  PENDING + actual - expected + 'allPassed' - 'incomplete'
+not ok 4 - UI-07 findings: a missing category or an empty report is incomplete
+  Expected values to be strictly equal: + actual - expected + 'allPassed' - 'incomplete'
+not ok 5 - UI-07 findings: any FAIL makes the report failed
+  Expected values to be strictly equal: + actual - expected + 'allPassed' - 'failed'
+not ok 6 - UI-07 findings: a PASS backed only by a recorder assertion is not independent proof
+  Expected values to be strictly equal: false !== true
+not ok 17 - UI-07 task draft: check and provider lists match the shared schema order
+  Expected values to be strictly deep-equal: + actual - expected + [] - [ -   'pageLoad', -   'title', -   'formSubmit' - ]
+not ok 19 - UI-07 task draft: checks stay in canonical order whatever the tap order
+  Expected values to be strictly deep-equal: + actual - expected + [] - [ -   'pageLoad', -   'title', -   'formSubmit' - ]
+not ok 20 - UI-07 task draft: providers stay sorted a, b
+  Expected values to be strictly deep-equal: + actual - expected + [] - [ -   'a', -   'b' - ]
+not ok 21 - UI-07 task draft: browser review needs a goal, a check, a provider and a spend cap
+  Expected values to be strictly equal: false !== true
+not ok 22 - UI-07 task draft: schedule review needs every fixed term
+  Expected values to be strictly equal: false !== true
+not ok 23 - UI-07 task draft: clearing one form keeps the other
+  Expected values to be strictly equal: '' !== '5'
+not ok 25 - UI-07 task draft: same object until it changes (stable snapshot)
+  Expected "actual" not to be reference-equal to "expected": { browser: { asset: 'DemoUSD', checks: [], goal: '', maxPaidAttempts: 1, providerIds: [], spendCap: '', targetId: 'checkout-healthy' }, schedule: { amount: '', asset: 'DemoUSD', int
+not ok 26 - UI-07 task status: every shared outcome, authority, action and delivery state has a label and group
+  'DRAFT label'
+not ok 28 - UI-07 task status: closing authority is distinct from closed
+  `Expected "actual" to be strictly unequal to: ''`
+not ok 29 - UI-07 task status: only FINALIZED payments are described as final
+  Expected values to be strictly deep-equal: + actual - expected + [] - [ -   'FINALIZED' - ]
+not ok 30 - UI-07 task status: an unknown payment is unknown, never failed
+  Expected values to be strictly equal: '' !== 'unknown'
+not ok 31 - UI-07 task status: failed or invalid delivery is a problem even when payment succeeded
+  Expected values to be strictly equal: '' !== 'problem'
+# tests 35
+# pass 18
+# fail 17

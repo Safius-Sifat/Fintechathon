@@ -1,8 +1,8 @@
 {
   "owner": "Person3",
   "plan": "docs/plans/03 - Android Owner Wallet.md (v7.1)",
-  "updatedAt": "2026-10-20T16:00:00+06:00",
-  "currentCheckpoint": "UI-06 Activity, Transaction Details, Assets and Token Details: visually approved, submitted as a draft PR. Next: UI-07.",
+  "updatedAt": "2026-10-20T16:50:00+06:00",
+  "currentCheckpoint": "UI-07 Agent tasks (TaskCreate, Approval, Task, Schedule, Inspector): implemented on work/person3-mobile-ui07-agent-tasks, awaiting the owner's visual review. UI-06 (#35) is still an open draft; UI-07 is based on it.",
   "priority": "Person3 owner decision 2026-10-19: screens, layouts and UI/UX first. Wallet, security and backend functionality is deferred, not dropped; every task below stays required for the final deliverable.",
   "acceptanceRule": "UI checkpoints are layout and navigation previews. They complete no P3 case: every case below stays open until its own functional, device and iOS evidence exists.",
   "uiCheckpoints": [
@@ -33,13 +33,13 @@
     {
       "id": "UI-06",
       "screens": "Activity, TransactionDetail, Assets, TokenDetails",
-      "status": "IN_REVIEW (visually approved, draft PR)",
+      "status": "IN_REVIEW (visually approved, draft PR #35, not merged)",
       "preparesCases": "P3-W02, P3-W03, WQ06, WQ11, WQ13"
     },
     {
       "id": "UI-07",
-      "screens": "TaskCreate, Approval, Task, Schedule, Inspector",
-      "status": "NOT_STARTED",
+      "screens": "AgentTasks (hub), TaskCreate, Approval, Task, Schedule, Inspector",
+      "status": "REVIEW (local branch, not submitted; depends on unmerged #35)",
       "preparesCases": "P3-03, P3-04"
     },
     {
@@ -68,7 +68,7 @@
       "approach": "Plan, Agent execution instructions: Node's test runner through the existing pinned tsx; apps/mobile script 'test': 'tsx --test test/*.test.ts'; test names contain the exact case ID; pure domain/view-model/API logic only (no React Native screens in Node).",
       "requiredBefore": "Functional QR and amount validation: apps/mobile/src/domain/{amounts,qr,assets}.ts with apps/mobile/test/{amounts,qr,assets}.test.ts (P3-W02, WQ03, WQ14)",
       "dependencyNote": "Uses the tsx version already pinned in the workspace; any new test dependency is recorded in the lockfile through the agreed narrow exception",
-      "observed": "apps/mobile 'test' and 'check' (tsx/Node test runner) merged in #33; root make check-mobile runs them since #34, then fails on the native gate by design. 14 tests as of UI-06."
+      "observed": "apps/mobile 'test' and 'check' (tsx/Node test runner) merged in #33; root make check-mobile runs them since #34, then fails on the native gate by design. 14 tests as of UI-06; 35 as of UI-07."
     }
   },
   "platformRule": "v7.1: a case passes only when Android and iOS both pass. Current work is Android only, so Android results are recorded as LOCAL_PASS until P3-X01 exists.",
