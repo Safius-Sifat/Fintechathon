@@ -100,6 +100,22 @@ export function HomeScreen() {
         accessibilityHint="Opens agent tasks"
         onPress={() => navigation.navigate("AgentTasks")}
       />
+      <NavRow
+        icon="account-check-outline"
+        tone="amber"
+        label="Approvals and alerts"
+        value="Requests unavailable"
+        accessibilityHint="Opens agent payment approvals and alerts"
+        onPress={() => navigation.navigate("Approvals")}
+      />
+      <NavRow
+        icon="shield-lock-outline"
+        tone="amber"
+        label="Agent controls"
+        value="Status unavailable"
+        accessibilityHint="Opens freeze, pause, revoke and logout"
+        onPress={() => navigation.navigate("AgentControls")}
+      />
 
       <View style={styles.note}>
         <IconTile icon="call-split" tone="slate" size={36} />

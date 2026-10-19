@@ -1,0 +1,133 @@
+{
+  "task": "UI-08 (group 1 of 2)",
+  "title": "Approvals, Approval detail, Alerts and Agent controls (layout and navigation only)",
+  "status": "REVIEW",
+  "recordedAt": "2026-10-20T17:20:00+06:00",
+  "note": "UI evidence, kept outside evidence/*/cases/. Completes no P3 case: P3-A01 stays open. No approval, rejection, freeze, pause, revoke, logout or alert is performed or shown as real. Group 2 (WalletPolicy, IntentCompose, IntentReview, AllowanceApproval, P3-A02) is not started.",
+  "baseCommit": "98088df",
+  "dependency": "Branched from work/person3-mobile-ui07-agent-tasks (draft PR #36), which depends on work/person3-mobile-ui06-activity-assets (draft PR #35). Neither is merged; origin/main is 95e91fb. Merge order: #35, #36, then this group.",
+  "planReference": "docs/plans/03 - Android Owner Wallet.md v7.1: P3-A01 (approval screen fields, untrusted rationale, reject sends no signature, alerts with freeze, controls vs logout), S9.5 review thresholds and 15-minute co-signed actions, S9.6 freeze vs pause/revoke and the four separate effects, S9.11 service inhibit, S4 ApprovalRequest",
+  "implemented": [
+    "Home: 'Approvals and alerts' (Requests unavailable) and 'Agent controls' (Status unavailable) rows under Agent tasks",
+    "Approvals: 'Approval requests unavailable', stated as not an empty list; when a payment waits (above the review threshold, held up to 15 minutes, nothing paid without approval on the protected screen); reject or expiry makes no signature and releases the reservation; guide for Pending, Approved, Rejected and Expired; link to Alerts; __DEV__-only samples, pending and expired only (no approved sample)",
+    "Approval detail (development samples only): amount in display and base units, time left, from (Agent wallet), network and chain, action, provider, full recipient address (words), asset, task, review threshold; agent's reason tagged 'Untrusted model text'; 'Payment check on this phone: Not built'; Approve and Reject disabled; reject sends no signature; an expired request shows it can no longer be decided",
+    "Alerts: 'Alerts unavailable'; the service hold is off chain and is not a freeze; only the owner clears it after signing in again; __DEV__-only sample alert with wallet, network, rule, detection, service hold and 'Frozen on chain: Unavailable'; Freeze and Clear hold disabled",
+    "Agent controls: agent wallet state (account, network, frozen, paused, service hold) all unavailable, never shown as stopped; a stop counts once confirmed and earlier payments may settle; separate cards for Freeze and Unfreeze (permissions kept), Pause and Revoke (authority ends; unpause does not restore), and Log out (service session only, agents keep working); each card states its scope (on chain or service session) and its effect on existing permissions; every action disabled",
+    "config/approvals.ts labels every shared ApprovalRequest state and Operation; canDecide and expiryLabel; config/agentControls.ts ties each on-chain control to Person1's AdminCommand number"
+  ],
+  "fixtures": "config/approvalSamples.ts: one pending and one expired sample request and one sample alert, shown only in __DEV__ builds and always labelled. Expiry times are relative to app load so the countdown reads sensibly. Addresses are words, never hex. There is deliberately no approved sample.",
+  "fabricated": "none outside the labelled development samples",
+  "security": "No signing, native call, push registration, network request or secret. Approve, Reject, Freeze, Unfreeze, Pause, Revoke, Log out and Clear hold are all disabled.",
+  "dependencyChange": "none (type-only imports from the existing @mandate/schema devDependency; no lockfile or native change)",
+  "files": [
+    "apps/mobile/src/screens/Approvals.tsx",
+    "apps/mobile/src/screens/ApprovalDetail.tsx",
+    "apps/mobile/src/screens/Alerts.tsx",
+    "apps/mobile/src/screens/AgentControls.tsx",
+    "apps/mobile/src/screens/HomeScreen.tsx (two rows)",
+    "apps/mobile/src/config/approvals.ts",
+    "apps/mobile/src/config/agentControls.ts",
+    "apps/mobile/src/config/approvalSamples.ts",
+    "apps/mobile/src/navigation/RootNavigator.tsx",
+    "apps/mobile/test/approvals.test.ts",
+    "apps/mobile/test/agentControls.test.ts"
+  ],
+  "checks": [
+    {
+      "check": "UI-08 group 1 tests before implementation (red, against stub modules)",
+      "command": "pnpm --filter @mandate/mobile test",
+      "result": "FAIL (expected)",
+      "observed": "All 10 new tests failed with assertion errors; the 35 existing tests passed",
+      "artifact": "evidence/person3/ui-08/red-run.txt"
+    },
+    {
+      "check": "pnpm --filter @mandate/mobile check (after implementation)",
+      "result": "PASS",
+      "observed": "45/45 tests (10 new + 35 existing), typecheck clean"
+    },
+    { "check": "pnpm typecheck (all workspace packages)", "result": "PASS" },
+    {
+      "check": "pnpm check:repository",
+      "result": "PASS",
+      "observed": "checkedFiles 534, failures []"
+    },
+    {
+      "check": "prettier --check on changed and new files",
+      "result": "PASS"
+    },
+    {
+      "check": "make check-mobile",
+      "result": "NOT_RUN",
+      "observed": "make is not available on this Windows host. Step 1 is the same mobile suite (45 pass above); step 2 (not-ready.mjs check-mobile-native) fails by design, so make check-mobile still fails overall until native and device suites exist."
+    }
+  ],
+  "device": {
+    "kind": "emulator",
+    "serial": "emulator-5554",
+    "android": "16",
+    "api": 36,
+    "build": "Existing dev-client APK; JS from this branch. No native change.",
+    "physicalPhone": "NOT RUN",
+    "ios": "NOT RUN",
+    "screenReader": "NOT RUN"
+  },
+  "runtimeChecks": [
+    {
+      "check": "Home rows and Approvals at 1.0: unavailable list, waiting rules, state guide, labelled pending and expired samples",
+      "result": "PASS",
+      "screens": [
+        "01-home-rows.png",
+        "02-approvals-top.png",
+        "03-approvals-guide.png",
+        "04-approvals-samples.png"
+      ]
+    },
+    {
+      "check": "Approval detail at 1.0: account, network, action, provider, full recipient, asset, amount (display and base units), task, expiry; untrusted reason; approve and reject disabled; expired request not decidable",
+      "result": "PASS",
+      "screens": [
+        "10-detail-pending-top.png",
+        "11-detail-pending-payment.png",
+        "13-detail-pending-actions.png",
+        "14-detail-expired-bottom.png"
+      ]
+    },
+    {
+      "check": "Alerts at 1.0: unavailable list; service hold is not a freeze; labelled sample; freeze and clear hold disabled",
+      "result": "PASS",
+      "screens": ["20-alerts-top.png", "22-alerts-sample-actions.png"]
+    },
+    {
+      "check": "Agent controls at 1.0: state unavailable, never stopped; freeze/unfreeze, pause/revoke and logout separate, each with scope and effect on permissions; all disabled",
+      "result": "PASS",
+      "observed": "The scope tag first used the 'not built' clock icon, which read like a pending state; replaced with a neutral 'Acts on chain' / 'Acts on the service session' chip during review.",
+      "screens": [
+        "30-controls-top.png",
+        "31-controls-freeze.png",
+        "32-controls-pause.png",
+        "34-controls-bottom.png"
+      ]
+    },
+    {
+      "check": "Large text, font scale 2.0: Approvals, Approval detail, Alerts and Agent controls reflow without clipping. Emulator restored to 1.0.",
+      "result": "PASS",
+      "screens": [
+        "60-2x-controls-state.png",
+        "61-2x-controls-logout.png",
+        "63-2x-alerts-actions.png",
+        "64-2x-approvals-samples.png",
+        "65-2x-detail-reason.png",
+        "67-2x-detail-actions.png"
+      ]
+    }
+  ],
+  "pending": [
+    "Real GET /approvals and /approvals/:id with the account's session; push registration and ID-only push (P3-A01, Person2 P2-A02)",
+    "Native signApproval that recomputes the Action digest from the displayed fields and the trusted manifest, with fresh authentication; reject route sends no signature (P3-A01.T01-T04)",
+    "Native Admin FREEZE/UNFREEZE/PAUSE/REVOKE with relay through sponsor or personal gas; confirmed chain state for frozen/paused/epoch (P3-A01.T05, P3-05)",
+    "Real logout through NativeSession and the service inhibit clear route with recent sign-in (P3-W03, S4)",
+    "Account-scoped push routing (P3-A01.T06)",
+    "UI-08 group 2: WalletPolicy, IntentCompose, IntentReview, AllowanceApproval (P3-A02)",
+    "Physical Android phone, iOS, screen-reader pass"
+  ]
+}

@@ -1,0 +1,26 @@
+Red run of the UI-08 (group 1) tests against stub modules, before implementation.
+Command: pnpm --filter @mandate/mobile test (exit 1). Paths and stack traces removed.
+
+not ok 1 - UI-08 controls: on-chain controls use Person1's Admin command numbers
+  Expected values to be strictly equal: -1 !== 5
+not ok 2 - UI-08 controls: freeze stops agent spending but keeps permissions
+  Expected values to be strictly equal: false !== true
+not ok 3 - UI-08 controls: pause and revoke end existing authority
+  pause false !== true
+not ok 4 - UI-08 controls: logout ends this phone's session only and never stops agents
+  Expected values to be strictly equal: false !== true
+not ok 5 - UI-08 controls: each control has its own title and effect text
+  Expected values to be strictly equal: 1 !== 2
+not ok 6 - UI-08 approvals: every shared approval state has a label and group
+  'PENDING'
+not ok 7 - UI-08 approvals: only a pending request before its expiry can be decided
+  APPROVED true !== false
+not ok 8 - UI-08 approvals: an approved state is never shown as the default or a pending state
+  `Expected "actual" to be strictly unequal to: ''`
+not ok 9 - UI-08 approvals: expiry label counts down and never shows a past request as open
+  Expected values to be strictly equal: + actual - expected + '' - 'Expires in 10 min'
+not ok 10 - UI-08 approvals: every shared operation has a plain-language label
+  'PAY'
+# tests 45
+# pass 35
+# fail 10

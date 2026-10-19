@@ -2,8 +2,12 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import type { NavigatorScreenParams } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { AccountsScreen } from "../screens/Accounts";
+import { AgentControlsScreen } from "../screens/AgentControls";
 import { AgentTasksScreen } from "../screens/AgentTasks";
+import { AlertsScreen } from "../screens/Alerts";
 import { ApprovalScreen } from "../screens/Approval";
+import { ApprovalDetailScreen } from "../screens/ApprovalDetail";
+import { ApprovalsScreen } from "../screens/Approvals";
 import { ActivityScreen } from "../screens/ActivityScreen";
 import { AssetsScreen } from "../screens/Assets";
 import { HomeScreen } from "../screens/HomeScreen";
@@ -53,6 +57,11 @@ export type RootStackParamList = {
   // Development samples only until real tasks exist.
   Task: { sampleId: string };
   Inspector: { sampleId: string };
+  Approvals: undefined;
+  // Development samples only until real requests exist.
+  ApprovalDetail: { sampleId: string };
+  Alerts: undefined;
+  AgentControls: undefined;
 };
 
 const TAB_META: Record<keyof TabParamList, TabMeta> = {
@@ -117,6 +126,10 @@ export function RootNavigator() {
       <Stack.Screen name="Approval" component={ApprovalScreen} />
       <Stack.Screen name="Task" component={TaskScreen} />
       <Stack.Screen name="Inspector" component={InspectorScreen} />
+      <Stack.Screen name="Approvals" component={ApprovalsScreen} />
+      <Stack.Screen name="ApprovalDetail" component={ApprovalDetailScreen} />
+      <Stack.Screen name="Alerts" component={AlertsScreen} />
+      <Stack.Screen name="AgentControls" component={AgentControlsScreen} />
     </Stack.Navigator>
   );
 }
