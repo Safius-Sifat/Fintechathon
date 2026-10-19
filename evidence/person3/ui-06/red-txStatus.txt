@@ -1,0 +1,6 @@
+not ok 11 - UI-06 status: every shared LOCAL_TX_STATES value has a display group
+not ok 12 - UI-06 status: every shared state has a non-empty plain-language label
+not ok 13 - UI-06 status: only included or finalized count as confirmed
+# tests 14
+# pass 11
+# fail 3

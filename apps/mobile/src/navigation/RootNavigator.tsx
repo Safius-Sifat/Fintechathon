@@ -3,12 +3,15 @@ import type { NavigatorScreenParams } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { AccountsScreen } from "../screens/Accounts";
 import { ActivityScreen } from "../screens/ActivityScreen";
+import { AssetsScreen } from "../screens/Assets";
 import { HomeScreen } from "../screens/HomeScreen";
 import { IntroScreen, SetupScreen, WelcomeScreen } from "../screens/Onboarding";
 import { ReceiveScreen } from "../screens/Receive";
 import { ScanScreen } from "../screens/Scan";
 import { SendScreen } from "../screens/Send";
 import { SettingsScreen } from "../screens/SettingsScreen";
+import { TokenDetailsScreen } from "../screens/TokenDetails";
+import { TransactionDetailScreen } from "../screens/TransactionDetail";
 import { TransferReviewScreen } from "../screens/TransferReview";
 import { TabBar, type TabMeta } from "./TabBar";
 
@@ -32,6 +35,10 @@ export type RootStackParamList = {
   Send: undefined;
   // Reads the Send draft from state/sendDraft.ts.
   TransferReview: undefined;
+  // Development samples only until real history exists.
+  TransactionDetail: { sampleId: string };
+  Assets: undefined;
+  TokenDetails: { token: "ETH" | "DemoUSD" | "sample" };
 };
 
 const TAB_META: Record<keyof TabParamList, TabMeta> = {
@@ -84,6 +91,12 @@ export function RootNavigator() {
       <Stack.Screen name="Scan" component={ScanScreen} />
       <Stack.Screen name="Send" component={SendScreen} />
       <Stack.Screen name="TransferReview" component={TransferReviewScreen} />
+      <Stack.Screen
+        name="TransactionDetail"
+        component={TransactionDetailScreen}
+      />
+      <Stack.Screen name="Assets" component={AssetsScreen} />
+      <Stack.Screen name="TokenDetails" component={TokenDetailsScreen} />
     </Stack.Navigator>
   );
 }

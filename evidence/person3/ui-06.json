@@ -1,0 +1,133 @@
+{
+  "task": "UI-06",
+  "title": "Activity, Transaction Details, Assets and Token Details (layout and navigation only)",
+  "status": "REVIEW",
+  "recordedAt": "2026-10-20T15:20:00+06:00",
+  "note": "UI evidence, kept outside evidence/*/cases/. Completes no P3 case: P3-W02, P3-W03, WQ06, WQ11 and WQ13 stay open. No real transaction, balance or verified token metadata is shown.",
+  "baseCommit": "fb4dc6c",
+  "dependency": "Built on UI-05 (PR #33), on UI-04 (#32), UI-03 (#31) and UI-02 (#30); all unmerged. The UI-06 change is the diff against fb4dc6c.",
+  "planReference": "docs/plans/03 - Android Owner Wallet.md v7.1, S8.1 Assets and Activity screen groups, S8.2 transaction states, S8.4 (history never shown as verified empty; watch-only vs send-enabled tokens; no fabricated APY)",
+  "implemented": [
+    "Activity: Personal account / Agent wallet selector; the two histories are separate lists; each shows 'History unavailable', stated as not an empty history",
+    "Activity: 'What the states mean' guide with Pending, Confirmed, Failed, Replaced or cancelled and Unknown; Unknown is never shown as failed",
+    "Activity: __DEV__-only 'Development samples' section; every row tagged 'Development sample'; release builds do not show it",
+    "Transaction Details: reachable only from development samples; banner 'Development sample, not a real transaction'; status chip; token amount; separate Network fee card with fee and payer; nonce, replacement, data source; explorer disabled",
+    "Assets: Personal account / Agent wallet selector; personal ETH and DemoUSD 'Balance unavailable', DemoUSD tagged 'Registry not loaded'; Import token and Hidden tokens disabled; agent wallet DemoUSD, test USDC, vault position, floor and reservations unavailable; no APY",
+    "Token Details: ETH shows protocol facts only (native coin, 18 decimals); DemoUSD metadata 'Not loaded / Not checked'; send status explained (registry + code check, watch-only otherwise); Hide and Explorer disabled; __DEV__-only sample watch-only token",
+    "Home: 'Assets and tokens' row; account row moved to a shared NavRow component",
+    "config/txStatus.ts maps every shared LOCAL_TX_STATES value to a display group and label"
+  ],
+  "fixtures": "config/devSamples.ts: five placeholder activity records and one sample token, shown only in __DEV__ builds and always labelled. Addresses and hashes are words ('Sample recipient address', 'Sample hash'), never hex, so they cannot pass for real values.",
+  "fabricated": "none outside the labelled development samples",
+  "dependencyChange": {
+    "added": "@mandate/schema as an apps/mobile devDependency (workspace link) for the type-only import of LOCAL_TX_STATES; tests import the runtime list",
+    "lockfile": "3 lines added, 0 removed (workspace link only)",
+    "bundling": "app code uses 'import type' only, so nothing from the schema package is bundled into the app",
+    "native": "none; app.json unchanged"
+  },
+  "files": [
+    "apps/mobile/src/screens/ActivityScreen.tsx",
+    "apps/mobile/src/screens/TransactionDetail.tsx",
+    "apps/mobile/src/screens/Assets.tsx",
+    "apps/mobile/src/screens/TokenDetails.tsx",
+    "apps/mobile/src/screens/HomeScreen.tsx",
+    "apps/mobile/src/config/txStatus.ts",
+    "apps/mobile/src/config/devSamples.ts",
+    "apps/mobile/src/config/activity.ts",
+    "apps/mobile/src/components/TxStatusChip.tsx",
+    "apps/mobile/src/components/NavRow.tsx",
+    "apps/mobile/src/theme.ts (red tone)",
+    "apps/mobile/src/navigation/RootNavigator.tsx",
+    "apps/mobile/test/txStatus.test.ts",
+    "apps/mobile/package.json, pnpm-lock.yaml (devDependency link)"
+  ],
+  "checks": [
+    {
+      "check": "txStatus tests before implementation (red)",
+      "command": "pnpm --filter @mandate/mobile test",
+      "result": "FAIL (expected)",
+      "observed": "3 of 4 new tests failed against a stub: every state has a group (expected 'pending', got 'unknown'), every state has a label (DRAFT missing), only included/finalized are confirmed",
+      "artifact": "evidence/person3/ui-06/red-txStatus.txt"
+    },
+    {
+      "check": "pnpm --filter @mandate/mobile check (after implementation)",
+      "result": "PASS",
+      "observed": "14/14 tests (4 txStatus + 10 sendDraft), typecheck clean"
+    },
+    { "check": "pnpm typecheck (all workspace packages)", "result": "PASS" },
+    {
+      "check": "pnpm check:repository",
+      "result": "PASS",
+      "observed": "checkedFiles 455, failures []"
+    },
+    { "check": "prettier --check on changed files", "result": "PASS" }
+  ],
+  "device": {
+    "kind": "emulator",
+    "serial": "emulator-5554",
+    "android": "16",
+    "api": 36,
+    "build": "Existing dev-client APK; JS from this branch. No native change.",
+    "physicalPhone": "NOT RUN",
+    "ios": "NOT RUN"
+  },
+  "runtimeChecks": [
+    {
+      "check": "Activity at 1.0: separate personal and agent histories, both 'History unavailable'; state guide; labelled development samples per source",
+      "result": "PASS",
+      "screens": [
+        "02-activity-personal.png",
+        "03-activity-guide.png",
+        "04-activity-samples-personal.png",
+        "06-activity-samples-agent.png"
+      ]
+    },
+    {
+      "check": "Transaction Details at 1.0: failed agent-wallet owner transfer and pending personal send; fee and payer in their own card, separate from the token amount",
+      "result": "PASS",
+      "screens": [
+        "10-detail-agent-failed.png",
+        "12-detail-personal-pending.png",
+        "13-detail-personal-pending-bottom.png"
+      ]
+    },
+    {
+      "check": "Assets at 1.0: personal ETH/DemoUSD unavailable, registry not loaded; agent wallet not connected, no APY",
+      "result": "PASS",
+      "screens": [
+        "01-home-assets-row.png",
+        "20-assets-personal.png",
+        "22-assets-agent.png"
+      ]
+    },
+    {
+      "check": "Token Details at 1.0: ETH protocol facts; DemoUSD not loaded/not checked; sample watch-only token labelled",
+      "result": "PASS",
+      "screens": [
+        "30-token-eth.png",
+        "31-token-demousd.png",
+        "33-token-sample.png"
+      ]
+    },
+    {
+      "check": "Large text, font scale 2.0: Activity, samples, Transaction Details, Assets and Token Details reflow without clipping",
+      "result": "PASS",
+      "observed": "Status and sample tags wrap inside their pills; detail rows stack label above value",
+      "screens": [
+        "40-2x-assets.png",
+        "42-2x-token-demousd.png",
+        "44-2x-activity.png",
+        "46-2x-activity-samples.png",
+        "47-2x-detail.png",
+        "48-2x-detail-fee.png"
+      ]
+    }
+  ],
+  "pending": [
+    "Real history from the Person2 API and RPC, with coverage/backfill/stale states and loaded/empty variants (P3-W03, WQ11)",
+    "Real balances from RPC; token import with code/metadata checks; reviewed registry from the trusted deployment manifest (P3-W02, WQ13)",
+    "Pending/replacement/rebroadcast lifecycle from the native journal (P3-W02, WQ06)",
+    "Explorer links, search/filter and exports",
+    "Physical Android phone, iOS simulator and iPhone, screen-reader pass"
+  ]
+}

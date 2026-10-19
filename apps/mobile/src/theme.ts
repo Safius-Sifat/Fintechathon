@@ -30,6 +30,7 @@ export const tones = {
   green: { bg: "#E2F5EA", fg: "#1E8A4C" },
   violet: { bg: "#EEE9FF", fg: "#6A4BD8" },
   slate: { bg: "#EAEEF4", fg: "#475569" },
+  red: { bg: "#FDE8E7", fg: "#C23B33" },
 } as const;
 
 export type Tone = keyof typeof tones;

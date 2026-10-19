@@ -15,6 +15,7 @@ import { Card, DetailRow, Divider } from "../components/Card";
 import { ChainChip } from "../components/ChainChip";
 import { Icon } from "../components/Icon";
 import { IconTile } from "../components/IconTile";
+import { NavRow } from "../components/NavRow";
 import { Screen } from "../components/Screen";
 import { StatusTag } from "../components/StatusTag";
 import { preview } from "../config/capabilities";
@@ -41,11 +42,28 @@ export function HomeScreen() {
       title="Home"
       header={<BrandHeader onScan={() => navigation.navigate("Scan")} />}
     >
-      <AccountRow onPress={() => navigation.navigate("Accounts")} />
+      {/* With no wallet there is no account to name. */}
+      <NavRow
+        icon="account-circle-outline"
+        tone="blue"
+        label="Account"
+        value="No account yet"
+        accessibilityHint="Opens accounts"
+        onPress={() => navigation.navigate("Accounts")}
+      />
 
       <PersonalAccountHero
         onReceive={() => navigation.navigate("Receive")}
         onSend={() => navigation.navigate("Send")}
+      />
+
+      <NavRow
+        icon="wallet-outline"
+        tone="blue"
+        label="Assets and tokens"
+        value="Balances unavailable"
+        accessibilityHint="Opens personal and agent wallet assets"
+        onPress={() => navigation.navigate("Assets")}
       />
 
       <Banner
@@ -109,27 +127,6 @@ function BrandHeader({ onScan }: { onScan: () => void }) {
         </Pressable>
       </View>
     </View>
-  );
-}
-
-// Opens the account switcher. With no wallet there is no account to name.
-function AccountRow({ onPress }: { onPress: () => void }) {
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel="Account. No account yet."
-      accessibilityHint="Opens accounts"
-      onPress={onPress}
-      android_ripple={{ color: "rgba(15, 23, 42, 0.06)" }}
-      style={({ pressed }) => [styles.accountRow, pressed && styles.pressed]}
-    >
-      <IconTile icon="account-circle-outline" tone="blue" size={40} />
-      <View style={styles.accountText}>
-        <Text style={styles.accountLabel}>Account</Text>
-        <Text style={styles.accountValue}>No account yet</Text>
-      </View>
-      <Icon name="chevron-right" size={24} color={colors.textSubtle} />
-    </Pressable>
   );
 }
 
@@ -205,23 +202,6 @@ function HeroFact({ label, value, style }: HeroFactProps) {
 }
 
 const styles = StyleSheet.create({
-  accountRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: space.md,
-    minHeight: 64,
-    paddingVertical: space.sm,
-    paddingHorizontal: space.md,
-    borderRadius: radius.lg,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.hairline,
-    boxShadow: shadows.card,
-    overflow: "hidden",
-  },
-  accountText: { flex: 1, gap: 2 },
-  accountLabel: { ...type.label, color: colors.textMuted },
-  accountValue: { ...type.bodyStrong, color: colors.ink },
   pressed: { opacity: 0.85 },
 
   brand: {

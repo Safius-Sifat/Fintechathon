@@ -1,31 +1,39 @@
 import type { Capability } from "./capabilities";
 
-// "unavailable" means the app cannot know what happened (no working source);
-// "empty" means a working source reported no activity. The two must never be
-// shown the same way. A loaded-list state arrives with the first real source.
-export type HistoryState =
-  | { kind: "unavailable"; sources: readonly Capability[] }
-  | { kind: "empty" };
+// Personal and agent-wallet histories come from different sources and are
+// shown separately. Neither source exists in this build, so the only state
+// is "unavailable": the app cannot know what happened. That is never shown
+// as an empty history. Loaded and empty states arrive with the first real
+// source (P3-W03).
 
-// Sources that would feed the history. Neither exists in this build.
-const sources: readonly Capability[] = [
-  {
-    id: "personal-activity",
-    title: "Personal wallet",
-    detail: "Transfers from the wallet on this phone.",
-    icon: "wallet-outline",
-    tone: "blue",
-    state: "notBuilt",
-  },
-  {
-    id: "agent-activity",
-    title: "Agent spending",
-    detail: "Payments agents make from their own wallets.",
-    icon: "robot-outline",
-    tone: "amber",
-    state: "notConnected",
-  },
-];
+export type ActivitySource = "personal" | "agent";
 
-// The only state this build can report.
-export const historyState: HistoryState = { kind: "unavailable", sources };
+interface HistorySource {
+  body: string;
+  source: Capability;
+}
+
+export const historySources: Record<ActivitySource, HistorySource> = {
+  personal: {
+    body: "This is not an empty history. This build cannot read personal activity because there is no wallet on this phone.",
+    source: {
+      id: "personal-activity",
+      title: "Personal account history",
+      detail: "Transfers to and from your account, read from the chain.",
+      icon: "wallet-outline",
+      tone: "blue",
+      state: "notBuilt",
+    },
+  },
+  agent: {
+    body: "This is not an empty history. This build cannot read agent-wallet activity because the Mandate service is not connected.",
+    source: {
+      id: "agent-activity",
+      title: "Agent wallet history",
+      detail: "Agent payments, funding and owner transfers.",
+      icon: "robot-outline",
+      tone: "amber",
+      state: "notConnected",
+    },
+  },
+};

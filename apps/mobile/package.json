@@ -25,6 +25,7 @@
     "react-native-screens": "4.16.0"
   },
   "devDependencies": {
+    "@mandate/schema": "workspace:*",
     "@types/react": "19.1.10"
   }
 }
