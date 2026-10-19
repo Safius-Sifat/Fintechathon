@@ -68,10 +68,15 @@
   },
   "staticChecks": [
     { "check": "pnpm typecheck (all workspace packages)", "result": "PASS" },
-    { "check": "pnpm check:repository", "result": "PASS", "observed": "checkedFiles 336, failures []" },
+    {
+      "check": "pnpm check:repository",
+      "result": "PASS",
+      "observed": "checkedFiles 336, failures []"
+    },
     {
       "check": "prettier --check on every changed Person3 file",
-      "result": "PASS"
+      "result": "PASS (corrected)",
+      "observed": "The first record said PASS, but this evidence file itself was not prettier-formatted. Fixed during integration; see integration.checks."
     },
     {
       "check": "pnpm format:check (whole repo)",
@@ -84,6 +89,36 @@
       "observed": "apps/mobile has no test runner yet"
     }
   ],
+  "integration": {
+    "mergedMain": "575d2f063c53b301489263b16a2c1bcfc96102a5",
+    "featureCommit": "ef30f57eeb3dc9b1973ca5fd07fda0ff5a8a6905",
+    "conflicts": "none",
+    "mainChanges": "Release gate, owner activity wallet cases and Person1 evidence (#26). No change to apps/mobile, dependencies, the lockfile, native code, app.json or plugins, so the build and runtime checks below still apply and the app was not rebuilt.",
+    "diffAgainstMain": "Exactly the 44 UI-01.1 files; their contents are byte-identical to the feature commit, apart from this evidence file.",
+    "checks": [
+      {
+        "check": "pnpm install --frozen-lockfile",
+        "result": "PASS",
+        "observed": "Lockfile is up to date"
+      },
+      { "check": "pnpm typecheck (all workspace packages)", "result": "PASS" },
+      {
+        "check": "pnpm check:repository",
+        "result": "PASS",
+        "observed": "checkedFiles 340, failures []"
+      },
+      {
+        "check": "prettier --check on every changed Person3 text file",
+        "result": "PASS",
+        "observed": "apps/mobile/.gitignore has no prettier parser. pnpm-lock.yaml is flagged on origin/main too; pnpm writes it and format:check does not cover it."
+      },
+      {
+        "check": "pnpm test:release",
+        "result": "FAIL (pre-existing, Windows-local)",
+        "observed": "scripts/test/release-check.test.mjs fails at load: it builds paths with new URL(...).pathname, which gives D:\\\\D:\\\\...shenzen%20fintech... on Windows. The test and scripts/release-check.mjs come from origin/main unchanged; this PR does not touch scripts/. CI runs on ubuntu-24.04, where the path works."
+      }
+    ]
+  },
   "build": {
     "type": "Expo dev client debug build (not Expo Go), CNG prebuild --clean, x86_64",
     "where": "real branch working tree, D:\\projects\\shenzen fintech\\Fintechathon (path with a space, pnpm isolated layout)",
