@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<testsuite name="com.mandate.ownerwallet.NativeBoundaryTest" tests="2" failures="0" errors="0" skipped="0" time="1.35" timestamp="2026-10-19T08:50:36" hostname="localhost">
+  <properties>
+    <property name="device" value="Medium_Phone(AVD) - 16" />
+    <property name="flavor" value="" />
+    <property name="project" value=":owner-wallet" />
+  </properties>
+  <testcase name="P3_01_T01_bridgeStatusHasOnlyPublicFields" classname="com.mandate.ownerwallet.NativeBoundaryTest" time="0.02" />
+  <testcase name="P3_01_T01_walletCoreLoadsAndComputes" classname="com.mandate.ownerwallet.NativeBoundaryTest" time="0.008" />
+</testsuite>
