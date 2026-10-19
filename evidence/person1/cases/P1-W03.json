@@ -1,0 +1,239 @@
+[
+  {
+    "caseId": "P1-W03.T01",
+    "taskId": "P1-W03",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "3249c89f551d31cf6c27030f75636dc6fd0b9473",
+    "workingTreeDigest": "see commit",
+    "schemaCommit": "3249c89f551d31cf6c27030f75636dc6fd0b9473",
+    "environment": {
+      "forge": "1.8.5",
+      "solc": "0.8.28 via_ir",
+      "chain": "local Foundry EVM, chainId 84532"
+    },
+    "command": "forge test --root packages/contracts --match-contract OwnerActivityTest",
+    "testName": "test_P1_W03_T01_fundingIsNotAgentSpend",
+    "exitCode": 0,
+    "expected": "funding 1000000 moves two balances, total unchanged, no counter/nonce/epoch change",
+    "observed": "as expected",
+    "startedAt": "2026-10-19T02:56:39+06:00",
+    "finishedAt": "2026-10-19T02:56:39+06:00",
+    "artifactRefs": [
+      "packages/contracts/test/OwnerActivity.t.sol"
+    ],
+    "limitations": [
+      "Local Foundry EVM; actual chain receipts/events still required"
+    ]
+  },
+  {
+    "caseId": "P1-W03.T02",
+    "taskId": "P1-W03",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "3249c89f551d31cf6c27030f75636dc6fd0b9473",
+    "workingTreeDigest": "see commit",
+    "schemaCommit": "3249c89f551d31cf6c27030f75636dc6fd0b9473",
+    "environment": {
+      "forge": "1.8.5",
+      "solc": "0.8.28 via_ir",
+      "chain": "local Foundry EVM, chainId 84532"
+    },
+    "command": "forge test --root packages/contracts --match-contract OwnerActivityTest",
+    "testName": "test_P1_W03_T02_WQ07_ownerSendIsOwnerControl",
+    "exitCode": 0,
+    "expected": "owner sends 400000 after 200000 task spend: OwnerTransferExecuted/WalletPaused emitted, task gross stays 200000, epoch 1, agent action rejected",
+    "observed": "as expected",
+    "startedAt": "2026-10-19T02:56:39+06:00",
+    "finishedAt": "2026-10-19T02:56:39+06:00",
+    "artifactRefs": [
+      "packages/contracts/test/OwnerActivity.t.sol"
+    ],
+    "limitations": [
+      "Local Foundry EVM; actual chain receipts/events still required",
+      "History classification itself is Person4's inspector"
+    ]
+  },
+  {
+    "caseId": "P1-W03.T03",
+    "taskId": "P1-W03",
+    "status": "BLOCKED",
+    "sourceCommit": "3249c89f551d31cf6c27030f75636dc6fd0b9473",
+    "workingTreeDigest": "see commit",
+    "schemaCommit": "3249c89f551d31cf6c27030f75636dc6fd0b9473",
+    "environment": {
+      "forge": "1.8.5",
+      "solc": "0.8.28 via_ir",
+      "chain": "local Foundry EVM, chainId 84532"
+    },
+    "command": null,
+    "testName": null,
+    "exitCode": null,
+    "expected": "missing-data export is UNVERIFIABLE; tampered chain FAILS",
+    "observed": "not run",
+    "startedAt": "2026-10-19T02:56:39+06:00",
+    "finishedAt": "2026-10-19T02:56:39+06:00",
+    "artifactRefs": [
+      "packages/contracts/test/OwnerActivity.t.sol"
+    ],
+    "limitations": [
+      "Person4 inspector"
+    ]
+  },
+  {
+    "caseId": "P1-W03.T04",
+    "taskId": "P1-W03",
+    "status": "BLOCKED",
+    "sourceCommit": "3249c89f551d31cf6c27030f75636dc6fd0b9473",
+    "workingTreeDigest": "see commit",
+    "schemaCommit": "3249c89f551d31cf6c27030f75636dc6fd0b9473",
+    "environment": {
+      "forge": "1.8.5",
+      "solc": "0.8.28 via_ir",
+      "chain": "local Foundry EVM, chainId 84532"
+    },
+    "command": null,
+    "testName": null,
+    "exitCode": null,
+    "expected": "unregistered supported-asset outflow flagged by history scan",
+    "observed": "not run",
+    "startedAt": "2026-10-19T02:56:39+06:00",
+    "finishedAt": "2026-10-19T02:56:39+06:00",
+    "artifactRefs": [
+      "packages/contracts/test/OwnerActivity.t.sol"
+    ],
+    "limitations": [
+      "Person4 inspector and Person2 history adapters"
+    ]
+  },
+  {
+    "caseId": "P1-W03.WQ03",
+    "taskId": "P1-W03",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "3249c89f551d31cf6c27030f75636dc6fd0b9473",
+    "workingTreeDigest": "see commit",
+    "schemaCommit": "3249c89f551d31cf6c27030f75636dc6fd0b9473",
+    "environment": {
+      "forge": "1.8.5",
+      "solc": "0.8.28 via_ir",
+      "chain": "local Foundry EVM, chainId 84532"
+    },
+    "command": "forge test --root packages/contracts --match-contract OwnerActivityTest",
+    "testName": "test_P1_W03_WQ03_wrongChainAndPrecision",
+    "exitCode": 0,
+    "expected": "wallet cannot deploy off 84532; chain-1 signature rejected; 1 base unit moves exactly; over-balance reverts",
+    "observed": "as expected",
+    "startedAt": "2026-10-19T02:56:39+06:00",
+    "finishedAt": "2026-10-19T02:56:39+06:00",
+    "artifactRefs": [
+      "packages/contracts/test/OwnerActivity.t.sol"
+    ],
+    "limitations": [
+      "Local Foundry EVM; actual chain receipts/events still required",
+      "QR parsing is Person3"
+    ]
+  },
+  {
+    "caseId": "P1-W03.WQ04",
+    "taskId": "P1-W03",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "3249c89f551d31cf6c27030f75636dc6fd0b9473",
+    "workingTreeDigest": "see commit",
+    "schemaCommit": "3249c89f551d31cf6c27030f75636dc6fd0b9473",
+    "environment": {
+      "forge": "1.8.5",
+      "solc": "0.8.28 via_ir",
+      "chain": "local Foundry EVM, chainId 84532"
+    },
+    "command": "forge test --root packages/contracts --match-contract OwnerActivityTest",
+    "testName": "test_P1_W03_WQ04_exactDebit",
+    "exitCode": 0,
+    "expected": "ETH and ERC-20 owner sends debit exactly; wallet never pays relayer gas",
+    "observed": "as expected",
+    "startedAt": "2026-10-19T02:56:39+06:00",
+    "finishedAt": "2026-10-19T02:56:39+06:00",
+    "artifactRefs": [
+      "packages/contracts/test/OwnerActivity.t.sol"
+    ],
+    "limitations": [
+      "Local Foundry EVM; actual chain receipts/events still required"
+    ]
+  },
+  {
+    "caseId": "P1-W03.WQ07",
+    "taskId": "P1-W03",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "3249c89f551d31cf6c27030f75636dc6fd0b9473",
+    "workingTreeDigest": "see commit",
+    "schemaCommit": "3249c89f551d31cf6c27030f75636dc6fd0b9473",
+    "environment": {
+      "forge": "1.8.5",
+      "solc": "0.8.28 via_ir",
+      "chain": "local Foundry EVM, chainId 84532"
+    },
+    "command": "forge test --root packages/contracts --match-contract OwnerActivityTest",
+    "testName": "test_P1_W03_T02_WQ07_ownerSendIsOwnerControl",
+    "exitCode": 0,
+    "expected": "owner-only signature relayed by anyone, no executor/MPC; pauses and advances epoch",
+    "observed": "as expected",
+    "startedAt": "2026-10-19T02:56:39+06:00",
+    "finishedAt": "2026-10-19T02:56:39+06:00",
+    "artifactRefs": [
+      "packages/contracts/test/OwnerActivity.t.sol"
+    ],
+    "limitations": [
+      "Local Foundry EVM; actual chain receipts/events still required"
+    ]
+  },
+  {
+    "caseId": "P1-W03.WQ08",
+    "taskId": "P1-W03",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "3249c89f551d31cf6c27030f75636dc6fd0b9473",
+    "workingTreeDigest": "see commit",
+    "schemaCommit": "3249c89f551d31cf6c27030f75636dc6fd0b9473",
+    "environment": {
+      "forge": "1.8.5",
+      "solc": "0.8.28 via_ir",
+      "chain": "local Foundry EVM, chainId 84532"
+    },
+    "command": "forge test --root packages/contracts --match-contract OwnerActivityTest",
+    "testName": "test_P1_W03_WQ08_rejectedSignaturesDomainsAndNonces",
+    "exitCode": 0,
+    "expected": "agent key, domain 4, wrong chain, wrong wallet, future nonce and replay rejected; domain-4 agent Action rejected",
+    "observed": "as expected",
+    "startedAt": "2026-10-19T02:56:39+06:00",
+    "finishedAt": "2026-10-19T02:56:39+06:00",
+    "artifactRefs": [
+      "packages/contracts/test/OwnerActivity.t.sol"
+    ],
+    "limitations": [
+      "Local Foundry EVM; actual chain receipts/events still required"
+    ]
+  },
+  {
+    "caseId": "P1-W03.WQ13",
+    "taskId": "P1-W03",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "3249c89f551d31cf6c27030f75636dc6fd0b9473",
+    "workingTreeDigest": "see commit",
+    "schemaCommit": "3249c89f551d31cf6c27030f75636dc6fd0b9473",
+    "environment": {
+      "forge": "1.8.5",
+      "solc": "0.8.28 via_ir",
+      "chain": "local Foundry EVM, chainId 84532"
+    },
+    "command": "forge test --root packages/contracts --match-contract OwnerActivityTest",
+    "testName": "test_P1_W03_WQ13_importedTaxedAndInvalidTokens",
+    "exitCode": 0,
+    "expected": "imported 18-decimal token moves exact base units; taxed, false-returning and code-less tokens rejected without side effects",
+    "observed": "as expected",
+    "startedAt": "2026-10-19T02:56:39+06:00",
+    "finishedAt": "2026-10-19T02:56:39+06:00",
+    "artifactRefs": [
+      "packages/contracts/test/OwnerActivity.t.sol"
+    ],
+    "limitations": [
+      "Local Foundry EVM; actual chain receipts/events still required",
+      "Token metadata display/import UI is Person3"
+    ]
+  }
+]

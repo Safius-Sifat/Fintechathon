@@ -1,6 +1,6 @@
 {
   "owner": "Person1",
-  "updatedAt": "2026-10-19T02:44:59+06:00",
+  "updatedAt": "2026-10-19T02:56:39+06:00",
   "milestone": "M5 Base Sepolia deployment (P1-06)",
   "tasks": {
     "P1-01": {
@@ -73,6 +73,13 @@
         "T04 actual agent PAY then owner pause/transfer needs the Person2 MPC executor and Person3 owner wallet",
         "Full deployments/base-sepolia.json manifest needs provider, origin, MPC, runbook and agent values from Persons 2-4"
       ]
+    },
+    "P1-W03": {
+      "status": "IN_PROGRESS",
+      "blockedBy": [
+        "Actual chain receipts/events for funding, owner transfer, Admin and agent payment",
+        "Person4 inspector cases T03/T04 and Person2 history adapters"
+      ]
     }
   },
   "files": [
@@ -107,6 +114,9 @@
     "packages/contracts/scripts/record-deployment.mjs",
     "deployments/base-sepolia.config.json",
     "docs/contracts-deploy.md",
-    "evidence/person1/deployment.json"
+    "evidence/person1/deployment.json",
+    "packages/contracts/test/OwnerActivity.t.sol",
+    "scripts/release-check.mjs",
+    "scripts/test/release-check.test.mjs"
   ]
 }
