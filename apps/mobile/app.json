@@ -6,7 +6,8 @@
     "orientation": "portrait",
     "platforms": ["android"],
     "android": {
-      "package": "app.mandate.wallet.dev"
+      "package": "app.mandate.wallet.dev",
+      "blockedPermissions": ["android.permission.RECORD_AUDIO"]
     },
     "extra": {
       "chainId": 84532,
@@ -21,7 +22,15 @@
           }
         }
       ],
-      "./plugins/withFontScaleLayout"
+      "./plugins/withFontScaleLayout",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Mandate uses the camera only to scan QR codes.",
+          "microphonePermission": false,
+          "recordAudioAndroid": false
+        }
+      ]
     ]
   }
 }

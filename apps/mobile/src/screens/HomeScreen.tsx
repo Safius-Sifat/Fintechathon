@@ -26,6 +26,7 @@ import {
   shadows,
   space,
   stackedFontScale,
+  touchTarget,
   type,
 } from "../theme";
 
@@ -36,10 +37,13 @@ export function HomeScreen() {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   return (
-    <Screen title="Home" header={<BrandHeader />}>
+    <Screen
+      title="Home"
+      header={<BrandHeader onScan={() => navigation.navigate("Scan")} />}
+    >
       <AccountRow onPress={() => navigation.navigate("Accounts")} />
 
-      <PersonalAccountHero />
+      <PersonalAccountHero onReceive={() => navigation.navigate("Receive")} />
 
       <Banner
         icon="information-outline"
@@ -78,7 +82,7 @@ export function HomeScreen() {
   );
 }
 
-function BrandHeader() {
+function BrandHeader({ onScan }: { onScan: () => void }) {
   return (
     <View style={styles.brand}>
       <View style={styles.brandMark}>
@@ -87,7 +91,20 @@ function BrandHeader() {
           Mandate
         </Text>
       </View>
-      <ChainChip />
+      <View style={styles.brandActions}>
+        <ChainChip />
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Scan QR code"
+          onPress={onScan}
+          style={({ pressed }) => [
+            styles.scanButton,
+            pressed && styles.pressed,
+          ]}
+        >
+          <Icon name="qrcode-scan" size={22} color={colors.ink} />
+        </Pressable>
+      </View>
     </View>
   );
 }
@@ -113,7 +130,7 @@ function AccountRow({ onPress }: { onPress: () => void }) {
   );
 }
 
-function PersonalAccountHero() {
+function PersonalAccountHero({ onReceive }: { onReceive: () => void }) {
   // Side-by-side facts break words at large text sizes; stack them instead.
   const { fontScale } = useWindowDimensions();
   const factStyle =
@@ -147,8 +164,8 @@ function PersonalAccountHero() {
         <HeroAction
           label="Receive"
           icon="arrow-bottom-left"
-          disabled={!preview.hasOwnerWallet}
-          accessibilityHint="Unavailable. Needs a wallet on this phone."
+          accessibilityHint="Shows where funds would arrive. No address exists yet."
+          onPress={onReceive}
         />
         <HeroAction
           label="Send"
@@ -158,7 +175,7 @@ function PersonalAccountHero() {
         />
       </View>
       <Text style={styles.heroCaption}>
-        Receive and Send need a wallet on this phone.
+        Receiving and sending need a wallet on this phone.
       </Text>
     </View>
   );
@@ -208,6 +225,18 @@ const styles = StyleSheet.create({
     gap: space.sm,
   },
   brandMark: { flexDirection: "row", alignItems: "center", gap: space.xs },
+  brandActions: { flexDirection: "row", alignItems: "center", gap: space.sm },
+  scanButton: {
+    width: touchTarget,
+    height: touchTarget,
+    borderRadius: touchTarget / 2,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.hairline,
+    boxShadow: shadows.card,
+  },
   wordmark: {
     ...type.heading,
     fontSize: 22,

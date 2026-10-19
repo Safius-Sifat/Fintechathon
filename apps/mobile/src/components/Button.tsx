@@ -88,7 +88,62 @@ export function TextButton({
   );
 }
 
+interface OutlineButtonProps {
+  label: string;
+  icon: IconName;
+  disabled?: boolean;
+  // Read by screen readers; explains why a disabled action is unavailable.
+  accessibilityHint?: string;
+  onPress?: () => void;
+}
+
+// Light secondary pill on cards, e.g. Copy and Share.
+export function OutlineButton({
+  label,
+  icon,
+  disabled = false,
+  accessibilityHint,
+  onPress,
+}: OutlineButtonProps) {
+  const fg = disabled ? colors.textDisabled : colors.ink;
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityState={{ disabled }}
+      accessibilityHint={accessibilityHint}
+      disabled={disabled}
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.outline,
+        disabled && styles.outlineDisabled,
+        pressed && styles.pressed,
+      ]}
+    >
+      <Icon name={icon} size={18} color={fg} />
+      <Text style={[styles.outlineLabel, { color: fg }]}>{label}</Text>
+    </Pressable>
+  );
+}
+
 const styles = StyleSheet.create({
+  outline: {
+    flexGrow: 1,
+    flexBasis: 0,
+    minWidth: 120,
+    minHeight: touchTarget,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: space.sm,
+    paddingHorizontal: space.lg,
+    paddingVertical: space.sm,
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    borderColor: colors.hairline,
+    backgroundColor: colors.surface,
+  },
+  outlineDisabled: { backgroundColor: colors.surfaceMuted },
+  outlineLabel: { ...type.bodyStrong, textAlign: "center", flexShrink: 1 },
   primary: {
     minHeight: 56,
     flexDirection: "row",
