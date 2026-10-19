@@ -49,17 +49,33 @@
     "apps/mobile/src/navigation/RootNavigator.tsx"
   ],
   "checks": [
-    { "check": "pnpm typecheck (all workspace packages)", "result": "PASS" },
+    {
+      "check": "pnpm typecheck (all workspace packages)",
+      "result": "PASS"
+    },
     {
       "check": "pnpm check:repository",
       "result": "PASS",
       "observed": "checkedFiles 415, failures []"
     },
-    { "check": "prettier --check on changed files", "result": "PASS" },
+    {
+      "check": "prettier --check on changed files",
+      "result": "PASS"
+    },
     {
       "check": "pnpm --filter @mandate/mobile test",
       "result": "PASS",
       "observed": "10/10 tests in test/sendDraft.test.ts (fields kept, stable snapshot, no cross-account or cross-network leak, cancel clears one context, account switch cancels the old draft, lock/logout clears all, completeness, listeners, field allowlist). Written with the store, not run red first."
+    },
+    {
+      "check": "scripts/check-suite.mjs node @mandate/mobile on Linux (WSL clone of fb44e94, Node 22.23.3, pnpm 10.20.0)",
+      "result": "PASS",
+      "observed": "check-suite: node @mandate/mobile passed 10 tests. The proposed second line (not-ready.mjs check-mobile-native) exits nonzero as intended."
+    },
+    {
+      "check": "apps/mobile check (tsc --noEmit && tsx --test)",
+      "result": "PASS",
+      "observed": "10/10, typecheck clean"
     }
   ],
   "device": {
