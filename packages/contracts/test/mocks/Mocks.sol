@@ -92,3 +92,25 @@ contract UnavailableVault is ERC20 {
     return 0;
   }
 }
+
+/// Imported standard token with 18 decimals; the wallet never reads its metadata.
+contract PlainToken18 is ERC20 {
+  constructor() ERC20("Imported 18", "IMP18") {}
+
+  function mint(address to, uint256 amount) external {
+    _mint(to, amount);
+  }
+}
+
+/// Non-compliant token: transfer returns false instead of reverting.
+contract FalseToken is ERC20 {
+  constructor() ERC20("False", "FALSE") {}
+
+  function mint(address to, uint256 amount) external {
+    _mint(to, amount);
+  }
+
+  function transfer(address, uint256) public pure override returns (bool) {
+    return false;
+  }
+}

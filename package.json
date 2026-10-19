@@ -25,13 +25,14 @@
     "contracts:build": "forge build --root packages/contracts",
     "format:check": "prettier --check \"{apps,packages,services,scripts}/**/*.{ts,tsx,mjs,json}\"",
     "check:integration": "node scripts/not-ready.mjs integration",
-    "release:check": "node scripts/not-ready.mjs release",
+    "release:check": "node --import tsx scripts/release-check.mjs",
     "mandate-verify": "pnpm --filter @mandate/verifier cli",
     "relay-admin": "node scripts/not-ready.mjs owner-recovery-relayer",
     "test:ops": "node --test scripts/ops/test/*.test.mjs",
     "test:migrations": "tsx --test packages/platform/test/*.test.ts",
     "test:db": "node scripts/ops/with-test-postgres.mjs",
-    "check:repository": "node scripts/ops/check-repository.mjs"
+    "check:repository": "node scripts/ops/check-repository.mjs",
+    "test:release": "node --import tsx --test scripts/test/*.test.mjs"
   },
   "devDependencies": {
     "@types/node": "22.18.12",

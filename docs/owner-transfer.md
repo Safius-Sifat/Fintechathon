@@ -19,3 +19,11 @@ Every earlier Permit stops working (the wallet is paused and its epoch is old). 
 ## Relaying without the backend
 
 Read `authorityEpoch()` and `ownerTransferNonce()` from any RPC, sign natively, and submit through the backend sponsor, the native personal-gas relay or any independent funded sender. Native ETH arrives through `receive()`; calls with unknown data revert. Tests: `packages/contracts/test/{OwnerTransfer,NativeReceive}.t.sol`.
+
+## History attribution (P1-W03)
+
+- **Funding from the owner's personal account is not agent spend.** It moves two balances (personal down, managed up) and is one funding activity. The managed wallet's gross counters, nonces and epoch do not change.
+- **An owner transfer is OWNER_CONTROL.** The `OwnerTransferExecuted` and `WalletPaused` events, and the advanced epoch, identify it. It never adds to a task's or the executor's gross spend, and it never resets that spend. After the transfer, the agent's old Permits fail.
+- **Amounts are exact base units for any token.** The wallet never reads token metadata. Taxed, non-compliant and code-less tokens are rejected without side effects.
+
+`test/OwnerActivity.t.sol` covers these rules and the contract side of WQ03/04/07/08/13. The inspector-side cases (T03 missing data, T04 unmatched outflow) belong to Person4.
