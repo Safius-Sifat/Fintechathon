@@ -1,5 +1,5 @@
 PNPM := ./scripts/pnpm.sh
-.PHONY: setup doctor infra-up infra-down dev-platform dev-provider dev-mobile dev-worker db-migrate typecheck build check-schema check-contracts check-platform check-mobile check-agents check-integration release-check mpc-fetch
+.PHONY: setup doctor infra-up infra-down dev-platform dev-provider dev-mobile dev-worker db-migrate typecheck build check-schema check-contracts check-platform check-mobile check-mobile-native check-agents check-integration release-check mpc-fetch
 setup:
 	$(PNPM) install --frozen-lockfile
 	$(PNPM) setup:env
@@ -29,8 +29,11 @@ check-schema:
 check-contracts:
 	node scripts/check-suite.mjs forge packages/contracts 'test/**/*.t.sol'
 	$(PNPM) --filter @mandate/contracts abi:check
-check-platform check-mobile check-agents:
+check-platform check-agents:
 	node scripts/not-ready.mjs $@
+check-mobile:
+	node scripts/check-suite.mjs node @mandate/mobile
+	node scripts/not-ready.mjs check-mobile-native
 check-integration:
 	$(PNPM) check:integration
 release-check:
