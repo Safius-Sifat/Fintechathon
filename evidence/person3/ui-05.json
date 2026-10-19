@@ -20,13 +20,24 @@
   ],
   "fabricated": "none: no balance, fee, validation result, signature or successful transfer",
   "sampleInput": "Typed for the screenshots only: recipient 'sample-recipient-not-checked', amount '0.01'. Neither is stored or sent.",
-  "dependencies": "No new packages. apps/mobile/package.json gains only the 'test' script (uses the root's pinned tsx 4.20.6, as packages/schema does). app.json, lockfile, root configuration and native code unchanged",
-  "rootWrapperNote": "Root 'make check-mobile' and any root test wrapper belong to Person1 and are unchanged; wiring apps/mobile 'test' into them is a coordination request, not part of this change",
+  "dependencies": "No new packages. apps/mobile/package.json gains 'test' (tsx --test test/*.test.ts) and 'check' (tsc --noEmit && tsx --test test/*.test.ts), using the root's pinned tsx 4.20.6 as packages/schema does. app.json, lockfile, root configuration and native code unchanged",
+  "limitations": [
+    "Account/network switch and lock/logout/wallet-removal clearing (switchContext, clearAllDrafts) are implemented and unit-tested but not yet called: accounts, app lock and sessions do not exist. They must be wired when P3-W01 and P3-W03 land.",
+    "The 10 store tests passed but were written with the store and not run failing first. Future functional work follows the plan's red/green process (failing assertion recorded before the implementation).",
+    "Mobile tests are not yet connected to the root 'make check-mobile', which still runs scripts/not-ready.mjs. See person1Request."
+  ],
+  "person1Request": {
+    "owner": "Person1 (root Makefile)",
+    "reason": "Run the mobile unit tests from the root without reporting mobile acceptance as passing: native, instrumentation and installed-app suites do not exist yet (AGENTS.md: root acceptance commands must not report success for absent implementations).",
+    "patch": "Makefile: replace\n  check-platform check-mobile check-agents:\n  \tnode scripts/not-ready.mjs $@\nwith\n  check-platform check-agents:\n  \tnode scripts/not-ready.mjs $@\n  check-mobile:\n  \tnode scripts/check-suite.mjs node @mandate/mobile\n  \tnode scripts/not-ready.mjs check-mobile-native\n(keep check-mobile in .PHONY)",
+    "effect": "make check-mobile runs apps/mobile 'check' (typecheck + Node tests) and fails on any test failure or on zero tests, then still exits nonzero with 'check-mobile-native: ... not available' until the native suites are wired. The second line is removed only when the :owner-wallet Gradle and Maestro suites exist.",
+    "verified": "apps/mobile 'check' passes directly (10/10). scripts/check-suite.mjs itself cannot spawn ./scripts/pnpm.sh on Windows (EFTYPE, a Windows limitation of the script); verified on Linux (WSL) instead, see checks."
+  },
   "files": [
     "apps/mobile/src/state/sendDraft.ts",
     "apps/mobile/src/state/useSendDraft.ts",
     "apps/mobile/test/sendDraft.test.ts",
-    "apps/mobile/package.json (test script)",
+    "apps/mobile/package.json (test and check scripts)",
     "apps/mobile/src/screens/Send.tsx",
     "apps/mobile/src/screens/TransferReview.tsx",
     "apps/mobile/src/config/transfer.ts",
