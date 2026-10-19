@@ -1,0 +1,135 @@
+{
+  "task": "UI-04",
+  "title": "Receive and Scan",
+  "status": "REVIEW",
+  "recordedAt": "2026-10-19T16:20:00+06:00",
+  "note": "UI evidence, kept outside evidence/*/cases/. Not a P3-W02 or WQ03 result: there is no receiving address, and scanned codes are not parsed as payment requests.",
+  "baseCommit": "34f4560",
+  "dependency": "Built on UI-03 (PR #31), which is built on UI-02 (PR #30). Both unmerged; the UI-04 change is the diff against 34f4560.",
+  "planReference": "docs/plans/03 - Android Owner Wallet.md v7.1, S8.1 Receive screen group and S8.4 (camera permission only for scan; QR is a draft request only; scan cannot sign or pay)",
+  "implemented": [
+    "Receive: account and network (Base Sepolia, chain 84532) shown; wallet selector with Agent wallet disabled (Not connected); ETH/DemoUSD selector changes the explanation only; empty QR frame 'No address yet'; Address Not created; Copy and Share disabled",
+    "Scan, working: camera permission intro, Android permission dialog, denied (Try again), permanently denied (Open settings), return from settings picks up the grant, live camera with viewfinder, close button",
+    "Scan result sheet (code) shows the raw QR text and states that reading payment requests is not available; nothing is opened, paid, signed or saved",
+    "Home: Receive button opens Receive; scan button in the header opens Scan; Send stays disabled"
+  ],
+  "fabricated": "none: no address, no generated QR, no parsed payment request",
+  "dependencyChange": {
+    "added": "expo-camera 17.0.10 (apps/mobile/package.json, exact pin; matches expo 54.0.33 bundledNativeModules ~17.0.10)",
+    "lockfile": "21 lines added, 0 removed",
+    "appJson": "expo-camera plugin with a camera-only usage message; microphonePermission false; recordAudioAndroid false; android.blockedPermissions RECORD_AUDIO",
+    "apkPermissions": "aapt dump permissions: CAMERA only, no RECORD_AUDIO",
+    "nativeRebuild": "expo prebuild --clean + assembleDebug x86_64 PASS; prebuild's added ios script removed from package.json, no other prebuild change",
+    "apkSha256": "8a446a216512f7d7427bbda6c9c62fa2615c7dd991ed28c62447740eaa5566d2"
+  },
+  "files": [
+    "apps/mobile/src/screens/Receive.tsx",
+    "apps/mobile/src/screens/Scan.tsx",
+    "apps/mobile/src/screens/HomeScreen.tsx",
+    "apps/mobile/src/components/Button.tsx (OutlineButton)",
+    "apps/mobile/src/navigation/RootNavigator.tsx",
+    "apps/mobile/app.json",
+    "apps/mobile/package.json",
+    "pnpm-lock.yaml"
+  ],
+  "checks": [
+    { "check": "pnpm typecheck (all workspace packages)", "result": "PASS" },
+    {
+      "check": "pnpm check:repository",
+      "result": "PASS",
+      "observed": "checkedFiles 393, failures []"
+    },
+    { "check": "prettier --check on changed files", "result": "PASS" },
+    {
+      "check": "Unit tests",
+      "result": "NOT RUN",
+      "observed": "apps/mobile has no test runner yet"
+    }
+  ],
+  "device": {
+    "kind": "emulator",
+    "serial": "emulator-5554",
+    "android": "16",
+    "api": 36,
+    "camera": "emulator virtual scene (back camera)",
+    "physicalPhone": "NOT RUN",
+    "ios": "NOT RUN"
+  },
+  "runtimeChecks": [
+    {
+      "check": "Receive at 1.0: account, network, selectors, empty QR, disabled Copy/Share; DemoUSD switches the note; Agent wallet cannot be selected",
+      "result": "PASS",
+      "screens": [
+        "02-receive.png",
+        "04-receive-end.png",
+        "05-receive-demousd-agent-tap.png"
+      ]
+    },
+    {
+      "check": "Scan permission flow: intro -> Not now returns Home; Allow -> system dialog -> Don't allow -> denied; Try again -> Don't allow -> permanently denied with Open settings; Open settings opens Android settings; after granting, returning shows the live camera",
+      "result": "PASS",
+      "screens": [
+        "06-scan-permission-intro.png",
+        "08-system-permission-dialog.png",
+        "09-denied-try-again.png",
+        "11-denied-open-settings.png",
+        "13b-scanner-later.png"
+      ]
+    },
+    {
+      "check": "Close button leaves the scanner and the camera is released",
+      "result": "PASS",
+      "observed": "dumpsys media.camera: Device 10 is closed, no client instance",
+      "screens": ["15-close-back-home.png"]
+    },
+    {
+      "check": "Real QR decoding by the camera",
+      "result": "NOT_RUN",
+      "observed": "A known nonsensitive test QR (text 'Mandate scanner test') was placed on the emulator virtual-scene posters, but the virtual camera could not be turned toward it from the console. No code has been decoded. Stays NOT_RUN until observed, on a physical phone or a controllable emulator camera, with known nonsensitive test codes only."
+    },
+    {
+      "check": "Result sheet layout, UI preview using a development sample (not proof of decoding)",
+      "result": "PASS (UI preview only)",
+      "observed": "A __DEV__-only button on the scanner loads a built-in sample text; the sheet titles it 'Sample result' and tags it 'Development sample, not scanned'. Release builds do not contain the button. Long text scrolls inside a bounded box so the actions stay on screen, at 1.0 and 2.0.",
+      "screens": [
+        "31-scanner-with-dev-button.png",
+        "32-sample-result-1x.png",
+        "33-sample-result-scrolled-1x.png",
+        "35-2x-scanner-dev-button.png",
+        "36-2x-sample-result.png"
+      ]
+    },
+    {
+      "check": "Allow camera screen at font scale 2.0 (permission reset with pm clear)",
+      "result": "PASS",
+      "screens": ["34-2x-allow-camera.png"]
+    },
+    {
+      "check": "Large-text fixes found in this pass",
+      "result": "FIXED",
+      "observed": "StatusTag label overflowed the sheet at 2.0 (now wraps inside the tag; shared component). Development button text touched its border at 2.0 (vertical padding added)."
+    },
+    {
+      "check": "Large text, font scale 2.0, cold start: Home header, Receive, Scan permission screen and live scanner reflow without clipped or broken words",
+      "result": "PASS",
+      "observed": "The Allow camera screen at 2.0 is recorded separately below.",
+      "screens": [
+        "20-2x-home.png",
+        "21-2x-receive.png",
+        "22-2x-receive-mid.png",
+        "23-2x-receive-end.png",
+
+        "25-2x-scanner.png"
+      ]
+    }
+  ],
+  "pending": [
+    "Mobile test harness (owned setup): Node's test runner through the pinned tsx, 'test': 'tsx --test test/*.test.ts' in apps/mobile (plan, Agent execution instructions). Must exist before functional QR/amount validation work",
+    "Real QR decode and result sheet on a physical phone",
+    "Physical Android phone check",
+    "iOS simulator and physical iPhone checks (expo-camera supports iOS; untested)",
+    "Screen-reader pass with TalkBack/VoiceOver",
+    "Receiving address, chain-qualified ERC-681 QR, copy/share (P3-W02, needs P3-01/P3-W01 accounts)",
+    "ERC-681 parsing with wrong-chain/precision rejection and its tests (P3-W02, WQ03, WQ14; needs the mobile test runner)"
+  ]
+}

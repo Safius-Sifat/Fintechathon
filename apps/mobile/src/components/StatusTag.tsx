@@ -71,5 +71,6 @@ const styles = StyleSheet.create({
     paddingVertical: space.xs,
     borderRadius: radius.pill,
   },
-  label: { ...type.label },
+  // Wraps inside the tag at large text sizes instead of overflowing it.
+  label: { ...type.label, flexShrink: 1 },
 });

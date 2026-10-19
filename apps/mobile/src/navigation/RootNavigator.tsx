@@ -5,6 +5,8 @@ import { AccountsScreen } from "../screens/Accounts";
 import { ActivityScreen } from "../screens/ActivityScreen";
 import { HomeScreen } from "../screens/HomeScreen";
 import { IntroScreen, SetupScreen, WelcomeScreen } from "../screens/Onboarding";
+import { ReceiveScreen } from "../screens/Receive";
+import { ScanScreen } from "../screens/Scan";
 import { SettingsScreen } from "../screens/SettingsScreen";
 import { TabBar, type TabMeta } from "./TabBar";
 
@@ -23,6 +25,8 @@ export type RootStackParamList = {
   Setup: { direct?: boolean } | undefined;
   Tabs: NavigatorScreenParams<TabParamList>;
   Accounts: undefined;
+  Receive: undefined;
+  Scan: undefined;
 };
 
 const TAB_META: Record<keyof TabParamList, TabMeta> = {
@@ -71,6 +75,8 @@ export function RootNavigator() {
       <Stack.Screen name="Setup" component={SetupScreen} />
       <Stack.Screen name="Tabs" component={Tabs} />
       <Stack.Screen name="Accounts" component={AccountsScreen} />
+      <Stack.Screen name="Receive" component={ReceiveScreen} />
+      <Stack.Screen name="Scan" component={ScanScreen} />
     </Stack.Navigator>
   );
 }
