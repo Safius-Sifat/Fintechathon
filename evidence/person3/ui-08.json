@@ -1,7 +1,7 @@
 {
   "task": "UI-08 (group 1 of 2)",
   "title": "Approvals, Approval detail, Alerts and Agent controls (layout and navigation only)",
-  "status": "REVIEW",
+  "status": "SUBMITTED",
   "recordedAt": "2026-10-20T17:20:00+06:00",
   "note": "UI evidence, kept outside evidence/*/cases/. Completes no P3 case: P3-A01 stays open. No approval, rejection, freeze, pause, revoke, logout or alert is performed or shown as real. Group 2 (WalletPolicy, IntentCompose, IntentReview, AllowanceApproval, P3-A02) is not started.",
   "baseCommit": "98088df",
@@ -45,7 +45,10 @@
       "result": "PASS",
       "observed": "45/45 tests (10 new + 35 existing), typecheck clean"
     },
-    { "check": "pnpm typecheck (all workspace packages)", "result": "PASS" },
+    {
+      "check": "pnpm typecheck (all workspace packages)",
+      "result": "PASS"
+    },
     {
       "check": "pnpm check:repository",
       "result": "PASS",
@@ -129,5 +132,14 @@
     "Account-scoped push routing (P3-A01.T06)",
     "UI-08 group 2: WalletPolicy, IntentCompose, IntentReview, AllowanceApproval (P3-A02)",
     "Physical Android phone, iOS, screen-reader pass"
-  ]
+  ],
+  "submission": {
+    "pr": 37,
+    "draft": true,
+    "base": "main",
+    "originMain": "95e91fb (unchanged; no merge needed)",
+    "ownerApproval": "Visually approved by the Person3 owner on 2026-10-20",
+    "dependency": "#36 (UI-07) and #35 (UI-06), both unmerged; PR diff against main includes them until they merge. UI-08-only comparison: work/person3-mobile-ui07-agent-tasks...work/person3-mobile-ui08-approvals-controls (34 files)",
+    "afterDependenciesMerge": "merge origin/main, rerun checks, verify the PR diff contains only UI-08 group 1 files"
+  }
 }
