@@ -1,0 +1,137 @@
+{
+  "owner": "Person3",
+  "plan": "docs/plans/03 - Android Owner Wallet.md (v7.1)",
+  "updatedAt": "2026-10-19T14:40:00+06:00",
+  "currentCheckpoint": "P3-01 checkpoint 1: native module registration and Wallet Core load",
+  "platformRule": "v7.1: a case passes only when Android and iOS both pass. Current work is Android only, so Android results are recorded as LOCAL_PASS until P3-X01 exists.",
+  "completedMilestones": {
+    "UI-01.1": "App shell and honest Home/Activity/Settings preview, merged in #27 (50d948a). UI only; no case IDs."
+  },
+  "tasks": {
+    "P3-01": {
+      "title": "Native build and owner lifecycle",
+      "status": "IN_PROGRESS",
+      "cases": 5,
+      "checkpoints": [
+        "1. Module registered, Wallet Core 4.8.4 loads and computes, status-only bridge (this checkpoint)",
+        "2. Unit/instrumentation runner wiring and SeedStore AES-GCM under authenticated Keystore key",
+        "3. Native create/restore with Wallet Core BIP39, RecoveryActivity with FLAG_SECURE and word quiz",
+        "4. Cancellation, tamper, invalidation and backup-exclusion cases (T02-T04)",
+        "5. Clean prebuild/build/install from pins (T05) and physical-phone run"
+      ],
+      "blockedBy": [
+        "Physical Android 12+ phone with a secure screen lock (acceptance cases)"
+      ]
+    },
+    "P3-W01": {
+      "title": "Account lifecycle, lock and backup",
+      "status": "NOT_STARTED",
+      "cases": 7,
+      "blockedBy": [
+        "P3-01",
+        "Physical device for WQ01/02/10",
+        "T07 factory wallet discovery needs a deployed owner wallet (Person1 factory is deployed; mapping needs Person2 provisioning)"
+      ]
+    },
+    "P3-02": {
+      "title": "Typed scope validation and native confirmation",
+      "status": "NOT_STARTED",
+      "cases": 6,
+      "blockedBy": [
+        "Trusted release manifest deployments/base-sepolia.json does not exist yet (Person1 with values from Persons 2-4)"
+      ]
+    },
+    "P3-W02": {
+      "title": "Real receive/assets/send/review flow",
+      "status": "NOT_STARTED",
+      "cases": 9,
+      "blockedBy": [
+        "P3-W01 accounts and native signer",
+        "Test ETH and DemoUSD on Base Sepolia for the owner account"
+      ],
+      "ownedWork": "Exact BigInt amount parsing and EIP-55 address validation (shared AddressSchema is non-strict and has no unit parser)"
+    },
+    "P3-03": {
+      "title": "Login, wallet and task approval",
+      "status": "NOT_STARTED",
+      "cases": 6,
+      "blockedBy": [
+        "Person2 auth/provision/task/permit API (unverified)",
+        "Trusted release manifest (missing)",
+        "Person4 typed prepareTask interpretation"
+      ]
+    },
+    "P3-W03": {
+      "title": "Sessions, history and error states",
+      "status": "NOT_STARTED",
+      "cases": 6,
+      "blockedBy": ["Person2 sessions/history API (unverified)"]
+    },
+    "P3-04": {
+      "title": "Results, assets, schedule and inspection",
+      "status": "NOT_STARTED",
+      "cases": 6,
+      "blockedBy": [
+        "Person4 results and inspection findings",
+        "Person2 task/asset/schedule states"
+      ]
+    },
+    "P3-05": {
+      "title": "Controls and standalone recovery sender",
+      "status": "NOT_STARTED",
+      "cases": 6,
+      "blockedBy": [
+        "P3-02 native signAdmin/signOwnerTransfer",
+        "Independently funded personal account and RPC"
+      ],
+      "available": "Person1 Admin/OwnerTransfer ABI and vectors"
+    },
+    "P3-06": {
+      "title": "APK, documentation and integration proof",
+      "status": "NOT_STARTED",
+      "cases": 5,
+      "blockedBy": ["All P3 tasks", "Trusted release manifest"]
+    },
+    "P3-W04": {
+      "title": "Whole-app usability, error and permission qualification",
+      "status": "NOT_STARTED",
+      "cases": 6,
+      "blockedBy": ["All screens connected", "Person4 receive-request fixtures"]
+    },
+    "P3-W05": {
+      "title": "Complete installed release",
+      "status": "NOT_STARTED",
+      "cases": 4,
+      "blockedBy": ["P3-06 and every P3 task", "Person4 scenario runner"]
+    },
+    "P3-A01": {
+      "title": "Approval requests, alerts and freeze controls",
+      "status": "NOT_STARTED",
+      "cases": 6,
+      "blockedBy": [
+        "Person2 approval routes and push (P2-A02, unverified)",
+        "Physical device"
+      ],
+      "available": "Person1 approval vectors (packages/schema/fixtures/approval-v7.json)"
+    },
+    "P3-A02": {
+      "title": "Wallet policy editor, allowance and intent review",
+      "status": "NOT_STARTED",
+      "cases": 5,
+      "blockedBy": [
+        "Person2 compile and policy routes (P2-A01/A02, unverified)"
+      ],
+      "available": "Person1 wallet-policy vectors (packages/schema/fixtures/wallet-policy-v7.json)"
+    },
+    "P3-X01": {
+      "title": "iOS native parity",
+      "status": "DEFERRED",
+      "cases": 7,
+      "blockedBy": [
+        "Deferred by the Person3 owner: Android first",
+        "macOS with Xcode, a physical iPhone with a passcode, and a paid Apple Developer Program membership for APNs/TestFlight"
+      ],
+      "preparedNow": "Wallet Core is pinned at 4.8.4, which is published both as the Android Maven artifact and as the TrustWalletCore CocoaPod; the TypeScript interface lives in modules/owner-wallet/src for both platforms"
+    }
+  }
+}

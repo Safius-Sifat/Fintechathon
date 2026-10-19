@@ -18,6 +18,8 @@ export interface Capability {
   icon: IconName;
   tone: Tone;
   state: CapabilityState;
+  // Overrides the state's default tag text.
+  stateLabel?: string;
 }
 
 // Literal `false` types: turning any of these on is a deliberate, reviewed
