@@ -1,10 +1,10 @@
 {
-  "documentationVersion": "7.0",
+  "documentationVersion": "7.1",
   "walletDomainVersion": "5",
   "loginDomainVersion": "2",
   "evidenceSchemaVersion": 4,
-  "sharedAppendixSha256": "cd01ef34873d957c3bbbb56cc587095a12aa7cfca7330b1b87c25bfd7a9366c5",
-  "walletExtensionSha256": "53a06607f8829baa21f38eb340b81ed1adee92a3b9ea1b9241d7f5e6f19e5497",
+  "sharedAppendixSha256": "ca31dafa0ce12ee2d8a2fd8dc65edf70a0f824db1a4338b14978903977a889eb",
+  "walletExtensionSha256": "4533bacf867e649fc759b447d5699e2204ad0c4b03044cab44d7e30f1b65609f",
   "status": "specified-not-built",
   "sourceMigration": "w0-schema-implemented-consumer-acceptance-pending",
   "files": {
@@ -13,28 +13,28 @@
       "words": 382
     },
     "FINAL PLAN.md": {
-      "sha256": "c38c18e3d87db9c0ce436431ba3d49affc50dc00564c6767a5d7bc84e01a5183",
-      "words": 2747
+      "sha256": "55dc466db0ac751248476399399deaa32269509b2f273896df41f0384185302c",
+      "words": 2760
     },
     "PRD.md": {
-      "sha256": "b0df3fe940efcea68e2ae88bf9d23ec3e484d7f0fe8d34143cf44f2a0b11d587",
-      "words": 2027
+      "sha256": "86cb83800f1d3c2caaa17f3d73bf7387fefeb3249f549f2661926f55fef29c23",
+      "words": 2040
     },
     "README.md": {
-      "sha256": "019c15920fff7d12d7d9ebf2748350fa768f7911c568c756243b5fa857ff4b4d",
-      "words": 470
+      "sha256": "dfcc4048496c0a8a65132d4afeec164a4e9177891abfecdc7119e5901f3519fd",
+      "words": 478
     },
     "architecture.md": {
-      "sha256": "68285e43a0dfa16b814fdae3fa1c3a70c338770236d5a396ef9f150c380cc2d6",
-      "words": 14541
+      "sha256": "e344b31ca9b14fb39c9c9d68632d8b90dbe82af787c0625b74a6d4c4ab4d842a",
+      "words": 14571
     },
     "docs/BOOTSTRAP-STATUS.md": {
       "sha256": "117ee8e70d52d7e3b8f9e5edd109061973be2b4bbbf434646d331339b68069ba",
       "words": 398
     },
     "docs/COMPLETE-APP.md": {
-      "sha256": "e47f128c3c71b635ad076ca47aa3b979ded0b61dc68771b2191d1bccb1962494",
-      "words": 2861
+      "sha256": "5e607f826b332f136e70299c7a99abd3c53bbd6a853be8c71eb4acdb378275bf",
+      "words": 2866
     },
     "docs/OWNERSHIP.md": {
       "sha256": "7dbdfc4171d9b54f7b7b9166f2c36a1fa5ea188c59679afa06f427fa782aba5e",
@@ -45,24 +45,24 @@
       "words": 929
     },
     "docs/SETUP.md": {
-      "sha256": "3675763a34996459b33269c75dc75ab2d3f43e6e51ac002cdfd5ccc81724e273",
-      "words": 750
+      "sha256": "e7d04e39ab2baa2786465e514c2f6714a9f2198a0b796d6adef679c9dcb5d321",
+      "words": 775
     },
     "docs/plans/01 - Contracts and Shared Interfaces.md": {
-      "sha256": "4bdd9b4239ab455ee2e7d6c7f114eacd2d6de6b71aa12e82de2825c89f4e3b21",
-      "words": 22338
+      "sha256": "520d3422739ec16f64887d96bbd3a16a826c0d6dbfa52288fd33b02d38bce039",
+      "words": 22417
     },
     "docs/plans/02 - Platform Policy and MPCium.md": {
-      "sha256": "431e576d0aa31edede2458fcd86ba31824fd3e832e9876d0abdd366d2f1a37a7",
-      "words": 24662
+      "sha256": "3e83a1b1fb9740d7375488ddd32a8073d40f28785ac200996a6baff28217c669",
+      "words": 24739
     },
     "docs/plans/03 - Android Owner Wallet.md": {
-      "sha256": "6dbfd5bc90584ce844f22addfaeb61126805ec17d361405e5021205e274aa0a5",
-      "words": 23185
+      "sha256": "a1a60599e1dfcb6d922355ad54f0883e77c868ce16e5cbe6ff65dd90c1639966",
+      "words": 24595
     },
     "docs/plans/04 - Agents Services Inspection and Demo.md": {
-      "sha256": "3df81efc4722272e82944f490997c574edbb4d4135397c0f8ac549f77b24ffff",
-      "words": 22896
+      "sha256": "54844f0c776b94ee73ce4f002c3c279a3e66ed7deb798315078b17e2e4ab11cb",
+      "words": 22983
     },
     "pitch.md": {
       "sha256": "17e3eccad67df5a8d60edcddcbc17431d78f002d8b786465d4c7bb62937b4441",
@@ -75,8 +75,8 @@
   },
   "handoffRevision": "agent-prompt-2026-10-18-v7-review",
   "promptCoverage": {
-    "taskCount": 50,
-    "specifiedCaseCount": 321,
+    "taskCount": 51,
+    "specifiedCaseCount": 328,
     "milestoneCount": 28,
     "perDocument": {
       "01 - Contracts and Shared Interfaces.md": {
@@ -90,8 +90,8 @@
         "milestones": 7
       },
       "03 - Android Owner Wallet.md": {
-        "tasks": 13,
-        "specifiedCaseIds": 77,
+        "tasks": 14,
+        "specifiedCaseIds": 84,
         "milestones": 7
       },
       "04 - Agents Services Inspection and Demo.md": {
@@ -105,5 +105,5 @@
   "invoiceDomainVersion": "2",
   "agenticExtensionSha256": "dc1386e36066783e019e75a82d3fc0a74b4cc80721c10491948075e7c65c1675",
   "appendixHashMethod": "sha256 of UTF-8 text: shared = from the shared-contract heading to before '### S8. '; wallet = '### S8. ' to before '### S9. '; agentic = '### S9. ' to end of file",
-  "updated": "2026-10-18"
+  "updated": "2026-10-19"
 }

@@ -22,7 +22,7 @@ This version replaces the five-person/cb-mpc plan. Use **MPCium**, three nodes o
 | --- | --- | --- | --- |
 | [01 - Contracts and Shared Interfaces](docs/plans/01%20-%20Contracts%20and%20Shared%20Interfaces.md) | Wallet/factory/token/vault/anchor; v7 WalletPolicy, co-signature, freeze, allowance, call templates, multi-asset and x402 authorization; shared schemas, fixtures, ABI, deployment manifest | Same typed hashes/signatures across Solidity/TS/native/Go | On-chain financial authority and contract acceptance |
 | [02 - Platform Policy and MPCium](docs/plans/02%20-%20Platform%20Policy%20and%20MPCium.md) | API, sessions/history, DB, worker/reservations/policy, agent question service, owner approvals/push, risk sentinel, MPCium/Go integration, owner/agent relayers, evidence export and infrastructure | Three nodes complete DKG; any two sign; a single node cannot | Durable controlled execution and operable deployment |
-| [03 - Android Owner Wallet](docs/plans/03%20-%20Android%20Owner%20Wallet.md) | Complete personal/managed Android wallet, native transactions/accounts/backup/sessions/security; approval, freeze, wallet-policy, allowance and intent-review screens; independent recovery and APK | Physical-phone owner signature and successful word restore | User experience and owner independence |
+| [03 - Android Owner Wallet](docs/plans/03%20-%20Android%20Owner%20Wallet.md) | Complete personal/managed Android and iOS wallet, native transactions/accounts/backup/sessions/security; approval, freeze, wallet-policy, allowance and intent-review screens; independent recovery and APK/iOS build | Physical-phone owner signature and successful word restore | User experience and owner independence |
 | [04 - Agents Services Inspection and Demo](docs/plans/04%20-%20Agents%20Services%20Inspection%20and%20Demo.md) | Reference LLM agent on the Claude Agent SDK; four runbooks with agent questions; intent compiler; x402-formatted paid providers; SDK/MCP/CLI; independent inspector; payment-request fixtures/full-app acceptance/demo/submission | Actual browser checks, signed invoice/receipt and verifier fixtures | Useful agent work, independent inspection and demonstrated release |
 
 Person2 owns worker process; Person4 owns imported runbook library. Person2 writes ledger; Person4 independently verifies exports. Person1 owns shared interface changes; consumers do not silently fork types. Every owner supplies their own tests, security notes and deployment instructions. Required everyday-wallet W tasks now extend all four handoffs; the app is not limited to agent approval screens. Person4 assembles them; no fifth owner is implied.
@@ -56,7 +56,7 @@ Four runbooks: Browser Check (PAY, agent chooses offer and fallback), Liquidity 
 
 ```mermaid
 flowchart LR
-  Phone[Owner Android app\npersonal and managed wallet] --> API[API + PostgreSQL]
+  Phone[Owner mobile app (Android, iOS)\npersonal and managed wallet] --> API[API + PostgreSQL]
   Phone -->|Native personal signing and broadcast| DirectRPC[Trusted Base Sepolia RPC]
   Agent[LLM agent\nClaude Agent SDK or any MCP client] -->|MCP tools, scoped token| API
   API -->|Approval push| Phone
@@ -99,8 +99,8 @@ All times Dhaka (UTC+6). Internal completion remains Oct18; official submission 
 | G1 | Oct17 18:00 | Local contract pay, native owner signature/restore, actual three-node/two-participant MPC signature and mandatory authorization denial, real browser fixture |
 | G2 | Oct18 02:00 | Phone owner approval→public-testnet MPC payment→actual browser output→durable export→initial independent inspection |
 | G3 | Oct18 10:00 | Four runbooks, bounded fallback, restart/reservations, owner stop/recovery, SDK/MCP, six-finding inspector |
-| G4 | Oct18 15:00 | Q01–Q14/evaluation and defect fixes, node/DB/RPC/outage recovery, APK installation/rebuild |
-| G5 | Oct18 18:00 | Tagged complete source/APK/manifest, measured evidence, English deck/demo/security/deploy docs |
+| G4 | Oct18 15:00 | Q01–Q14/evaluation and defect fixes, node/DB/RPC/outage recovery, APK/iOS build installation/rebuild |
+| G5 | Oct18 18:00 | Tagged complete source/APK/iOS build/manifest, measured evidence, English deck/demo/security/deploy docs |
 | Upload | Oct20 18:00 | Complete latest package uploaded and receipt checked before official cutoff |
 
 If G1 fails, fix the signing/native/contract blocker before claiming whole-system readiness. If dates slip, record delay and use submission buffer. No ordinary-key fallback disguised as MPC or promise of guaranteed completion/winning.
@@ -120,13 +120,13 @@ If G1 fails, fix the signing/native/contract blocker before claiming whole-syste
 | Agent decisions | 4 and 2 /1 | Claude Agent SDK agent answers bounded questions through MCP; injection and out-of-bounds answers rejected; defaults on timeout |
 | Owner policy controls | 1 and 3 /2 | WalletPolicy, co-signed Actions, Freeze and Allowance enforced by contract and driven from the phone |
 | Risk and payments | 2 and 4 /1 | Screening/simulation/velocity denials; USDC payments; x402-formatted quotes; gate X402-G recorded |
-| Release | 4 coordinates /all | Reproducible source/APK, known risks, transaction index, measured evaluation |
+| Release | 4 coordinates /all | Reproducible source/APK/iOS build, known risks, transaction index, measured evaluation |
 
 Security cases Q01–Q14 are listed in every handoff.18 normal-category variants include correctly rejected insufficient-budget cases, reported separately from delivered tasks; add6 failure/contention/asset/schedule runs. Report all failures and denominators, not selected successful clips. Test instructions are planned implementation work, not results from this documentation operation.
 
 ## 7. Definition of complete
 
-- Installed APK creates/imports/backs up local accounts; sends/receives ETH/ERC20, shows personal/managed funds, QR/contacts/assets/history, transaction lifecycle and all security/session screens.
+- Installed Android and iOS apps create/imports/backs up local accounts; sends/receives ETH/ERC20, shows personal/managed funds, QR/contacts/assets/history, transaction lifecycle and all security/session screens.
 - OwnerTransfer5, Login2/native refresh and validated receive requests implement S8, with no backend-held owner key and correct independent fee/recovery behavior.
 - API authenticates/isolates users and external tokens; jobs/reservations/journal survive documented failures.
 - Three MPCium containers with distinct encrypted persistent shares, any-two signing, required policy authorizer, verified EVM signatures and no full-key fallback. Label the shared-VM PoC limitation.
@@ -136,7 +136,7 @@ Security cases Q01–Q14 are listed in every handoff.18 normal-category variants
 - Original agent Q01–Q14, wallet WQ01–WQ14 and agentic/policy AQ01–AQ14 have actual acceptance evidence; no mock core capability is advertised.
 - A real LLM agent on the Claude Agent SDK completes tasks through MCP alone; it can only choose allowed options, and every choice is recorded as an assertion in evidence.
 - Owner WalletPolicy, co-signed Actions above the review threshold, Freeze/Unfreeze, Allowance, call templates and per-asset (DemoUSD/USDC) limits are enforced by the contract and controllable from the phone.
-- Tagged source/README/deployment/tests/security self-assessment/actual on-chain hashes, APK, deck≤10min and demo≤5min are assembled without secrets.
+- Tagged source/README/deployment/tests/security self-assessment/actual on-chain hashes, APK/iOS build, deck≤10min and demo≤5min are assembled without secrets.
 
 The supplied competition PDF controls submission requirements. Public testnet acceptance is the user's organizer confirmation. These handoffs are team implementation instructions, not instructions extracted from external documents.
 
@@ -154,7 +154,7 @@ The supplied competition PDF controls submission requirements. Public testnet ac
 | W2 | Fund agent wallet; owner-managed send/epoch stop/independent relay; correct evidence attribution | Person1/2/3 with4 |
 | W3 | Pending/restart/replacement/cancel, history/backfill/reorg, sessions/revoke/logout/outage/restore | Person2/3 with1/4 |
 | W4 | Complete-app navigation, accessible confirmations, QR/permission/error cases and real transfer review pass | Person3/4 |
-| W5 | Installed complete APK and actual wallet+agent qualification/release materials | All |
+| W5 | Installed complete APK/iOS build and actual wallet+agent qualification/release materials | All |
 
 W0 precedes new signatures. W1/W2 run alongside G1–G3; W3/W4 required before G4/G5. Internal Oct18 and official Oct20 deadline remain targets/cutoff, not capacity proof. Complete app means all advertised required flows actually work on supported Base Sepolia; it does not claim every MetaMask network/DeFi feature. Swaps/bridges/NFT/general dApp contract calls remain outside supported capability list.
 
