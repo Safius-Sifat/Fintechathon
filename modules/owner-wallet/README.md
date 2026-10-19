@@ -1,5 +1,12 @@
 # Native owner-wallet boundary — Person3
 
-Implement Kotlin/Wallet Core JNI owner create/import/backup, authenticated Keystore seed wrapping, native scope validation/confirmation and typed Login/Permit/Admin signing. Use the exact bridge in your handoff. No seed/private key crosses React Native bridge; no raw-sign method; no embedded-provider signing substitute.
+Expo module with the owner's recovery words, accounts, encrypted seed storage, native confirmation and typed signing (handoff 03, S8.6). No seed, recovery word or private key crosses the React Native bridge; there is no raw-sign method and no embedded-provider signing substitute.
 
-No native signing module is supplied by this bootstrap. `apps/mobile` currently displays foundation status only. Native Android build/Wallet Core integration is the G1 gate; do not treat opening Metro as wallet readiness. Android12+ physical device required for acceptance.
+## Current state (P3-01 checkpoint 1)
+
+- Android Gradle project `:owner-wallet`, autolinked into `apps/mobile` as the workspace package `@mandate/owner-wallet`.
+- Trust Wallet Core `com.trustwallet:wallet-core:4.8.4` (Apache-2.0). `app.plugin.js` adds its GitHub Packages repository; see `docs/mobile-build.md` for the build credential.
+- One bridge call, `getNativeStatus()`: whether the Wallet Core JNI library loaded, a keccak256 known-answer self-test, Wallet Core's default Ethereum derivation path and the pinned version. It returns public metadata only.
+- Not built yet: wallet creation, recovery words, seed storage, unlock and signing. iOS (Swift) comes with P3-X01.
+
+Physical Android 12+ phone acceptance is still required; emulator results are local only.

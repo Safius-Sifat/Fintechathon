@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<testsuite name="com.mandate.ownerwallet.NativeBoundaryTest" tests="2" failures="1" errors="0" skipped="0" time="1.389" timestamp="2026-10-19T08:49:08" hostname="localhost">
+  <properties>
+    <property name="device" value="Medium_Phone(AVD) - 16" />
+    <property name="flavor" value="" />
+    <property name="project" value=":owner-wallet" />
+  </properties>
+  <testcase name="P3_01_T01_bridgeStatusHasOnlyPublicFields" classname="com.mandate.ownerwallet.NativeBoundaryTest" time="0.01" />
+  <testcase name="P3_01_T01_walletCoreLoadsAndComputes" classname="com.mandate.ownerwallet.NativeBoundaryTest" time="0.025">
+    <failure>java.lang.AssertionError: Wallet Core JNI library did not load: not implemented
+at org.junit.Assert.fail(Assert.java:89)
+at org.junit.Assert.assertTrue(Assert.java:42)
+at com.mandate.ownerwallet.NativeBoundaryTest.P3_01_T01_walletCoreLoadsAndComputes(NativeBoundaryTest.kt:17)
+</failure>
+  </testcase>
+</testsuite>
