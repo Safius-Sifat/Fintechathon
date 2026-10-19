@@ -1,14 +1,15 @@
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { Banner } from "../components/Banner";
 import { OutlineButton } from "../components/Button";
 import { Card, DetailRow, SectionTitle } from "../components/Card";
 import { Icon, type IconName } from "../components/Icon";
 import { Screen } from "../components/Screen";
+import { Segmented } from "../components/Segmented";
 import { network } from "../config/network";
 import type { RootStackParamList } from "../navigation/RootNavigator";
-import { colors, radius, space, touchTarget, type } from "../theme";
+import { colors, radius, space, type } from "../theme";
 
 // Receive preview. A receiving address comes from an account on this phone,
 // and none exists yet, so there is no address and no QR code. Mandate never
@@ -63,7 +64,8 @@ export function ReceiveScreen({ navigation }: Props) {
             {
               key: "agent",
               label: "Agent wallet",
-              disabledReason: "Not connected",
+              detail: "Not connected",
+              disabled: true,
             },
           ]}
           selected="personal"
@@ -76,7 +78,7 @@ export function ReceiveScreen({ navigation }: Props) {
             { key: "DemoUSD", label: "DemoUSD" },
           ]}
           selected={asset}
-          onSelect={(key) => setAsset(key as Asset)}
+          onSelect={setAsset}
         />
         <Text style={styles.caption}>{ASSET_NOTES[asset]}</Text>
       </Card>
@@ -129,101 +131,9 @@ export function ReceiveScreen({ navigation }: Props) {
   );
 }
 
-interface SegmentOption {
-  key: string;
-  label: string;
-  // Shown under the option, which cannot be selected.
-  disabledReason?: string;
-}
-
-interface SegmentedProps {
-  label: string;
-  options: readonly SegmentOption[];
-  selected: string;
-  onSelect: (key: string) => void;
-}
-
-function Segmented({ label, options, selected, onSelect }: SegmentedProps) {
-  return (
-    <View style={styles.segmentBlock}>
-      <Text style={styles.segmentLabel}>{label}</Text>
-      <View style={styles.segment} accessibilityRole="radiogroup">
-        {options.map((option) => {
-          const isSelected = option.key === selected;
-          const disabled = option.disabledReason !== undefined;
-          return (
-            <Pressable
-              key={option.key}
-              accessibilityRole="radio"
-              accessibilityState={{ selected: isSelected, disabled }}
-              accessibilityHint={option.disabledReason}
-              disabled={disabled}
-              onPress={() => onSelect(option.key)}
-              style={[styles.segmentItem, isSelected && styles.segmentSelected]}
-            >
-              <Text
-                style={[
-                  styles.segmentText,
-                  isSelected && styles.segmentTextSelected,
-                  disabled && styles.segmentTextDisabled,
-                ]}
-              >
-                {option.label}
-              </Text>
-              {option.disabledReason ? (
-                <Text style={styles.segmentReason}>
-                  {option.disabledReason}
-                </Text>
-              ) : null}
-            </Pressable>
-          );
-        })}
-      </View>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   cardTitle: { ...type.heading, color: colors.ink },
   caption: { ...type.small, color: colors.textMuted },
-
-  segmentBlock: { gap: space.xs },
-  segmentLabel: { ...type.label, color: colors.textMuted },
-  segment: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: space.xs,
-    padding: space.xs,
-    borderRadius: radius.md,
-    backgroundColor: colors.surfaceMuted,
-  },
-  segmentItem: {
-    flexGrow: 1,
-    flexBasis: 0,
-    minWidth: 120,
-    minHeight: touchTarget - space.sm,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: space.md,
-    paddingVertical: space.xs,
-    borderRadius: radius.sm,
-  },
-  segmentSelected: {
-    backgroundColor: colors.surface,
-    boxShadow: "0px 1px 4px rgba(15, 23, 42, 0.10)",
-  },
-  segmentText: {
-    ...type.bodyStrong,
-    color: colors.textMuted,
-    textAlign: "center",
-  },
-  segmentTextSelected: { color: colors.ink },
-  segmentTextDisabled: { color: colors.textDisabled },
-  segmentReason: {
-    ...type.small,
-    color: colors.textDisabled,
-    textAlign: "center",
-  },
 
   qrFrame: {
     alignItems: "center",
