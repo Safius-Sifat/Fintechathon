@@ -3,6 +3,7 @@ import type { NavigatorScreenParams } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { ActivityScreen } from "../screens/ActivityScreen";
 import { HomeScreen } from "../screens/HomeScreen";
+import { IntroScreen, SetupScreen, WelcomeScreen } from "../screens/Onboarding";
 import { SettingsScreen } from "../screens/SettingsScreen";
 import { TabBar, type TabMeta } from "./TabBar";
 
@@ -12,9 +13,13 @@ export type TabParamList = {
   Settings: undefined;
 };
 
-// Root stack: full-screen flows (Receive, Send, details) are pushed over the
-// tabs in later milestones.
+// Root stack: the first-run flow, then the tabs. Full-screen flows (Receive,
+// Send, details) are pushed over the tabs in later milestones.
 export type RootStackParamList = {
+  Welcome: undefined;
+  Intro: undefined;
+  // direct: opened from Welcome, skipping How it works.
+  Setup: { direct?: boolean } | undefined;
   Tabs: NavigatorScreenParams<TabParamList>;
 };
 
@@ -51,9 +56,17 @@ function Tabs() {
   );
 }
 
+// No build can create a wallet yet, so every launch starts at Welcome.
+// Leaving onboarding resets the stack, so Android back on Home exits the app.
 export function RootNavigator() {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Navigator
+      initialRouteName="Welcome"
+      screenOptions={{ headerShown: false }}
+    >
+      <Stack.Screen name="Welcome" component={WelcomeScreen} />
+      <Stack.Screen name="Intro" component={IntroScreen} />
+      <Stack.Screen name="Setup" component={SetupScreen} />
       <Stack.Screen name="Tabs" component={Tabs} />
     </Stack.Navigator>
   );

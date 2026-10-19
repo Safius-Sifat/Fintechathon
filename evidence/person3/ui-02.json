@@ -1,0 +1,124 @@
+{
+  "task": "UI-02",
+  "title": "Welcome and onboarding screens (layout and navigation only)",
+  "status": "REVIEW",
+  "recordedAt": "2026-10-19T15:15:00+06:00",
+  "note": "UI evidence only, kept outside evidence/*/cases/. Not a P3-01, P3-W01 or device-acceptance result: wallet creation and restore are not implemented and are shown as not available.",
+  "baseCommit": "04f80a06aef361b305d20f6e371862939a4ec1ba",
+  "planReference": "docs/plans/03 - Android Owner Wallet.md v7.1, S8.1 Onboarding screen group (create/import, optional passphrase, native backup, restore consequences)",
+  "flow": "Welcome -> How it works (1/2) -> Set up your wallet (2/2) -> Explore the preview (resets to the tabs). 'I have a recovery phrase' on Welcome goes straight to setup.",
+  "implemented": [
+    "Welcome: brand, tagline, decorative orb with icon chips, Get started and I have a recovery phrase",
+    "How it works: four points (wallet stays on the phone, separate agent wallet, owner can stop agents, test network only) and a Preview build notice",
+    "Set up your wallet: Create and Restore shown as disabled controls tagged Not available yet; Before you start notes on recovery-phrase safety and passphrase consequences; Not available in this build notice",
+    "Every launch starts at Welcome because no build can create a wallet yet; leaving onboarding resets the stack"
+  ],
+  "notCollected": "No text fields. The flow never asks for recovery words, passphrases, passwords or other credentials.",
+  "sampleData": "none",
+  "dependencies": "No new packages; apps/mobile/package.json, app.json and native code unchanged",
+  "files": [
+    "apps/mobile/src/screens/Onboarding.tsx",
+    "apps/mobile/src/components/Orb.tsx",
+    "apps/mobile/src/components/Button.tsx (PrimaryButton, TextButton)",
+    "apps/mobile/src/navigation/RootNavigator.tsx"
+  ],
+  "checks": [
+    { "check": "pnpm typecheck (all workspace packages)", "result": "PASS" },
+    {
+      "check": "pnpm check:repository",
+      "result": "PASS",
+      "observed": "checkedFiles 352, failures []"
+    },
+    {
+      "check": "prettier --check on changed files",
+      "result": "PASS"
+    },
+    {
+      "check": "Unit tests",
+      "result": "NOT RUN",
+      "observed": "apps/mobile has no test runner yet"
+    }
+  ],
+  "device": {
+    "kind": "emulator",
+    "serial": "emulator-5554",
+    "android": "16",
+    "api": 36,
+    "screen": "1080x2400 @ 420dpi",
+    "build": "Existing dev-client APK (built for P3-01 checkpoint 1; JS served by Metro from this branch). No native change in UI-02, so no rebuild.",
+    "physicalPhone": "NOT RUN",
+    "ios": "NOT RUN: iOS simulator and iPhone unavailable (shared React Native UI, no Android-only layout APIs)"
+  },
+  "runtimeChecks": [
+    {
+      "check": "Welcome, How it works and Set up your wallet render at font scale 1.0",
+      "result": "PASS",
+      "screens": [
+        "01-welcome.png",
+        "02-intro.png",
+        "03-setup.png",
+        "04-setup-scrolled.png"
+      ]
+    },
+    {
+      "check": "Android back from Set up returns to How it works",
+      "result": "PASS",
+      "screens": ["05-back-to-intro.png"]
+    },
+    {
+      "check": "Explore the preview opens Home; Android back on Home leaves the app instead of returning to onboarding",
+      "result": "PASS",
+      "observed": "launcher became topResumedActivity",
+      "screens": ["06-home-after-explore.png"]
+    },
+    {
+      "check": "Large text, font scale 2.0, cold start: no clipped text, actions stay pinned and reachable, content scrolls",
+      "result": "PASS",
+      "screens": [
+        "10-2x-welcome.png",
+        "13-2x-intro-scrolled.png",
+        "14-2x-setup.png",
+        "15-2x-setup-end.png"
+      ]
+    },
+    {
+      "check": "I have a recovery phrase opens Set up; Android back and the on-screen back button both return to Welcome",
+      "result": "PASS",
+      "observed": "Set up is pushed directly on Welcome, so back skips How it works; no code change needed",
+      "screens": [
+        "21-recovery-path-setup.png",
+        "22-hwback-to-welcome.png",
+        "23-headerback-to-welcome.png"
+      ]
+    },
+    {
+      "check": "Step indicator: Set up opened from I have a recovery phrase shows no step progress; via Get started it shows 2/2",
+      "result": "PASS",
+      "screens": [
+        "24-recovery-path-no-step.png",
+        "25-getstarted-path-step2.png"
+      ]
+    },
+    {
+      "check": "Font scale changed 1.0 -> 2.0 -> 1.0 while onboarding is open (on Set up, then on How it works)",
+      "result": "PASS",
+      "observed": "Same process (pid 11259 before and after). The current step stays selected and re-lays out at each scale; Android back after the changes still returns Set up -> How it works. The scroll position resets to the top after each change because the navigation tree is remounted.",
+      "screens": [
+        "30-runtime-2x-setup.png",
+        "31-runtime-1x-setup.png",
+        "32-runtime-back-to-intro.png",
+        "33-runtime-2x-intro.png",
+        "34-runtime-1x-intro.png"
+      ]
+    }
+  ],
+  "knownLimitations": [
+    "Scroll position resets after a system font-size change"
+  ],
+  "pending": [
+    "iOS simulator and physical iPhone checks",
+    "Physical Android phone check",
+    "Screen-reader pass with TalkBack/VoiceOver (labels and disabled states are set in code but not yet exercised with a screen reader)",
+    "Functional create/restore, native backup and receive address (P3-01, P3-W01)"
+  ]
+}

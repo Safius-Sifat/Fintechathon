@@ -1,5 +1,5 @@
 import { Pressable, StyleSheet, Text } from "react-native";
-import { colors, radius, space, touchTarget, type } from "../theme";
+import { colors, radius, shadows, space, touchTarget, type } from "../theme";
 import { Icon, type IconName } from "./Icon";
 
 interface HeroActionProps {
@@ -36,7 +36,91 @@ export function HeroAction({
   );
 }
 
+interface PrimaryButtonProps {
+  label: string;
+  icon?: IconName;
+  accessibilityHint?: string;
+  onPress: () => void;
+}
+
+// Full-width dark pill for the main action of a flow step.
+export function PrimaryButton({
+  label,
+  icon = "arrow-right",
+  accessibilityHint,
+  onPress,
+}: PrimaryButtonProps) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityHint={accessibilityHint}
+      onPress={onPress}
+      android_ripple={{ color: "rgba(255, 255, 255, 0.16)" }}
+      style={({ pressed }) => [styles.primary, pressed && styles.pressed]}
+    >
+      <Text style={styles.primaryLabel}>{label}</Text>
+      <Icon name={icon} size={20} color={colors.onDark} />
+    </Pressable>
+  );
+}
+
+interface TextButtonProps {
+  label: string;
+  accessibilityHint?: string;
+  onPress: () => void;
+}
+
+// Secondary action shown as plain text under a primary button.
+export function TextButton({
+  label,
+  accessibilityHint,
+  onPress,
+}: TextButtonProps) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityHint={accessibilityHint}
+      onPress={onPress}
+      style={({ pressed }) => [styles.text, pressed && styles.pressed]}
+    >
+      <Text style={styles.textLabel}>{label}</Text>
+    </Pressable>
+  );
+}
+
 const styles = StyleSheet.create({
+  primary: {
+    minHeight: 56,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: space.sm,
+    paddingHorizontal: space.xl,
+    paddingVertical: space.md,
+    borderRadius: radius.pill,
+    backgroundColor: colors.ink,
+    boxShadow: shadows.hero,
+    overflow: "hidden",
+  },
+  primaryLabel: {
+    ...type.bodyStrong,
+    fontSize: 16,
+    color: colors.onDark,
+    textAlign: "center",
+    flexShrink: 1,
+  },
+  text: {
+    minHeight: touchTarget,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: space.lg,
+  },
+  textLabel: {
+    ...type.bodyStrong,
+    color: colors.textMuted,
+    textAlign: "center",
+  },
+  pressed: { opacity: 0.85 },
   action: {
     flexGrow: 1,
     flexBasis: 0,
