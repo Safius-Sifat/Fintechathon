@@ -1,8 +1,20 @@
 {
   "owner": "Person3",
   "plan": "docs/plans/03 - Android Owner Wallet.md (v7.1)",
-  "updatedAt": "2026-10-19T14:40:00+06:00",
-  "currentCheckpoint": "P3-01 checkpoint 1: native module registration and Wallet Core load",
+  "updatedAt": "2026-10-19T15:30:00+06:00",
+  "currentCheckpoint": "P3-01 checkpoint 1 in review: native loading verified on an emulator; physical-device and iOS gates incomplete",
+  "priority": "Person3 owner decision 2026-10-19: screens, layouts and UI/UX first. Wallet, security and backend functionality is deferred, not dropped; every task below stays required for the final deliverable.",
+  "uiCheckpoints": [
+    "UI-02 Welcome/Onboarding (Onboarding.tsx): welcome, how it works, setup choices; create/import shown as not available",
+    "UI-03 Home/Accounts (Home.tsx, Accounts.tsx): account switcher, separate Personal account and Agent wallet cards",
+    "UI-04 Receive and Scan (Receive.tsx, Scan.tsx): source/asset selector, QR and camera-permission layouts",
+    "UI-05 Send and review (Send.tsx, TransferReview.tsx): form, fee and confirmation layouts; no signing",
+    "UI-06 Activity, TransactionDetail, Assets, TokenDetails: lists, filters, lifecycle states, stale/coverage states",
+    "UI-07 Agent tasks (TaskCreate, Approval, Task, Schedule, Inspector)",
+    "UI-08 Approvals, alerts and agent controls (P3-A01 screens); wallet policy, allowance and intent review (P3-A02 screens)",
+    "UI-09 Owner control and recovery (Control.tsx, Recovery.tsx)",
+    "UI-10 Security/Agent Access, Contacts, Network and Help"
+  ],
   "platformRule": "v7.1: a case passes only when Android and iOS both pass. Current work is Android only, so Android results are recorded as LOCAL_PASS until P3-X01 exists.",
   "completedMilestones": {
     "UI-01.1": "App shell and honest Home/Activity/Settings preview, merged in #27 (50d948a). UI only; no case IDs."
@@ -13,7 +25,7 @@
       "status": "IN_PROGRESS",
       "cases": 5,
       "checkpoints": [
-        "1. Module registered, Wallet Core 4.8.4 loads and computes, status-only bridge (this checkpoint)",
+        "1. Module registered, Wallet Core 4.8.4 loads and computes on an emulator; diagnostic getNativeStatus only, not a wallet capability (in review)",
         "2. Unit/instrumentation runner wiring and SeedStore AES-GCM under authenticated Keystore key",
         "3. Native create/restore with Wallet Core BIP39, RecoveryActivity with FLAG_SECURE and word quiz",
         "4. Cancellation, tamper, invalidation and backup-exclusion cases (T02-T04)",

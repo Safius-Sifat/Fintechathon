@@ -2,6 +2,7 @@
   "task": "P3-01",
   "checkpoint": "1: native module registration and Wallet Core library load",
   "status": "REVIEW",
+  "summary": "Native loading verified on an emulator. Physical-device, iOS and the remaining P3-01 gates are incomplete.",
   "recordedAt": "2026-10-19T15:05:00+06:00",
   "note": "Checkpoint evidence, kept outside evidence/person3/cases/. P3-01.T01 also needs a physical Android 12+ phone and the public account/profile bridge, so no case record is written yet.",
   "sourceCommit": "99b72c33e4e297b1885aa3201ee90855eccb7a14",
@@ -24,7 +25,7 @@
       "error"
     ],
     "secretFields": "none",
-    "s86Note": "getNativeStatus is a diagnostic addition to the S8.6 native interface; it carries no key material"
+    "s86Note": "getNativeStatus is a diagnostic addition to the S8.6 native interface, not a wallet capability. It carries no key material and creates, stores or signs nothing."
   },
   "checks": [
     {
