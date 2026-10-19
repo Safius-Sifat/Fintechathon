@@ -1,26 +1,47 @@
-import { SafeAreaView, StyleSheet, Text, View } from "react-native";
+import {
+  DefaultTheme,
+  NavigationContainer,
+  type InitialState,
+  type Theme,
+} from "@react-navigation/native";
+import { useRef } from "react";
+import { StatusBar, useWindowDimensions } from "react-native";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+import { RootNavigator } from "./src/navigation/RootNavigator";
+import { colors } from "./src/theme";
+
+const navigationTheme: Theme = {
+  ...DefaultTheme,
+  colors: {
+    ...DefaultTheme.colors,
+    background: colors.background,
+    card: colors.surface,
+    border: colors.hairline,
+    text: colors.text,
+    primary: colors.personal,
+  },
+};
+
 export default function App() {
+  // Remount the navigation tree when the system font size changes: tabs that
+  // are mounted but hidden are not re-laid out by the native side and would
+  // keep text measured at the old size. Navigation state is carried over, so
+  // the user stays on the same tab. Native side: plugins/withFontScaleLayout.js.
+  const { fontScale } = useWindowDimensions();
+  const navigationState = useRef<InitialState | undefined>(undefined);
   return (
-    <SafeAreaView style={styles.page}>
-      <View style={styles.body}>
-        <Text style={styles.title}>Mandate</Text>
-        <Text style={styles.label}>BASE SEPOLIA · DEVELOPMENT</Text>
-        <Text style={styles.text}>Project foundation is ready.</Text>
-        <Text style={styles.text}>
-          Native owner signing, task approval and financial execution are not
-          connected yet.
-        </Text>
-        <Text style={styles.text}>
-          Person 3: follow the Android Owner Wallet handoff in docs/plans.
-        </Text>
-      </View>
-    </SafeAreaView>
+    <SafeAreaProvider>
+      <StatusBar barStyle="dark-content" />
+      <NavigationContainer
+        key={fontScale}
+        theme={navigationTheme}
+        initialState={navigationState.current}
+        onStateChange={(state) => {
+          navigationState.current = state;
+        }}
+      >
+        <RootNavigator />
+      </NavigationContainer>
+    </SafeAreaProvider>
   );
 }
-const styles = StyleSheet.create({
-  page: { flex: 1, backgroundColor: "#fafafa" },
-  body: { padding: 24, gap: 18 },
-  title: { fontSize: 34, fontWeight: "700", color: "#151515" },
-  label: { fontSize: 12, fontWeight: "600", color: "#555" },
-  text: { fontSize: 17, lineHeight: 25, color: "#222" },
-});
