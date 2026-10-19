@@ -80,7 +80,33 @@
         "14-2x-setup.png",
         "15-2x-setup-end.png"
       ]
+    },
+    {
+      "check": "I have a recovery phrase opens Set up; Android back and the on-screen back button both return to Welcome",
+      "result": "PASS",
+      "observed": "Set up is pushed directly on Welcome, so back skips How it works; no code change needed",
+      "screens": [
+        "21-recovery-path-setup.png",
+        "22-hwback-to-welcome.png",
+        "23-headerback-to-welcome.png"
+      ]
+    },
+    {
+      "check": "Font scale changed 1.0 -> 2.0 -> 1.0 while onboarding is open (on Set up, then on How it works)",
+      "result": "PASS",
+      "observed": "Same process (pid 11259 before and after). The current step stays selected and re-lays out at each scale; Android back after the changes still returns Set up -> How it works. The scroll position resets to the top after each change because the navigation tree is remounted.",
+      "screens": [
+        "30-runtime-2x-setup.png",
+        "31-runtime-1x-setup.png",
+        "32-runtime-back-to-intro.png",
+        "33-runtime-2x-intro.png",
+        "34-runtime-1x-intro.png"
+      ]
     }
+  ],
+  "knownLimitations": [
+    "On the I have a recovery phrase path, Set up still shows step 2/2 although How it works was skipped",
+    "Scroll position resets after a system font-size change"
   ],
   "pending": [
     "iOS simulator and physical iPhone checks",
