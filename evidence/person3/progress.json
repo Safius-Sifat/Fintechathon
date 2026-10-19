@@ -2,7 +2,7 @@
   "owner": "Person3",
   "plan": "docs/plans/03 - Android Owner Wallet.md (v7.1)",
   "updatedAt": "2026-10-20T16:50:00+06:00",
-  "currentCheckpoint": "UI-07 Agent tasks (TaskCreate, Approval, Task, Schedule, Inspector): implemented on work/person3-mobile-ui07-agent-tasks, awaiting the owner's visual review. UI-06 (#35) is still an open draft; UI-07 is based on it.",
+  "currentCheckpoint": "UI-07 Agent tasks: visually approved, submitted as draft PR #36 (depends on unmerged #35). Next: UI-08 first group (Approvals, Alerts, Agent Controls).",
   "priority": "Person3 owner decision 2026-10-19: screens, layouts and UI/UX first. Wallet, security and backend functionality is deferred, not dropped; every task below stays required for the final deliverable.",
   "acceptanceRule": "UI checkpoints are layout and navigation previews. They complete no P3 case: every case below stays open until its own functional, device and iOS evidence exists.",
   "uiCheckpoints": [
@@ -39,7 +39,7 @@
     {
       "id": "UI-07",
       "screens": "AgentTasks (hub), TaskCreate, Approval, Task, Schedule, Inspector",
-      "status": "REVIEW (local branch, not submitted; depends on unmerged #35)",
+      "status": "IN_REVIEW (visually approved, draft PR #36, depends on unmerged #35)",
       "preparesCases": "P3-03, P3-04"
     },
     {

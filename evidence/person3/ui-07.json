@@ -1,7 +1,7 @@
 {
   "task": "UI-07",
   "title": "Agent tasks: TaskCreate, Approval, Task, Schedule and Inspector (layout and navigation only)",
-  "status": "REVIEW",
+  "status": "SUBMITTED",
   "recordedAt": "2026-10-20T16:50:00+06:00",
   "note": "UI evidence, kept outside evidence/*/cases/. Completes no P3 case: P3-03 and P3-04 stay open. No task, permission, payment, approval, schedule or inspection result is created or shown as real.",
   "baseCommit": "b281e78",
@@ -57,7 +57,10 @@
       "result": "PASS",
       "observed": "35/35 tests (21 UI-07 + 4 txStatus + 10 sendDraft), typecheck clean"
     },
-    { "check": "pnpm typecheck (all workspace packages)", "result": "PASS" },
+    {
+      "check": "pnpm typecheck (all workspace packages)",
+      "result": "PASS"
+    },
     {
       "check": "pnpm check:repository",
       "result": "PASS",
@@ -168,5 +171,13 @@
     "Amount parsing and total gross cap calculation (P3-W02 domain code)",
     "Service allowance and Liquidity keeper forms (P3-A02 AllowanceApproval; P3-04 Assets liquidity)",
     "Physical Android phone, iOS, screen-reader pass"
-  ]
+  ],
+  "submission": {
+    "pr": 36,
+    "draft": true,
+    "base": "main",
+    "originMain": "95e91fb (unchanged; no merge needed)",
+    "dependency": "#35 unmerged; PR diff against main includes UI-06 until it merges. UI-07-only comparison: work/person3-mobile-ui06-activity-assets...work/person3-mobile-ui07-agent-tasks (57 files)",
+    "afterDependencyMerges": "merge origin/main, rerun checks, verify the PR diff contains only UI-07 files"
+  }
 }
