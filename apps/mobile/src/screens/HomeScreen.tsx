@@ -43,7 +43,10 @@ export function HomeScreen() {
     >
       <AccountRow onPress={() => navigation.navigate("Accounts")} />
 
-      <PersonalAccountHero onReceive={() => navigation.navigate("Receive")} />
+      <PersonalAccountHero
+        onReceive={() => navigation.navigate("Receive")}
+        onSend={() => navigation.navigate("Send")}
+      />
 
       <Banner
         icon="information-outline"
@@ -130,7 +133,12 @@ function AccountRow({ onPress }: { onPress: () => void }) {
   );
 }
 
-function PersonalAccountHero({ onReceive }: { onReceive: () => void }) {
+interface HeroProps {
+  onReceive: () => void;
+  onSend: () => void;
+}
+
+function PersonalAccountHero({ onReceive, onSend }: HeroProps) {
   // Side-by-side facts break words at large text sizes; stack them instead.
   const { fontScale } = useWindowDimensions();
   const factStyle =
@@ -170,8 +178,8 @@ function PersonalAccountHero({ onReceive }: { onReceive: () => void }) {
         <HeroAction
           label="Send"
           icon="arrow-top-right"
-          disabled={!preview.canMoveFunds}
-          accessibilityHint="Unavailable. Needs a wallet on this phone."
+          accessibilityHint="Shows the send form. Nothing can be sent yet."
+          onPress={onSend}
         />
       </View>
       <Text style={styles.heroCaption}>

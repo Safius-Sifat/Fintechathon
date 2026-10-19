@@ -42,6 +42,7 @@ export function Screen({
         </View>
       ) : null}
       <ScrollView
+        keyboardShouldPersistTaps="handled"
         style={styles.scroll}
         contentContainerStyle={[
           styles.content,

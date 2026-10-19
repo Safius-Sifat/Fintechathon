@@ -7,7 +7,9 @@ import { HomeScreen } from "../screens/HomeScreen";
 import { IntroScreen, SetupScreen, WelcomeScreen } from "../screens/Onboarding";
 import { ReceiveScreen } from "../screens/Receive";
 import { ScanScreen } from "../screens/Scan";
+import { SendScreen } from "../screens/Send";
 import { SettingsScreen } from "../screens/SettingsScreen";
+import { TransferReviewScreen } from "../screens/TransferReview";
 import { TabBar, type TabMeta } from "./TabBar";
 
 export type TabParamList = {
@@ -27,6 +29,9 @@ export type RootStackParamList = {
   Accounts: undefined;
   Receive: undefined;
   Scan: undefined;
+  Send: undefined;
+  // Reads the Send draft from state/sendDraft.ts.
+  TransferReview: undefined;
 };
 
 const TAB_META: Record<keyof TabParamList, TabMeta> = {
@@ -77,6 +82,8 @@ export function RootNavigator() {
       <Stack.Screen name="Accounts" component={AccountsScreen} />
       <Stack.Screen name="Receive" component={ReceiveScreen} />
       <Stack.Screen name="Scan" component={ScanScreen} />
+      <Stack.Screen name="Send" component={SendScreen} />
+      <Stack.Screen name="TransferReview" component={TransferReviewScreen} />
     </Stack.Navigator>
   );
 }

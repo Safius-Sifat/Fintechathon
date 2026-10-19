@@ -6,7 +6,9 @@
   "scripts": {
     "start": "expo start --dev-client",
     "android": "expo run:android --device",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test test/*.test.ts",
+    "check": "tsc --noEmit && tsx --test test/*.test.ts"
   },
   "dependencies": {
     "@expo/vector-icons": "15.1.1",
