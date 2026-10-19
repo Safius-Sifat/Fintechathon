@@ -116,6 +116,11 @@
         "check": "pnpm test:release",
         "result": "FAIL (pre-existing, Windows-local)",
         "observed": "scripts/test/release-check.test.mjs fails at load: it builds paths with new URL(...).pathname, which gives D:\\\\D:\\\\...shenzen%20fintech... on Windows. The test and scripts/release-check.mjs come from origin/main unchanged; this PR does not touch scripts/. CI runs on ubuntu-24.04, where the path works."
+      },
+      {
+        "check": "pnpm test:release on Linux",
+        "result": "PASS",
+        "observed": "8/8 tests. Fresh clone of commit 97ecb5e (identical to this branch apart from this evidence file) in WSL Ubuntu, Node 22.23.3 and pnpm 10.20.0 via scripts/pnpm.sh, install --frozen-lockfile."
       }
     ]
   },
