@@ -92,6 +92,14 @@
       ]
     },
     {
+      "check": "Step indicator: Set up opened from I have a recovery phrase shows no step progress; via Get started it shows 2/2",
+      "result": "PASS",
+      "screens": [
+        "24-recovery-path-no-step.png",
+        "25-getstarted-path-step2.png"
+      ]
+    },
+    {
       "check": "Font scale changed 1.0 -> 2.0 -> 1.0 while onboarding is open (on Set up, then on How it works)",
       "result": "PASS",
       "observed": "Same process (pid 11259 before and after). The current step stays selected and re-lays out at each scale; Android back after the changes still returns Set up -> How it works. The scroll position resets to the top after each change because the navigation tree is remounted.",
@@ -105,7 +113,6 @@
     }
   ],
   "knownLimitations": [
-    "On the I have a recovery phrase path, Set up still shows step 2/2 although How it works was skipped",
     "Scroll position resets after a system font-size change"
   ],
   "pending": [

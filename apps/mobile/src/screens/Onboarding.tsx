@@ -59,7 +59,7 @@ export function WelcomeScreen({ navigation }: Props<"Welcome">) {
           <TextButton
             label="I have a recovery phrase"
             accessibilityHint="Shows how restoring a wallet will work"
-            onPress={() => navigation.navigate("Setup")}
+            onPress={() => navigation.navigate("Setup", { direct: true })}
           />
         </>
       }
@@ -120,7 +120,10 @@ export function IntroScreen({ navigation }: Props<"Intro">) {
   return (
     <FlowLayout
       header={
-        <StepHeader step={1} steps={2} onBack={() => navigation.goBack()} />
+        <StepHeader
+          progress={{ step: 1, steps: 2 }}
+          onBack={() => navigation.goBack()}
+        />
       }
       footer={
         <PrimaryButton
@@ -158,11 +161,16 @@ export function IntroScreen({ navigation }: Props<"Intro">) {
   );
 }
 
-export function SetupScreen({ navigation }: Props<"Setup">) {
+export function SetupScreen({ navigation, route }: Props<"Setup">) {
+  // Opened straight from Welcome, setup is not step 2 of the introduction.
+  const direct = route.params?.direct === true;
   return (
     <FlowLayout
       header={
-        <StepHeader step={2} steps={2} onBack={() => navigation.goBack()} />
+        <StepHeader
+          progress={direct ? undefined : { step: 2, steps: 2 }}
+          onBack={() => navigation.goBack()}
+        />
       }
       footer={
         <PrimaryButton
@@ -265,12 +273,12 @@ function StepTitle({ title, subtitle }: { title: string; subtitle: string }) {
 }
 
 interface StepHeaderProps {
-  step: number;
-  steps: number;
+  // Omitted when the screen was reached outside the step sequence.
+  progress?: { step: number; steps: number };
   onBack: () => void;
 }
 
-function StepHeader({ step, steps, onBack }: StepHeaderProps) {
+function StepHeader({ progress, onBack }: StepHeaderProps) {
   return (
     <View style={styles.stepHeader}>
       <Pressable
@@ -281,18 +289,25 @@ function StepHeader({ step, steps, onBack }: StepHeaderProps) {
       >
         <Icon name="chevron-left" size={28} color={colors.ink} />
       </Pressable>
-      <View
-        style={styles.track}
-        accessible
-        accessibilityLabel={`Step ${step} of ${steps}`}
-      >
-        <View
-          style={[styles.trackFill, { width: `${(step / steps) * 100}%` }]}
-        />
-      </View>
-      <Text style={styles.stepCount} importantForAccessibility="no">
-        {step}/{steps}
-      </Text>
+      {progress ? (
+        <>
+          <View
+            style={styles.track}
+            accessible
+            accessibilityLabel={`Step ${progress.step} of ${progress.steps}`}
+          >
+            <View
+              style={[
+                styles.trackFill,
+                { width: `${(progress.step / progress.steps) * 100}%` },
+              ]}
+            />
+          </View>
+          <Text style={styles.stepCount} importantForAccessibility="no">
+            {progress.step}/{progress.steps}
+          </Text>
+        </>
+      ) : null}
     </View>
   );
 }

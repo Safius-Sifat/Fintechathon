@@ -18,7 +18,8 @@ export type TabParamList = {
 export type RootStackParamList = {
   Welcome: undefined;
   Intro: undefined;
-  Setup: undefined;
+  // direct: opened from Welcome, skipping How it works.
+  Setup: { direct?: boolean } | undefined;
   Tabs: NavigatorScreenParams<TabParamList>;
 };
 
