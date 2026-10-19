@@ -1,6 +1,7 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import type { NavigatorScreenParams } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { AccountsScreen } from "../screens/Accounts";
 import { ActivityScreen } from "../screens/ActivityScreen";
 import { HomeScreen } from "../screens/HomeScreen";
 import { IntroScreen, SetupScreen, WelcomeScreen } from "../screens/Onboarding";
@@ -21,6 +22,7 @@ export type RootStackParamList = {
   // direct: opened from Welcome, skipping How it works.
   Setup: { direct?: boolean } | undefined;
   Tabs: NavigatorScreenParams<TabParamList>;
+  Accounts: undefined;
 };
 
 const TAB_META: Record<keyof TabParamList, TabMeta> = {
@@ -68,6 +70,7 @@ export function RootNavigator() {
       <Stack.Screen name="Intro" component={IntroScreen} />
       <Stack.Screen name="Setup" component={SetupScreen} />
       <Stack.Screen name="Tabs" component={Tabs} />
+      <Stack.Screen name="Accounts" component={AccountsScreen} />
     </Stack.Navigator>
   );
 }
