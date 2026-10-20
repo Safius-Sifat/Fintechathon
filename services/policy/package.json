@@ -5,10 +5,17 @@
   "type": "module",
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "dev": "tsx src/index.ts",
-    "cli": "tsx src/index.ts"
+    "dev": "tsx src/main.ts",
+    "check": "tsc --noEmit && tsx --test test/*.test.ts"
   },
   "dependencies": {
-    "@mandate/schema": "workspace:*"
+    "@mandate/platform": "workspace:*",
+    "@mandate/schema": "workspace:*",
+    "pg": "8.16.3",
+    "viem": "2.38.5",
+    "zod": "3.25.76"
+  },
+  "devDependencies": {
+    "@types/pg": "8.15.5"
   }
 }

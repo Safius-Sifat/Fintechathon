@@ -156,6 +156,7 @@ try {
         "packages/platform/test/db/*.test.ts",
         "apps/api/test/db/*.test.ts",
         "apps/worker/test/db/*.test.ts",
+        "services/policy/test/db/*.test.ts",
       ],
       {
         cwd: root,

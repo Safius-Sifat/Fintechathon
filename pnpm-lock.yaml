@@ -286,9 +286,25 @@ importers:
 
   services/policy:
     dependencies:
+      '@mandate/platform':
+        specifier: workspace:*
+        version: link:../../packages/platform
       '@mandate/schema':
         specifier: workspace:*
         version: link:../../packages/schema
+      pg:
+        specifier: 8.16.3
+        version: 8.16.3
+      viem:
+        specifier: 2.38.5
+        version: 2.38.5(typescript@5.9.3)(zod@3.25.76)
+      zod:
+        specifier: 3.25.76
+        version: 3.25.76
+    devDependencies:
+      '@types/pg':
+        specifier: 8.15.5
+        version: 8.15.5
 
 packages:
 
