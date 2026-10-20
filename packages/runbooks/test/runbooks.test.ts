@@ -104,7 +104,8 @@ test("prepareTask: prepares valid browser-check task and filters providers", () 
     },
   });
 
-  assert.equal(res1.needsOwnerReason, null);
+  // Valid input, but the runbook code is not hashed yet, so it is not approvable.
+  assert.ok(res1.needsOwnerReason?.includes("not built"));
   assert.equal(res1.conditions.runbookId, "browser-check");
   assert.deepEqual(res1.conditions.browser?.providerIds, ["a", "b"]);
 
@@ -120,7 +121,7 @@ test("prepareTask: prepares valid browser-check task and filters providers", () 
     },
   });
 
-  assert.equal(res2.needsOwnerReason, null);
+  assert.ok(res2.needsOwnerReason?.includes("not built"));
   assert.deepEqual(res2.conditions.browser?.providerIds, ["b"]);
 
   // Test invalid check ordering or unsupported target

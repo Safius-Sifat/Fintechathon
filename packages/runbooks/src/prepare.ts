@@ -37,22 +37,36 @@ const DEFAULT_PROVIDER_BINDINGS = [
   },
 ];
 
+// Runbook artifact hashes are not built yet (P4-03: canonical hashes of the
+// emitted JS, schemas, validator and lock file). Until they are, the manifest
+// carries this marker and every prepared task says it cannot be approved,
+// because an owner's Permit would not bind real code.
+export const UNBUILT_ARTIFACT_HASH: Hex =
+  "0x0000000000000000000000000000000000000000000000000000000000000000";
+export const UNBUILT_REASON =
+  "Runbook artifact hashes are not built, so this task cannot be approved yet";
+
+const KIND: Record<RunbookId, number> = {
+  "browser-check": 0,
+  "liquidity-keeper": 1,
+  "scheduled-pay": 2,
+  "service-allowance": 3,
+};
+
 export function createRunbookManifest(
   runbookId: RunbookId,
   version = "1.0.0",
 ): RunbookManifest {
-  const dummyHash: Hex =
-    "0x0000000000000000000000000000000000000000000000000000000000000001";
   return {
     schemaVersion: 4,
     runbookId,
-    kind: 0,
+    kind: KIND[runbookId],
     version,
-    entryArtifactHash: dummyHash,
-    inputSchemaHash: dummyHash,
-    outputSchemaHash: dummyHash,
-    validatorArtifactHash: dummyHash,
-    dependencyLockHash: dummyHash,
+    entryArtifactHash: UNBUILT_ARTIFACT_HASH,
+    inputSchemaHash: UNBUILT_ARTIFACT_HASH,
+    outputSchemaHash: UNBUILT_ARTIFACT_HASH,
+    validatorArtifactHash: UNBUILT_ARTIFACT_HASH,
+    dependencyLockHash: UNBUILT_ARTIFACT_HASH,
   };
 }
 
@@ -106,7 +120,7 @@ export function prepareTask(params: PrepareTaskParams): PrepareTaskResult {
       conditions,
       scope,
       runbookManifest: manifest,
-      needsOwnerReason: null,
+      needsOwnerReason: UNBUILT_REASON,
     };
   }
 
@@ -148,7 +162,7 @@ export function prepareTask(params: PrepareTaskParams): PrepareTaskResult {
       conditions,
       scope,
       runbookManifest: manifest,
-      needsOwnerReason: null,
+      needsOwnerReason: UNBUILT_REASON,
     };
   }
 
@@ -190,7 +204,7 @@ export function prepareTask(params: PrepareTaskParams): PrepareTaskResult {
       conditions,
       scope,
       runbookManifest: manifest,
-      needsOwnerReason: null,
+      needsOwnerReason: UNBUILT_REASON,
     };
   }
 
