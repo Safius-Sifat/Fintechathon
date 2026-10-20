@@ -84,3 +84,38 @@ export const connectionCapabilities: readonly Capability[] = [
     state: "notConnected",
   },
 ];
+
+export const agentCapabilities: readonly Capability[] = [
+  {
+    id: "agent-wallet-create",
+    title: "Create an agent wallet",
+    detail: "A separate wallet an agent spends from, funded by you.",
+    icon: "robot-outline",
+    tone: "amber",
+    state: "notBuilt",
+  },
+  {
+    id: "agent-tasks",
+    title: "Tasks and approvals",
+    detail: "Describe a task, check its exact terms, then approve it.",
+    icon: "clipboard-check-outline",
+    tone: "blue",
+    state: "notBuilt",
+  },
+  {
+    id: "agent-stop",
+    title: "Pause, end and freeze",
+    detail: "Stop agents from this phone, even when the service is offline.",
+    icon: "hand-back-left-outline",
+    tone: "green",
+    state: "notBuilt",
+  },
+  {
+    id: "agent-proof",
+    title: "Proof",
+    detail: "Six findings and a file you can check without Mandate.",
+    icon: "shield-check-outline",
+    tone: "violet",
+    state: "notBuilt",
+  },
+];

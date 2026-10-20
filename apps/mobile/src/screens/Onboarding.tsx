@@ -13,7 +13,7 @@ import { Banner } from "../components/Banner";
 import { PrimaryButton, TextButton } from "../components/Button";
 import { Icon, type IconName } from "../components/Icon";
 import { IconTile } from "../components/IconTile";
-import { Orb } from "../components/Orb";
+import { Seal } from "../components/Seal";
 import { StatusTag } from "../components/StatusTag";
 import type { RootStackParamList } from "../navigation/RootNavigator";
 import {
@@ -35,13 +35,6 @@ type Props<T extends keyof RootStackParamList> = NativeStackScreenProps<
   RootStackParamList,
   T
 >;
-
-const ORB_CHIPS = [
-  { icon: "wallet-outline", color: tones.blue.fg, x: 0.16, y: 0.24 },
-  { icon: "robot-outline", color: tones.amber.fg, x: 0.86, y: 0.3 },
-  { icon: "shield-check-outline", color: tones.green.fg, x: 0.12, y: 0.74 },
-  { icon: "key-outline", color: tones.violet.fg, x: 0.84, y: 0.8 },
-] as const;
 
 const HOW_IT_WORKS: readonly {
   icon: IconName;
@@ -77,7 +70,7 @@ const HOW_IT_WORKS: readonly {
 
 export function WelcomeScreen({ navigation }: Props<"Welcome">) {
   const { width } = useWindowDimensions();
-  const orbSize = Math.min(width - space.xl * 2, 220);
+  const sealSize = Math.min(width - space.xl * 2, 200);
   return (
     <FlowLayout
       footer={
@@ -94,17 +87,14 @@ export function WelcomeScreen({ navigation }: Props<"Welcome">) {
         </>
       }
     >
+      <View style={styles.sealRow}>
+        <Seal size={sealSize} />
+      </View>
       <View style={styles.welcomeBrand}>
-        <Icon name="alpha-m-box" size={56} color={colors.ink} />
         <Text style={styles.welcomeTitle} accessibilityRole="header">
-          Mandate
-        </Text>
-        <Text style={styles.welcomeTagline}>
           Your agent. Your money. Real work.
         </Text>
-      </View>
-      <View style={styles.orbRow}>
-        <Orb size={orbSize} chips={ORB_CHIPS} />
+        <Text style={styles.welcomeTagline}>Mandate</Text>
       </View>
       <Text style={styles.welcomeBody}>
         A wallet that lives on your phone, and AI agents that spend only within
@@ -296,19 +286,18 @@ const styles = StyleSheet.create({
   },
   pressed: { opacity: 0.7 },
 
-  welcomeBrand: { alignItems: "center", gap: space.xs, paddingTop: space.xl },
+  welcomeBrand: { alignItems: "center", gap: space.xs },
   welcomeTitle: {
     ...type.title,
-    fontSize: 34,
-    lineHeight: 40,
     color: colors.ink,
+    textAlign: "center",
   },
   welcomeTagline: {
     ...type.body,
     color: colors.textMuted,
     textAlign: "center",
   },
-  orbRow: { alignItems: "center" },
+  sealRow: { alignItems: "center", paddingTop: space.lg },
   welcomeBody: {
     ...type.body,
     fontSize: 16,

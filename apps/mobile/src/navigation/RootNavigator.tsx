@@ -2,6 +2,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import type { NavigatorScreenParams } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { AccountsScreen } from "../screens/Accounts";
+import { AgentsScreen } from "../screens/AgentsScreen";
 import { ActivityScreen } from "../screens/ActivityScreen";
 import { HomeScreen } from "../screens/HomeScreen";
 import { SetupScreen, WelcomeScreen } from "../screens/Onboarding";
@@ -14,6 +15,7 @@ import { TabBar, type TabMeta } from "./TabBar";
 
 export type TabParamList = {
   Home: undefined;
+  Agents: undefined;
   Activity: undefined;
   Settings: undefined;
 };
@@ -38,6 +40,11 @@ const TAB_META: Record<keyof TabParamList, TabMeta> = {
     icon: "home-variant-outline",
     iconSelected: "home-variant",
   },
+  Agents: {
+    label: "Agents",
+    icon: "robot-outline",
+    iconSelected: "robot",
+  },
   Activity: {
     label: "Activity",
     icon: "clock-time-four-outline",
@@ -59,6 +66,7 @@ function Tabs() {
       tabBar={(props) => <TabBar {...props} meta={TAB_META} />}
     >
       <Tab.Screen name="Home" component={HomeScreen} />
+      <Tab.Screen name="Agents" component={AgentsScreen} />
       <Tab.Screen name="Activity" component={ActivityScreen} />
       <Tab.Screen name="Settings" component={SettingsScreen} />
     </Tab.Navigator>
