@@ -44,7 +44,7 @@ export function TaskTermsScreen({ route, navigation }: Props) {
     recipients: "",
     maxPayment: "",
     spendCap: "",
-    liquidFloor: "0",
+    liquidFloor: "3",
     reviewThreshold: "0",
     startsAt: String(Math.floor(Date.now() / 1000) + 60),
     expiresAt: String(Math.floor(Date.now() / 1000) + 3600),
@@ -330,7 +330,7 @@ export function TaskTermsScreen({ route, navigation }: Props) {
             [
               ["maxPayment", "Most per payment (max 0.500000)"],
               ["spendCap", "Total task cap (max 2.000000)"],
-              ["liquidFloor", "Keep liquid in DemoUSD"],
+              ["liquidFloor", "Keep liquid in DemoUSD (at least 3.000000)"],
               [
                 "reviewThreshold",
                 "Ask me above in DemoUSD (0 asks for every payment)",
