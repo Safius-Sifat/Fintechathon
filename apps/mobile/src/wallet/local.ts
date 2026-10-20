@@ -70,6 +70,7 @@ export interface ServiceTaskReference {
   taskId: string;
   walletId: string;
   goal: string;
+  input?: Record<string, unknown>;
 }
 export interface ServiceReferences {
   walletId: string | null;

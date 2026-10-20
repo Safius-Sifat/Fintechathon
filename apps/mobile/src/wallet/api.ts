@@ -144,7 +144,6 @@ export async function post<T>(path: string, body: unknown, schema: z.ZodType<T, 
   gate.assert(auth.ticket);
   const res = await response(path, { method: "POST", headers: { "content-type": "application/json", authorization: `Bearer ${auth.session.accessToken}`, "idempotency-key": refs.pending[fingerprint]! }, body: JSON.stringify(body) }, auth.ticket);
   const value = await jsonResponse(res, schema, auth.ticket);
-  await updateServiceReferences(auth.session.owner, (previous) => { const pending = { ...previous.pending }; delete pending[fingerprint]; return { ...previous, pending }; });
   gate.assert(auth.ticket);
   return value;
 }
@@ -174,7 +173,7 @@ export async function createTask(input: z.infer<typeof CreateTaskRequestSchema>)
   const auth = authorized();
   const task = await post("/v1/tasks", body, TaskViewSchema);
   if (task.walletId !== body.walletId || task.runbookId !== body.runbookId) throw new Error("The service returned another task.");
-  await updateServiceReferences(auth.session.owner, (refs) => ({ ...refs, tasks: [{ taskId: task.taskId, walletId: task.walletId, goal: body.goal }, ...refs.tasks.filter((t) => t.taskId !== task.taskId)].slice(0, 100) }));
+  await updateServiceReferences(auth.session.owner, (refs) => ({ ...refs, tasks: [{ taskId: task.taskId, walletId: task.walletId, goal: body.goal, input: body.input }, ...refs.tasks.filter((t) => t.taskId !== task.taskId)].slice(0, 100) }));
   gate.assert(auth.ticket);
   return task;
 }

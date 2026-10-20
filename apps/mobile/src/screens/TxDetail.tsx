@@ -12,7 +12,7 @@ type Props = NativeStackScreenProps<RootStackParamList, "TxDetail">;
 
 // One transaction, read from the chain. Pending until it is in a block.
 export function TxDetailScreen({ navigation, route }: Props) {
-  const { hash } = route.params;
+  const { hash, origin = "phone", taskId } = route.params;
   const tx = useAsync(() => transaction(hash), [hash]);
   const rcpt = useAsync(() => receipt(hash), [hash]);
   const done = rcpt.data != null;
@@ -55,7 +55,7 @@ export function TxDetailScreen({ navigation, route }: Props) {
     >
       <Steps
         items={[
-          { state: "done", title: "Signed on this phone" },
+          { state: "done", title: origin === "phone" ? "Signed on this phone" : origin === "agent" ? "Agent transaction reported by service" : "Transaction reported by service" },
           { state: tx.data ? "done" : "now", title: "Sent to the network" },
           {
             state: done ? "done" : "now",
@@ -83,6 +83,7 @@ export function TxDetailScreen({ navigation, route }: Props) {
         ) : null}
       </Rows>
       {tx.error ? <Note>{tx.error}</Note> : null}
+      {taskId ? <GhostButton label="View task" onPress={() => navigation.navigate("TaskDetail", { taskId })} /> : null}
     </Page>
   );
 }

@@ -13,30 +13,6 @@ import * as W from "./walletExtras";
 // sample data so the layouts can be reviewed. None of it is wired to a wallet,
 // the service or a signer, and the route does not exist in release builds.
 
-const quotes = [
-  {
-    state: "done",
-    title: "Two quotes received",
-    detail: "Tessel 0.40, Northgate 0.55",
-  },
-  {
-    state: "done",
-    title: "Agent chose Tessel Checks",
-    detail: "Lowest price with all three checks",
-  },
-  {
-    state: "now",
-    title: "Paying 0.40 DUSD",
-    detail: "Sent. Waiting for the chain",
-  },
-  {
-    state: "todo",
-    title: "Result from the provider",
-    detail: "Signed, then checked by the app",
-  },
-  { state: "todo", title: "Close the task" },
-] as const;
-
 const findings: readonly P.FindingView[] = [
   {
     name: "Integrity",
@@ -69,10 +45,6 @@ const findings: readonly P.FindingView[] = [
     reason: "Only the service says the agent finished.",
   },
 ];
-
-const pending: readonly P.FindingView[] = findings.map((f, i) =>
-  i < 3 ? f : { ...f, state: "PENDING", reason: "Not yet." },
-);
 
 type Make = (back: () => void) => ReactElement;
 
@@ -120,73 +92,20 @@ export const previews: Record<
     title: "Create an agent wallet",
     make: (b) => <A.AgentIntro onBack={b} />,
   },
-  provisioning: {
-    group: "Start an agent",
-    title: "Setting up",
-    make: (b) => <A.Provisioning onBack={b} />,
-  },
-  walletReady: {
-    group: "Start an agent",
-    title: "Agent wallet, not funded",
-    make: (b) => (
-      <A.AgentWallet onBack={b} address="0x2Bd9…71aF" balances={null} />
-    ),
-  },
   fund: {
     group: "Start an agent",
     title: "Fund the agent wallet",
     make: (b) => <A.FundAgent onBack={b} />,
-  },
-  walletFunded: {
-    group: "Start an agent",
-    title: "Agent wallet, funded",
-    make: (b) => (
-      <A.AgentWallet
-        onBack={b}
-        address="0x2Bd9…71aF"
-        balances={{
-          spendable: "39.05",
-          liquid: "49.05",
-          floor: "10.00",
-          reserved: "0.40",
-          asOfBlock: "48,301,220",
-        }}
-      />
-    ),
   },
   compose: {
     group: "Start an agent",
     title: "Describe the task",
     make: (b) => <A.ComposeTask onBack={b} />,
   },
-  review: {
-    group: "Start an agent",
-    title: "Check the draft",
-    make: (b) => (
-      <A.IntentReview
-        onBack={b}
-        goal="Check that the demo shop checkout works: load, title and form."
-        warning='The draft added form submit, because you said "accept the form".'
-        terms={[
-          { label: "Task", value: "Check a web page" },
-          { label: "Page", value: "Healthy checkout" },
-          { label: "Checks", value: "Page load, title, form" },
-          { label: "Providers", value: "Tessel, then Northgate" },
-          { label: "Most spent", value: "3.00 DUSD, 1.00 each" },
-          { label: "Limits", value: "3 paid tries, 10 minutes" },
-        ]}
-      />
-    ),
-  },
   chooser: {
     group: "Start an agent",
     title: "New task",
     make: (b) => <A.ChooseTask onBack={b} />,
-  },
-  formWeb: {
-    group: "Start an agent",
-    title: "Form: web page",
-    make: (b) => <A.WebPageForm onBack={b} />,
   },
   formVault: {
     group: "Start an agent",
@@ -245,30 +164,15 @@ export const previews: Record<
     make: (b) => <A.ProviderDetail onBack={b} />,
   },
 
-  running: {
-    group: "Run and stop",
-    title: "Task running",
-    make: (b) => <R.TaskRunning onBack={b} steps={quotes} />,
-  },
   why: {
     group: "Run and stop",
     title: "Why the agent chose",
     make: (b) => <R.WhyAgentChose onBack={b} />,
   },
-  approve: {
-    group: "Run and stop",
-    title: "Approve a payment",
-    make: (b) => <R.ApprovePayment onBack={b} />,
-  },
   needsYou: {
     group: "Run and stop",
     title: "The agent needs you",
     make: (b) => <R.AgentNeedsYou onBack={b} />,
-  },
-  done: {
-    group: "Run and stop",
-    title: "Task done",
-    make: (b) => <R.TaskDone onBack={b} />,
   },
   agentHome: {
     group: "Run and stop",
@@ -323,29 +227,6 @@ export const previews: Record<
     make: (b) => <R.SignOutSheet onBack={b} />,
   },
 
-  activity: {
-    group: "Proof",
-    title: "Activity, who",
-    make: (b) => (
-      <P.ActivityWho
-        onBack={b}
-        today={[
-          {
-            title: "Page check, Tessel",
-            detail: "Checking the checkout. Included",
-            amount: "−0.40",
-            who: "Agent",
-          },
-          {
-            title: "Moved to agent wallet",
-            detail: "From your account. Confirmed",
-            amount: "−50.00",
-            who: "You",
-          },
-        ]}
-      />
-    ),
-  },
   agentPay: {
     group: "Proof",
     title: "Agent payment",
@@ -355,29 +236,6 @@ export const previews: Record<
     group: "Proof",
     title: "Owner transfer",
     make: (b) => <P.OwnerTransferDetail onBack={b} />,
-  },
-  proof: {
-    group: "Proof",
-    title: "Proof",
-    make: (b) => (
-      <P.Proof
-        onBack={b}
-        findings={findings}
-        source="Checking the checkout. From the Mandate service."
-      />
-    ),
-  },
-  proofPending: {
-    group: "Proof",
-    title: "Proof, running",
-    make: (b) => (
-      <P.Proof
-        onBack={b}
-        findings={pending}
-        source="Task still running."
-        running
-      />
-    ),
   },
   findingPass: {
     group: "Proof",
@@ -425,11 +283,6 @@ export const previews: Record<
         note="A failed finding is shown as it is. It is not hidden or softened."
       />
     ),
-  },
-  exportProof: {
-    group: "Proof",
-    title: "Export proof",
-    make: (b) => <P.ExportProof onBack={b} />,
   },
   independent: {
     group: "Proof",

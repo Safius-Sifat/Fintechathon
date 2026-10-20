@@ -16,7 +16,12 @@ import {
   ShowPhraseScreen,
 } from "../screens/wallet/Lifecycle";
 import type { AdminCommandName } from "../wallet/core";
-import { useWallet } from "../wallet/session";
+import { currentAccount, useWallet } from "../wallet/session";
+import { TaskCreateScreen } from "../screens/TaskCreate";
+import { TaskTermsScreen } from "../screens/TaskTerms";
+import { TaskDetailScreen } from "../screens/TaskDetail";
+import { AgentTokenScreen } from "../screens/AgentToken";
+import { TaskProofScreen } from "../screens/TaskProof";
 import { PreviewIndex, PreviewScreen } from "../screens/preview";
 import { AgentsScreen } from "../screens/AgentsScreen";
 import { ActivityScreen } from "../screens/ActivityScreen";
@@ -47,11 +52,16 @@ export type RootStackParamList = {
   Lock: undefined;
   ShowPhrase: undefined;
   Contacts: { pick?: boolean };
-  TxDetail: { hash: Hash };
+  TxDetail: { hash: Hash; origin?: "phone" | "agent" | "service"; taskId?: string };
   AgentControl: { command: AdminCommandName; wallet: Address };
   OwnerMoveOut: { wallet: Address };
   WalletLimits: { wallet: Address };
-  Approvals: { wallet: Address };
+  Approvals: { wallet: Address; walletId?: string; taskId?: string };
+  TaskCreate: { walletId: string };
+  TaskTerms: { taskId: string };
+  TaskDetail: { taskId: string };
+  AgentToken: { taskId: string };
+  TaskProof: { taskId: string };
   Tabs: NavigatorScreenParams<TabParamList>;
   Accounts: undefined;
   Receive: undefined;
@@ -113,7 +123,7 @@ export function RootNavigator() {
   const { status } = useWallet();
   if (status === "loading") return null;
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Navigator key={`${status}:${currentAccount()?.address ?? ""}`} screenOptions={{ headerShown: false }}>
       {status === "none" ? (
         <>
           <Stack.Screen name="Welcome" component={WelcomeScreen} />
@@ -142,6 +152,11 @@ export function RootNavigator() {
           <Stack.Screen name="OwnerMoveOut" component={OwnerMoveOutScreen} />
           <Stack.Screen name="WalletLimits" component={WalletLimitsScreen} />
           <Stack.Screen name="Approvals" component={ApprovalsScreen} />
+          <Stack.Screen name="TaskCreate" component={TaskCreateScreen} />
+          <Stack.Screen name="TaskTerms" component={TaskTermsScreen} />
+          <Stack.Screen name="TaskDetail" component={TaskDetailScreen} />
+          <Stack.Screen name="AgentToken" component={AgentTokenScreen} />
+          <Stack.Screen name="TaskProof" component={TaskProofScreen} />
           {__DEV__ ? (
             <>
               <Stack.Screen name="PreviewIndex" component={PreviewIndex} />
