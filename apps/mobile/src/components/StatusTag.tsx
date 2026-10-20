@@ -1,41 +1,18 @@
-import { StyleSheet, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import type { CapabilityState } from "../config/capabilities";
-import { colors, radius, space, tones, type } from "../theme";
+import { radius, space, type, makeStyles, useColors } from "../theme";
 import { Icon, type IconName } from "./Icon";
 
 // State is always spelled out in text; color and icon only reinforce it.
-const TAGS: Record<
-  CapabilityState,
-  { label: string; icon: IconName; fg: string; bg: string }
-> = {
-  configured: {
-    label: "Configured",
-    icon: "check-circle-outline",
-    fg: tones.green.fg,
-    bg: tones.green.bg,
-  },
-  notBuilt: {
-    label: "Not available yet",
-    icon: "progress-clock",
-    fg: colors.textMuted,
-    bg: colors.surfaceMuted,
-  },
-  notConnected: {
-    label: "Not connected",
-    icon: "link-variant-off",
-    fg: colors.textMuted,
-    bg: colors.surfaceMuted,
-  },
-  unavailable: {
-    label: "Unavailable",
-    icon: "cloud-off-outline",
-    fg: tones.amber.fg,
-    bg: tones.amber.bg,
-  },
+const LABELS: Record<CapabilityState, { label: string; icon: IconName }> = {
+  configured: { label: "Configured", icon: "check-circle-outline" },
+  notBuilt: { label: "Not available yet", icon: "progress-clock" },
+  notConnected: { label: "Not connected", icon: "link-variant-off" },
+  unavailable: { label: "Unavailable", icon: "cloud-off-outline" },
 };
 
 export function statusLabel(state: CapabilityState) {
-  return TAGS[state].label;
+  return LABELS[state].label;
 }
 
 interface StatusTagProps {
@@ -46,13 +23,15 @@ interface StatusTagProps {
 }
 
 export function StatusTag({ state, label, onDark }: StatusTagProps) {
-  const tag = TAGS[state];
-  const fg = onDark ? colors.onDark : tag.fg;
+  const colors = useColors();
+  const styles = useStyles();
+  const tag = LABELS[state];
+  const fg = onDark ? colors.onInk : colors.ink2;
   return (
     <View
       style={[
         styles.tag,
-        { backgroundColor: onDark ? colors.heroFill : tag.bg },
+        { backgroundColor: onDark ? colors.inkFill : colors.tile },
       ]}
     >
       <Icon name={tag.icon} size={14} color={fg} />
@@ -61,7 +40,7 @@ export function StatusTag({ state, label, onDark }: StatusTagProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   tag: {
     flexDirection: "row",
     alignItems: "center",
@@ -73,4 +52,4 @@ const styles = StyleSheet.create({
   },
   // Wraps inside the tag at large text sizes instead of overflowing it.
   label: { ...type.label, flexShrink: 1 },
-});
+}));

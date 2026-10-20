@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
-import { StyleSheet, Text, View } from "react-native";
-import { colors, space, type, type Tone } from "../theme";
+import { Text, View } from "react-native";
+import { space, type, type Tone, makeStyles } from "../theme";
 import { IconTile } from "./IconTile";
 import type { IconName } from "./Icon";
 
@@ -15,6 +15,7 @@ interface StateViewProps {
 
 // Whole-section state: unavailable, empty or error.
 export function StateView({ icon, tone, title, body, tag }: StateViewProps) {
+  const styles = useStyles();
   return (
     <View style={styles.root}>
       <IconTile icon={icon} tone={tone} size={64} />
@@ -27,7 +28,7 @@ export function StateView({ icon, tone, title, body, tag }: StateViewProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   root: {
     alignItems: "center",
     gap: space.md,
@@ -41,5 +42,5 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   tag: { alignSelf: "center" },
-  body: { ...type.body, color: colors.textMuted, textAlign: "center" },
-});
+  body: { ...type.body, color: colors.ink2, textAlign: "center" },
+}));

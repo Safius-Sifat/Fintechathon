@@ -1,7 +1,14 @@
 import type { ReactNode } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { colors, shadows, space, touchTarget, type } from "../theme";
+import {
+  shadows,
+  space,
+  touchTarget,
+  type,
+  makeStyles,
+  useColors,
+} from "../theme";
 import { Icon } from "./Icon";
 
 interface ScreenProps {
@@ -25,6 +32,8 @@ export function Screen({
   onBack,
   children,
 }: ScreenProps) {
+  const colors = useColors();
+  const styles = useStyles();
   const insets = useSafeAreaInsets();
   return (
     <View style={[styles.root, { paddingTop: insets.top }]}>
@@ -62,8 +71,8 @@ export function Screen({
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.background },
+const useStyles = makeStyles((colors) => ({
+  root: { flex: 1, backgroundColor: colors.ground },
   backRow: { paddingTop: space.sm, paddingHorizontal: space.lg },
   back: {
     width: touchTarget,
@@ -71,7 +80,7 @@ const styles = StyleSheet.create({
     borderRadius: touchTarget / 2,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: colors.surface,
+    backgroundColor: colors.raised,
     boxShadow: shadows.card,
   },
   pressed: { opacity: 0.7 },
@@ -84,5 +93,5 @@ const styles = StyleSheet.create({
   },
   titleBlock: { gap: space.xs, paddingTop: space.sm, paddingBottom: space.xs },
   title: { ...type.title, color: colors.ink },
-  subtitle: { ...type.body, color: colors.textMuted },
-});
+  subtitle: { ...type.body, color: colors.ink2 },
+}));

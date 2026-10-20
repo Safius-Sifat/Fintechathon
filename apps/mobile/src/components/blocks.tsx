@@ -1,18 +1,23 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { ActivityIndicator, Pressable, Text, View } from "react-native";
 import {
-  ActivityIndicator,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
-import { colors, fonts, radius, space, touchTarget, type } from "../theme";
+  palettes,
+  fonts,
+  radius,
+  type Colors,
+  space,
+  touchTarget,
+  type,
+  makeStyles,
+  useColors,
+} from "../theme";
 import { Icon, type IconName } from "./Icon";
 import { Seal } from "./Seal";
 
 // Small building blocks shared by the agent, stop and proof screens.
 
 export function Rows({ children }: { children: ReactNode }) {
+  const styles = useStyles();
   return <View style={styles.rows}>{children}</View>;
 }
 
@@ -27,6 +32,8 @@ interface RowProps {
 // Label left, value right, optional detail under the label. Tappable rows get
 // a chevron.
 export function Row({ label, value, detail, onPress, mono }: RowProps) {
+  const colors = useColors();
+  const styles = useStyles();
   const body = (
     <View style={styles.row}>
       <View style={styles.rowText}>
@@ -54,10 +61,12 @@ export function Row({ label, value, detail, onPress, mono }: RowProps) {
 }
 
 export function Note({ children }: { children: ReactNode }) {
+  const styles = useStyles();
   return <Text style={styles.note}>{children}</Text>;
 }
 
 export function Heading({ children }: { children: string }) {
+  const styles = useStyles();
   return (
     <Text style={styles.heading} accessibilityRole="header">
       {children}
@@ -67,10 +76,12 @@ export function Heading({ children }: { children: string }) {
 
 // The serif voice line used for goals, reasons and plain statements.
 export function Voice({ children }: { children: ReactNode }) {
+  const styles = useStyles();
   return <Text style={styles.voice}>{children}</Text>;
 }
 
 export function BigAmount({ value, unit }: { value: string; unit?: string }) {
+  const styles = useStyles();
   return (
     <View
       style={styles.amountRow}
@@ -91,6 +102,8 @@ export interface StepItem {
 }
 
 export function Steps({ items }: { items: readonly StepItem[] }) {
+  const colors = useColors();
+  const styles = useStyles();
   return (
     <View style={styles.steps}>
       {items.map((step, i) => (
@@ -129,10 +142,9 @@ export function Steps({ items }: { items: readonly StepItem[] }) {
 }
 
 export type FindingState = "PASS" | "FAIL" | "PENDING" | "UNVERIFIABLE";
-const FINDING: Record<
-  FindingState,
-  { label: string; icon: IconName; color: string }
-> = {
+const findingStyle = (
+  colors: Colors,
+): Record<FindingState, { label: string; icon: IconName; color: string }> => ({
   PASS: { label: "Passed", icon: "check-circle", color: colors.ink },
   FAIL: { label: "Failed", icon: "close-circle", color: colors.accent },
   PENDING: { label: "Not yet", icon: "circle-outline", color: colors.ink3 },
@@ -141,10 +153,10 @@ const FINDING: Record<
     icon: "help-circle-outline",
     color: colors.ink,
   },
-};
+});
 
 export function findingLabel(state: FindingState) {
-  return FINDING[state].label;
+  return findingStyle(palettes.light)[state].label;
 }
 
 interface FindingRowProps {
@@ -156,7 +168,8 @@ interface FindingRowProps {
 
 // One of the six findings. State is spelled out in words; the glyph helps.
 export function FindingRow({ name, state, reason, onPress }: FindingRowProps) {
-  const f = FINDING[state];
+  const styles = useStyles();
+  const f = findingStyle(useColors())[state];
   const body = (
     <View
       style={styles.row}
@@ -180,6 +193,8 @@ export function FindingRow({ name, state, reason, onPress }: FindingRowProps) {
 }
 
 export function Tag({ label, wax }: { label: string; wax?: boolean }) {
+  const colors = useColors();
+  const styles = useStyles();
   return (
     <View style={[styles.tag, wax && styles.tagWax]}>
       <Text style={[styles.tagText, wax && { color: colors.accent }]}>
@@ -198,6 +213,8 @@ export function Chips<K extends string>({
   selected: K;
   onSelect?: (key: K) => void;
 }) {
+  const colors = useColors();
+  const styles = useStyles();
   return (
     <View style={styles.chips} accessibilityRole="radiogroup">
       {options.map((o) => {
@@ -228,6 +245,7 @@ export function GhostButton({
   label: string;
   onPress?: () => void;
 }) {
+  const styles = useStyles();
   return (
     <Pressable
       accessibilityRole="button"
@@ -254,6 +272,8 @@ export function HoldToSeal({
   onSealed?: () => void;
   disabled?: boolean;
 }) {
+  const colors = useColors();
+  const styles = useStyles();
   const [filled, setFilled] = useState(0);
   const [sealed, setSealed] = useState(false);
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -300,7 +320,7 @@ export function HoldToSeal({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   rows: { borderTopWidth: 1, borderTopColor: colors.rule },
   row: {
     flexDirection: "row",
@@ -386,6 +406,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  holdDisabled: { backgroundColor: colors.surfaceMuted },
+  holdDisabled: { backgroundColor: colors.tile },
   holdLabel: { ...type.bodyStrong, fontSize: 16, color: colors.onInk },
-});
+}));

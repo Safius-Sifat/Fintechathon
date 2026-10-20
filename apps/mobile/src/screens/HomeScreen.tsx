@@ -2,7 +2,6 @@ import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import {
   Pressable,
-  StyleSheet,
   Text,
   View,
   useWindowDimensions,
@@ -20,19 +19,21 @@ import { StatusTag } from "../components/StatusTag";
 import { preview } from "../config/capabilities";
 import type { RootStackParamList } from "../navigation/RootNavigator";
 import {
-  colors,
   radius,
   shadows,
   space,
   stackedFontScale,
   touchTarget,
   type,
+  makeStyles,
+  useColors,
 } from "../theme";
 
 // Home preview. The personal account and its agent wallet are separate
 // surfaces and their balances are never combined. No wallet exists on this
 // phone yet, so nothing here shows an address, a balance or a working action.
 export function HomeScreen() {
+  const styles = useStyles();
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   return (
@@ -85,6 +86,8 @@ export function HomeScreen() {
 }
 
 function BrandHeader({ onScan }: { onScan: () => void }) {
+  const colors = useColors();
+  const styles = useStyles();
   return (
     <View style={styles.brand}>
       <View style={styles.brandMark}>
@@ -113,13 +116,15 @@ function BrandHeader({ onScan }: { onScan: () => void }) {
 
 // Opens the account switcher. With no wallet there is no account to name.
 function AccountRow({ onPress }: { onPress: () => void }) {
+  const colors = useColors();
+  const styles = useStyles();
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel="Account. No account yet."
       accessibilityHint="Opens accounts"
       onPress={onPress}
-      android_ripple={{ color: "rgba(15, 23, 42, 0.06)" }}
+      android_ripple={{ color: colors.ripple }}
       style={({ pressed }) => [styles.accountRow, pressed && styles.pressed]}
     >
       <IconTile icon="account-circle-outline" tone="blue" size={40} />
@@ -127,7 +132,7 @@ function AccountRow({ onPress }: { onPress: () => void }) {
         <Text style={styles.accountLabel}>Account</Text>
         <Text style={styles.accountValue}>No account yet</Text>
       </View>
-      <Icon name="chevron-right" size={24} color={colors.textSubtle} />
+      <Icon name="chevron-right" size={24} color={colors.ink3} />
     </Pressable>
   );
 }
@@ -138,6 +143,8 @@ interface HeroProps {
 }
 
 function PersonalAccountHero({ onReceive, onSend }: HeroProps) {
+  const colors = useColors();
+  const styles = useStyles();
   // Side-by-side facts break words at large text sizes; stack them instead.
   const { fontScale } = useWindowDimensions();
   const factStyle =
@@ -148,7 +155,7 @@ function PersonalAccountHero({ onReceive, onSend }: HeroProps) {
     <View style={styles.hero}>
       <View style={styles.heroTop}>
         <View style={styles.heroIcon}>
-          <Icon name="wallet-outline" size={20} color={colors.onDark} />
+          <Icon name="wallet-outline" size={20} color={colors.onInk} />
         </View>
         <Text style={styles.heroLabel}>Personal account</Text>
         <StatusTag state="notBuilt" label="Not set up" onDark />
@@ -195,6 +202,7 @@ interface HeroFactProps {
 }
 
 function HeroFact({ label, value, style }: HeroFactProps) {
+  const styles = useStyles();
   return (
     <View style={[styles.heroFact, style]}>
       <Text style={styles.heroFactLabel}>{label}</Text>
@@ -203,7 +211,7 @@ function HeroFact({ label, value, style }: HeroFactProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   accountRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -212,14 +220,14 @@ const styles = StyleSheet.create({
     paddingVertical: space.sm,
     paddingHorizontal: space.md,
     borderRadius: radius.lg,
-    backgroundColor: colors.surface,
+    backgroundColor: colors.raised,
     borderWidth: 1,
-    borderColor: colors.hairline,
+    borderColor: colors.rule,
     boxShadow: shadows.card,
     overflow: "hidden",
   },
   accountText: { flex: 1, gap: 2 },
-  accountLabel: { ...type.label, color: colors.textMuted },
+  accountLabel: { ...type.label, color: colors.ink2 },
   accountValue: { ...type.bodyStrong, color: colors.ink },
   pressed: { opacity: 0.85 },
 
@@ -239,9 +247,9 @@ const styles = StyleSheet.create({
     borderRadius: touchTarget / 2,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: colors.surface,
+    backgroundColor: colors.raised,
     borderWidth: 1,
-    borderColor: colors.hairline,
+    borderColor: colors.rule,
     boxShadow: shadows.card,
   },
   wordmark: {
@@ -267,14 +275,14 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: radius.md,
-    backgroundColor: colors.heroFill,
+    backgroundColor: colors.inkFill,
     alignItems: "center",
     justifyContent: "center",
   },
-  heroLabel: { ...type.bodyStrong, color: colors.onDarkMuted, flexGrow: 1 },
+  heroLabel: { ...type.bodyStrong, color: colors.onInkMuted, flexGrow: 1 },
   heroBody: { gap: space.xs },
-  heroTitle: { ...type.hero, color: colors.onDark },
-  heroText: { ...type.small, color: colors.onDarkMuted },
+  heroTitle: { ...type.hero, color: colors.onInk },
+  heroText: { ...type.small, color: colors.onInkMuted },
   heroFacts: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -285,20 +293,20 @@ const styles = StyleSheet.create({
     paddingVertical: space.sm,
     paddingHorizontal: space.md,
     borderRadius: radius.md,
-    backgroundColor: colors.heroFill,
+    backgroundColor: colors.inkFill,
   },
   heroFactInline: { flexGrow: 1, flexBasis: 0, minWidth: 120 },
   heroFactStacked: { width: "100%" },
-  heroFactLabel: { ...type.label, color: colors.onDarkMuted },
-  heroFactValue: { ...type.bodyStrong, color: colors.onDark },
+  heroFactLabel: { ...type.label, color: colors.onInkMuted },
+  heroFactValue: { ...type.bodyStrong, color: colors.onInk },
   heroActions: { flexDirection: "row", flexWrap: "wrap", gap: space.sm },
-  heroCaption: { ...type.small, color: colors.onDarkMuted },
+  heroCaption: { ...type.small, color: colors.onInkMuted },
 
   cardHeader: { flexDirection: "row", gap: space.md, alignItems: "center" },
   cardHeaderText: { flex: 1, gap: 2 },
   cardTitle: { ...type.heading, color: colors.ink },
-  cardSubtitle: { ...type.small, color: colors.textMuted },
-  caption: { ...type.small, color: colors.textMuted },
+  cardSubtitle: { ...type.small, color: colors.ink2 },
+  caption: { ...type.small, color: colors.ink2 },
 
   note: {
     flexDirection: "row",
@@ -306,5 +314,5 @@ const styles = StyleSheet.create({
     gap: space.md,
     paddingHorizontal: space.xs,
   },
-  noteText: { ...type.small, color: colors.textMuted, flex: 1 },
-});
+  noteText: { ...type.small, color: colors.ink2, flex: 1 },
+}));

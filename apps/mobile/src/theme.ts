@@ -1,46 +1,92 @@
+import { useMemo } from "react";
+import {
+  StyleSheet,
+  useColorScheme,
+  type ImageStyle,
+  type TextStyle,
+  type ViewStyle,
+} from "react-native";
+
 // Visual direction: calm instrument. Cool grey ground, ink text, hairline
 // rules, and one wax-red accent that means "signed by you". The accent is
 // never used for danger. See docs/design/DIRECTION.md.
 
-export const colors = {
+const light = {
   ground: "#E8ECEB",
   raised: "#F4F6F5",
+  tile: "#DDE3E2",
   ink: "#14191C",
   ink2: "#454E54",
   ink3: "#5A646A",
+  ink4: "#6E787E",
   rule: "#C6CDCF",
   accent: "#8F2A2E",
   waxTint: "#D9C2C3",
   onInk: "#F4F6F5",
+  onInkMuted: "rgba(244, 246, 245, 0.72)",
+  onInkDisabled: "rgba(244, 246, 245, 0.5)",
   onAccent: "#F4F6F5",
-  // Aliases used by existing components; migrate to the names above.
-  background: "#E8ECEB",
-  surface: "#F4F6F5",
-  surfaceMuted: "#DDE3E2",
-  hairline: "#C6CDCF",
-  text: "#14191C",
-  textMuted: "#454E54",
-  textSubtle: "#5A646A",
-  textDisabled: "#6E787E",
-  onDark: "#F4F6F5",
-  onDarkMuted: "rgba(244, 246, 245, 0.72)",
-  onDarkDisabled: "rgba(244, 246, 245, 0.5)",
-  heroFill: "rgba(244, 246, 245, 0.10)",
-  heroLine: "rgba(244, 246, 245, 0.18)",
-  personal: "#14191C",
-  agent: "#8F2A2E",
-  ok: "#14191C",
-  stop: "#14191C",
+  inkFill: "rgba(244, 246, 245, 0.10)",
+  inkLine: "rgba(244, 246, 245, 0.18)",
+  glass: "rgba(255, 255, 255, 0.72)",
+  ripple: "rgba(20, 25, 28, 0.08)",
+  rippleOnInk: "rgba(244, 246, 245, 0.16)",
+  rippleOnRaised: "rgba(20, 25, 28, 0.12)",
+  outline: "rgba(20, 25, 28, 0.14)",
+  statusBar: "dark",
 } as const;
 
+export type Colors = { [K in keyof typeof light]: string };
+
+const dark: Colors = {
+  ground: "#0F1315",
+  raised: "#171D20",
+  tile: "#232B2F",
+  ink: "#ECEAE3",
+  ink2: "#A7AFB3",
+  ink3: "#8C969B",
+  ink4: "#6B757A",
+  rule: "#283034",
+  accent: "#C95B5F",
+  waxTint: "#3A2527",
+  onInk: "#0F1315",
+  onInkMuted: "rgba(15, 19, 21, 0.72)",
+  onInkDisabled: "rgba(15, 19, 21, 0.5)",
+  onAccent: "#0F1315",
+  inkFill: "rgba(15, 19, 21, 0.08)",
+  inkLine: "rgba(15, 19, 21, 0.16)",
+  glass: "rgba(23, 29, 32, 0.72)",
+  ripple: "rgba(236, 234, 227, 0.10)",
+  rippleOnInk: "rgba(15, 19, 21, 0.16)",
+  rippleOnRaised: "rgba(236, 234, 227, 0.14)",
+  outline: "rgba(236, 234, 227, 0.16)",
+  statusBar: "light",
+};
+
+export const palettes: { light: Colors; dark: Colors } = { light, dark };
+
+// The palette follows the system light or dark setting. Styles that use it are
+// built with makeStyles so they rebuild when the setting changes.
+export function useColors(): Colors {
+  return useColorScheme() === "dark" ? dark : light;
+}
+
+type Named = Record<string, ViewStyle | TextStyle | ImageStyle>;
+
+export function makeStyles<T extends Named>(factory: (c: Colors) => T) {
+  return function useStyles(): T {
+    const colors = useColors();
+    return useMemo(() => StyleSheet.create(factory(colors)), [colors]);
+  };
+}
+
 // Icon tile tones. The design uses one neutral tile, so every tone matches.
-const neutralTile = { bg: "#DDE3E2", fg: "#14191C" } as const;
 export const tones = {
-  blue: neutralTile,
-  amber: neutralTile,
-  green: neutralTile,
-  violet: neutralTile,
-  slate: neutralTile,
+  blue: null,
+  amber: null,
+  green: null,
+  violet: null,
+  slate: null,
 } as const;
 
 export type Tone = keyof typeof tones;

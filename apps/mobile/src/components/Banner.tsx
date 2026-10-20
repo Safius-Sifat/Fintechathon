@@ -1,5 +1,5 @@
-import { StyleSheet, Text, View } from "react-native";
-import { colors, radius, space, type } from "../theme";
+import { Text, View } from "react-native";
+import { radius, space, type, makeStyles, useColors } from "../theme";
 import { Icon, type IconName } from "./Icon";
 
 interface BannerProps {
@@ -10,13 +10,15 @@ interface BannerProps {
 
 // Quiet notice for "preview build" style statements, not errors.
 export function Banner({ icon, title, body }: BannerProps) {
+  const colors = useColors();
+  const styles = useStyles();
   return (
     <View
       style={styles.banner}
       accessible
       accessibilityLabel={`${title}. ${body}`}
     >
-      <Icon name={icon} size={20} color={colors.textMuted} />
+      <Icon name={icon} size={20} color={colors.ink2} />
       <View style={styles.text}>
         <Text style={styles.title}>{title}</Text>
         <Text style={styles.body}>{body}</Text>
@@ -25,18 +27,18 @@ export function Banner({ icon, title, body }: BannerProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   banner: {
     flexDirection: "row",
     gap: space.md,
     paddingVertical: space.md,
     paddingHorizontal: space.lg,
     borderRadius: radius.lg,
-    backgroundColor: "rgba(255, 255, 255, 0.72)",
+    backgroundColor: colors.glass,
     borderWidth: 1,
-    borderColor: colors.hairline,
+    borderColor: colors.rule,
   },
   text: { flex: 1, gap: 2 },
   title: { ...type.label, fontSize: 13, color: colors.ink },
-  body: { ...type.small, color: colors.textMuted },
-});
+  body: { ...type.small, color: colors.ink2 },
+}));

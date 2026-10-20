@@ -1,5 +1,5 @@
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { StyleSheet, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import { PrimaryButton, TextButton } from "../components/Button";
 import { Card, DetailRow, Divider } from "../components/Card";
 import { Icon } from "../components/Icon";
@@ -8,7 +8,7 @@ import { StatusTag } from "../components/StatusTag";
 import { FEE_PAYER, SOURCE_LABELS } from "../config/transfer";
 import { network } from "../config/network";
 import type { RootStackParamList } from "../navigation/RootNavigator";
-import { colors, fonts, radius, space, type } from "../theme";
+import { fonts, radius, space, type, makeStyles, useColors } from "../theme";
 import { currentDraftContext, useSendDraft } from "../state/useSendDraft";
 import { OwnerTransferNote } from "./Send";
 
@@ -19,6 +19,8 @@ import { OwnerTransferNote } from "./Send";
 type Props = NativeStackScreenProps<RootStackParamList, "TransferReview">;
 
 export function TransferReviewScreen({ navigation }: Props) {
+  const colors = useColors();
+  const styles = useStyles();
   const { source, asset, recipient, amount } =
     useSendDraft(currentDraftContext);
   return (
@@ -68,7 +70,7 @@ export function TransferReviewScreen({ navigation }: Props) {
       </Card>
 
       <View style={styles.notice}>
-        <Icon name="lock-outline" size={20} color={colors.textMuted} />
+        <Icon name="lock-outline" size={20} color={colors.ink2} />
         <Text style={styles.noticeText}>
           Signing is not available in this build. Nothing will be sent. When it
           is built, final confirmation happens on a protected screen of its own.
@@ -86,9 +88,9 @@ export function TransferReviewScreen({ navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   cardTitle: { ...type.heading, color: colors.ink },
-  label: { ...type.small, color: colors.textMuted },
+  label: { ...type.small, color: colors.ink2 },
   amount: { ...type.hero, color: colors.ink },
   recipient: { gap: space.xs },
   address: {
@@ -97,14 +99,14 @@ const styles = StyleSheet.create({
     color: colors.ink,
     padding: space.md,
     borderRadius: radius.md,
-    backgroundColor: colors.surfaceMuted,
+    backgroundColor: colors.tile,
   },
-  caption: { ...type.small, color: colors.textMuted },
+  caption: { ...type.small, color: colors.ink2 },
   notice: {
     flexDirection: "row",
     alignItems: "flex-start",
     gap: space.md,
     paddingHorizontal: space.xs,
   },
-  noticeText: { ...type.small, color: colors.textMuted, flex: 1 },
-});
+  noticeText: { ...type.small, color: colors.ink2, flex: 1 },
+}));

@@ -1,8 +1,15 @@
 import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Icon, type IconName } from "../components/Icon";
-import { colors, shadows, space, touchTarget, type } from "../theme";
+import {
+  shadows,
+  space,
+  touchTarget,
+  type,
+  makeStyles,
+  useColors,
+} from "../theme";
 
 export interface TabMeta {
   label: string;
@@ -17,6 +24,8 @@ export function TabBar({
   navigation,
   meta,
 }: BottomTabBarProps & { meta: Record<string, TabMeta> }) {
+  const colors = useColors();
+  const styles = useStyles();
   const insets = useSafeAreaInsets();
   return (
     <View
@@ -26,7 +35,7 @@ export function TabBar({
       {state.routes.map((route, index) => {
         const selected = state.index === index;
         const tab = meta[route.name];
-        const color = selected ? colors.ink : colors.textSubtle;
+        const color = selected ? colors.ink : colors.ink3;
         const onPress = () => {
           const event = navigation.emit({
             type: "tabPress",
@@ -45,7 +54,7 @@ export function TabBar({
             accessibilityLabel={tab.label}
             onPress={onPress}
             android_ripple={{
-              color: "rgba(15, 23, 42, 0.08)",
+              color: colors.ripple,
               borderless: true,
             }}
             style={styles.item}
@@ -69,12 +78,12 @@ export function TabBar({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   bar: {
     flexDirection: "row",
-    backgroundColor: colors.surface,
+    backgroundColor: colors.raised,
     borderTopWidth: 1,
-    borderTopColor: colors.hairline,
+    borderTopColor: colors.rule,
     paddingTop: space.sm,
     boxShadow: shadows.bar,
   },
@@ -87,4 +96,4 @@ const styles = StyleSheet.create({
   },
   label: { ...type.label, fontWeight: "500" },
   selected: { fontWeight: "700" },
-});
+}));

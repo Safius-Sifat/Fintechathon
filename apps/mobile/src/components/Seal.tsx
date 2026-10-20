@@ -1,5 +1,5 @@
-import { StyleSheet, Text, View } from "react-native";
-import { colors, fonts } from "../theme";
+import { Text, View } from "react-native";
+import { fonts, makeStyles, useColors } from "../theme";
 
 const BEADS = 48;
 
@@ -15,6 +15,8 @@ interface SealProps {
 // accent means "signed by you", so it only appears as the seal fills.
 // Decorative: nearby text carries the meaning.
 export function Seal({ size, filled = 0, sealed = false }: SealProps) {
+  const colors = useColors();
+  const styles = useStyles();
   const ring = size / 2 - size * 0.035;
   const bead = size * 0.027;
   const disc = size * 0.66;
@@ -76,7 +78,7 @@ export function Seal({ size, filled = 0, sealed = false }: SealProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   disc: {
     position: "absolute",
     alignItems: "center",
@@ -84,4 +86,4 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   mark: { fontFamily: fonts.serifBold, textAlign: "center" },
-});
+}));

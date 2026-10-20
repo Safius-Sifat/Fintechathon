@@ -1,8 +1,9 @@
-import { StyleSheet, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import { network } from "../config/network";
-import { colors, radius, shadows, space, type } from "../theme";
+import { radius, shadows, space, type, makeStyles } from "../theme";
 
 export function ChainChip() {
+  const styles = useStyles();
   return (
     <View
       style={styles.chip}
@@ -16,7 +17,7 @@ export function ChainChip() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   chip: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -25,17 +26,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: space.md,
     paddingVertical: space.xs + 2,
     borderRadius: radius.pill,
-    backgroundColor: colors.surface,
+    backgroundColor: colors.raised,
     borderWidth: 1,
-    borderColor: colors.hairline,
+    borderColor: colors.rule,
     boxShadow: shadows.card,
   },
   dot: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: colors.personal,
+    backgroundColor: colors.ink,
   },
   text: { ...type.label, color: colors.ink },
-  testnet: { ...type.label, color: colors.textMuted },
-});
+  testnet: { ...type.label, color: colors.ink2 },
+}));

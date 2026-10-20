@@ -1,5 +1,12 @@
-import { Pressable, StyleSheet, Text, useWindowDimensions } from "react-native";
-import { colors, radius, space, touchTarget, type } from "../theme";
+import { Pressable, Text, useWindowDimensions } from "react-native";
+import {
+  radius,
+  space,
+  touchTarget,
+  type,
+  makeStyles,
+  useColors,
+} from "../theme";
 import { Icon, type IconName } from "./Icon";
 
 interface HeroActionProps {
@@ -19,7 +26,9 @@ export function HeroAction({
   accessibilityHint,
   onPress,
 }: HeroActionProps) {
-  const fg = disabled ? colors.onDarkDisabled : colors.ink;
+  const colors = useColors();
+  const styles = useStyles();
+  const fg = disabled ? colors.onInkDisabled : colors.ink;
   return (
     <Pressable
       accessibilityRole="button"
@@ -27,7 +36,7 @@ export function HeroAction({
       accessibilityHint={accessibilityHint}
       disabled={disabled}
       onPress={onPress}
-      android_ripple={{ color: "rgba(15, 23, 42, 0.12)" }}
+      android_ripple={{ color: colors.rippleOnRaised }}
       style={[styles.action, disabled ? styles.disabled : styles.enabled]}
     >
       <Icon name={icon} size={18} color={fg} />
@@ -53,7 +62,9 @@ export function PrimaryButton({
   accessibilityHint,
   onPress,
 }: PrimaryButtonProps) {
-  const fg = disabled ? colors.textDisabled : colors.onDark;
+  const colors = useColors();
+  const styles = useStyles();
+  const fg = disabled ? colors.ink4 : colors.onInk;
   return (
     <Pressable
       accessibilityRole="button"
@@ -61,7 +72,7 @@ export function PrimaryButton({
       accessibilityHint={accessibilityHint}
       disabled={disabled}
       onPress={onPress}
-      android_ripple={{ color: "rgba(255, 255, 255, 0.16)" }}
+      android_ripple={{ color: colors.rippleOnInk }}
       style={({ pressed }) => [
         styles.primary,
         disabled && styles.primaryDisabled,
@@ -86,6 +97,7 @@ export function TextButton({
   accessibilityHint,
   onPress,
 }: TextButtonProps) {
+  const styles = useStyles();
   return (
     <Pressable
       accessibilityRole="button"
@@ -115,7 +127,9 @@ export function OutlineButton({
   accessibilityHint,
   onPress,
 }: OutlineButtonProps) {
-  const fg = disabled ? colors.textDisabled : colors.ink;
+  const colors = useColors();
+  const styles = useStyles();
+  const fg = disabled ? colors.ink4 : colors.ink;
   // The minimum width grows with the text size, so side-by-side buttons
   // wrap onto their own rows instead of breaking a label mid-word.
   const { fontScale } = useWindowDimensions();
@@ -142,7 +156,7 @@ export function OutlineButton({
 
 const OUTLINE_MIN_WIDTH = 120;
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   outline: {
     flexGrow: 1,
     flexBasis: 0,
@@ -155,10 +169,10 @@ const styles = StyleSheet.create({
     paddingVertical: space.sm,
     borderRadius: radius.pill,
     borderWidth: 1,
-    borderColor: colors.hairline,
-    backgroundColor: colors.surface,
+    borderColor: colors.rule,
+    backgroundColor: colors.raised,
   },
-  outlineDisabled: { backgroundColor: colors.surfaceMuted },
+  outlineDisabled: { backgroundColor: colors.tile },
   outlineLabel: { ...type.bodyStrong, textAlign: "center", flexShrink: 1 },
   primary: {
     minHeight: 56,
@@ -172,11 +186,11 @@ const styles = StyleSheet.create({
     backgroundColor: colors.ink,
     overflow: "hidden",
   },
-  primaryDisabled: { backgroundColor: colors.surfaceMuted, boxShadow: "none" },
+  primaryDisabled: { backgroundColor: colors.tile, boxShadow: "none" },
   primaryLabel: {
     ...type.bodyStrong,
     fontSize: 16,
-    color: colors.onDark,
+    color: colors.onInk,
     textAlign: "center",
     flexShrink: 1,
   },
@@ -188,7 +202,7 @@ const styles = StyleSheet.create({
   },
   textLabel: {
     ...type.bodyStrong,
-    color: colors.textMuted,
+    color: colors.ink2,
     textAlign: "center",
   },
   pressed: { opacity: 0.85 },
@@ -206,11 +220,11 @@ const styles = StyleSheet.create({
     borderRadius: radius.pill,
     overflow: "hidden",
   },
-  enabled: { backgroundColor: colors.onDark },
+  enabled: { backgroundColor: colors.onInk },
   disabled: {
-    backgroundColor: colors.heroFill,
+    backgroundColor: colors.inkFill,
     borderWidth: 1,
-    borderColor: colors.heroLine,
+    borderColor: colors.inkLine,
   },
   label: { ...type.bodyStrong, textAlign: "center", flexShrink: 1 },
-});
+}));

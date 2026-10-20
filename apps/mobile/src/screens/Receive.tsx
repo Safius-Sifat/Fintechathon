@@ -1,6 +1,6 @@
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import { Banner } from "../components/Banner";
 import { OutlineButton } from "../components/Button";
 import { Card, DetailRow, SectionTitle } from "../components/Card";
@@ -9,7 +9,7 @@ import { Screen } from "../components/Screen";
 import { Segmented } from "../components/Segmented";
 import { network } from "../config/network";
 import type { RootStackParamList } from "../navigation/RootNavigator";
-import { colors, radius, space, type } from "../theme";
+import { radius, space, type, makeStyles, useColors } from "../theme";
 
 // Receive preview. A receiving address comes from an account on this phone,
 // and none exists yet, so there is no address and no QR code. Mandate never
@@ -41,6 +41,8 @@ const NOTES: readonly { icon: IconName; text: string }[] = [
 ];
 
 export function ReceiveScreen({ navigation }: Props) {
+  const colors = useColors();
+  const styles = useStyles();
   const [asset, setAsset] = useState<Asset>("ETH");
   return (
     <Screen
@@ -89,7 +91,7 @@ export function ReceiveScreen({ navigation }: Props) {
           accessible
           accessibilityLabel="No QR code. This account has no address yet."
         >
-          <Icon name="qrcode-remove" size={48} color={colors.textSubtle} />
+          <Icon name="qrcode-remove" size={48} color={colors.ink3} />
           <Text style={styles.qrTitle}>No address yet</Text>
           <Text style={styles.qrText}>
             A QR code appears here once this account has an address.
@@ -116,7 +118,7 @@ export function ReceiveScreen({ navigation }: Props) {
       <Card>
         {NOTES.map((note) => (
           <View key={note.icon} style={styles.note}>
-            <Icon name={note.icon} size={20} color={colors.textMuted} />
+            <Icon name={note.icon} size={20} color={colors.ink2} />
             <Text style={styles.noteText}>{note.text}</Text>
           </View>
         ))}
@@ -131,9 +133,9 @@ export function ReceiveScreen({ navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   cardTitle: { ...type.heading, color: colors.ink },
-  caption: { ...type.small, color: colors.textMuted },
+  caption: { ...type.small, color: colors.ink2 },
 
   qrFrame: {
     alignItems: "center",
@@ -144,12 +146,12 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     borderWidth: 2,
     borderStyle: "dashed",
-    borderColor: "rgba(15, 23, 42, 0.14)",
+    borderColor: colors.outline,
   },
-  qrTitle: { ...type.heading, color: colors.textMuted, textAlign: "center" },
-  qrText: { ...type.small, color: colors.textMuted, textAlign: "center" },
+  qrTitle: { ...type.heading, color: colors.ink2, textAlign: "center" },
+  qrText: { ...type.small, color: colors.ink2, textAlign: "center" },
   actions: { flexDirection: "row", flexWrap: "wrap", gap: space.sm },
 
   note: { flexDirection: "row", alignItems: "flex-start", gap: space.md },
-  noteText: { ...type.body, color: colors.text, flex: 1 },
-});
+  noteText: { ...type.body, color: colors.ink, flex: 1 },
+}));

@@ -1,7 +1,14 @@
 import type { ReactNode } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { colors, shadows, space, touchTarget, type } from "../theme";
+import {
+  shadows,
+  space,
+  touchTarget,
+  type,
+  makeStyles,
+  useColors,
+} from "../theme";
 import { Icon } from "./Icon";
 
 interface PageProps {
@@ -16,6 +23,8 @@ interface PageProps {
 // Full-screen flow page: back button, serif title, scrolling body and a pinned
 // footer. The body scrolls, so signed terms are never hidden on small phones.
 export function Page({ title, subtitle, onBack, footer, children }: PageProps) {
+  const colors = useColors();
+  const styles = useStyles();
   const insets = useSafeAreaInsets();
   return (
     <View style={[styles.root, { paddingTop: insets.top }]}>
@@ -57,7 +66,7 @@ export function Page({ title, subtitle, onBack, footer, children }: PageProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   root: { flex: 1, backgroundColor: colors.ground },
   backRow: { paddingTop: space.sm, paddingHorizontal: space.lg },
   back: {
@@ -81,4 +90,4 @@ const styles = StyleSheet.create({
   title: { ...type.title, color: colors.ink },
   subtitle: { ...type.body, color: colors.ink2 },
   footer: { paddingTop: space.md, paddingHorizontal: space.xl, gap: space.sm },
-});
+}));

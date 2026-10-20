@@ -1,5 +1,5 @@
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { StyleSheet, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import { PrimaryButton } from "../components/Button";
 import { Card, SectionTitle } from "../components/Card";
 import { CapabilityRow } from "../components/CapabilityRow";
@@ -8,7 +8,7 @@ import { IconTile } from "../components/IconTile";
 import { Screen } from "../components/Screen";
 import type { Capability } from "../config/capabilities";
 import type { RootStackParamList } from "../navigation/RootNavigator";
-import { colors, space, type } from "../theme";
+import { space, type, makeStyles, useColors } from "../theme";
 
 // Account switcher preview. Accounts are derived from the wallet's recovery
 // phrase, and no wallet exists on this phone yet, so the list is empty and
@@ -59,6 +59,8 @@ const ACCOUNT_ACTIONS: readonly Capability[] = [
 ];
 
 export function AccountsScreen({ navigation }: Props) {
+  const colors = useColors();
+  const styles = useStyles();
   return (
     <Screen
       title="Accounts"
@@ -85,7 +87,7 @@ export function AccountsScreen({ navigation }: Props) {
       <Card>
         {HOW_ACCOUNTS_WORK.map((item) => (
           <View key={item.icon} style={styles.fact}>
-            <Icon name={item.icon} size={20} color={colors.textMuted} />
+            <Icon name={item.icon} size={20} color={colors.ink2} />
             <Text style={styles.factText}>{item.text}</Text>
           </View>
         ))}
@@ -101,10 +103,10 @@ export function AccountsScreen({ navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   empty: { alignItems: "center", gap: space.sm, paddingVertical: space.sm },
   emptyTitle: { ...type.heading, color: colors.ink, textAlign: "center" },
-  emptyText: { ...type.small, color: colors.textMuted, textAlign: "center" },
+  emptyText: { ...type.small, color: colors.ink2, textAlign: "center" },
   fact: { flexDirection: "row", alignItems: "flex-start", gap: space.md },
-  factText: { ...type.body, color: colors.text, flex: 1 },
-});
+  factText: { ...type.body, color: colors.ink, flex: 1 },
+}));

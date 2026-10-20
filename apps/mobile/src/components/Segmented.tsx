@@ -1,5 +1,12 @@
-import { Pressable, StyleSheet, Text, View } from "react-native";
-import { colors, radius, space, touchTarget, type } from "../theme";
+import { Pressable, Text, View } from "react-native";
+import {
+  makeStyles,
+  radius,
+  shadows,
+  space,
+  touchTarget,
+  type,
+} from "../theme";
 
 export interface SegmentOption<K extends string> {
   key: K;
@@ -23,6 +30,7 @@ export function Segmented<K extends string>({
   selected,
   onSelect,
 }: SegmentedProps<K>) {
+  const styles = useStyles();
   return (
     <View style={styles.block}>
       <Text style={styles.label}>{label}</Text>
@@ -62,16 +70,16 @@ export function Segmented<K extends string>({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   block: { gap: space.xs },
-  label: { ...type.label, color: colors.textMuted },
+  label: { ...type.label, color: colors.ink2 },
   segment: {
     flexDirection: "row",
     flexWrap: "wrap",
     gap: space.xs,
     padding: space.xs,
     borderRadius: radius.md,
-    backgroundColor: colors.surfaceMuted,
+    backgroundColor: colors.tile,
   },
   item: {
     flexGrow: 1,
@@ -85,11 +93,11 @@ const styles = StyleSheet.create({
     borderRadius: radius.sm,
   },
   itemSelected: {
-    backgroundColor: colors.surface,
-    boxShadow: "0px 1px 4px rgba(15, 23, 42, 0.10)",
+    backgroundColor: colors.raised,
+    boxShadow: shadows.card,
   },
-  text: { ...type.bodyStrong, color: colors.textMuted, textAlign: "center" },
+  text: { ...type.bodyStrong, color: colors.ink2, textAlign: "center" },
   textSelected: { color: colors.ink },
-  textDisabled: { color: colors.textDisabled },
-  detail: { ...type.small, color: colors.textMuted, textAlign: "center" },
-});
+  textDisabled: { color: colors.ink4 },
+  detail: { ...type.small, color: colors.ink2, textAlign: "center" },
+}));

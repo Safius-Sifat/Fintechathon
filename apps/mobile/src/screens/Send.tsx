@@ -1,6 +1,6 @@
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useEffect } from "react";
-import { StyleSheet, Text, TextInput, View } from "react-native";
+import { Text, TextInput, View } from "react-native";
 import { Banner } from "../components/Banner";
 import { OutlineButton, PrimaryButton, TextButton } from "../components/Button";
 import { Card, DetailRow } from "../components/Card";
@@ -17,7 +17,7 @@ import {
   type SendDraft,
 } from "../state/sendDraft";
 import { currentDraftContext, useSendDraft } from "../state/useSendDraft";
-import { colors, fonts, radius, space, tones, type } from "../theme";
+import { fonts, radius, space, type, makeStyles, useColors } from "../theme";
 
 // Send form preview. The fields work locally so the layout can be reviewed,
 // but nothing typed here is checked: there is no balance, fee quote, address
@@ -28,6 +28,8 @@ import { colors, fonts, radius, space, tones, type } from "../theme";
 type Props = NativeStackScreenProps<RootStackParamList, "Send">;
 
 export function SendScreen({ navigation }: Props) {
+  const colors = useColors();
+  const styles = useStyles();
   const context = currentDraftContext;
   const { source, asset, recipient, amount } = useSendDraft(context);
   const set = (patch: Partial<SendDraft>) => updateDraft(context, patch);
@@ -96,7 +98,7 @@ export function SendScreen({ navigation }: Props) {
           value={recipient}
           onChangeText={(text) => set({ recipient: text })}
           placeholder={`0x… address on ${network.name}`}
-          placeholderTextColor={colors.textSubtle}
+          placeholderTextColor={colors.ink3}
           autoCapitalize="none"
           autoCorrect={false}
           autoComplete="off"
@@ -132,7 +134,7 @@ export function SendScreen({ navigation }: Props) {
             value={amount}
             onChangeText={(text) => set({ amount: text })}
             placeholder="0.0"
-            placeholderTextColor={colors.textSubtle}
+            placeholderTextColor={colors.ink3}
             keyboardType="decimal-pad"
             style={[styles.input, styles.amountInput]}
           />
@@ -185,9 +187,11 @@ export function SendScreen({ navigation }: Props) {
 // Sending from the agent wallet is owner governance, not a normal payment.
 // The effect only follows a successful, confirmed transfer.
 export function OwnerTransferNote() {
+  const styles = useStyles();
+  const colors = useColors();
   return (
     <View style={styles.callout}>
-      <Icon name="pause-circle-outline" size={22} color={tones.amber.fg} />
+      <Icon name="pause-circle-outline" size={22} color={colors.ink} />
       <View style={styles.calloutText}>
         <Text style={styles.calloutTitle}>This is an owner transfer</Text>
         <Text style={styles.calloutBody}>
@@ -200,8 +204,8 @@ export function OwnerTransferNote() {
   );
 }
 
-const styles = StyleSheet.create({
-  caption: { ...type.small, color: colors.textMuted },
+const useStyles = makeStyles((colors) => ({
+  caption: { ...type.small, color: colors.ink2 },
   fieldLabel: { ...type.heading, color: colors.ink },
   input: {
     ...type.body,
@@ -210,14 +214,14 @@ const styles = StyleSheet.create({
     paddingVertical: space.sm,
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: "rgba(15, 23, 42, 0.14)",
-    backgroundColor: colors.surface,
+    borderColor: colors.outline,
+    backgroundColor: colors.raised,
     color: colors.ink,
   },
   mono: { fontFamily: fonts.mono },
   amountRow: { flexDirection: "row", alignItems: "center", gap: space.md },
   amountInput: { flex: 1, fontSize: 22, lineHeight: 28 },
-  assetSuffix: { ...type.bodyStrong, color: colors.textMuted },
+  assetSuffix: { ...type.bodyStrong, color: colors.ink2 },
   actions: { flexDirection: "row", flexWrap: "wrap", gap: space.sm },
   callout: {
     flexDirection: "row",
@@ -225,9 +229,9 @@ const styles = StyleSheet.create({
     gap: space.md,
     padding: space.md,
     borderRadius: radius.md,
-    backgroundColor: tones.amber.bg,
+    backgroundColor: colors.tile,
   },
   calloutText: { flex: 1, gap: 2 },
-  calloutTitle: { ...type.bodyStrong, color: tones.amber.fg },
-  calloutBody: { ...type.small, color: colors.text },
-});
+  calloutTitle: { ...type.bodyStrong, color: colors.ink },
+  calloutBody: { ...type.small, color: colors.ink },
+}));

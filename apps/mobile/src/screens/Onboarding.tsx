@@ -3,7 +3,6 @@ import type { ReactNode } from "react";
 import {
   Pressable,
   ScrollView,
-  StyleSheet,
   Text,
   View,
   useWindowDimensions,
@@ -17,14 +16,14 @@ import { Seal } from "../components/Seal";
 import { StatusTag } from "../components/StatusTag";
 import type { RootStackParamList } from "../navigation/RootNavigator";
 import {
-  colors,
   radius,
   shadows,
   space,
-  tones,
   touchTarget,
   type,
   type Tone,
+  makeStyles,
+  useColors,
 } from "../theme";
 
 // First-run flow: Welcome (with how it works) -> Set up your wallet -> app.
@@ -69,6 +68,7 @@ const HOW_IT_WORKS: readonly {
 ];
 
 export function WelcomeScreen({ navigation }: Props<"Welcome">) {
+  const styles = useStyles();
   const { width } = useWindowDimensions();
   const sealSize = Math.min(width - space.xl * 2, 200);
   return (
@@ -126,6 +126,7 @@ export function WelcomeScreen({ navigation }: Props<"Welcome">) {
 }
 
 export function SetupScreen({ navigation }: Props<"Setup">) {
+  const styles = useStyles();
   return (
     <FlowLayout
       header={<BackHeader onBack={() => navigation.goBack()} />}
@@ -191,6 +192,7 @@ interface SetupOptionProps {
 // An unavailable choice: rendered as a disabled control so screen readers
 // announce it as a button that cannot be used yet.
 function SetupOption({ icon, tone, title, body }: SetupOptionProps) {
+  const styles = useStyles();
   return (
     <Pressable
       disabled
@@ -210,15 +212,18 @@ function SetupOption({ icon, tone, title, body }: SetupOptionProps) {
 }
 
 function Note({ icon, text }: { icon: IconName; text: string }) {
+  const colors = useColors();
+  const styles = useStyles();
   return (
     <View style={styles.note}>
-      <Icon name={icon} size={20} color={colors.textMuted} />
+      <Icon name={icon} size={20} color={colors.ink2} />
       <Text style={styles.noteText}>{text}</Text>
     </View>
   );
 }
 
 function StepTitle({ title, subtitle }: { title: string; subtitle: string }) {
+  const styles = useStyles();
   return (
     <View style={styles.stepTitle}>
       <Text style={styles.title} accessibilityRole="header">
@@ -230,6 +235,8 @@ function StepTitle({ title, subtitle }: { title: string; subtitle: string }) {
 }
 
 function BackHeader({ onBack }: { onBack: () => void }) {
+  const colors = useColors();
+  const styles = useStyles();
   return (
     <View style={styles.stepHeader}>
       <Pressable
@@ -254,6 +261,7 @@ interface FlowLayoutProps {
 // actions pinned above the bottom inset, so they stay reachable at any text
 // size.
 function FlowLayout({ header, footer, children }: FlowLayoutProps) {
+  const styles = useStyles();
   const insets = useSafeAreaInsets();
   return (
     <View style={[styles.root, { paddingTop: insets.top }]}>
@@ -270,8 +278,8 @@ function FlowLayout({ header, footer, children }: FlowLayoutProps) {
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.background },
+const useStyles = makeStyles((colors) => ({
+  root: { flex: 1, backgroundColor: colors.ground },
   scroll: { flex: 1 },
   content: {
     paddingTop: space.lg,
@@ -294,7 +302,7 @@ const styles = StyleSheet.create({
   },
   welcomeTagline: {
     ...type.body,
-    color: colors.textMuted,
+    color: colors.ink2,
     textAlign: "center",
   },
   sealRow: { alignItems: "center", paddingTop: space.lg },
@@ -302,7 +310,7 @@ const styles = StyleSheet.create({
     ...type.body,
     fontSize: 16,
     lineHeight: 23,
-    color: colors.text,
+    color: colors.ink,
     textAlign: "center",
     paddingHorizontal: space.sm,
   },
@@ -320,17 +328,17 @@ const styles = StyleSheet.create({
     borderRadius: touchTarget / 2,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: colors.surface,
+    backgroundColor: colors.raised,
     boxShadow: shadows.card,
   },
 
   stepTitle: { gap: space.sm },
   title: { ...type.title, color: colors.ink },
-  subtitle: { ...type.body, color: colors.textMuted },
+  subtitle: { ...type.body, color: colors.ink2 },
 
   pointList: {
-    backgroundColor: colors.surface,
-    borderColor: colors.hairline,
+    backgroundColor: colors.raised,
+    borderColor: colors.rule,
     borderWidth: 1,
     borderRadius: radius.lg,
     padding: space.lg,
@@ -340,11 +348,11 @@ const styles = StyleSheet.create({
   point: { flexDirection: "row", alignItems: "flex-start", gap: space.md },
   pointText: { flex: 1, gap: 2 },
   pointTitle: { ...type.bodyStrong, color: colors.ink },
-  pointBody: { ...type.small, color: colors.textMuted },
+  pointBody: { ...type.small, color: colors.ink2 },
 
   option: {
-    backgroundColor: colors.surface,
-    borderColor: colors.hairline,
+    backgroundColor: colors.raised,
+    borderColor: colors.rule,
     borderWidth: 1,
     borderRadius: radius.lg,
     padding: space.lg,
@@ -358,11 +366,11 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     gap: space.sm,
   },
-  optionTitle: { ...type.heading, color: colors.textMuted },
-  optionBody: { ...type.small, color: colors.textMuted },
+  optionTitle: { ...type.heading, color: colors.ink2 },
+  optionBody: { ...type.small, color: colors.ink2 },
 
   notes: { gap: space.md, paddingHorizontal: space.xs },
   notesTitle: { ...type.heading, color: colors.ink },
   note: { flexDirection: "row", alignItems: "flex-start", gap: space.md },
-  noteText: { ...type.body, color: colors.text, flex: 1 },
-});
+  noteText: { ...type.body, color: colors.ink, flex: 1 },
+}));

@@ -9,25 +9,29 @@ import {
   Newsreader_600SemiBold,
 } from "@expo-google-fonts/newsreader";
 import { useFonts } from "expo-font";
-import { useRef } from "react";
+import { useMemo, useRef } from "react";
 import { StatusBar, useWindowDimensions } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { RootNavigator } from "./src/navigation/RootNavigator";
-import { colors } from "./src/theme";
-
-const navigationTheme: Theme = {
-  ...DefaultTheme,
-  colors: {
-    ...DefaultTheme.colors,
-    background: colors.ground,
-    card: colors.raised,
-    border: colors.rule,
-    text: colors.ink,
-    primary: colors.ink,
-  },
-};
+import { useColors } from "./src/theme";
 
 export default function App() {
+  const colors = useColors();
+  const navigationTheme = useMemo<Theme>(
+    () => ({
+      ...DefaultTheme,
+      dark: colors.statusBar === "light",
+      colors: {
+        ...DefaultTheme.colors,
+        background: colors.ground,
+        card: colors.raised,
+        border: colors.rule,
+        text: colors.ink,
+        primary: colors.ink,
+      },
+    }),
+    [colors],
+  );
   // Headings render in the system serif until the bundled font is ready, so a
   // font error never blocks the app.
   const [fontsLoaded, fontError] = useFonts({
@@ -43,7 +47,11 @@ export default function App() {
   if (!fontsLoaded && !fontError) return null;
   return (
     <SafeAreaProvider>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar
+        barStyle={
+          colors.statusBar === "light" ? "light-content" : "dark-content"
+        }
+      />
       <NavigationContainer
         key={fontScale}
         theme={navigationTheme}

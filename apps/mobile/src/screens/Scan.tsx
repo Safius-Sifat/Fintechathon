@@ -23,7 +23,15 @@ import { IconTile } from "../components/IconTile";
 import { Screen } from "../components/Screen";
 import { StatusTag } from "../components/StatusTag";
 import type { RootStackParamList } from "../navigation/RootNavigator";
-import { colors, fonts, radius, space, touchTarget, type } from "../theme";
+import {
+  fonts,
+  radius,
+  space,
+  touchTarget,
+  type,
+  makeStyles,
+  useColors,
+} from "../theme";
 
 // QR scanner. Reading a code works; understanding it as a payment request
 // does not exist yet, so a scan only shows the code's text. Nothing is
@@ -109,6 +117,7 @@ function PermissionView({
   cancelLabel,
   onCancel,
 }: PermissionViewProps) {
+  const styles = useStyles();
   return (
     <Screen title={title} onBack={onCancel}>
       <Card>
@@ -142,6 +151,8 @@ interface ScanResult {
 }
 
 function Scanner({ onClose }: { onClose: () => void }) {
+  const colors = useColors();
+  const styles = useStyles();
   const insets = useSafeAreaInsets();
   const [scanned, setScanned] = useState<ScanResult | null>(null);
 
@@ -222,11 +233,7 @@ function Scanner({ onClose }: { onClose: () => void }) {
             </Text>
           </ScrollView>
           <View style={styles.notice}>
-            <Icon
-              name="information-outline"
-              size={20}
-              color={colors.textMuted}
-            />
+            <Icon name="information-outline" size={20} color={colors.ink2} />
             <Text style={styles.noticeText}>
               Reading payment requests is not available yet. Nothing was paid,
               sent or saved.
@@ -244,13 +251,13 @@ function Scanner({ onClose }: { onClose: () => void }) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   permission: {
     alignItems: "center",
     gap: space.md,
     paddingVertical: space.sm,
   },
-  permissionText: { ...type.body, color: colors.text, textAlign: "center" },
+  permissionText: { ...type.body, color: colors.ink, textAlign: "center" },
 
   scanner: { flex: 1, backgroundColor: "#000000" },
   topBar: { paddingHorizontal: space.lg },
@@ -260,7 +267,7 @@ const styles = StyleSheet.create({
     borderRadius: touchTarget / 2,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: colors.surface,
+    backgroundColor: colors.raised,
   },
   pressed: { opacity: 0.7 },
   frameArea: { flex: 1, alignItems: "center", justifyContent: "center" },
@@ -278,8 +285,8 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     backgroundColor: "rgba(15, 23, 42, 0.78)",
   },
-  hintTitle: { ...type.bodyStrong, color: colors.onDark, textAlign: "center" },
-  hintText: { ...type.small, color: colors.onDarkMuted, textAlign: "center" },
+  hintTitle: { ...type.bodyStrong, color: colors.onInk, textAlign: "center" },
+  hintText: { ...type.small, color: colors.onInkMuted, textAlign: "center" },
 
   result: {
     marginTop: "auto",
@@ -287,17 +294,17 @@ const styles = StyleSheet.create({
     gap: space.md,
     borderTopLeftRadius: radius.hero,
     borderTopRightRadius: radius.hero,
-    backgroundColor: colors.surface,
+    backgroundColor: colors.raised,
   },
   resultHeader: { flexDirection: "row", alignItems: "center", gap: space.md },
   resultTitle: { ...type.heading, color: colors.ink, flex: 1 },
-  resultLabel: { ...type.label, color: colors.textMuted },
+  resultLabel: { ...type.label, color: colors.ink2 },
   // Long content scrolls inside the box instead of pushing the actions off
   // screen.
   resultBox: {
     maxHeight: 160,
     borderRadius: radius.md,
-    backgroundColor: colors.surfaceMuted,
+    backgroundColor: colors.tile,
   },
   resultData: {
     ...type.body,
@@ -313,14 +320,14 @@ const styles = StyleSheet.create({
     paddingVertical: space.sm,
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: colors.heroLine,
+    borderColor: colors.inkLine,
   },
   devSampleText: {
     ...type.label,
-    color: colors.onDark,
+    color: colors.onInk,
     textAlign: "center",
     paddingHorizontal: space.sm,
   },
   notice: { flexDirection: "row", alignItems: "flex-start", gap: space.sm },
-  noticeText: { ...type.small, color: colors.textMuted, flex: 1 },
-});
+  noticeText: { ...type.small, color: colors.ink2, flex: 1 },
+}));

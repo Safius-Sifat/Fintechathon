@@ -1,11 +1,12 @@
-import { StyleSheet, Text, View, useWindowDimensions } from "react-native";
+import { Text, View, useWindowDimensions } from "react-native";
 import type { Capability } from "../config/capabilities";
-import { colors, space, stackedFontScale, type } from "../theme";
+import { space, stackedFontScale, type, makeStyles } from "../theme";
 import { IconTile } from "./IconTile";
 import { StatusTag, statusLabel } from "./StatusTag";
 
 // Read-only row: icon tile, title, detail and an explicit state tag.
 export function CapabilityRow({ capability }: { capability: Capability }) {
+  const styles = useStyles();
   const { fontScale } = useWindowDimensions();
   const stacked = fontScale > stackedFontScale;
   const label = capability.stateLabel ?? statusLabel(capability.state);
@@ -27,7 +28,7 @@ export function CapabilityRow({ capability }: { capability: Capability }) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   row: {
     minHeight: 56,
     flexDirection: "row",
@@ -43,5 +44,5 @@ const styles = StyleSheet.create({
   },
   text: { flexShrink: 1, gap: 2 },
   title: { ...type.bodyStrong, color: colors.ink },
-  detail: { ...type.small, color: colors.textMuted },
-});
+  detail: { ...type.small, color: colors.ink2 },
+}));
