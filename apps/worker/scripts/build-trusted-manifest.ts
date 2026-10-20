@@ -12,9 +12,9 @@ import {
   RUNBOOK_IDS,
 } from "@mandate/schema";
 import { evidenceKey } from "@mandate/platform";
-import { MCP_TOOLS } from "../../apps/mcp/src/tools.js";
+import { MCP_TOOLS } from "../../mcp/src/tools.js";
 
-const root = resolve(import.meta.dirname, "../..");
+const root = resolve(import.meta.dirname, "../../..");
 const env = (name: string) => {
   const v = process.env[name];
   if (!v) throw new Error(`${name} is required`);
