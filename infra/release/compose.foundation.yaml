@@ -18,8 +18,11 @@ services:
       API_HOST: 127.0.0.1
       API_TRUSTED_PROXY_ADDRESSES: "127.0.0.1"
       SOURCE_REVISION: ${MANDATE_COMMIT:?tested commit required}
+      TRUSTED_MANIFEST_FILE: /run/trusted-manifest.json
+      API_RPC_URL: https://sepolia.base.org
     volumes:
       - /opt/mandate/private/db-ca.crt:/run/db-ca.crt:ro
+      - /opt/mandate/signer/manifest.json:/run/trusted-manifest.json:ro
     logging:
       driver: json-file
       options: { max-size: 10m, max-file: "3" }
