@@ -39,7 +39,7 @@ before(async () => {
 });
 after(async () => {
   server.close();
-  await chain.close();
+  await chain?.close();
   await admin.end();
 });
 

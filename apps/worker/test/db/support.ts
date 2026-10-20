@@ -71,7 +71,20 @@ async function freePort(): Promise<number> {
 
 // Local fork of Base Sepolia: the deployed Person1 contracts keep their real
 // addresses and code hashes. Results are LOCAL fork evidence, never public PASS.
+// Several suites fork concurrently; a fork that fails to start (public RPC
+// throttling) is retried on a fresh port before the suite fails.
 export async function forkChain(options: { blockTime?: number } = {}) {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      return await startFork(options);
+    } catch (error) {
+      if (attempt >= 4) throw error;
+      await new Promise((r) => setTimeout(r, 1500 * attempt));
+    }
+  }
+}
+
+async function startFork(options: { blockTime?: number }) {
   const port = await freePort();
   const anvil = process.env.ANVIL_BIN ?? join(homedir(), ".foundry/bin/anvil");
   const forkUrl = process.env.ANVIL_FORK_URL ?? "https://sepolia.base.org";
@@ -110,7 +123,10 @@ export async function forkChain(options: { blockTime?: number } = {}) {
     } catch {
       if (child.exitCode !== null)
         throw new Error("anvil exited; fork RPC unavailable");
-      if (Date.now() > deadline) throw new Error("anvil fork did not start");
+      if (Date.now() > deadline) {
+        child.kill("SIGTERM");
+        throw new Error("anvil fork did not start");
+      }
       await new Promise((r) => setTimeout(r, 300));
     }
   }

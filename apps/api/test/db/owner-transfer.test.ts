@@ -20,7 +20,7 @@ before(async () => {
   chain = await forkChain();
 });
 after(async () => {
-  await chain.close();
+  await chain?.close();
   await admin.end();
 });
 
