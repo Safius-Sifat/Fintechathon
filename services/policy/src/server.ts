@@ -17,6 +17,10 @@ export function createPolicyServer(
     throw new Error("Internal token must be at least 32 bytes");
   const app = createFoundationApp("policy", { logger: false });
   const expected = Buffer.from("Bearer " + internalToken);
+  // Failures never echo internal details; the authorizer treats non-200 as unavailable.
+  app.setErrorHandler(async (_error, _request, reply) =>
+    reply.code(503).send({ code: "POLICY_UNAVAILABLE" }),
+  );
   app.addHook("onRequest", async (request, reply) => {
     if (!request.url.startsWith("/internal/")) return;
     const given = Buffer.from(request.headers.authorization ?? "");

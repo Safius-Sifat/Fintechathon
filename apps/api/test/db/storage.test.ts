@@ -224,3 +224,31 @@ test("P2-03.T07 idempotency rows survive lease recovery and changed bodies confl
     assert.equal(results.filter((r) => !r.replayed).length, 1);
     await assert.rejects(run({ changed: true }), /different body/);
   }));
+
+test("P2-03.T07 a lease that expires on its final attempt ends FAILED instead of staying leased", () =>
+  withSchema(async ({ pool }) => {
+    let now = 1793000000;
+    await transaction(pool, (c) =>
+      enqueueJob(
+        c,
+        {
+          kind: "wallet.provision",
+          dedupeKey: "last",
+          payload: {},
+          runAt: now,
+          maxAttempts: 1,
+        },
+        now,
+      ),
+    );
+    const q = new JobQueue(pool, "worker", () => now, 30);
+    const [job] = await q.lease(["wallet.provision"]);
+    assert.ok(job);
+    now += 31;
+    assert.deepEqual(await q.lease(["wallet.provision"]), []);
+    const row = (await pool.query("SELECT state,last_error FROM jobs")).rows[0];
+    assert.deepEqual(row, {
+      state: "FAILED",
+      last_error: "lease expired on final attempt",
+    });
+  }));

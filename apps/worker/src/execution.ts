@@ -493,7 +493,19 @@ export class Executor {
             return false;
           }
         });
-        if (!executed) continue;
+        if (!executed) {
+          // Included without this Action's event: outcome unexplained, keep the risk.
+          await transaction(this.database, async (c) => {
+            await this.setState(
+              c,
+              row.id,
+              ["SUBMITTED", "INCLUDED"],
+              "UNKNOWN",
+            );
+            await settleReservation(c, row.id, { state: "UNKNOWN" }, now);
+          });
+          return;
+        }
         const block = await this.client.getBlock({
           blockNumber: result.receipt.blockNumber,
         });

@@ -60,6 +60,11 @@ export class JobQueue {
   async lease(kinds: readonly string[], limit = 1): Promise<Job[]> {
     const now = this.clock();
     const rows = await transaction(this.database, async (client) => {
+      // A lease that expired on its final attempt can never run again.
+      await client.query(
+        "UPDATE jobs SET state='FAILED',lease_owner=NULL,lease_token=NULL,lease_expires_at=NULL,last_error=COALESCE(last_error,'lease expired on final attempt'),updated_at=$2 WHERE kind=ANY($1) AND state='LEASED' AND lease_expires_at<=$2 AND attempts>=max_attempts",
+        [kinds, now],
+      );
       const due = await client.query<{ id: string }>(
         "SELECT id FROM jobs WHERE kind=ANY($1) AND run_at<=$2 AND attempts<max_attempts AND (state='READY' OR (state='LEASED' AND lease_expires_at<=$2)) ORDER BY run_at,id LIMIT $3 FOR UPDATE SKIP LOCKED",
         [kinds, now, limit],

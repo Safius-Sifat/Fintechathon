@@ -118,19 +118,38 @@ const handlers: Record<string, (job: Job) => Promise<boolean>> = {
     const tx = await client.getTransaction({
       hash: job.payload.txHash as `0x${string}`,
     });
+    const wallet = (
+      await database.query<{ wallet_address: string | null }>(
+        "SELECT wallet_address FROM wallets WHERE owner_address=$1",
+        [owner.toLowerCase()],
+      )
+    ).rows[0]?.wallet_address;
+    const managed = wallet ? getAddress(wallet) : null;
+    // The registered hash is attributed to whichever own account sent or received it.
+    const personal = tx.from === owner || tx.to === owner;
+    const account =
+      personal || !managed
+        ? {
+            owner,
+            source: "PERSONAL" as const,
+            address: owner,
+            counterpart: managed,
+          }
+        : {
+            owner,
+            source: "MANAGED" as const,
+            address: managed,
+            counterpart: owner,
+          };
     await history.record(
-      { owner, source: "PERSONAL", address: owner, counterpart: null },
-      await history.verify(
-        { owner, source: "PERSONAL", address: owner, counterpart: null },
-        "txlist",
-        {
-          blockNumber: String(tx.blockNumber ?? 0n),
-          hash: tx.hash,
-          from: tx.from,
-          to: tx.to ?? "0x0000000000000000000000000000000000000000",
-          value: tx.value.toString(),
-        },
-      ),
+      account,
+      await history.verify(account, "txlist", {
+        blockNumber: String(tx.blockNumber ?? 0n),
+        hash: tx.hash,
+        from: tx.from,
+        to: tx.to ?? "0x0000000000000000000000000000000000000000",
+        value: tx.value.toString(),
+      }),
     );
     return true;
   },
