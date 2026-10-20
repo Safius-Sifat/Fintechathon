@@ -161,3 +161,11 @@ docker compose -f "$REPO/infra/release/compose.mpcium.yaml" config --quiet
 The compose check needs valid `MPC_PRIVATE_DIR` and immutable `MPC_NODE_IMAGE`
 values but starts nothing. Real DKG is the separate explicit qualification script;
 fast unit CI cannot establish financial or public-chain readiness.
+
+Post-denial queue recovery is currently BLOCKED: after the authorization denials,
+a fresh valid request following transport/signers restart timed out90s. Pinned
+`sign_consumer.go` waits45s for a reply then NAKs, while the event consumer rejects
+invalid authorizations without replying. This can retain/retry invalid requests
+with concurrency1. The final qualification script also requires a successful
+post-denial fresh session, so earlier quorum results cannot hide this blocker.
+No stream purge, custom nonce/session restoration or cryptographic patch was used.

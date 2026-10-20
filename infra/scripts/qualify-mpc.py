@@ -47,6 +47,7 @@ try:
   stopped=[f'node{i}' for i in range(3) if i!=alone];docker('stop',*stopped);time.sleep(12);run('single-'+str(alone),'sign',True);docker('start',*stopped);time.sleep(15)
  docker('stop','node0');time.sleep(12);run('outage-one','sign');docker('stop','node1');time.sleep(12);run('outage-two','sign',True);docker('start','node0','node1');time.sleep(15);run('restart-persistent-share','sign')
  for mode in ['deny-missing','deny-wrong','deny-mutated']:run(mode,mode,True)
+ run('post-denial-recovery','sign')
  p=subprocess.run([cli,'transport-denial'],capture_output=True,text=True,check=True);(public/'nats-denial.json').write_text(p.stdout)
  info=json.loads(subprocess.check_output(['docker','info','--format','{{json .}}']))
  (public/'host-resources.json').write_text(json.dumps({'dockerVersion':info['ServerVersion'],'dockerCPUs':info['NCPU'],'dockerMemoryBytes':info['MemTotal'],'azure4GiBQualification':False},indent=2)+'\n')

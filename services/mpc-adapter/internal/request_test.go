@@ -112,7 +112,7 @@ func TestResultBindingAndDuplicateAction(t *testing.T) {
 	r := s.a.Record
 	compact := ecdsa.SignCompact(key, r.Digest[:], false)
 	valid := event.SigningResultEvent{ResultType: event.ResultTypeSuccess, WalletID: r.WalletID, TxID: r.AttemptID, NetworkInternalCode: boundary.Network, R: compact[1:33], S: compact[33:65], SignatureRecovery: []byte{compact[0] - 27}}
-	for _, mutation := range []string{"wallet", "attempt", "network", "digest", "nonrecovering"} {
+	for _, mutation := range []string{"wallet", "attempt", "network", "digest", "keyVersion", "nonrecovering"} {
 		wrong := valid
 		switch mutation {
 		case "wallet":
@@ -125,6 +125,12 @@ func TestResultBindingAndDuplicateAction(t *testing.T) {
 			d := r.Digest
 			d[1] ^= 1
 			sig := ecdsa.SignCompact(key, d[:], false)
+			wrong.R = sig[1:33]
+			wrong.S = sig[33:65]
+			wrong.SignatureRecovery = []byte{sig[0] - 27}
+		case "keyVersion":
+			other := secp.PrivKeyFromBytes([]byte{4})
+			sig := ecdsa.SignCompact(other, r.Digest[:], false)
 			wrong.R = sig[1:33]
 			wrong.S = sig[33:65]
 			wrong.SignatureRecovery = []byte{sig[0] - 27}

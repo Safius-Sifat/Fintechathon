@@ -39,6 +39,8 @@ run('openssl','req','-x509','-newkey','rsa:2048','-nodes','-days','2','-subj','/
 (tls/'extensions').write_text('subjectAltName=DNS:nats,DNS:localhost,IP:127.0.0.1\nextendedKeyUsage=serverAuth,clientAuth\n')
 run('openssl','req','-newkey','rsa:2048','-nodes','-subj','/CN=nats','-keyout',str(tls/'transport.key'),'-out',str(tls/'transport.csr'))
 run('openssl','x509','-req','-in',str(tls/'transport.csr'),'-CA',str(tls/'ca.crt'),'-CAkey',str(tls/'ca.key'),'-CAcreateserial','-days','2','-extfile',str(tls/'extensions'),'-out',str(tls/'transport.crt'))
+(tls/'runtime').mkdir()
+for filename in ['ca.crt','transport.crt','transport.key']:shutil.copy(tls/filename,tls/'runtime'/filename)
 natsPassword=secrets.token_hex(24);token=secrets.token_hex(16);chain=secrets.token_hex(32)
 (private/'transport.json').write_text(json.dumps({'natsPassword':natsPassword,'consulToken':token}))
 (private/'nats.conf').write_text(f'''port:4222

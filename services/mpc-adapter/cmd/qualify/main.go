@@ -71,11 +71,6 @@ func main() {
 	if dir == "" {
 		must(errors.New("MPC_PRIVATE_DIR required"))
 	}
-	lock, e := os.OpenFile(filepath.Join(dir, "mandate-adapter-a.lock"), os.O_CREATE|os.O_RDWR, 0600)
-	must(e)
-	defer lock.Close()
-	must(syscall.Flock(int(lock.Fd()), syscall.LOCK_EX|syscall.LOCK_NB))
-	defer syscall.Flock(int(lock.Fd()), syscall.LOCK_UN)
 	var transport struct {
 		NatsPassword string
 		ConsulToken  string
@@ -95,6 +90,11 @@ func main() {
 		fmt.Println(`{"name":"nats-wrong-credentials","result":"LOCAL_PASS"}`)
 		return
 	}
+	lock, e := os.OpenFile(filepath.Join(dir, "mandate-adapter-a.lock"), os.O_CREATE|os.O_RDWR, 0600)
+	must(e)
+	defer lock.Close()
+	must(syscall.Flock(int(lock.Fd()), syscall.LOCK_EX|syscall.LOCK_NB))
+	defer syscall.Flock(int(lock.Fd()), syscall.LOCK_UN)
 	nc, e := nats.Connect("tls://127.0.0.1:14222", opts...)
 	must(e)
 	defer nc.Close()
