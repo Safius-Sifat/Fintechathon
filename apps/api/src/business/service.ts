@@ -22,12 +22,14 @@ import {
   type DeploymentManifest,
 } from "@mandate/schema";
 import {
+  checkpoint,
   enqueueJob,
   exportBundle,
   type EvidenceKey,
   idempotentMutation,
   IdempotencyConflict,
   readWallet,
+  transaction,
   type Clock,
 } from "@mandate/platform";
 import { AuthError } from "../auth/errors.js";
@@ -449,6 +451,10 @@ export class BusinessService {
         "EVIDENCE_UNAVAILABLE",
       );
     try {
+      // Signs the current evidence head; the bundle stays provisional until anchored.
+      await transaction(this.database, (c) =>
+        checkpoint(c, evidence.key, taskId, this.clock()),
+      );
       return await exportBundle(
         this.database,
         evidence.artifactKey,
