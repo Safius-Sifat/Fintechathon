@@ -409,7 +409,6 @@ export function AllowanceApproval({ onBack }: PreviewProps) {
       onBack={onBack}
       footer={<GhostButton label="Decline" />}
     >
-      <HoldToSeal label="Press and hold to seal" />
       <Rows>
         <Row label="Most per payment" value="1.00 DUSD" />
         <Row label="Can pay" value="Tessel Checks, Northgate Probes" />
@@ -418,6 +417,7 @@ export function AllowanceApproval({ onBack }: PreviewProps) {
       <Note>
         You can pause it at any time, even when the Mandate service is offline.
       </Note>
+      <HoldToSeal label="Press and hold to seal" />
     </Page>
   );
 }

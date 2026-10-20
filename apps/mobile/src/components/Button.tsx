@@ -1,40 +1,13 @@
-import { Pressable, StyleSheet, Text, useWindowDimensions } from "react-native";
-import { colors, radius, space, touchTarget, type } from "../theme";
+import { Pressable, Text, useWindowDimensions } from "react-native";
+import {
+  radius,
+  space,
+  touchTarget,
+  type,
+  makeStyles,
+  useColors,
+} from "../theme";
 import { Icon, type IconName } from "./Icon";
-
-interface HeroActionProps {
-  label: string;
-  icon: IconName;
-  disabled?: boolean;
-  // Read by screen readers; explains why a disabled action is unavailable.
-  accessibilityHint?: string;
-  onPress?: () => void;
-}
-
-// Pill action on the dark hero card.
-export function HeroAction({
-  label,
-  icon,
-  disabled = false,
-  accessibilityHint,
-  onPress,
-}: HeroActionProps) {
-  const fg = disabled ? colors.onDarkDisabled : colors.ink;
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityState={{ disabled }}
-      accessibilityHint={accessibilityHint}
-      disabled={disabled}
-      onPress={onPress}
-      android_ripple={{ color: "rgba(15, 23, 42, 0.12)" }}
-      style={[styles.action, disabled ? styles.disabled : styles.enabled]}
-    >
-      <Icon name={icon} size={18} color={fg} />
-      <Text style={[styles.label, { color: fg }]}>{label}</Text>
-    </Pressable>
-  );
-}
 
 interface PrimaryButtonProps {
   label: string;
@@ -48,12 +21,14 @@ interface PrimaryButtonProps {
 // Full-width dark pill for the main action of a flow step.
 export function PrimaryButton({
   label,
-  icon = "arrow-right",
+  icon,
   disabled = false,
   accessibilityHint,
   onPress,
 }: PrimaryButtonProps) {
-  const fg = disabled ? colors.textDisabled : colors.onDark;
+  const colors = useColors();
+  const styles = useStyles();
+  const fg = disabled ? colors.ink4 : colors.onInk;
   return (
     <Pressable
       accessibilityRole="button"
@@ -61,15 +36,15 @@ export function PrimaryButton({
       accessibilityHint={accessibilityHint}
       disabled={disabled}
       onPress={onPress}
-      android_ripple={{ color: "rgba(255, 255, 255, 0.16)" }}
+      android_ripple={{ color: colors.rippleOnInk }}
       style={({ pressed }) => [
         styles.primary,
         disabled && styles.primaryDisabled,
         pressed && styles.pressed,
       ]}
     >
+      {icon ? <Icon name={icon} size={20} color={fg} /> : null}
       <Text style={[styles.primaryLabel, { color: fg }]}>{label}</Text>
-      <Icon name={icon} size={20} color={fg} />
     </Pressable>
   );
 }
@@ -86,6 +61,7 @@ export function TextButton({
   accessibilityHint,
   onPress,
 }: TextButtonProps) {
+  const styles = useStyles();
   return (
     <Pressable
       accessibilityRole="button"
@@ -115,7 +91,9 @@ export function OutlineButton({
   accessibilityHint,
   onPress,
 }: OutlineButtonProps) {
-  const fg = disabled ? colors.textDisabled : colors.ink;
+  const colors = useColors();
+  const styles = useStyles();
+  const fg = disabled ? colors.ink4 : colors.ink;
   // The minimum width grows with the text size, so side-by-side buttons
   // wrap onto their own rows instead of breaking a label mid-word.
   const { fontScale } = useWindowDimensions();
@@ -142,7 +120,7 @@ export function OutlineButton({
 
 const OUTLINE_MIN_WIDTH = 120;
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   outline: {
     flexGrow: 1,
     flexBasis: 0,
@@ -155,10 +133,10 @@ const styles = StyleSheet.create({
     paddingVertical: space.sm,
     borderRadius: radius.pill,
     borderWidth: 1,
-    borderColor: colors.hairline,
-    backgroundColor: colors.surface,
+    borderColor: colors.rule,
+    backgroundColor: colors.raised,
   },
-  outlineDisabled: { backgroundColor: colors.surfaceMuted },
+  outlineDisabled: { backgroundColor: colors.tile },
   outlineLabel: { ...type.bodyStrong, textAlign: "center", flexShrink: 1 },
   primary: {
     minHeight: 56,
@@ -172,11 +150,11 @@ const styles = StyleSheet.create({
     backgroundColor: colors.ink,
     overflow: "hidden",
   },
-  primaryDisabled: { backgroundColor: colors.surfaceMuted, boxShadow: "none" },
+  primaryDisabled: { backgroundColor: colors.tile, boxShadow: "none" },
   primaryLabel: {
     ...type.bodyStrong,
     fontSize: 16,
-    color: colors.onDark,
+    color: colors.onInk,
     textAlign: "center",
     flexShrink: 1,
   },
@@ -188,29 +166,8 @@ const styles = StyleSheet.create({
   },
   textLabel: {
     ...type.bodyStrong,
-    color: colors.textMuted,
+    color: colors.ink2,
     textAlign: "center",
   },
   pressed: { opacity: 0.85 },
-  action: {
-    flexGrow: 1,
-    flexBasis: 0,
-    minWidth: 120,
-    minHeight: touchTarget,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: space.sm,
-    paddingHorizontal: space.lg,
-    paddingVertical: space.sm,
-    borderRadius: radius.pill,
-    overflow: "hidden",
-  },
-  enabled: { backgroundColor: colors.onDark },
-  disabled: {
-    backgroundColor: colors.heroFill,
-    borderWidth: 1,
-    borderColor: colors.heroLine,
-  },
-  label: { ...type.bodyStrong, textAlign: "center", flexShrink: 1 },
-});
+}));

@@ -2,17 +2,36 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
   ActivityIndicator,
   Pressable,
-  StyleSheet,
   Text,
   View,
+  useWindowDimensions,
 } from "react-native";
-import { colors, fonts, radius, space, touchTarget, type } from "../theme";
+import {
+  palettes,
+  fonts,
+  radius,
+  type Colors,
+  space,
+  stackedFontScale,
+  touchTarget,
+  type,
+  makeStyles,
+  useColors,
+} from "../theme";
+import {
+  HOLD_STEPS,
+  holdRelease,
+  holdTick,
+  idleHold,
+  type Hold,
+} from "../state/hold";
 import { Icon, type IconName } from "./Icon";
 import { Seal } from "./Seal";
 
 // Small building blocks shared by the agent, stop and proof screens.
 
 export function Rows({ children }: { children: ReactNode }) {
+  const styles = useStyles();
   return <View style={styles.rows}>{children}</View>;
 }
 
@@ -27,14 +46,31 @@ interface RowProps {
 // Label left, value right, optional detail under the label. Tappable rows get
 // a chevron.
 export function Row({ label, value, detail, onPress, mono }: RowProps) {
+  const colors = useColors();
+  const styles = useStyles();
+  // At large text sizes the value moves under the label instead of squeezing it.
+  const stacked = useWindowDimensions().fontScale > stackedFontScale;
+  const spoken = [label, detail, value].filter(Boolean).join(". ");
   const body = (
-    <View style={styles.row}>
+    <View
+      style={[styles.row, stacked && styles.rowStacked]}
+      accessible={onPress ? false : true}
+      accessibilityLabel={onPress ? undefined : spoken}
+    >
       <View style={styles.rowText}>
         <Text style={styles.rowLabel}>{label}</Text>
         {detail ? <Text style={styles.rowDetail}>{detail}</Text> : null}
       </View>
       {value ? (
-        <Text style={[styles.rowValue, mono && styles.mono]}>{value}</Text>
+        <Text
+          style={[
+            styles.rowValue,
+            stacked && styles.rowValueStacked,
+            mono && styles.mono,
+          ]}
+        >
+          {value}
+        </Text>
       ) : null}
       {onPress ? (
         <Icon name="chevron-right" size={22} color={colors.ink3} />
@@ -45,6 +81,7 @@ export function Row({ label, value, detail, onPress, mono }: RowProps) {
   return (
     <Pressable
       accessibilityRole="button"
+      accessibilityLabel={spoken}
       onPress={onPress}
       style={({ pressed }) => pressed && styles.pressed}
     >
@@ -54,10 +91,12 @@ export function Row({ label, value, detail, onPress, mono }: RowProps) {
 }
 
 export function Note({ children }: { children: ReactNode }) {
+  const styles = useStyles();
   return <Text style={styles.note}>{children}</Text>;
 }
 
 export function Heading({ children }: { children: string }) {
+  const styles = useStyles();
   return (
     <Text style={styles.heading} accessibilityRole="header">
       {children}
@@ -67,10 +106,12 @@ export function Heading({ children }: { children: string }) {
 
 // The serif voice line used for goals, reasons and plain statements.
 export function Voice({ children }: { children: ReactNode }) {
+  const styles = useStyles();
   return <Text style={styles.voice}>{children}</Text>;
 }
 
 export function BigAmount({ value, unit }: { value: string; unit?: string }) {
+  const styles = useStyles();
   return (
     <View
       style={styles.amountRow}
@@ -84,6 +125,11 @@ export function BigAmount({ value, unit }: { value: string; unit?: string }) {
 }
 
 export type StepState = "done" | "now" | "todo";
+const STEP_WORDS: Record<StepState, string> = {
+  done: "Done",
+  now: "In progress",
+  todo: "Not started",
+};
 export interface StepItem {
   state: StepState;
   title: string;
@@ -91,10 +137,17 @@ export interface StepItem {
 }
 
 export function Steps({ items }: { items: readonly StepItem[] }) {
+  const colors = useColors();
+  const styles = useStyles();
   return (
     <View style={styles.steps}>
       {items.map((step, i) => (
-        <View key={step.title} style={styles.step}>
+        <View
+          key={step.title}
+          style={styles.step}
+          accessible
+          accessibilityLabel={`${STEP_WORDS[step.state]}. ${step.title}${step.detail ? `. ${step.detail}` : ""}`}
+        >
           <View style={styles.stepMark}>
             {step.state === "done" ? (
               <Icon name="check-circle" size={26} color={colors.ink} />
@@ -129,10 +182,9 @@ export function Steps({ items }: { items: readonly StepItem[] }) {
 }
 
 export type FindingState = "PASS" | "FAIL" | "PENDING" | "UNVERIFIABLE";
-const FINDING: Record<
-  FindingState,
-  { label: string; icon: IconName; color: string }
-> = {
+const findingStyle = (
+  colors: Colors,
+): Record<FindingState, { label: string; icon: IconName; color: string }> => ({
   PASS: { label: "Passed", icon: "check-circle", color: colors.ink },
   FAIL: { label: "Failed", icon: "close-circle", color: colors.accent },
   PENDING: { label: "Not yet", icon: "circle-outline", color: colors.ink3 },
@@ -141,10 +193,10 @@ const FINDING: Record<
     icon: "help-circle-outline",
     color: colors.ink,
   },
-};
+});
 
 export function findingLabel(state: FindingState) {
-  return FINDING[state].label;
+  return findingStyle(palettes.light)[state].label;
 }
 
 interface FindingRowProps {
@@ -156,7 +208,8 @@ interface FindingRowProps {
 
 // One of the six findings. State is spelled out in words; the glyph helps.
 export function FindingRow({ name, state, reason, onPress }: FindingRowProps) {
-  const f = FINDING[state];
+  const styles = useStyles();
+  const f = findingStyle(useColors())[state];
   const body = (
     <View
       style={styles.row}
@@ -180,6 +233,8 @@ export function FindingRow({ name, state, reason, onPress }: FindingRowProps) {
 }
 
 export function Tag({ label, wax }: { label: string; wax?: boolean }) {
+  const colors = useColors();
+  const styles = useStyles();
   return (
     <View style={[styles.tag, wax && styles.tagWax]}>
       <Text style={[styles.tagText, wax && { color: colors.accent }]}>
@@ -198,6 +253,8 @@ export function Chips<K extends string>({
   selected: K;
   onSelect?: (key: K) => void;
 }) {
+  const colors = useColors();
+  const styles = useStyles();
   return (
     <View style={styles.chips} accessibilityRole="radiogroup">
       {options.map((o) => {
@@ -224,23 +281,33 @@ export function Chips<K extends string>({
 export function GhostButton({
   label,
   onPress,
+  disabled,
 }: {
   label: string;
   onPress?: () => void;
+  disabled?: boolean;
 }) {
+  const styles = useStyles();
   return (
     <Pressable
       accessibilityRole="button"
+      accessibilityState={{ disabled: disabled === true }}
+      disabled={disabled}
       onPress={onPress}
-      style={({ pressed }) => [styles.ghost, pressed && styles.pressed]}
+      style={({ pressed }) => [
+        styles.ghost,
+        disabled && styles.ghostDisabled,
+        pressed && styles.pressed,
+      ]}
     >
-      <Text style={styles.ghostLabel}>{label}</Text>
+      <Text style={[styles.ghostLabel, disabled && styles.ghostLabelDisabled]}>
+        {label}
+      </Text>
     </Pressable>
   );
 }
 
 const HOLD_MS = 600;
-const STEPS = 48;
 
 // Press and hold to sign. The seal fills while held; releasing early cancels
 // with nothing signed. The caller decides what signing means; in a build that
@@ -254,53 +321,238 @@ export function HoldToSeal({
   onSealed?: () => void;
   disabled?: boolean;
 }) {
-  const [filled, setFilled] = useState(0);
-  const [sealed, setSealed] = useState(false);
+  const styles = useStyles();
+  const colors = useColors();
+  const [hold, setHold] = useState<Hold>(idleHold);
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
   const stop = () => {
     if (timer.current) clearInterval(timer.current);
     timer.current = null;
   };
   useEffect(() => stop, []);
+  useEffect(() => {
+    if (hold.sealed) {
+      stop();
+      onSealed?.();
+    }
+    // onSealed fires once, when the hold completes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hold.sealed]);
   const start = () => {
-    if (disabled || sealed) return;
+    if (disabled || hold.sealed) return;
     stop();
-    let n = 0;
-    timer.current = setInterval(() => {
-      n += 1;
-      setFilled(n);
-      if (n >= STEPS) {
-        stop();
-        setSealed(true);
-        onSealed?.();
-      }
-    }, HOLD_MS / STEPS);
+    timer.current = setInterval(() => setHold(holdTick), HOLD_MS / HOLD_STEPS);
   };
-  const cancel = () => {
-    if (sealed) return;
+  const release = () => {
     stop();
-    setFilled(0);
+    setHold(holdRelease);
   };
   return (
     <View style={styles.hold}>
-      <Seal size={150} filled={filled} sealed={sealed} />
+      <Seal size={150} filled={hold.filled} sealed={hold.sealed} />
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={label}
         accessibilityHint="Press and hold to confirm"
         disabled={disabled}
         onPressIn={start}
-        onPressOut={cancel}
+        onPressOut={release}
         style={[styles.holdButton, disabled && styles.holdDisabled]}
       >
         <Icon name="fingerprint" size={20} color={colors.onInk} />
-        <Text style={styles.holdLabel}>{sealed ? "Sealed" : label}</Text>
+        <Text style={styles.holdLabel}>{hold.sealed ? "Sealed" : label}</Text>
       </Pressable>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+// Serif section heading with an optional action on the right ("See all").
+export function SectionHeading({
+  children,
+  action,
+  onAction,
+}: {
+  children: string;
+  action?: string;
+  onAction?: () => void;
+}) {
+  const styles = useStyles();
+  return (
+    <View style={styles.sectionHead}>
+      <Text style={styles.sectionTitle} accessibilityRole="header">
+        {children}
+      </Text>
+      {action ? (
+        <Pressable
+          accessibilityRole="button"
+          onPress={onAction}
+          hitSlop={8}
+          style={({ pressed }) => pressed && styles.pressed}
+        >
+          <Text style={styles.sectionAction}>{action}</Text>
+        </Pressable>
+      ) : null}
+    </View>
+  );
+}
+
+// Square action tile: icon over a label (Receive, Send, Scan).
+export function ActionTile({
+  icon,
+  label,
+  onPress,
+  disabled,
+}: {
+  icon: IconName;
+  label: string;
+  onPress?: () => void;
+  disabled?: boolean;
+}) {
+  const styles = useStyles();
+  const colors = useColors();
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      accessibilityState={{ disabled: disabled === true }}
+      disabled={disabled}
+      onPress={onPress}
+      style={({ pressed }) => [styles.tile, pressed && styles.pressed]}
+    >
+      <Icon name={icon} size={26} color={disabled ? colors.ink4 : colors.ink} />
+      <Text style={[styles.tileLabel, disabled && { color: colors.ink4 }]}>
+        {label}
+      </Text>
+    </Pressable>
+  );
+}
+
+// Round token mark with a row title, subtitle and a right-hand value.
+export function TokenRow({
+  mark,
+  title,
+  subtitle,
+  value,
+  onPress,
+}: {
+  mark: ReactNode;
+  title: string;
+  subtitle: string;
+  value: string;
+  onPress?: () => void;
+}) {
+  const styles = useStyles();
+  const body = (
+    <View
+      style={styles.tokenRow}
+      accessible
+      accessibilityLabel={`${title}. ${subtitle}. ${value}`}
+    >
+      <View style={styles.tokenMark}>{mark}</View>
+      <View style={styles.rowText}>
+        <Text style={styles.tokenTitle}>{title}</Text>
+        <Text style={styles.rowDetail}>{subtitle}</Text>
+      </View>
+      <Text style={styles.tokenValue}>{value}</Text>
+    </View>
+  );
+  if (!onPress) return body;
+  return (
+    <Pressable accessibilityRole="button" onPress={onPress}>
+      {body}
+    </Pressable>
+  );
+}
+
+// Decimal keypad for amounts. It only edits the text it is given.
+export function Keypad({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (next: string) => void;
+}) {
+  const styles = useStyles();
+  const colors = useColors();
+  const press = (key: string) => {
+    if (key === "back") return onChange(value.slice(0, -1));
+    if (key === "." && (value.includes(".") || value === "")) {
+      return onChange(value === "" ? "0." : value);
+    }
+    if (value === "0" && key !== ".") return onChange(key);
+    onChange(value + key);
+  };
+  const keys = ["1", "2", "3", "4", "5", "6", "7", "8", "9", ".", "0", "back"];
+  return (
+    <View style={styles.keypad}>
+      {keys.map((key) => (
+        <Pressable
+          key={key}
+          accessibilityRole="button"
+          accessibilityLabel={key === "back" ? "Delete" : key}
+          onPress={() => press(key)}
+          style={({ pressed }) => [styles.key, pressed && styles.pressed]}
+        >
+          {key === "back" ? (
+            <Icon name="backspace-outline" size={26} color={colors.ink} />
+          ) : (
+            <Text style={styles.keyText}>{key}</Text>
+          )}
+        </Pressable>
+      ))}
+    </View>
+  );
+}
+
+const useStyles = makeStyles((colors) => ({
+  sectionHead: {
+    flexDirection: "row",
+    alignItems: "baseline",
+    justifyContent: "space-between",
+    marginTop: space.sm,
+  },
+  sectionTitle: { ...type.hero, color: colors.ink },
+  sectionAction: { ...type.body, color: colors.ink2 },
+  tile: {
+    flex: 1,
+    minHeight: 86,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.rule,
+    backgroundColor: colors.raised,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: space.sm,
+  },
+  tileLabel: { ...type.bodyStrong, color: colors.ink },
+  tokenRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: space.md,
+    paddingVertical: space.md,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.rule,
+  },
+  tokenMark: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    borderWidth: 1,
+    borderColor: colors.rule,
+    backgroundColor: colors.raised,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  tokenTitle: { ...type.body, fontSize: 19, color: colors.ink },
+  tokenValue: { ...type.body, fontSize: 19, color: colors.ink2 },
+  keypad: { flexDirection: "row", flexWrap: "wrap" },
+  key: {
+    width: "33.333%",
+    height: 54,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  keyText: { fontSize: 32, color: colors.ink },
   rows: { borderTopWidth: 1, borderTopColor: colors.rule },
   row: {
     flexDirection: "row",
@@ -311,6 +563,7 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.rule,
     minHeight: touchTarget,
   },
+  rowStacked: { flexDirection: "column", gap: space.xs },
   rowText: { flex: 1, gap: 2 },
   rowLabel: { ...type.body, color: colors.ink },
   rowDetail: { ...type.small, color: colors.ink2 },
@@ -320,6 +573,7 @@ const styles = StyleSheet.create({
     maxWidth: "55%",
     textAlign: "right",
   },
+  rowValueStacked: { maxWidth: "100%", textAlign: "left" },
   mono: { fontFamily: fonts.mono },
   pressed: { opacity: 0.7 },
   note: { ...type.small, color: colors.ink2 },
@@ -355,7 +609,7 @@ const styles = StyleSheet.create({
   tagText: { ...type.small, color: colors.ink },
   chips: { flexDirection: "row", flexWrap: "wrap", gap: space.sm },
   chip: {
-    minHeight: 44,
+    minHeight: touchTarget,
     paddingHorizontal: space.lg,
     borderRadius: radius.pill,
     borderWidth: 1,
@@ -375,6 +629,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: space.xl,
   },
   ghostLabel: { ...type.bodyStrong, fontSize: 16, color: colors.ink },
+  ghostDisabled: { borderColor: colors.rule },
+  ghostLabelDisabled: { color: colors.ink4 },
   hold: { alignItems: "center", gap: space.lg },
   holdButton: {
     alignSelf: "stretch",
@@ -386,6 +642,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  holdDisabled: { backgroundColor: colors.surfaceMuted },
+  holdDisabled: { backgroundColor: colors.tile },
   holdLabel: { ...type.bodyStrong, fontSize: 16, color: colors.onInk },
-});
+}));

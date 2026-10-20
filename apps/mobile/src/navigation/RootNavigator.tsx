@@ -40,21 +40,25 @@ export type RootStackParamList = {
 
 const TAB_META: Record<keyof TabParamList, TabMeta> = {
   Home: {
-    label: "Home",
-    icon: "home-variant-outline",
-    iconSelected: "home-variant",
+    label: "Wallet",
+    icon: "wallet-outline",
+    iconSelected: "wallet",
   },
   Agents: {
     label: "Agents",
-    icon: "robot-outline",
-    iconSelected: "robot",
+    icon: "circle-double",
+    iconSelected: "circle-double",
   },
   Activity: {
     label: "Activity",
-    icon: "clock-time-four-outline",
-    iconSelected: "clock-time-four",
+    icon: "clock-outline",
+    iconSelected: "clock",
   },
-  Settings: { label: "Settings", icon: "cog-outline", iconSelected: "cog" },
+  Settings: {
+    label: "Settings",
+    icon: "tune-variant",
+    iconSelected: "tune-variant",
+  },
 };
 
 const Tab = createBottomTabNavigator<TabParamList>();

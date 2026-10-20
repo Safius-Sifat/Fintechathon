@@ -1,19 +1,21 @@
 import type { ReactNode } from "react";
-import { StyleSheet, Text, View, useWindowDimensions } from "react-native";
+import { Text, View, useWindowDimensions } from "react-native";
 import {
-  colors,
   radius,
   shadows,
   space,
   stackedFontScale,
   type,
+  makeStyles,
 } from "../theme";
 
 export function Card({ children }: { children: ReactNode }) {
+  const styles = useStyles();
   return <View style={styles.card}>{children}</View>;
 }
 
 export function SectionTitle({ children }: { children: string }) {
+  const styles = useStyles();
   return (
     <Text style={styles.sectionTitle} accessibilityRole="header">
       {children}
@@ -22,6 +24,7 @@ export function SectionTitle({ children }: { children: string }) {
 }
 
 export function Divider() {
+  const styles = useStyles();
   return <View style={styles.divider} />;
 }
 
@@ -33,6 +36,7 @@ interface DetailRowProps {
 
 // Label/value pair. Stacks when large text is on so nothing truncates.
 export function DetailRow({ label, value, muted }: DetailRowProps) {
+  const styles = useStyles();
   const { fontScale } = useWindowDimensions();
   const stacked = fontScale > stackedFontScale;
   return (
@@ -51,10 +55,10 @@ export function DetailRow({ label, value, muted }: DetailRowProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((colors) => ({
   card: {
-    backgroundColor: colors.surface,
-    borderColor: colors.hairline,
+    backgroundColor: colors.raised,
+    borderColor: colors.rule,
     borderWidth: 1,
     borderRadius: radius.lg,
     padding: space.lg,
@@ -67,7 +71,7 @@ const styles = StyleSheet.create({
     marginTop: space.sm,
     marginBottom: -space.xs,
   },
-  divider: { height: 1, backgroundColor: colors.hairline },
+  divider: { height: 1, backgroundColor: colors.rule },
   detailRow: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -75,8 +79,8 @@ const styles = StyleSheet.create({
     gap: space.md,
   },
   detailRowStacked: { flexDirection: "column", gap: 2 },
-  detailLabel: { ...type.small, color: colors.textMuted },
+  detailLabel: { ...type.small, color: colors.ink2 },
   detailValue: { ...type.bodyStrong, color: colors.ink, flexShrink: 1 },
-  detailValueMuted: { color: colors.textMuted },
+  detailValueMuted: { color: colors.ink2 },
   detailValueEnd: { textAlign: "right" },
-});
+}));

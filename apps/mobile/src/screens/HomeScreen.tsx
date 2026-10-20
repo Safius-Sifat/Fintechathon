@@ -1,310 +1,188 @@
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { Pressable, ScrollView, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-  useWindowDimensions,
-  type StyleProp,
-  type ViewStyle,
-} from "react-native";
-import { Banner } from "../components/Banner";
-import { HeroAction } from "../components/Button";
-import { Card, DetailRow, Divider } from "../components/Card";
-import { ChainChip } from "../components/ChainChip";
-import { Icon } from "../components/Icon";
-import { IconTile } from "../components/IconTile";
-import { Screen } from "../components/Screen";
-import { StatusTag } from "../components/StatusTag";
-import { preview } from "../config/capabilities";
+  ActionTile,
+  Note,
+  Row,
+  Rows,
+  SectionHeading,
+  TokenRow,
+} from "../components/blocks";
+import { Icon, type IconName } from "../components/Icon";
+import { RoundButton } from "../components/Page";
 import type { RootStackParamList } from "../navigation/RootNavigator";
-import {
-  colors,
-  radius,
-  shadows,
-  space,
-  stackedFontScale,
-  touchTarget,
-  type,
-} from "../theme";
+import { fonts, makeStyles, space, type, useColors } from "../theme";
 
-// Home preview. The personal account and its agent wallet are separate
+// Wallet home. The personal account and its agent wallet are separate
 // surfaces and their balances are never combined. No wallet exists on this
 // phone yet, so nothing here shows an address, a balance or a working action.
 export function HomeScreen() {
+  const styles = useStyles();
+  const colors = useColors();
+  const insets = useSafeAreaInsets();
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   return (
-    <Screen
-      title="Home"
-      header={<BrandHeader onScan={() => navigation.navigate("Scan")} />}
-    >
-      <AccountRow onPress={() => navigation.navigate("Accounts")} />
-
-      <PersonalAccountHero
-        onReceive={() => navigation.navigate("Receive")}
-        onSend={() => navigation.navigate("Send")}
-      />
-
-      <Banner
-        icon="information-outline"
-        title="Preview build"
-        body="This build cannot sign, send funds or show balances."
-      />
-
-      <Card>
-        <View style={styles.cardHeader}>
-          <IconTile icon="robot-outline" tone="amber" />
-          <View style={styles.cardHeaderText}>
-            <Text style={styles.cardTitle}>Agent wallet</Text>
-            <Text style={styles.cardSubtitle}>
-              Separate funds your agents spend under your rules
-            </Text>
-          </View>
+    <View style={[styles.root, { paddingTop: insets.top }]}>
+      <ScrollView
+        style={styles.flex}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.top}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Account. No account yet."
+            accessibilityHint="Opens accounts"
+            onPress={() => navigation.navigate("Accounts")}
+            style={({ pressed }) => [styles.account, pressed && styles.pressed]}
+          >
+            <View style={styles.avatar}>
+              <Icon name="account-outline" size={24} color={colors.accent} />
+            </View>
+            <Text style={styles.accountName}>No account</Text>
+            <Icon name="chevron-down" size={22} color={colors.ink2} />
+          </Pressable>
+          <RoundButton
+            icon="qrcode-scan"
+            label="Scan QR code"
+            onPress={() => navigation.navigate("Scan")}
+          />
         </View>
-        <StatusTag state="notConnected" />
-        <Divider />
-        <DetailRow label="Address" value="Not created" muted />
-        <DetailRow label="Spendable" value="Unavailable" muted />
-        <Text style={styles.caption}>
-          The agent wallet needs the Mandate service, which this build does not
-          connect to.
-        </Text>
-      </Card>
 
-      <View style={styles.note}>
-        <IconTile icon="call-split" tone="slate" size={36} />
-        <Text style={styles.noteText}>
-          Personal and agent funds stay separate. Their balances are never added
-          together.
-        </Text>
-      </View>
-    </Screen>
-  );
-}
+        <View style={styles.hero}>
+          <Text style={styles.heroLabel}>Personal account</Text>
+          <Text style={styles.heroValue} accessibilityRole="header">
+            No wallet yet
+          </Text>
+          <Text style={styles.heroNote}>
+            Test funds. No balance or address until a wallet exists.
+          </Text>
+        </View>
 
-function BrandHeader({ onScan }: { onScan: () => void }) {
-  return (
-    <View style={styles.brand}>
-      <View style={styles.brandMark}>
-        <Icon name="alpha-m-box" size={32} color={colors.ink} />
-        <Text style={styles.wordmark} accessibilityRole="header">
-          Mandate
-        </Text>
-      </View>
-      <View style={styles.brandActions}>
-        <ChainChip />
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Scan QR code"
-          onPress={onScan}
-          style={({ pressed }) => [
-            styles.scanButton,
-            pressed && styles.pressed,
-          ]}
+        <View style={styles.tiles}>
+          <ActionTile
+            icon="arrow-bottom-left"
+            label="Receive"
+            onPress={() => navigation.navigate("Receive")}
+          />
+          <ActionTile
+            icon="arrow-top-right"
+            label="Send"
+            onPress={() => navigation.navigate("Send")}
+          />
+          <ActionTile
+            icon="qrcode-scan"
+            label="Scan"
+            onPress={() => navigation.navigate("Scan")}
+          />
+        </View>
+
+        <SectionHeading
+          action="See all"
+          onAction={() => navigation.navigate("Tabs", { screen: "Agents" })}
         >
-          <Icon name="qrcode-scan" size={22} color={colors.ink} />
-        </Pressable>
-      </View>
-    </View>
-  );
-}
+          Agents
+        </SectionHeading>
+        <Rows>
+          <Row
+            label="No agent wallet"
+            detail="Needs the Mandate service. Not connected."
+            onPress={() => navigation.navigate("Tabs", { screen: "Agents" })}
+          />
+        </Rows>
 
-// Opens the account switcher. With no wallet there is no account to name.
-function AccountRow({ onPress }: { onPress: () => void }) {
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel="Account. No account yet."
-      accessibilityHint="Opens accounts"
-      onPress={onPress}
-      android_ripple={{ color: "rgba(15, 23, 42, 0.06)" }}
-      style={({ pressed }) => [styles.accountRow, pressed && styles.pressed]}
-    >
-      <IconTile icon="account-circle-outline" tone="blue" size={40} />
-      <View style={styles.accountText}>
-        <Text style={styles.accountLabel}>Account</Text>
-        <Text style={styles.accountValue}>No account yet</Text>
-      </View>
-      <Icon name="chevron-right" size={24} color={colors.textSubtle} />
-    </Pressable>
-  );
-}
-
-interface HeroProps {
-  onReceive: () => void;
-  onSend: () => void;
-}
-
-function PersonalAccountHero({ onReceive, onSend }: HeroProps) {
-  // Side-by-side facts break words at large text sizes; stack them instead.
-  const { fontScale } = useWindowDimensions();
-  const factStyle =
-    fontScale > stackedFontScale
-      ? styles.heroFactStacked
-      : styles.heroFactInline;
-  return (
-    <View style={styles.hero}>
-      <View style={styles.heroTop}>
-        <View style={styles.heroIcon}>
-          <Icon name="wallet-outline" size={20} color={colors.onDark} />
+        <SectionHeading>Tokens</SectionHeading>
+        <View>
+          <TokenRow
+            mark={<DemoMark />}
+            title="DemoUSD"
+            subtitle="Base Sepolia"
+            value="Unavailable"
+          />
+          <TokenRow
+            mark={<TokenGlyph icon="ethereum" color={colors.ink} />}
+            title="Ether"
+            subtitle="Test ETH, pays network fees"
+            value="Unavailable"
+          />
+          <TokenRow
+            mark={<TokenGlyph icon="currency-usd" color={colors.ink} />}
+            title="USDC"
+            subtitle="Circle test token"
+            value="Unavailable"
+          />
         </View>
-        <Text style={styles.heroLabel}>Personal account</Text>
-        <StatusTag state="notBuilt" label="Not set up" onDark />
-      </View>
-
-      <View style={styles.heroBody}>
-        <Text style={styles.heroTitle}>No wallet yet</Text>
-        <Text style={styles.heroText}>
-          Your own account, kept on this phone. There is no balance or address
-          to show until a wallet exists.
-        </Text>
-      </View>
-
-      <View style={styles.heroFacts}>
-        <HeroFact label="Address" value="Not created" style={factStyle} />
-        <HeroFact label="Spendable" value="Unavailable" style={factStyle} />
-      </View>
-
-      <View style={styles.heroActions}>
-        <HeroAction
-          label="Receive"
-          icon="arrow-bottom-left"
-          accessibilityHint="Shows where funds would arrive. No address exists yet."
-          onPress={onReceive}
-        />
-        <HeroAction
-          label="Send"
-          icon="arrow-top-right"
-          accessibilityHint="Shows the send form. Nothing can be sent yet."
-          onPress={onSend}
-        />
-      </View>
-      <Text style={styles.heroCaption}>
-        Receiving and sending need a wallet on this phone.
-      </Text>
+        <Note>
+          Preview build. This build cannot sign, send or show balances.
+        </Note>
+      </ScrollView>
     </View>
   );
 }
 
-interface HeroFactProps {
-  label: string;
-  value: string;
-  style: StyleProp<ViewStyle>;
-}
-
-function HeroFact({ label, value, style }: HeroFactProps) {
+// DemoUSD carries the Mandate seal mark.
+function DemoMark() {
+  const styles = useStyles();
   return (
-    <View style={[styles.heroFact, style]}>
-      <Text style={styles.heroFactLabel}>{label}</Text>
-      <Text style={styles.heroFactValue}>{value}</Text>
+    <View style={styles.demoMark}>
+      <Text style={styles.demoLetter}>M</Text>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  accountRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: space.md,
-    minHeight: 64,
-    paddingVertical: space.sm,
-    paddingHorizontal: space.md,
-    borderRadius: radius.lg,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.hairline,
-    boxShadow: shadows.card,
-    overflow: "hidden",
-  },
-  accountText: { flex: 1, gap: 2 },
-  accountLabel: { ...type.label, color: colors.textMuted },
-  accountValue: { ...type.bodyStrong, color: colors.ink },
-  pressed: { opacity: 0.85 },
+function TokenGlyph({ icon, color }: { icon: IconName; color: string }) {
+  return <Icon name={icon} size={26} color={color} />;
+}
 
-  brand: {
-    minHeight: 56,
+const useStyles = makeStyles((colors) => ({
+  root: { flex: 1, backgroundColor: colors.ground },
+  flex: { flex: 1 },
+  content: {
+    paddingTop: space.sm,
+    paddingHorizontal: space.xl,
+    paddingBottom: space.xxxl,
+    gap: space.lg,
+  },
+  top: {
     flexDirection: "row",
-    flexWrap: "wrap",
     alignItems: "center",
     justifyContent: "space-between",
-    gap: space.sm,
   },
-  brandMark: { flexDirection: "row", alignItems: "center", gap: space.xs },
-  brandActions: { flexDirection: "row", alignItems: "center", gap: space.sm },
-  scanButton: {
-    width: touchTarget,
-    height: touchTarget,
-    borderRadius: touchTarget / 2,
+  account: { flexDirection: "row", alignItems: "center", gap: space.sm },
+  avatar: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: colors.waxTint,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.hairline,
-    boxShadow: shadows.card,
   },
-  wordmark: {
-    ...type.heading,
-    fontSize: 22,
-    lineHeight: 28,
+  accountName: { ...type.heading, fontSize: 20, color: colors.ink },
+  pressed: { opacity: 0.7 },
+  hero: { gap: space.xs },
+  heroLabel: { ...type.body, color: colors.ink2 },
+  heroValue: {
+    ...type.display,
+    fontFamily: fonts.serifBold,
     color: colors.ink,
   },
-
-  hero: {
-    borderRadius: radius.hero,
-    padding: space.xl,
-    gap: space.lg,
-    backgroundColor: colors.ink,
-  },
-  heroTop: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    alignItems: "center",
-    gap: space.sm,
-  },
-  heroIcon: {
+  heroNote: { ...type.body, color: colors.ink2 },
+  tiles: { flexDirection: "row", gap: space.md },
+  demoMark: {
     width: 32,
     height: 32,
-    borderRadius: radius.md,
-    backgroundColor: colors.heroFill,
+    borderRadius: 16,
+    backgroundColor: colors.accent,
     alignItems: "center",
     justifyContent: "center",
   },
-  heroLabel: { ...type.bodyStrong, color: colors.onDarkMuted, flexGrow: 1 },
-  heroBody: { gap: space.xs },
-  heroTitle: { ...type.hero, color: colors.onDark },
-  heroText: { ...type.small, color: colors.onDarkMuted },
-  heroFacts: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: space.sm,
+  demoLetter: {
+    fontFamily: fonts.serifBold,
+    fontSize: 18,
+    lineHeight: 22,
+    color: colors.onAccent,
   },
-  heroFact: {
-    gap: 2,
-    paddingVertical: space.sm,
-    paddingHorizontal: space.md,
-    borderRadius: radius.md,
-    backgroundColor: colors.heroFill,
-  },
-  heroFactInline: { flexGrow: 1, flexBasis: 0, minWidth: 120 },
-  heroFactStacked: { width: "100%" },
-  heroFactLabel: { ...type.label, color: colors.onDarkMuted },
-  heroFactValue: { ...type.bodyStrong, color: colors.onDark },
-  heroActions: { flexDirection: "row", flexWrap: "wrap", gap: space.sm },
-  heroCaption: { ...type.small, color: colors.onDarkMuted },
-
-  cardHeader: { flexDirection: "row", gap: space.md, alignItems: "center" },
-  cardHeaderText: { flex: 1, gap: 2 },
-  cardTitle: { ...type.heading, color: colors.ink },
-  cardSubtitle: { ...type.small, color: colors.textMuted },
-  caption: { ...type.small, color: colors.textMuted },
-
-  note: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: space.md,
-    paddingHorizontal: space.xs,
-  },
-  noteText: { ...type.small, color: colors.textMuted, flex: 1 },
-});
+}));

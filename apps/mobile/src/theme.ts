@@ -1,46 +1,41 @@
+import { useMemo } from "react";
+import {
+  StyleSheet,
+  useColorScheme,
+  type ImageStyle,
+  type TextStyle,
+  type ViewStyle,
+} from "react-native";
+
 // Visual direction: calm instrument. Cool grey ground, ink text, hairline
 // rules, and one wax-red accent that means "signed by you". The accent is
 // never used for danger. See docs/design/DIRECTION.md.
 
-export const colors = {
-  ground: "#E8ECEB",
-  raised: "#F4F6F5",
-  ink: "#14191C",
-  ink2: "#454E54",
-  ink3: "#5A646A",
-  rule: "#C6CDCF",
-  accent: "#8F2A2E",
-  waxTint: "#D9C2C3",
-  onInk: "#F4F6F5",
-  onAccent: "#F4F6F5",
-  // Aliases used by existing components; migrate to the names above.
-  background: "#E8ECEB",
-  surface: "#F4F6F5",
-  surfaceMuted: "#DDE3E2",
-  hairline: "#C6CDCF",
-  text: "#14191C",
-  textMuted: "#454E54",
-  textSubtle: "#5A646A",
-  textDisabled: "#6E787E",
-  onDark: "#F4F6F5",
-  onDarkMuted: "rgba(244, 246, 245, 0.72)",
-  onDarkDisabled: "rgba(244, 246, 245, 0.5)",
-  heroFill: "rgba(244, 246, 245, 0.10)",
-  heroLine: "rgba(244, 246, 245, 0.18)",
-  personal: "#14191C",
-  agent: "#8F2A2E",
-  ok: "#14191C",
-  stop: "#14191C",
-} as const;
+export { palettes, type Colors } from "./palettes";
+import { palettes, type Colors } from "./palettes";
+
+// The palette follows the system light or dark setting. Styles that use it are
+// built with makeStyles so they rebuild when the setting changes.
+export function useColors(): Colors {
+  return useColorScheme() === "dark" ? palettes.dark : palettes.light;
+}
+
+type Named = Record<string, ViewStyle | TextStyle | ImageStyle>;
+
+export function makeStyles<T extends Named>(factory: (c: Colors) => T) {
+  return function useStyles(): T {
+    const colors = useColors();
+    return useMemo(() => StyleSheet.create(factory(colors)), [colors]);
+  };
+}
 
 // Icon tile tones. The design uses one neutral tile, so every tone matches.
-const neutralTile = { bg: "#DDE3E2", fg: "#14191C" } as const;
 export const tones = {
-  blue: neutralTile,
-  amber: neutralTile,
-  green: neutralTile,
-  violet: neutralTile,
-  slate: neutralTile,
+  blue: null,
+  amber: null,
+  green: null,
+  violet: null,
+  slate: null,
 } as const;
 
 export type Tone = keyof typeof tones;
