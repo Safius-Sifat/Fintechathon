@@ -49,19 +49,20 @@ await startFoundationService("api", 3000, async (app, database) => {
           })),
         }
       : null;
+  // Hex keys from files or, in the release container, the runtime env file.
+  const secret = async (name: "EVIDENCE_KEY" | "ARTIFACT_KEY") =>
+    env[name + "_FILE"]
+      ? (await file(name + "_FILE")).toString("utf8").trim()
+      : env[name]?.trim();
+  const [evidenceSeed, artifactKey] = [
+    await secret("EVIDENCE_KEY"),
+    await secret("ARTIFACT_KEY"),
+  ];
   const evidence =
-    env.EVIDENCE_KEY_FILE && env.ARTIFACT_KEY_FILE
+    evidenceSeed && artifactKey
       ? {
-          key: evidenceKey(
-            Buffer.from(
-              (await file("EVIDENCE_KEY_FILE")).toString("utf8").trim(),
-              "hex",
-            ),
-          ),
-          artifactKey: Buffer.from(
-            (await file("ARTIFACT_KEY_FILE")).toString("utf8").trim(),
-            "hex",
-          ),
+          key: evidenceKey(Buffer.from(evidenceSeed, "hex")),
+          artifactKey: Buffer.from(artifactKey, "hex"),
         }
       : null;
   const deps: BusinessDependencies = {
