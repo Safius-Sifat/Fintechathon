@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import type { Address, Hash } from "viem";
 import { AccountsScreen } from "../screens/Accounts";
 import { AgentControlScreen } from "../screens/AgentControl";
+import { OwnerMoveOutScreen, WalletLimitsScreen } from "../screens/AgentMoney";
 import { ContactsScreen } from "../screens/Contacts";
 import { TxDetailScreen } from "../screens/TxDetail";
 import {
@@ -47,6 +48,8 @@ export type RootStackParamList = {
   Contacts: { pick?: boolean };
   TxDetail: { hash: Hash };
   AgentControl: { command: AdminCommandName; wallet: Address };
+  OwnerMoveOut: { wallet: Address };
+  WalletLimits: { wallet: Address };
   Tabs: NavigatorScreenParams<TabParamList>;
   Accounts: undefined;
   Receive: undefined;
@@ -134,6 +137,8 @@ export function RootNavigator() {
           <Stack.Screen name="Contacts" component={ContactsScreen} />
           <Stack.Screen name="ShowPhrase" component={ShowPhraseScreen} />
           <Stack.Screen name="AgentControl" component={AgentControlScreen} />
+          <Stack.Screen name="OwnerMoveOut" component={OwnerMoveOutScreen} />
+          <Stack.Screen name="WalletLimits" component={WalletLimitsScreen} />
           {__DEV__ ? (
             <>
               <Stack.Screen name="PreviewIndex" component={PreviewIndex} />

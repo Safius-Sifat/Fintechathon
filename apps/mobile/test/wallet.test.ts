@@ -297,3 +297,33 @@ test("wallet: policy checks follow the contract ceilings", async () => {
   ]);
   assert.equal(built.message.deadline - built.message.issuedAt, 1800n);
 });
+
+test("wallet: permits are checked before signing", async () => {
+  const { checkPermit, checkApproval } = await import(
+    "../src/wallet/approvals"
+  );
+  for (const v of fixture("permit-v7.json").valid) {
+    const expected = {
+      epoch: 0n,
+      nowSeconds: BigInt(v.message.issuedAt) + 1n,
+      agentAssets: [v.message.asset],
+    };
+    assert.equal(checkPermit(v.message, expected).ok, true, v.id);
+    assert.equal(checkPermit(v.message, { ...expected, epoch: 1n }).ok, false);
+    assert.equal(
+      checkPermit({ ...v.message, maxPayment: "500001" }, expected).ok,
+      false,
+    );
+    assert.equal(
+      checkPermit(v.message, {
+        ...expected,
+        nowSeconds: BigInt(v.message.expiresAt),
+      }).ok,
+      false,
+    );
+  }
+  const a = fixture("approval-v7.json").valid[0].message;
+  assert.equal(checkApproval(a, BigInt(a.expiresAt) - 60n).ok, true);
+  assert.equal(checkApproval(a, BigInt(a.expiresAt) - 2000n).ok, false);
+  assert.equal(checkApproval(a, BigInt(a.expiresAt)).ok, false);
+});
