@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { BaseError } from "viem";
 
 export interface AsyncState<T> {
   data: T | undefined;
@@ -58,5 +59,20 @@ export function useAsync<T>(
     : { data: undefined, error: null, loading: true, reload };
 }
 
-export const errorText = (e: unknown) =>
-  e instanceof Error ? e.message : String(e);
+// Service refusals that need a next step the service message does not name.
+const NEXT_STEP: Record<string, string> = {
+  "Terms exceed the confirmed wallet policy.":
+    "Set the agent wallet's limits first (Agents, Wallet limits), with these providers allowed and a per-payment limit at least this high.",
+  "Recipients must be the task's bound providers.":
+    "Use only the providers this task is bound to.",
+};
+
+// Chain errors carry RPC dumps; show one plain sentence instead.
+export const errorText = (e: unknown) => {
+  if (e instanceof BaseError)
+    return /insufficient funds|exceeds allowance \(0\)/i.test(e.message)
+      ? "Not enough test ETH in this account to pay the network fee. Nothing was sent."
+      : e.shortMessage;
+  const text = e instanceof Error ? e.message : String(e);
+  return NEXT_STEP[text] ? `${text} ${NEXT_STEP[text]}` : text;
+};
