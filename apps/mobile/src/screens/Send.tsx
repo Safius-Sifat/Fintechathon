@@ -2,43 +2,56 @@ import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useEffect } from "react";
 import { Text, TextInput, View } from "react-native";
 import { PrimaryButton } from "../components/Button";
-import { Chips, Keypad } from "../components/blocks";
-import { Icon } from "../components/Icon";
+import { Chips, Keypad, Note } from "../components/blocks";
 import { Frame, RoundButton } from "../components/Page";
-import { network } from "../config/network";
+import type { TransferAsset } from "../config/transfer";
 import type { RootStackParamList } from "../navigation/RootNavigator";
-import {
-  clearDraft,
-  isDraftComplete,
-  updateDraft,
-  type SendDraft,
-} from "../state/sendDraft";
-import { currentDraftContext, useSendDraft } from "../state/useSendDraft";
-import { fonts, makeStyles, radius, space, type, useColors } from "../theme";
-
-// Send form preview. The fields work locally so the layout can be reviewed,
-// but nothing typed here is checked: there is no balance, fee quote, address
-// or amount validation, and no signing. The form never sends anything.
-// The draft lives in an in-memory store (state/sendDraft.ts) so it survives
-// a font-size remount and Review -> Edit; leaving Send discards it.
+import { clearDraft, updateDraft, type SendDraft } from "../state/sendDraft";
+import { useDraftContext, useSendDraft } from "../state/useSendDraft";
+import { fonts, makeStyles, space, type, useColors } from "../theme";
+import { balanceOf } from "../wallet/chain";
+import { checkAddress, checkAmount } from "../wallet/core";
+import { formatAmount, tokenByName } from "../wallet/format";
+import { currentAccount } from "../wallet/session";
+import { useAsync } from "../wallet/useAsync";
+import { formatUnits } from "viem";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Send">;
 
+// Send form. The recipient and amount are checked as they are typed; the
+// review screen quotes the fee and the owner confirms before anything is
+// signed. Leaving Send discards the draft.
 export function SendScreen({ navigation }: Props) {
   const colors = useColors();
   const styles = useStyles();
-  const context = currentDraftContext;
-  const { source, asset, recipient, amount } = useSendDraft(context);
+  const context = useDraftContext();
+  const draft = useSendDraft(context);
   const set = (patch: Partial<SendDraft>) => updateDraft(context, patch);
-  const canReview = isDraftComplete({ source, asset, recipient, amount });
+  const token = tokenByName(draft.asset);
+  const account = currentAccount();
+  const available = useAsync(
+    () => (account ? balanceOf(token, account.address) : Promise.resolve(0n)),
+    [account?.address, token.name],
+  );
+  const to = checkAddress(draft.recipient);
+  const amount = checkAmount(draft.amount, token.decimals);
+  const tooMuch =
+    amount.ok && available.data !== undefined && amount.value > available.data;
+  const canReview = to.ok && amount.ok && !tooMuch;
 
-  // Leaving Send by any route (back button, Android back, gesture) cancels
-  // the draft. A font-size remount unmounts without removing the screen, so
-  // it keeps the draft.
   useEffect(
     () => navigation.addListener("beforeRemove", () => clearDraft(context)),
     [navigation, context],
   );
+
+  const problem =
+    draft.recipient && !to.ok
+      ? to.error
+      : draft.amount && !amount.ok
+        ? amount.error
+        : tooMuch
+          ? "More than you have."
+          : null;
 
   return (
     <Frame
@@ -46,20 +59,15 @@ export function SendScreen({ navigation }: Props) {
       onBack={() => navigation.goBack()}
       right={
         <RoundButton
-          icon="qrcode-scan"
-          label="Scan a payment request"
-          onPress={() => navigation.navigate("Scan")}
+          icon="account-box-outline"
+          label="Choose a contact"
+          onPress={() => navigation.navigate("Contacts", { pick: true })}
         />
       }
       footer={
         <PrimaryButton
           label="Review"
           disabled={!canReview}
-          accessibilityHint={
-            canReview
-              ? "Shows the transfer details. Nothing is sent."
-              : "Enter a recipient and an amount first."
-          }
           onPress={() => navigation.navigate("TransferReview")}
         />
       }
@@ -70,9 +78,9 @@ export function SendScreen({ navigation }: Props) {
         </Text>
         <TextInput
           accessibilityLabelledBy="recipient-label"
-          value={recipient}
+          value={draft.recipient}
           onChangeText={(text) => set({ recipient: text })}
-          placeholder={`0x… address on ${network.name}`}
+          placeholder="0x… address on Base Sepolia"
           placeholderTextColor={colors.ink3}
           autoCapitalize="none"
           autoCorrect={false}
@@ -85,60 +93,44 @@ export function SendScreen({ navigation }: Props) {
       <View style={styles.amountBlock}>
         <Text
           style={styles.amount}
-          accessibilityLabel={`Amount ${amount === "" ? "0" : amount} ${asset}`}
+          accessibilityLabel={`Amount ${draft.amount || "0"} ${token.name}`}
           adjustsFontSizeToFit
           numberOfLines={1}
         >
-          {amount === "" ? "0" : amount}
+          {draft.amount === "" ? "0" : draft.amount}
         </Text>
-        <Chips
+        <Chips<TransferAsset>
           options={[
             { key: "DemoUSD", label: "DemoUSD" },
             { key: "ETH", label: "ETH" },
+            { key: "USDC", label: "USDC" },
           ]}
-          selected={asset}
+          selected={draft.asset}
           onSelect={(key) => set({ asset: key })}
         />
         <Text style={styles.available}>
-          Available: unavailable. Nothing is checked or sent in this build.
+          {available.data !== undefined
+            ? `Available ${formatAmount(available.data, token.decimals)} ${token.symbol}`
+            : available.error
+              ? "Balance unavailable"
+              : "Reading balance…"}
+          {available.data !== undefined && token.address ? (
+            <Text
+              style={styles.max}
+              onPress={() =>
+                set({ amount: formatUnits(available.data!, token.decimals) })
+              }
+            >
+              {"  ·  Max"}
+            </Text>
+          ) : null}
         </Text>
+        {problem ? <Text style={styles.problem}>{problem}</Text> : null}
       </View>
 
-      <View style={styles.fromRow}>
-        <Text style={styles.toLabel}>From</Text>
-        <Chips
-          options={[
-            { key: "personal", label: "Personal account" },
-            { key: "agent", label: "Agent wallet" },
-          ]}
-          selected={source}
-          onSelect={(key) => set({ source: key })}
-        />
-      </View>
-      {source === "agent" ? <OwnerTransferNote /> : null}
-
-      <Keypad value={amount} onChange={(next) => set({ amount: next })} />
+      <Keypad value={draft.amount} onChange={(next) => set({ amount: next })} />
+      <Note>From your personal account. The network fee is paid in ETH.</Note>
     </Frame>
-  );
-}
-
-// Sending from the agent wallet is owner governance, not a normal payment.
-// The effect only follows a successful, confirmed transfer.
-export function OwnerTransferNote() {
-  const styles = useStyles();
-  const colors = useColors();
-  return (
-    <View style={styles.callout}>
-      <Icon name="pause-circle-outline" size={22} color={colors.ink} />
-      <View style={styles.calloutText}>
-        <Text style={styles.calloutTitle}>This is an owner transfer</Text>
-        <Text style={styles.calloutBody}>
-          A successful owner transfer pauses agents and invalidates their
-          existing permissions. Choosing or reviewing it does not stop anything
-          yet.
-        </Text>
-      </View>
-    </View>
   );
 }
 
@@ -161,19 +153,10 @@ const useStyles = makeStyles((colors) => ({
     color: colors.ink,
     paddingVertical: space.md,
   },
-  fromRow: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    alignItems: "center",
-    gap: space.md,
-    borderTopWidth: 1,
-    borderTopColor: colors.rule,
-    paddingTop: space.md,
-  },
   amountBlock: {
     alignItems: "center",
     gap: space.md,
-    paddingVertical: space.md,
+    paddingVertical: space.sm,
   },
   amount: {
     fontFamily: fonts.serifBold,
@@ -182,15 +165,6 @@ const useStyles = makeStyles((colors) => ({
     color: colors.ink,
   },
   available: { ...type.small, color: colors.ink2, textAlign: "center" },
-  callout: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: space.md,
-    padding: space.md,
-    borderRadius: radius.md,
-    backgroundColor: colors.tile,
-  },
-  calloutText: { flex: 1, gap: 2 },
-  calloutTitle: { ...type.bodyStrong, color: colors.ink },
-  calloutBody: { ...type.small, color: colors.ink },
+  max: { ...type.bodyStrong, color: colors.ink },
+  problem: { ...type.small, color: colors.ink, textAlign: "center" },
 }));

@@ -127,6 +127,13 @@ export async function removeWallet() {
   set({ status: "none", profile: null });
 }
 
+// Backup screen only: reads the words after the owner confirms.
+export const readPhraseForBackup = () => vault.readPhrase();
+
+export async function confirmBackup() {
+  await updateProfile((p) => ({ ...p, backupConfirmed: true }));
+}
+
 // For the signer module only: confirms with the owner, then returns the
 // current account's signer. Screens never call this.
 export async function signerForCurrent(reason: string): Promise<HDAccount> {

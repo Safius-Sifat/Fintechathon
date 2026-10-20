@@ -8,9 +8,7 @@ import { Seal } from "../components/Seal";
 import type { RootStackParamList } from "../navigation/RootNavigator";
 import { makeStyles, space, type } from "../theme";
 
-// First-run flow: Welcome -> Set up your wallet -> app. Creating and restoring
-// a wallet run on native screens that are not built yet, so setup only says so;
-// nothing here collects recovery words.
+// First-run flow: Welcome -> Set up your wallet -> create or restore.
 
 type Props<T extends keyof RootStackParamList> = NativeStackScreenProps<
   RootStackParamList,
@@ -47,7 +45,7 @@ export function WelcomeScreen({ navigation }: Props<"Welcome">) {
             <Row key={line} label={line} />
           ))}
         </Rows>
-        <Note>Preview build. Wallet features are not built yet.</Note>
+        <Note>Base Sepolia test network. Nothing here is real money.</Note>
       </ScrollView>
       <View
         style={[styles.footer, { paddingBottom: insets.bottom + space.lg }]}
@@ -58,8 +56,7 @@ export function WelcomeScreen({ navigation }: Props<"Welcome">) {
         />
         <TextButton
           label="I have a recovery phrase"
-          accessibilityHint="Shows how restoring a wallet will work"
-          onPress={() => navigation.navigate("Setup")}
+          onPress={() => navigation.navigate("Restore")}
         />
       </View>
     </View>
@@ -79,18 +76,13 @@ export function SetupScreen({ navigation }: Props<"Setup">) {
         <>
           <PrimaryButton
             label="Create a new wallet"
-            disabled
-            accessibilityHint="Not available in this build"
+            onPress={() => navigation.navigate("CreatePhrase")}
           />
-          <GhostButton label="I have a recovery phrase" disabled />
-          <Note>Preview build. Creating a wallet is not built yet.</Note>
-          <TextButton
-            label="Explore the preview"
-            accessibilityHint="Opens the app without a wallet"
-            onPress={() =>
-              navigation.reset({ index: 0, routes: [{ name: "Tabs" }] })
-            }
+          <GhostButton
+            label="I have a recovery phrase"
+            onPress={() => navigation.navigate("Restore")}
           />
+          <Note>Base Sepolia test network. Use test funds only.</Note>
         </>
       }
     >

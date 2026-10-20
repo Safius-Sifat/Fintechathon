@@ -206,3 +206,19 @@ export function checkLoginRequest(
     },
   };
 }
+
+// Reads a scanned code: a plain address or an EIP-681 "ethereum:" link. A
+// link for another chain is reported, never silently accepted.
+export function parseScan(
+  text: string,
+): { address: Address; wrongChain: boolean } | null {
+  const t = text.trim();
+  const m = /^(?:ethereum:)?(0x[0-9a-fA-F]{40})(?:@(\d+))?/.exec(t);
+  if (!m) return null;
+  const checked = checkAddress(m[1]!);
+  if (!checked.ok) return null;
+  return {
+    address: checked.value,
+    wrongChain: m[2] !== undefined && Number(m[2]) !== CHAIN_ID,
+  };
+}

@@ -1,52 +1,110 @@
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { useState } from "react";
+import { Alert } from "react-native";
+import { Banner } from "../components/Banner";
 import { Row, Rows, SectionHeading } from "../components/blocks";
 import { Screen } from "../components/Screen";
-import { statusLabel } from "../components/StatusTag";
-import {
-  connectionCapabilities,
-  securityCapabilities,
-  type Capability,
-} from "../config/capabilities";
 import { network } from "../config/network";
 import type { RootStackParamList } from "../navigation/RootNavigator";
-import {
-  nativeModuleCapability,
-  useNativeModuleState,
-} from "../state/nativeStatus";
-
-function CapabilityRows({ items }: { items: readonly Capability[] }) {
-  return (
-    <Rows>
-      {items.map((c) => (
-        <Row
-          key={c.id}
-          label={c.title}
-          detail={c.detail}
-          value={c.stateLabel ?? statusLabel(c.state)}
-        />
-      ))}
-    </Rows>
-  );
-}
+import { clearAllDrafts } from "../state/sendDraft";
+import { signIn, signOut, useApiSession } from "../wallet/api";
+import { API_ORIGIN } from "../wallet/config";
+import * as session from "../wallet/session";
+import { errorText } from "../wallet/useAsync";
 
 export function SettingsScreen() {
-  const nativeModule = nativeModuleCapability(useNativeModuleState());
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const { profile } = session.useWallet();
+  const api = useApiSession();
+  const [error, setError] = useState<string | null>(null);
+  const run = (f: () => Promise<void>) => () => {
+    setError(null);
+    f().catch((e) => setError(errorText(e)));
+  };
+  const remove = () =>
+    Alert.alert(
+      "Remove the wallet from this phone?",
+      "Your funds and any agent permissions stay on the chain. You can only get this wallet back with your recovery words.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Remove",
+          style: "destructive",
+          onPress: run(async () => {
+            clearAllDrafts();
+            await signOut();
+            await session.removeWallet();
+          }),
+        },
+      ],
+    );
   return (
     <Screen title="Settings">
+      {error ? (
+        <Banner icon="alert-outline" title="Not done" body={error} />
+      ) : null}
       <SectionHeading>Security</SectionHeading>
-      <CapabilityRows items={[nativeModule, ...securityCapabilities]} />
-
-      <SectionHeading>Connections</SectionHeading>
-      <CapabilityRows items={connectionCapabilities} />
-
-      <SectionHeading>Network</SectionHeading>
       <Rows>
         <Row
+          label="Recovery phrase"
+          detail={
+            profile?.backupConfirmed
+              ? "Written down and confirmed"
+              : "Not confirmed"
+          }
+          onPress={() => navigation.navigate("ShowPhrase")}
+        />
+        <Row
+          label="Lock now"
+          detail="Face ID, Touch ID or the passcode unlocks it. Mandate also locks after a minute in the background."
+          onPress={() => {
+            clearAllDrafts();
+            session.lock();
+          }}
+        />
+        <Row
+          label="Remove wallet from this phone"
+          detail="Needs your recovery words to restore."
+          onPress={remove}
+        />
+      </Rows>
+
+      <SectionHeading>Mandate service</SectionHeading>
+      <Rows>
+        {API_ORIGIN === null ? (
+          <Row
+            label="Sign in"
+            detail="The Mandate service address is not configured in this build."
+            value="Not configured"
+          />
+        ) : api ? (
+          <Row
+            label="Signed in"
+            detail={`Until ${new Date(api.expiresAt).toLocaleTimeString()}. Signing out does not stop agents.`}
+            value="Sign out"
+            onPress={run(signOut)}
+          />
+        ) : (
+          <Row
+            label="Sign in"
+            detail={`Signs a one-time login for ${API_ORIGIN}.`}
+            onPress={run(signIn)}
+          />
+        )}
+      </Rows>
+
+      <SectionHeading>Wallet</SectionHeading>
+      <Rows>
+        <Row
+          label="Contacts"
+          onPress={() => navigation.navigate("Contacts", {})}
+        />
+        <Row label="Accounts" onPress={() => navigation.navigate("Accounts")} />
+        <Row
           label={network.name}
-          detail={`Chain ${network.chainId}${network.isTestnet ? ". Test network only." : ""}`}
+          detail={`Chain ${network.chainId}. Test network only.`}
           value="Configured"
         />
       </Rows>
@@ -57,18 +115,12 @@ export function SettingsScreen() {
           <Rows>
             <Row
               label="Design preview"
-              detail="Sample-data screens for review"
+              detail="Sample-data screens for flows not built yet"
               onPress={() => navigation.navigate("PreviewIndex")}
             />
           </Rows>
         </>
       ) : null}
-
-      <SectionHeading>About</SectionHeading>
-      <Rows>
-        <Row label="Build" value="Development preview" />
-        <Row label="Milestone" value="P3-01 checkpoint 1" />
-      </Rows>
     </Screen>
   );
 }

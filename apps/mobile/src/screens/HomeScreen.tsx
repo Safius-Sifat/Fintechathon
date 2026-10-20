@@ -1,7 +1,14 @@
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import {
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  Text,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Banner } from "../components/Banner";
 import {
   ActionTile,
   Note,
@@ -14,35 +21,58 @@ import { Icon, type IconName } from "../components/Icon";
 import { RoundButton } from "../components/Page";
 import type { RootStackParamList } from "../navigation/RootNavigator";
 import { fonts, makeStyles, space, type, useColors } from "../theme";
+import { agentWallet, balances } from "../wallet/chain";
+import { TOKENS } from "../wallet/config";
+import { formatAmount, shortAddress } from "../wallet/format";
+import { currentAccount, useWallet } from "../wallet/session";
+import { useAsync } from "../wallet/useAsync";
 
-// Wallet home. The personal account and its agent wallet are separate
-// surfaces and their balances are never combined. No wallet exists on this
-// phone yet, so nothing here shows an address, a balance or a working action.
+// Wallet home. Balances are read from Base Sepolia. The personal account and
+// its agent wallet are separate and their balances are never added together.
 export function HomeScreen() {
   const styles = useStyles();
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  useWallet();
+  const account = currentAccount();
+  const bal = useAsync(
+    () => (account ? balances(account.address) : Promise.resolve(null)),
+    [account?.address],
+  );
+  const agent = useAsync(
+    () => (account ? agentWallet(account.address) : Promise.resolve(null)),
+    [account?.address],
+  );
+  const dusd = bal.data ? formatAmount(bal.data.values[0]!, 18) : "—";
   return (
     <View style={[styles.root, { paddingTop: insets.top }]}>
       <ScrollView
         style={styles.flex}
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={bal.loading && bal.data !== undefined}
+            onRefresh={() => {
+              bal.reload();
+              agent.reload();
+            }}
+          />
+        }
       >
         <View style={styles.top}>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Account. No account yet."
-            accessibilityHint="Opens accounts"
+            accessibilityLabel={`Account ${account?.label ?? ""}. Opens accounts`}
             onPress={() => navigation.navigate("Accounts")}
             style={({ pressed }) => [styles.account, pressed && styles.pressed]}
           >
             <View style={styles.avatar}>
-              <Icon name="account-outline" size={24} color={colors.accent} />
+              <Text style={styles.avatarText}>{(account?.index ?? 0) + 1}</Text>
             </View>
-            <Text style={styles.accountName}>No account</Text>
+            <Text style={styles.accountName}>{account?.label}</Text>
             <Icon name="chevron-down" size={22} color={colors.ink2} />
           </Pressable>
           <RoundButton
@@ -54,13 +84,24 @@ export function HomeScreen() {
 
         <View style={styles.hero}>
           <Text style={styles.heroLabel}>Personal account</Text>
-          <Text style={styles.heroValue} accessibilityRole="header">
-            No wallet yet
-          </Text>
+          <View style={styles.heroRow}>
+            <Text style={styles.heroValue} accessibilityRole="header">
+              {dusd}
+            </Text>
+            <Text style={styles.heroUnit}>DUSD</Text>
+          </View>
           <Text style={styles.heroNote}>
-            Test funds. No balance or address until a wallet exists.
+            {account ? shortAddress(account.address) : ""} · Test funds. No
+            market value.
           </Text>
         </View>
+        {bal.error ? (
+          <Banner
+            icon="cloud-off-outline"
+            title="Balances unavailable"
+            body={bal.error}
+          />
+        ) : null}
 
         <View style={styles.tiles}>
           <ActionTile
@@ -88,47 +129,51 @@ export function HomeScreen() {
         </SectionHeading>
         <Rows>
           <Row
-            label="No agent wallet"
-            detail="Needs the Mandate service. Not connected."
+            label={agent.data ? "Agent wallet" : "No agent wallet"}
+            detail={
+              agent.error
+                ? agent.error
+                : agent.data
+                  ? `${agent.data.frozen ? "Frozen" : agent.data.paused ? "Paused" : "Active"} · ${formatAmount(agent.data.balances[0]!, 18)} DUSD`
+                  : agent.loading
+                    ? "Checking the chain…"
+                    : "Creating one needs the Mandate service."
+            }
             onPress={() => navigation.navigate("Tabs", { screen: "Agents" })}
           />
         </Rows>
 
         <SectionHeading>Tokens</SectionHeading>
         <View>
-          <TokenRow
-            mark={<DemoMark />}
-            title="DemoUSD"
-            subtitle="Base Sepolia"
-            value="Unavailable"
-          />
-          <TokenRow
-            mark={<TokenGlyph icon="ethereum" color={colors.ink} />}
-            title="Ether"
-            subtitle="Test ETH, pays network fees"
-            value="Unavailable"
-          />
-          <TokenRow
-            mark={<TokenGlyph icon="currency-usd" color={colors.ink} />}
-            title="USDC"
-            subtitle="Circle test token"
-            value="Unavailable"
-          />
+          {TOKENS.map((t, i) => (
+            <TokenRow
+              key={t.name}
+              mark={
+                t.symbol === "DUSD" ? (
+                  <View style={styles.demoMark}>
+                    <Text style={styles.demoLetter}>M</Text>
+                  </View>
+                ) : (
+                  <TokenGlyph
+                    icon={t.symbol === "ETH" ? "ethereum" : "currency-usd"}
+                    color={colors.ink}
+                  />
+                )
+              }
+              title={t.name}
+              subtitle={t.note}
+              value={
+                bal.data ? formatAmount(bal.data.values[i]!, t.decimals) : "—"
+              }
+            />
+          ))}
         </View>
-        <Note>
-          Preview build. This build cannot sign, send or show balances.
-        </Note>
+        {bal.data ? (
+          <Note>
+            As of block {bal.data.block.toString()}. Pull down to refresh.
+          </Note>
+        ) : null}
       </ScrollView>
-    </View>
-  );
-}
-
-// DemoUSD carries the Mandate seal mark.
-function DemoMark() {
-  const styles = useStyles();
-  return (
-    <View style={styles.demoMark}>
-      <Text style={styles.demoLetter}>M</Text>
     </View>
   );
 }
@@ -160,15 +205,20 @@ const useStyles = makeStyles((colors) => ({
     alignItems: "center",
     justifyContent: "center",
   },
+  avatarText: { fontFamily: fonts.serifBold, fontSize: 20, color: colors.ink },
   accountName: { ...type.heading, fontSize: 20, color: colors.ink },
   pressed: { opacity: 0.7 },
   hero: { gap: space.xs },
   heroLabel: { ...type.body, color: colors.ink2 },
+  heroRow: { flexDirection: "row", alignItems: "baseline", gap: space.sm },
   heroValue: {
     ...type.display,
     fontFamily: fonts.serifBold,
+    fontSize: 64,
+    lineHeight: 70,
     color: colors.ink,
   },
+  heroUnit: { ...type.heading, fontSize: 22, color: colors.ink2 },
   heroNote: { ...type.body, color: colors.ink2 },
   tiles: { flexDirection: "row", gap: space.md },
   demoMark: {

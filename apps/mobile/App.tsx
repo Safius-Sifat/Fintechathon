@@ -9,11 +9,16 @@ import {
   Newsreader_600SemiBold,
 } from "@expo-google-fonts/newsreader";
 import { useFonts } from "expo-font";
-import { useMemo, useRef } from "react";
-import { StatusBar, useWindowDimensions } from "react-native";
+import { useEffect, useMemo, useRef } from "react";
+import { AppState, StatusBar, useWindowDimensions } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { RootNavigator } from "./src/navigation/RootNavigator";
+import { clearAllDrafts } from "./src/state/sendDraft";
 import { useColors } from "./src/theme";
+import { loadWallet, lock } from "./src/wallet/session";
+
+// Background time after which the wallet locks itself.
+const LOCK_AFTER_MS = 60_000;
 
 export default function App() {
   const colors = useColors();
@@ -44,6 +49,18 @@ export default function App() {
   // the user stays on the same tab. Native side: plugins/withFontScaleLayout.js.
   const { fontScale } = useWindowDimensions();
   const navigationState = useRef<InitialState | undefined>(undefined);
+  useEffect(() => {
+    loadWallet();
+    let leftAt = 0;
+    const sub = AppState.addEventListener("change", (next) => {
+      if (next === "background") leftAt = Date.now();
+      if (next === "active" && leftAt && Date.now() - leftAt > LOCK_AFTER_MS) {
+        clearAllDrafts();
+        lock();
+      }
+    });
+    return () => sub.remove();
+  }, []);
   if (!fontsLoaded && !fontError) return null;
   return (
     <SafeAreaProvider>
