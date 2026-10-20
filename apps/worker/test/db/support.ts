@@ -5,7 +5,7 @@ import { homedir } from "node:os";
 import { join } from "node:path";
 import net from "node:net";
 import { Pool } from "pg";
-import { createPublicClient, http, type PublicClient } from "viem";
+import { createPublicClient, custom, http, type PublicClient } from "viem";
 import { mnemonicToAccount } from "viem/accounts";
 import {
   discoverMigrations,
@@ -86,12 +86,21 @@ export async function forkChain() {
       String(port),
       "--silent",
       "--no-storage-caching",
+      "--no-priority-fee",
     ],
     { stdio: "ignore" },
   );
   const rpcUrl = `http://127.0.0.1:${port}`;
+  // anvil suggests a 1 gwei priority fee; Base Sepolia suggests about 0.001 gwei.
+  // Answer that one call like the public network so fee budgets see realistic quotes.
+  const upstream = http(rpcUrl, { retryCount: 0 })({});
   const client: PublicClient = createPublicClient({
-    transport: http(rpcUrl, { retryCount: 0 }),
+    transport: custom({
+      request: ({ method, params }) =>
+        method === "eth_maxPriorityFeePerGas"
+          ? Promise.resolve("0xf4240")
+          : upstream.request({ method, params }),
+    }),
   });
   const deadline = Date.now() + 60_000;
   for (;;) {
