@@ -1,8 +1,8 @@
 ---
 type: implementation-agent-prompt
 title: Person 3 — Mobile Owner Wallet (Android and iOS)
-version: "7.1"
-updated: 2026-10-18
+version: "7.2"
+updated: 2026-10-20
 status: specified-not-built
 owner: Person3
 handoff_revision: "agent-prompt-2026-10-17"
@@ -128,6 +128,50 @@ Sections 2–6 and the wallet tasks in section 7 are one delivery. Follow the se
 | Owner controls for agents | `P3-A01 + P3-A02` | Approval/alert/freeze screens first, then wallet policy editor, allowance and intent review. |
 
 **Completion record:** for each task record source commit, shared-schema commit, command/device or chain reference, observed result and known gaps. Unrun or failed cases stay incomplete. Both original G/Q and wallet W/WQ gates apply; no acceptance or implementation tests were executed by updating this document.
+
+## Fast path (v7.2) — JavaScript wallet, no native code
+
+**Decision (owner, 2026-10-20):** ship a functional app as fast as possible. The wallet is built in TypeScript with maintained cross-platform Expo and npm packages. No Kotlin or Swift is written. Where this section conflicts with the native-module text elsewhere in this document (sections marked Kotlin, Swift, Trust Wallet Core, Keystore wrapping, `FLAG_SECURE` native screens), this section wins. Everything not named here (contracts, typed objects, API, honest states) is unchanged.
+
+### Packages
+
+| Need | Package | Notes |
+| --- | --- | --- |
+| Accounts, signing, RPC, typed data | `viem` (2.38.5, same as `packages/schema`) | `mnemonicToAccount` with path `m/44'/60'/0'/0/{index}`; `signTypedData` for Permit, Admin, OwnerTransfer, Approval and Login; `createPublicClient`/`createWalletClient` on Base Sepolia |
+| Recovery phrase | `@scure/bip39` + English wordlist | 12 words, optional BIP39 passphrase |
+| Secure random | `react-native-get-random-values` | Imported first in `index.ts` |
+| Secret storage | `expo-secure-store` | Keychain (iOS) and Keystore (Android); `requireAuthentication: true`, `WHEN_PASSCODE_SET_THIS_DEVICE_ONLY` |
+| Biometrics and lock | `expo-local-authentication` | Unlock, and confirm before every signature |
+| Block screenshots | `expo-screen-capture` | On the phrase and quiz screens only |
+| QR | `react-native-qrcode-svg` + `react-native-svg` | Receive; scanning stays on `expo-camera` |
+| Clipboard | `expo-clipboard` | Addresses only, never the phrase |
+| Contacts and settings | `@react-native-async-storage/async-storage` | Non-secret data only |
+
+### Rules that still hold
+
+- The phrase and private keys live only in `expo-secure-store` and in memory while unlocked. They are never logged, sent to the API, put in AsyncStorage, analytics, crash reports or the clipboard.
+- One module, `apps/mobile/src/wallet/`, owns secrets. Screens call it; they never read the phrase or key directly.
+- It signs only the typed objects in S3 and S8.6 and transactions the review screen showed. It exposes no "sign this digest" or "sign this message" function.
+- Each signature needs a fresh biometric or passcode confirmation. Locking clears the in-memory account.
+- Read balances and send through a public Base Sepolia RPC, so personal send, receive and stop work without the Mandate service.
+- Missing capabilities still fail explicitly. `preview` flags turn on only when the code behind them works.
+
+### Accepted risk
+
+JavaScript holds the key in memory while the app is unlocked, so a compromised JavaScript bundle or dependency could read it. The native design avoided that. This is accepted for the Base Sepolia test network only. Before any mainnet or real-value use, move key handling to the native module described in this document.
+
+### Order (each step ends with a working app)
+
+| Step | Delivers | Replaces |
+| --- | --- | --- |
+| J1 | Wallet module: create, show and confirm phrase, optional passphrase, restore, unlock, lock, delete; accounts 0–19 with local names | P3-01, P3-W01 |
+| J2 | Real Home balances (ETH, DemoUSD, USDC from the deployment manifest), Receive with QR, Send with checks, fee quote, sign and broadcast, pending and confirmed states, transaction detail | P3-02 (personal part), P3-W02 |
+| J3 | Contacts, settings, backup status, security screen | P3-W01, P3-W03 (local parts) |
+| J4 | Signed Login against `/v1/auth/challenge` and `/verify` (API exists), session list and logout | P3-03 (sign-in), P3-W03 |
+| J5 | Owner stop: Admin PAUSE, REVOKE, FREEZE signed with `signTypedData` and sent through the RPC from the personal account | P3-05 |
+| J6 | Agent flows (task approval, policy, allowance, proof) as Person 2 and Person 4 endpoints land | P3-03, P3-04, P3-A01, P3-A02 |
+
+Tests: unit tests for the wallet module against the shared schema golden vectors (domain 5, Login 2) using the same test phrase as the fixtures; no real phrase in the repo. Check on the iOS simulator and an Android emulator; record what was not checked on a physical phone.
 
 ## Cross-platform delivery — Android and iOS (v7.1)
 

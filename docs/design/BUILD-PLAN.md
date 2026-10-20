@@ -51,3 +51,6 @@ Two kinds. Part A can be done now by one person in one branch. Part B needs a ca
 How each B item lands: replace the sample props in its preview screen with real view models from the API or native module, register the real route, set the matching `preview` flag only when it works, add it to `make check-mobile`, and remove the sample entry from the gallery. Changes to shared schema or API contracts go through Person 1.
 
 Order: A1 to A6 first (one PR), then B1 and B2, B3, B4 and B5, B6, B7, B8 as their owners land them.
+
+## Fast path (decided 2026-10-20)
+Part B no longer waits for native code. The wallet is built in TypeScript with Expo and npm packages (viem, @scure/bip39, expo-secure-store, expo-local-authentication). Steps J1 to J6 are in `docs/plans/03 - Android Owner Wallet.md`, section "Fast path (v7.2)". J1 to J3 and J5 need no Mandate backend; J4 uses the existing auth API; J6 waits for Person 2 and Person 4.
