@@ -165,3 +165,27 @@ test("API startup reads the explicit trusted ingress configuration", async () =>
     }
   }
 });
+
+test("P2-06.T01 readiness names failing dependencies and stays 503", async () => {
+  const { createFoundationApp } = await import("@mandate/platform");
+  const app = createFoundationApp("api", {
+    logger: false,
+    readiness: async () => ({ database: false, chain: true }),
+  });
+  try {
+    const r = await app.inject({ url: "/readyz" });
+    assert.equal(r.statusCode, 503);
+    assert.deepEqual(r.json().checks, { database: false, chain: true });
+    const failing = createFoundationApp("api", {
+      logger: false,
+      readiness: async () => {
+        throw new Error("secret=xyz");
+      },
+    });
+    const body = (await failing.inject({ url: "/readyz" })).body;
+    assert.ok(!body.includes("secret"));
+    await failing.close();
+  } finally {
+    await app.close();
+  }
+});

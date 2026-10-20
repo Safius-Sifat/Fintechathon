@@ -186,3 +186,50 @@ Operational consequences:
   the adapter stops waiting, so the reservation stays and no fresh attempt starts
   until the late result or reconciliation resolves it.
 No stream purge, custom nonce/session restoration or cryptographic patch was used.
+
+## Financial runtime (Person2, local qualification 2026-10-20)
+
+Processes (all loopback except the API's documented HTTPS ingress):
+`apps/api` (owner/agent routes), `apps/worker` (jobs, executor, relays, reconcile, sentinel),
+`services/policy` (private policy check), `mandate-authorizer` and `mandate-adapter` (Go, MPC boundary),
+three MPCium nodes with NATS/Consul (see the qualification section above).
+
+Runtime configuration names (values live outside Git; see infra/secrets.example):
+- API: `DATABASE_URL`, `DATABASE_CA_FILE`, `AUTH_ORIGIN`, `AUTH_JWT_SECRET_FILE`, `TRUSTED_MANIFEST_FILE`,
+  `API_RPC_URL`, `EVIDENCE_KEY_FILE` (32-byte hex Ed25519 seed), `ARTIFACT_KEY_FILE` (32-byte hex AES key).
+- Worker: `DATABASE_URL`, `DATABASE_CA_FILE`, `TRUSTED_MANIFEST_FILE`, `WORKER_RPC_URL`, `ADAPTER_URL`,
+  `ADAPTER_INTERNAL_TOKEN_FILE`, `RISK_RULES_FILE`, `WORKER_SIGNING_ENABLED`, `ETHERSCAN_API_KEY` (optional),
+  per lane `WORKER_{NORMAL,EMERGENCY,ANCHOR}_{KEYSTORE_FILE,PASSWORD_FILE,ADDRESS}` (Foundry/v3 keystores, owner-only files).
+- Policy: `POLICY_DATABASE_URL`, `POLICY_DATABASE_CA_FILE` (read-only role), `POLICY_INTERNAL_TOKEN_FILE`,
+  `TRUSTED_MANIFEST_FILE`, `POLICY_RPC_URL`, `SCREENING_LIST_FILE`, `POLICY_PORT`.
+- Authorizer: `AUTHORIZER_LISTEN`, `AUTHORIZER_INITIATOR_PUBLIC_KEY`, `AUTHORIZER_KEY_FILE`,
+  `AUTHORIZER_KEY_PASSWORD_FILE`, `POLICY_URL`, `POLICY_INTERNAL_TOKEN_FILE`, `AUTHORIZER_INTERNAL_TOKEN_FILE`.
+- Adapter: `ADAPTER_LISTEN`, `ADAPTER_LOCK_FILE`, `ADAPTER_DATABASE_URL` (sslmode=verify-full, sslrootcert),
+  `NATS_URL`, `NATS_USER`, `NATS_PASSWORD_FILE`, `NATS_TLS_DIR`, `INITIATOR_KEY_FILE`,
+  `INITIATOR_KEY_PASSWORD_FILE`, `AUTHORIZER_URL`, `AUTHORIZER_INTERNAL_TOKEN_FILE`,
+  `ADAPTER_INTERNAL_TOKEN_FILE`, `ADAPTER_SESSION_TIMEOUT` (default 15m, above the post-denial queue drain).
+
+Manifest entries operators publish: `riskRules.hash`
+0x51ca3d29b20018ac497c5b79d711521ef9f317c40787cfc690c9fa76bb8bae33 (services/policy/rules/risk-rules-v1.json),
+`screening.listHash` 0xa6559eb9187ffa5065270e6c34be70e94d7f1b0083624a1492ce4b6d787def85
+(services/policy/rules/demo-screening-v1.json). Processes refuse a mismatched file.
+
+Readiness: `/readyz` stays 503 until release gates pass and lists named checks only (no values or errors).
+
+Restore: restore DB and artifacts into an isolated environment with `WORKER_SIGNING_ENABLED` unset.
+The worker then reconciles journaled transactions, late MPC results and reservations but starts no new
+MPC request. Enable signing only after every SUBMITTED/UNKNOWN action and attempt is resolved against
+the chain. Never restore mid-sign ephemeral MPC state as a session.
+
+Lost signer: inhibit (any alert or admin draft), owner-signed PAUSE/REVOKE through the emergency lane
+(no MPC needed), fresh per-wallet DKG with a new MPC wallet ID and a fresh owner Permit. No reshare,
+no key reconstruction.
+
+Fee lanes: normal 0.016 ETH/day, emergency 0.002 ETH/day, anchor 0.002 ETH/day, 0.0005 ETH per
+transaction estimate (L1+L2 +20%). Fund each lane sender separately; the anchor lane signer must be
+the deployed EvidenceAnchor publisher 0x5cCEfD0Ac77088d72d38047856f4045E5ae56a95 (password not configured:
+public anchoring BLOCKED).
+
+Tests: `pnpm test:db` (TLS Postgres + Base Sepolia fork; 82 cases), package checks for api/worker/policy,
+Go `vet` + `test -race` for the three modules, and the MPC end-to-end
+`MPC_PRIVATE_DIR=... node scripts/ops/with-test-postgres.mjs 'apps/worker/test/e2e/*.test.ts'`.

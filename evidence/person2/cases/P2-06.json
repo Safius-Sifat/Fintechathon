@@ -1,0 +1,128 @@
+[
+  {
+    "caseId": "P2-06.T01",
+    "taskId": "P2-06",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "1dff9fabb1e472c29e2ee82823656b56b64cc661",
+    "assessedAt": "2026-10-20T12:11:02.348013+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia (local)",
+      "qualificationOnly": true
+    },
+    "command": "pnpm --filter @mandate/api check; Go race suites; Task2 qualification",
+    "exitCode": 0,
+    "expected": "Dependency outages deny new signing; readiness names dependency",
+    "observed": "Two-node outage fails closed and one-node outage signs (Task2); policy unavailable never signs (Go); readiness lists named checks only and stays 503.",
+    "artifactRefs": [],
+    "limitations": [
+      "DB/RPC/NATS/Consul outage against the full running stack not exercised together."
+    ]
+  },
+  {
+    "caseId": "P2-06.T02",
+    "taskId": "P2-06",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "1dff9fabb1e472c29e2ee82823656b56b64cc661",
+    "assessedAt": "2026-10-20T12:11:02.348013+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia (local)",
+      "qualificationOnly": true
+    },
+    "command": "pnpm --filter @mandate/worker check",
+    "exitCode": 0,
+    "expected": "Restored worker does not sign until enabled",
+    "observed": "gatedSigning refuses new MPC starts while status/reconcile continue; WORKER_SIGNING_ENABLED gates production.",
+    "artifactRefs": [],
+    "limitations": [
+      "Real backup/restore of DB and node shares not performed."
+    ]
+  },
+  {
+    "caseId": "P2-06.T03",
+    "taskId": "P2-06",
+    "status": "BLOCKED",
+    "sourceCommit": "1dff9fabb1e472c29e2ee82823656b56b64cc661",
+    "assessedAt": "2026-10-20T12:11:02.348013+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia (local)",
+      "qualificationOnly": true
+    },
+    "command": "n/a",
+    "exitCode": null,
+    "expected": "Lost share: owner stop/recover, fresh executor",
+    "observed": "Owner Admin/OwnerTransfer relays work without MPC (fork tests); fresh DKG path exists.",
+    "artifactRefs": [],
+    "limitations": [
+      "Permanent share loss drill and Person3 native/CLI recovery not run."
+    ]
+  },
+  {
+    "caseId": "P2-06.T04",
+    "taskId": "P2-06",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "1dff9fabb1e472c29e2ee82823656b56b64cc661",
+    "assessedAt": "2026-10-20T12:11:02.348013+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia (local)",
+      "qualificationOnly": true
+    },
+    "command": "git ls-files secret-pattern scan; evidence secret scan",
+    "exitCode": 0,
+    "expected": "No private identity/share/secret in Git or artifacts",
+    "observed": "No tracked .key.age, password, seed or identity files; evidence contains public keys/addresses only.",
+    "artifactRefs": [],
+    "limitations": [
+      "Host firewall, APK/iOS build and Azure container inspection not performed."
+    ]
+  },
+  {
+    "caseId": "P2-06.T05",
+    "taskId": "P2-06",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "1dff9fabb1e472c29e2ee82823656b56b64cc661",
+    "assessedAt": "2026-10-20T12:11:02.348013+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia (local)",
+      "qualificationOnly": true
+    },
+    "command": "pnpm test:db",
+    "exitCode": 0,
+    "expected": "Restart with pending UNKNOWN recovers original IDs/nonces",
+    "observed": "Relayer crash/lost-response/reorg cases rebroadcast original bytes; UNKNOWN reservations persist; leases recover.",
+    "artifactRefs": [],
+    "limitations": [
+      "Schedule catch-up depends on Person4 scheduled-pay runbook."
+    ]
+  },
+  {
+    "caseId": "P2-06.T06",
+    "taskId": "P2-06",
+    "status": "BLOCKED",
+    "sourceCommit": "1dff9fabb1e472c29e2ee82823656b56b64cc661",
+    "assessedAt": "2026-10-20T12:11:02.348013+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia (local)",
+      "qualificationOnly": true
+    },
+    "command": "n/a",
+    "exitCode": null,
+    "expected": "Fresh deployment reproducible from guide",
+    "observed": "Guide, config names, pins and rule hashes documented.",
+    "artifactRefs": [],
+    "limitations": [
+      "No Azure deployment (not authorized in this task)."
+    ]
+  }
+]

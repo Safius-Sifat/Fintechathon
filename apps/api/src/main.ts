@@ -1,19 +1,93 @@
-import { startFoundationService } from "@mandate/platform";
+import { readFile } from "node:fs/promises";
+import { getAddress } from "viem";
+import {
+  connectChain,
+  evidenceKey,
+  startFoundationService,
+} from "@mandate/platform";
+import { DeploymentManifestSchema } from "@mandate/schema";
 import { loadAuthConfig } from "./auth/config.js";
 import { registerAuth } from "./auth/routes.js";
 import { AuthService } from "./auth/service.js";
+import { registerBusiness } from "./business/routes.js";
+import {
+  BusinessService,
+  type BusinessDependencies,
+} from "./business/service.js";
+import { AgenticService } from "./business/agentic.js";
+import { ControlService } from "./business/controls.js";
+
+const env = process.env;
+const file = (name: string) => readFile(env[name]!);
 
 await startFoundationService("api", 3000, async (app, database) => {
   let auth = null;
   try {
-    auth = await loadAuthConfig(process.env);
+    auth = await loadAuthConfig(env);
   } catch {
     app.log.error(
       "Authentication configuration invalid; authentication disabled",
     );
   }
-  await registerAuth(
+  const authService = database && auth ? new AuthService(database, auth) : null;
+  await registerAuth(app, authService);
+  // Each optional dependency stays null when unconfigured; its routes then fail
+  // explicitly instead of returning partial financial data.
+  const manifest = env.TRUSTED_MANIFEST_FILE
+    ? DeploymentManifestSchema.parse(
+        JSON.parse((await file("TRUSTED_MANIFEST_FILE")).toString("utf8")),
+      )
+    : null;
+  const chain =
+    env.API_RPC_URL && manifest
+      ? {
+          client: await connectChain(env.API_RPC_URL, 84532),
+          assets: manifest.agentAssets.map((a) => ({
+            address: getAddress(a.address),
+            symbol: a.symbol,
+          })),
+        }
+      : null;
+  const evidence =
+    env.EVIDENCE_KEY_FILE && env.ARTIFACT_KEY_FILE
+      ? {
+          key: evidenceKey(
+            Buffer.from(
+              (await file("EVIDENCE_KEY_FILE")).toString("utf8").trim(),
+              "hex",
+            ),
+          ),
+          artifactKey: Buffer.from(
+            (await file("ARTIFACT_KEY_FILE")).toString("utf8").trim(),
+            "hex",
+          ),
+        }
+      : null;
+  const deps: BusinessDependencies = {
+    chain,
+    evidence,
+    manifest,
+    intentCompiler: null,
+  };
+  await registerBusiness(
     app,
-    database && auth ? new AuthService(database, auth) : null,
+    database && authService
+      ? new BusinessService(database, authService, deps, () =>
+          Math.floor(Date.now() / 1000),
+        )
+      : null,
+    database
+      ? new AgenticService(
+          database,
+          () => Math.floor(Date.now() / 1000),
+          null,
+          manifest,
+        )
+      : null,
+    database
+      ? new ControlService(database, chain?.client ?? null, () =>
+          Math.floor(Date.now() / 1000),
+        )
+      : null,
   );
 });

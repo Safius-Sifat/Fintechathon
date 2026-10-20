@@ -15,6 +15,8 @@ export type FoundationOptions = {
   deployment?: unknown;
   logger?: boolean;
   trustedProxyAddresses?: readonly string[];
+  // Named dependency checks; names only, never values or errors.
+  readiness?: () => Promise<Record<string, boolean>>;
 };
 export function createFoundationApp(
   service: "api" | "provider" | "policy",
@@ -69,14 +71,19 @@ export function createFoundationApp(
     revision: process.env.SOURCE_REVISION ?? null,
     chainId: 84532,
   }));
-  app.get("/readyz", async (_request, reply) =>
-    reply.code(503).send({
+  // Stays 503 until the release qualification gates pass, whatever the checks say.
+  app.get("/readyz", async (_request, reply) => {
+    const checks = options.readiness
+      ? await options.readiness().catch(() => ({ readiness: false }))
+      : {};
+    return reply.code(503).send({
       service,
       ready: false,
+      checks,
       reason:
         "Financial implementation and qualification gates are incomplete; see docs/plans.",
-    }),
-  );
+    });
+  });
   app.setNotFoundHandler(async (_request, reply) =>
     reply.code(501).send({
       code: "NOT_IMPLEMENTED",
@@ -136,6 +143,14 @@ export async function startFoundationService(
   const app = createFoundationApp(service, {
     database,
     deployment,
+    readiness: async () => ({
+      database: database
+        ? await database.query("SELECT 1").then(
+            () => true,
+            () => false,
+          )
+        : false,
+    }),
     ...(trustedProxyAddresses ? { trustedProxyAddresses } : {}),
   });
   database?.on("error", () =>

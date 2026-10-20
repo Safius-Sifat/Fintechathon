@@ -43,6 +43,17 @@ export type SigningClient = {
   status(actionId: string): Promise<AttemptView | null>;
 };
 
+// After a restore, new signing stays off until an operator enables it; status
+// reads continue so late results and reconciliation still resolve.
+export function gatedSigning(
+  adapter: SigningClient,
+  enabled: boolean,
+): SigningClient {
+  return enabled
+    ? adapter
+    : { start: async () => "BUSY", status: adapter.status };
+}
+
 // Worker-only client for the loopback MPC adapter.
 export function adapterClient(url: string, token: string): SigningClient {
   const call = async (method: "GET" | "POST", path: string, body?: unknown) => {

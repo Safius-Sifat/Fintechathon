@@ -23,9 +23,9 @@ const database = new Pool({
   },
 });
 // Without a trusted manifest or RPC the service still runs and denies every request.
-const manifest = env.DEPLOYMENT_MANIFEST_FILE
+const manifest = env.TRUSTED_MANIFEST_FILE
   ? DeploymentManifestSchema.parse(
-      JSON.parse(await readFile(env.DEPLOYMENT_MANIFEST_FILE, "utf8")),
+      JSON.parse(await readFile(env.TRUSTED_MANIFEST_FILE, "utf8")),
     )
   : null;
 const chain = env.POLICY_RPC_URL
