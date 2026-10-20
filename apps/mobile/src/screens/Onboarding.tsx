@@ -28,7 +28,7 @@ import {
   type Tone,
 } from "../theme";
 
-// First-run flow: Welcome -> How it works -> Set up your wallet -> app.
+// First-run flow: Welcome (with how it works) -> Set up your wallet -> app.
 // Creating and restoring a wallet run on native screens that are not built
 // yet, so setup only explains them; nothing here collects recovery words.
 
@@ -43,46 +43,6 @@ const ORB_CHIPS = [
   { icon: "shield-check-outline", color: tones.green.fg, x: 0.12, y: 0.74 },
   { icon: "key-outline", color: tones.violet.fg, x: 0.84, y: 0.8 },
 ] as const;
-
-export function WelcomeScreen({ navigation }: Props<"Welcome">) {
-  const { width } = useWindowDimensions();
-  const orbSize = Math.min(width - space.xl * 2, 300);
-  return (
-    <FlowLayout
-      centered
-      footer={
-        <>
-          <PrimaryButton
-            label="Get started"
-            onPress={() => navigation.navigate("Intro")}
-          />
-          <TextButton
-            label="I have a recovery phrase"
-            accessibilityHint="Shows how restoring a wallet will work"
-            onPress={() => navigation.navigate("Setup", { direct: true })}
-          />
-        </>
-      }
-    >
-      <View style={styles.welcomeBrand}>
-        <Icon name="alpha-m-box" size={56} color={colors.ink} />
-        <Text style={styles.welcomeTitle} accessibilityRole="header">
-          Mandate
-        </Text>
-        <Text style={styles.welcomeTagline}>
-          Your agent. Your money. Real work.
-        </Text>
-      </View>
-      <View style={styles.orbRow}>
-        <Orb size={orbSize} chips={ORB_CHIPS} />
-      </View>
-      <Text style={styles.welcomeBody}>
-        A wallet that lives on your phone, and AI agents that spend only within
-        the limits you approve.
-      </Text>
-    </FlowLayout>
-  );
-}
 
 const HOW_IT_WORKS: readonly {
   icon: IconName;
@@ -116,26 +76,41 @@ const HOW_IT_WORKS: readonly {
   },
 ];
 
-export function IntroScreen({ navigation }: Props<"Intro">) {
+export function WelcomeScreen({ navigation }: Props<"Welcome">) {
+  const { width } = useWindowDimensions();
+  const orbSize = Math.min(width - space.xl * 2, 220);
   return (
     <FlowLayout
-      header={
-        <StepHeader
-          progress={{ step: 1, steps: 2 }}
-          onBack={() => navigation.goBack()}
-        />
-      }
       footer={
-        <PrimaryButton
-          label="Next"
-          onPress={() => navigation.navigate("Setup")}
-        />
+        <>
+          <PrimaryButton
+            label="Get started"
+            onPress={() => navigation.navigate("Setup")}
+          />
+          <TextButton
+            label="I have a recovery phrase"
+            accessibilityHint="Shows how restoring a wallet will work"
+            onPress={() => navigation.navigate("Setup")}
+          />
+        </>
       }
     >
-      <StepTitle
-        title="Let your agent handle the real work"
-        subtitle="You decide how much it can spend, and you can stop it at any time."
-      />
+      <View style={styles.welcomeBrand}>
+        <Icon name="alpha-m-box" size={56} color={colors.ink} />
+        <Text style={styles.welcomeTitle} accessibilityRole="header">
+          Mandate
+        </Text>
+        <Text style={styles.welcomeTagline}>
+          Your agent. Your money. Real work.
+        </Text>
+      </View>
+      <View style={styles.orbRow}>
+        <Orb size={orbSize} chips={ORB_CHIPS} />
+      </View>
+      <Text style={styles.welcomeBody}>
+        A wallet that lives on your phone, and AI agents that spend only within
+        the limits you approve.
+      </Text>
       <View style={styles.pointList}>
         {HOW_IT_WORKS.map((point) => (
           <View
@@ -161,17 +136,10 @@ export function IntroScreen({ navigation }: Props<"Intro">) {
   );
 }
 
-export function SetupScreen({ navigation, route }: Props<"Setup">) {
-  // Opened straight from Welcome, setup is not step 2 of the introduction.
-  const direct = route.params?.direct === true;
+export function SetupScreen({ navigation }: Props<"Setup">) {
   return (
     <FlowLayout
-      header={
-        <StepHeader
-          progress={direct ? undefined : { step: 2, steps: 2 }}
-          onBack={() => navigation.goBack()}
-        />
-      }
+      header={<BackHeader onBack={() => navigation.goBack()} />}
       footer={
         <PrimaryButton
           label="Explore the preview"
@@ -272,13 +240,7 @@ function StepTitle({ title, subtitle }: { title: string; subtitle: string }) {
   );
 }
 
-interface StepHeaderProps {
-  // Omitted when the screen was reached outside the step sequence.
-  progress?: { step: number; steps: number };
-  onBack: () => void;
-}
-
-function StepHeader({ progress, onBack }: StepHeaderProps) {
+function BackHeader({ onBack }: { onBack: () => void }) {
   return (
     <View style={styles.stepHeader}>
       <Pressable
@@ -289,25 +251,6 @@ function StepHeader({ progress, onBack }: StepHeaderProps) {
       >
         <Icon name="chevron-left" size={28} color={colors.ink} />
       </Pressable>
-      {progress ? (
-        <>
-          <View
-            style={styles.track}
-            accessible
-            accessibilityLabel={`Step ${progress.step} of ${progress.steps}`}
-          >
-            <View
-              style={[
-                styles.trackFill,
-                { width: `${(progress.step / progress.steps) * 100}%` },
-              ]}
-            />
-          </View>
-          <Text style={styles.stepCount} importantForAccessibility="no">
-            {progress.step}/{progress.steps}
-          </Text>
-        </>
-      ) : null}
     </View>
   );
 }
@@ -315,24 +258,19 @@ function StepHeader({ progress, onBack }: StepHeaderProps) {
 interface FlowLayoutProps {
   header?: ReactNode;
   footer: ReactNode;
-  // Centres short content vertically; it still scrolls when it overflows.
-  centered?: boolean;
   children: ReactNode;
 }
 
 // Full-screen flow step: scrolling content on the glow canvas with the
 // actions pinned above the bottom inset, so they stay reachable at any text
 // size.
-function FlowLayout({ header, footer, centered, children }: FlowLayoutProps) {
+function FlowLayout({ header, footer, children }: FlowLayoutProps) {
   const insets = useSafeAreaInsets();
   return (
     <View style={[styles.root, { paddingTop: insets.top }]}>
       <View style={styles.canvas} pointerEvents="none" />
       {header}
-      <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={[styles.content, centered && styles.centered]}
-      >
+      <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
         {children}
       </ScrollView>
       <View
@@ -351,7 +289,6 @@ const styles = StyleSheet.create({
     experimental_backgroundImage: gradients.canvas,
   },
   scroll: { flex: 1 },
-  centered: { flexGrow: 1, justifyContent: "center" },
   content: {
     paddingTop: space.lg,
     paddingHorizontal: space.xl,
@@ -403,19 +340,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     boxShadow: shadows.card,
   },
-  track: {
-    flex: 1,
-    height: 6,
-    borderRadius: radius.pill,
-    backgroundColor: colors.surfaceMuted,
-    overflow: "hidden",
-  },
-  trackFill: {
-    height: "100%",
-    borderRadius: radius.pill,
-    backgroundColor: colors.ink,
-  },
-  stepCount: { ...type.label, color: colors.textMuted, minWidth: 28 },
 
   stepTitle: { gap: space.sm },
   title: { ...type.title, color: colors.ink },
