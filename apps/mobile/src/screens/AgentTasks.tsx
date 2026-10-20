@@ -40,6 +40,14 @@ export function AgentTasksScreen({ navigation }: Props) {
 
       <SectionTitle>Start a task</SectionTitle>
       <NavRow
+        icon="text-box-edit-outline"
+        tone="amber"
+        label="Describe a goal"
+        value="Say what you need; check the drafted terms"
+        accessibilityHint="Opens the goal form. Nothing is sent."
+        onPress={() => navigation.navigate("IntentCompose")}
+      />
+      <NavRow
         icon="web-check"
         tone="amber"
         label="Browser check"
@@ -55,18 +63,15 @@ export function AgentTasksScreen({ navigation }: Props) {
         accessibilityHint="Opens the scheduled payment form. Nothing is created."
         onPress={() => navigation.navigate("Schedule")}
       />
+      <NavRow
+        icon="repeat"
+        tone="amber"
+        label="Service allowance"
+        value="Buy allowed services up to a daily or weekly cap"
+        accessibilityHint="Opens the service allowance form. Nothing is created."
+        onPress={() => navigation.navigate("AllowanceApproval")}
+      />
       <Card>
-        <CapabilityRow
-          capability={{
-            id: "service-allowance",
-            title: "Service allowance",
-            detail:
-              "Let the agent buy allowed services up to a daily or weekly cap.",
-            icon: "repeat",
-            tone: "slate",
-            state: "notBuilt",
-          }}
-        />
         <CapabilityRow
           capability={{
             id: "liquidity-keeper",

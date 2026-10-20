@@ -1,5 +1,5 @@
-// In-memory store for the agent task forms (browser check and scheduled
-// payment). Like the Send draft it lives outside the screens, so a draft
+// In-memory store for the agent task forms (browser check, scheduled
+// payment and service allowance). Like the Send draft it lives outside the screens, so a draft
 // survives a font-size remount and Review -> Edit, and it is never written
 // to disk. It holds only public form input. Nothing here is a task, a
 // permission or a signed term: those come from the Mandate service and the
@@ -8,6 +8,15 @@
 // Pure TypeScript with no React Native imports, so Node tests can load it.
 
 import type { CHECK_ORDER, PROVIDER_IDS, TARGET_IDS } from "@mandate/schema";
+import {
+  CEILINGS,
+  checkAmount,
+  checkCount,
+  formCheck,
+  type FormCheck,
+} from "../config/agentLimits";
+import { ASSET_LABELS, PROVIDER_LABELS } from "../config/taskLabels";
+import { formatAgentAmount } from "../domain/amounts";
 import { contextKey, type DraftContext } from "./sendDraft";
 
 export type Check = (typeof CHECK_ORDER)[number];
@@ -16,6 +25,8 @@ export type TargetId = (typeof TARGET_IDS)[number];
 // The two agent assets in plan S2. USDC also needs a wallet policy cap.
 export type AgentAsset = "DemoUSD" | "USDC";
 export type ScheduleInterval = "daily" | "weekly" | "demo";
+// ALLOWANCE periods (plan S9.7): 86400 or 604800 seconds.
+export type AllowancePeriod = "daily" | "weekly";
 
 // Canonical orders from the shared schema (tested against it).
 export const CHECKS = [
@@ -45,9 +56,22 @@ export interface ScheduleDraft {
   periods: string;
 }
 
+// Service allowance (runbook "service-allowance", Permit kind ALLOWANCE).
+export interface AllowanceDraft {
+  asset: AgentAsset;
+  period: AllowancePeriod;
+  periodCap: string;
+  spendCap: string;
+  maxPayment: string;
+  providerIds: readonly ProviderId[];
+  days: string;
+  maxPurchases: string;
+}
+
 export interface TaskDrafts {
   browser: BrowserDraft;
   schedule: ScheduleDraft;
+  allowance: AllowanceDraft;
 }
 
 export type TaskDraftKind = keyof TaskDrafts;
@@ -72,6 +96,16 @@ export const EMPTY_TASK_DRAFTS: TaskDrafts = Object.freeze({
     interval: "daily",
     window: "",
     periods: "",
+  }),
+  allowance: Object.freeze({
+    asset: "DemoUSD",
+    period: "daily",
+    periodCap: "",
+    spendCap: "",
+    maxPayment: "",
+    providerIds: [],
+    days: "",
+    maxPurchases: "",
   }),
 });
 
@@ -117,6 +151,13 @@ export function updateScheduleDraft(
   update(context, "schedule", patch);
 }
 
+export function updateAllowanceDraft(
+  context: DraftContext,
+  patch: Partial<AllowanceDraft>,
+): void {
+  update(context, "allowance", patch);
+}
+
 function toggleInOrder<T>(
   selected: readonly T[],
   value: T,
@@ -143,6 +184,16 @@ export function toggleProvider(
   });
 }
 
+export function toggleAllowanceProvider(
+  context: DraftContext,
+  provider: ProviderId,
+): void {
+  const { providerIds } = getTaskDrafts(context).allowance;
+  update(context, "allowance", {
+    providerIds: toggleInOrder(providerIds, provider, PROVIDERS),
+  });
+}
+
 const filled = (value: string) => value.trim() !== "";
 
 export function isBrowserDraftComplete(draft: BrowserDraft): boolean {
@@ -164,7 +215,80 @@ export function isScheduleDraftComplete(draft: ScheduleDraft): boolean {
   ].every(filled);
 }
 
-// Leaving a form discards its draft; the other form is kept.
+export type AllowanceField =
+  | "periodCap"
+  | "spendCap"
+  | "maxPayment"
+  | "days"
+  | "maxPurchases";
+
+const PERIOD_WORD: Record<AllowancePeriod, string> = {
+  daily: "day",
+  weekly: "week",
+};
+
+// Form-level check against the S2 ceilings (plan S9.7). The contract and
+// the wallet policy check again; this does not replace either.
+export function validateAllowanceDraft(
+  draft: AllowanceDraft,
+): FormCheck<AllowanceField> {
+  const asset = ASSET_LABELS[draft.asset];
+  const word = PERIOD_WORD[draft.period];
+  const periodCap = checkAmount(
+    draft.periodCap,
+    asset,
+    draft.period === "daily" ? CEILINGS.walletDay : CEILINGS.walletWeek,
+  );
+  const spendCap = checkAmount(draft.spendCap, asset, null);
+  const maxPayment = checkAmount(draft.maxPayment, asset, CEILINGS.perPayment);
+  const days = checkCount(draft.days, CEILINGS.allowanceDays, "day");
+  const purchases = checkCount(
+    draft.maxPurchases,
+    CEILINGS.allowanceActions,
+    "purchase",
+  );
+  const errors: Partial<Record<AllowanceField, string>> = {};
+  if (periodCap.error) errors.periodCap = periodCap.error;
+  if (spendCap.error) errors.spendCap = spendCap.error;
+  if (maxPayment.error) errors.maxPayment = maxPayment.error;
+  else if (
+    maxPayment.units !== null &&
+    periodCap.units !== null &&
+    maxPayment.units > periodCap.units
+  )
+    errors.maxPayment = `Cannot be more than the cap per ${word}`;
+  if (days.error) errors.days = days.error;
+  if (purchases.error) errors.maxPurchases = purchases.error;
+
+  const missing: string[] = [];
+  if (!filled(draft.periodCap)) missing.push(`Cap per ${word}`);
+  if (!filled(draft.spendCap)) missing.push("Total cap");
+  if (!filled(draft.maxPayment)) missing.push("Most per purchase");
+  if (draft.providerIds.length === 0) missing.push("A provider");
+  if (!filled(draft.days)) missing.push("How long it lasts");
+  if (!filled(draft.maxPurchases)) missing.push("Most purchases");
+  return formCheck(errors, missing);
+}
+
+const plural = (n: number, unit: string) => `${n} ${unit}${n === 1 ? "" : "s"}`;
+
+// The allowance in plain words, or null until the form is complete.
+export function allowanceSummary(draft: AllowanceDraft): string[] | null {
+  if (!validateAllowanceDraft(draft).complete) return null;
+  const asset = ASSET_LABELS[draft.asset];
+  const word = PERIOD_WORD[draft.period];
+  const amount = (text: string) =>
+    `${formatAgentAmount(checkAmount(text, asset, null).units ?? 0n)} ${asset}`;
+  const providers = draft.providerIds.map((p) => PROVIDER_LABELS[p]);
+  return [
+    `Your agent may spend up to ${amount(draft.periodCap)} each ${word}, and ${amount(draft.spendCap)} in total.`,
+    `Each purchase is at most ${amount(draft.maxPayment)}, and only from ${providers.join(" or ")}.`,
+    `It can make up to ${plural(Number(draft.maxPurchases), "purchase")}. The allowance ends ${plural(Number(draft.days), "day")} after it starts.`,
+    `Each ${word} is counted from when the allowance starts, not from midnight. Unused budget does not carry over.`,
+  ];
+}
+
+// Leaving a form discards its draft; the other forms are kept.
 export function clearTaskDraft(
   context: DraftContext,
   kind: TaskDraftKind,

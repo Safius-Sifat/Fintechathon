@@ -85,9 +85,15 @@ export function HomeScreen() {
         <StatusTag state="notConnected" />
         <Divider />
         <DetailRow label="Address" value="Not created" muted />
-        <DetailRow label="Spendable" value="Unavailable" muted />
+        <DetailRow label="DemoUSD balance" value="Unavailable" muted />
+        <DetailRow label="DemoUSD spendable" value="Unavailable" muted />
+        <DetailRow label="Test USDC balance" value="Unavailable" muted />
+        <DetailRow label="Test USDC spendable" value="Unavailable" muted />
+        <DetailRow label="Frozen" value="Unavailable" muted />
+        <DetailRow label="Service hold" value="Unavailable" muted />
         <Text style={styles.caption}>
-          The agent wallet needs the Mandate service, which this build does not
+          Each asset is shown on its own and never added to personal funds. The
+          agent wallet needs the Mandate service, which this build does not
           connect to.
         </Text>
       </Card>
@@ -115,6 +121,14 @@ export function HomeScreen() {
         value="Status unavailable"
         accessibilityHint="Opens freeze, pause, revoke and logout"
         onPress={() => navigation.navigate("AgentControls")}
+      />
+      <NavRow
+        icon="tune-variant"
+        tone="amber"
+        label="Wallet policy"
+        value="Policy unavailable"
+        accessibilityHint="Opens limits, allowed recipients and the review threshold for all agents"
+        onPress={() => navigation.navigate("WalletPolicy")}
       />
 
       <View style={styles.note}>

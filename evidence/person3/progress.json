@@ -1,8 +1,8 @@
 {
   "owner": "Person3",
   "plan": "docs/plans/03 - Android Owner Wallet.md (v7.1)",
-  "updatedAt": "2026-10-20T17:40:00+06:00",
-  "currentCheckpoint": "UI-08 group 1 (Approvals, ApprovalDetail, Alerts, AgentControls): visually approved, submitted as draft PR #37 (depends on #36 -> #35, both unmerged). Next: UI-08 group 2 (WalletPolicy, IntentCompose, IntentReview, AllowanceApproval).",
+  "updatedAt": "2026-10-20T20:15:00+06:00",
+  "currentCheckpoint": "UI-08 group 2 (WalletPolicy, IntentCompose, IntentReview, AllowanceApproval) implemented on work/person3-mobile-ui08-policy-intent-allowance (branched from #37's branch); awaiting Person3 owner visual review, not submitted. UI-08 group 1 is draft PR #37 (depends on #36 -> #35).",
   "priority": "Person3 owner decision 2026-10-19: screens, layouts and UI/UX first. Wallet, security and backend functionality is deferred, not dropped; every task below stays required for the final deliverable.",
   "acceptanceRule": "UI checkpoints are layout and navigation previews. They complete no P3 case: every case below stays open until its own functional, device and iOS evidence exists.",
   "uiCheckpoints": [
@@ -45,7 +45,7 @@
     {
       "id": "UI-08",
       "screens": "Approvals, ApprovalDetail, Alerts, AgentControls, WalletPolicy, IntentCompose, IntentReview, AllowanceApproval",
-      "status": "IN_PROGRESS: group 1 (Approvals, ApprovalDetail, Alerts, AgentControls) visually approved, draft PR #37 (depends on #36 -> #35); group 2 (WalletPolicy, IntentCompose, IntentReview, AllowanceApproval) not started",
+      "status": "IN_PROGRESS: group 1 (Approvals, ApprovalDetail, Alerts, AgentControls) visually approved, draft PR #37 (depends on #36 -> #35); group 2 (WalletPolicy, IntentCompose, IntentReview, AllowanceApproval) implemented, in owner review, not submitted",
       "preparesCases": "P3-A01, P3-A02"
     },
     {
@@ -68,7 +68,7 @@
       "approach": "Plan, Agent execution instructions: Node's test runner through the existing pinned tsx; apps/mobile script 'test': 'tsx --test test/*.test.ts'; test names contain the exact case ID; pure domain/view-model/API logic only (no React Native screens in Node).",
       "requiredBefore": "Functional QR and amount validation: apps/mobile/src/domain/{amounts,qr,assets}.ts with apps/mobile/test/{amounts,qr,assets}.test.ts (P3-W02, WQ03, WQ14)",
       "dependencyNote": "Uses the tsx version already pinned in the workspace; any new test dependency is recorded in the lockfile through the agreed narrow exception",
-      "observed": "apps/mobile 'test' and 'check' (tsx/Node test runner) merged in #33; root make check-mobile runs them since #34, then fails on the native gate by design. 14 tests as of UI-06; 35 as of UI-07; 45 as of UI-08 group 1."
+      "observed": "apps/mobile 'test' and 'check' (tsx/Node test runner) merged in #33; root make check-mobile runs them since #34, then fails on the native gate by design. 14 tests as of UI-06; 35 as of UI-07; 45 as of UI-08 group 1; 69 as of UI-08 group 2."
     }
   },
   "platformRule": "v7.1: a case passes only when Android and iOS both pass. Current work is Android only, so Android results are recorded as LOCAL_PASS until P3-X01 exists.",
@@ -185,7 +185,7 @@
     },
     "P3-A02": {
       "title": "Wallet policy editor, allowance and intent review",
-      "status": "NOT_STARTED",
+      "status": "NOT_STARTED (UI preview only: UI-08 group 2)",
       "cases": 5,
       "blockedBy": [
         "Person2 compile and policy routes (P2-A01/A02, unverified)"

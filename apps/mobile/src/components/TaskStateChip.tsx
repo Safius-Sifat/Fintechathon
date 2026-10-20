@@ -44,5 +44,8 @@ const styles = StyleSheet.create({
     paddingVertical: space.xs,
     borderRadius: radius.pill,
   },
-  label: { ...type.label, flexShrink: 1 },
+  // Android can measure a short bold label slightly narrower than it draws
+  // (seen with the "ff" in "Allowlist off"), clipping its last word; the
+  // end padding leaves room for that.
+  label: { ...type.label, flexShrink: 1, paddingEnd: 2 },
 });

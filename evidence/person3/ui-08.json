@@ -3,7 +3,7 @@
   "title": "Approvals, Approval detail, Alerts and Agent controls (layout and navigation only)",
   "status": "SUBMITTED",
   "recordedAt": "2026-10-20T17:20:00+06:00",
-  "note": "UI evidence, kept outside evidence/*/cases/. Completes no P3 case: P3-A01 stays open. No approval, rejection, freeze, pause, revoke, logout or alert is performed or shown as real. Group 2 (WalletPolicy, IntentCompose, IntentReview, AllowanceApproval, P3-A02) is not started.",
+  "note": "UI evidence, kept outside evidence/*/cases/. Completes no P3 case: P3-A01 stays open. No approval, rejection, freeze, pause, revoke, logout or alert is performed or shown as real. Group 2 is recorded under group2.",
   "baseCommit": "98088df",
   "dependency": "Branched from work/person3-mobile-ui07-agent-tasks (draft PR #36), which depends on work/person3-mobile-ui06-activity-assets (draft PR #35). Neither is merged; origin/main is 95e91fb. Merge order: #35, #36, then this group.",
   "planReference": "docs/plans/03 - Android Owner Wallet.md v7.1: P3-A01 (approval screen fields, untrusted rationale, reject sends no signature, alerts with freeze, controls vs logout), S9.5 review thresholds and 15-minute co-signed actions, S9.6 freeze vs pause/revoke and the four separate effects, S9.11 service inhibit, S4 ApprovalRequest",
@@ -141,5 +141,162 @@
     "ownerApproval": "Visually approved by the Person3 owner on 2026-10-20",
     "dependency": "#36 (UI-07) and #35 (UI-06), both unmerged; PR diff against main includes them until they merge. UI-08-only comparison: work/person3-mobile-ui07-agent-tasks...work/person3-mobile-ui08-approvals-controls (34 files)",
     "afterDependenciesMerge": "merge origin/main, rerun checks, verify the PR diff contains only UI-08 group 1 files"
+  },
+  "group2": {
+    "title": "Wallet policy, Describe a goal (intent compose), Review terms (intent review) and Service allowance (layout, local drafts and form checks only)",
+    "status": "VISUALLY APPROVED by the Person3 owner on 2026-10-20; submission in progress",
+    "recordedAt": "2026-10-20T20:15:00+06:00",
+    "branch": "work/person3-mobile-ui08-policy-intent-allowance",
+    "baseCommit": "fd0b630",
+    "dependency": "Branched from work/person3-mobile-ui08-approvals-controls (draft PR #37), which depends on #36 then #35; none merged. origin/main is 95e91fb.",
+    "note": "Completes no P3 case: P3-A02 (T01-T05) stays open. Nothing is compiled, drafted by the service, signed, relayed or sent. Form checks against the S2 ceilings are local previews; native signWalletPolicy, the permit draft and the contract checks are not built.",
+    "planReference": "docs/plans/03 - Android Owner Wallet.md v7.1: P3-A02; S2 ceilings; S3 WalletPolicy/AssetCap; S4 /intents/compile, /wallets/:walletId/policy/draft, Terms; S9.3 intent compiler; S9.4 wallet policy (allowlist-off warning, 32/8 limits); S9.7 allowance; S9.10 outstanding x402 eligibility",
+    "implemented": [
+      "Home: agent wallet card shows DemoUSD balance, DemoUSD spendable, Test USDC balance, Test USDC spendable, Frozen and Service hold, each on its own row and Unavailable until real data exists; assets are never combined with each other or with personal funds; new Wallet policy row (Policy unavailable)",
+      "Agent tasks hub: Describe a goal row; Service allowance changes from Not available yet to a form",
+      "Wallet policy: current policy Unavailable (read from chain, not readable); per-asset limits for DemoUSD and Test USDC (USDC off until it has its own limits) with S2 ceilings 0.50/10.00/25.00 and per payment <= per day <= per week; recipients Allowed / Not listed / Blocked per manifest provider (one choice, never both), contacts Not available yet, x of 32 counters, Allowlist on/off chip and a warning when the change removes the last allowed recipient; call templates 0 of 8 (manifest not loaded, banned selectors noted); review threshold above an amount or none; local change list marked Tightens/Loosens; unsettled x402 payments Unavailable, not empty; list check on this phone Not built; Sign disabled",
+      "Describe a goal: goal text; Drafting unavailable and Draft terms disabled; manual forms offered (Browser check, Scheduled payment, Service allowance); editable draft (asset, most per payment, total spend cap, paid attempts, expiry, review threshold, providers) with a You changed list; model explanation and warnings tagged Untrusted model text",
+      "Review terms: goal next to every shared Terms field (16, schema order, incl. asset, review threshold, recipients and contract calls); each edited term marked Changed by you; values are the owner's edits, not the compiled draft; checks before signing all Not available / Not checked / Not built; Approve disabled",
+      "Service allowance: daily or weekly period, cap per period (<= 10.00 or 25.00), total cap, most per purchase (<= 0.50 and <= the period cap), providers, days (1-30), most purchases (1-200), minimum balance kept 3.00; In plain words summary; terms Not drafted yet; Approve disabled",
+      "Shared AmountField (label, limit hint, inline error); TaskStateChip label end padding so 'Allowlist off' is not clipped; three-option choices use the compact segmented layout (one row at 1.0, wrap without overlap at 2.0)"
+    ],
+    "fixtures": "config/policySamples.ts, __DEV__ only and labelled Development sample: a current policy (version 3), two unsettled x402 payments and one compiled browser-check draft. Providers are named, never given an address.",
+    "fabricated": "none outside the labelled development samples",
+    "security": "No signing, native call, network request or secret. Sign policy and both Approve buttons are disabled. Drafts are in memory only, keyed by account and network, and cleared on leaving the screen.",
+    "dependencyChange": "none (type-only imports from the existing @mandate/schema devDependency; no lockfile or native change)",
+    "files": [
+      "apps/mobile/src/screens/{WalletPolicy,IntentCompose,IntentReview,AllowanceApproval}.tsx",
+      "apps/mobile/src/screens/{HomeScreen,AgentTasks}.tsx",
+      "apps/mobile/src/navigation/RootNavigator.tsx",
+      "apps/mobile/src/components/AmountField.tsx",
+      "apps/mobile/src/components/TaskStateChip.tsx (label padding)",
+      "apps/mobile/src/domain/amounts.ts (six-decimal agent amounts only; not P3-W02)",
+      "apps/mobile/src/config/{agentLimits,policySamples}.ts",
+      "apps/mobile/src/state/{policyDraft,intentDraft,usePolicyEditor,useIntentDraft}.ts",
+      "apps/mobile/src/state/taskDraft.ts (allowance draft)",
+      "apps/mobile/test/{policy-form,intent-review,allowance}.test.ts"
+    ],
+    "checks": [
+      {
+        "check": "UI-08 group 2 tests before implementation (red, against stub modules)",
+        "command": "pnpm --filter @mandate/mobile test",
+        "result": "FAIL (expected)",
+        "observed": "All 23 new tests failed; the 45 existing tests passed. One test first passed vacuously against an empty stub and was tightened before the recorded run. The finishing-change test (absent cap reads as disabled) was run red against the old 'No limits' wording: 1 failed, 68 passed.",
+        "artifact": "evidence/person3/ui-08/group2-red-run.txt"
+      },
+      {
+        "check": "pnpm --filter @mandate/mobile check (after implementation)",
+        "result": "PASS",
+        "observed": "69/69 tests (24 new + 45 existing), typecheck clean"
+      },
+      {
+        "check": "pnpm typecheck (all workspace packages)",
+        "result": "PASS"
+      },
+      {
+        "check": "pnpm check:repository",
+        "result": "PASS (checkedFiles 613, failures [], rerun after the evidence update)"
+      },
+      {
+        "check": "prettier --check on changed and new files",
+        "result": "PASS"
+      },
+      {
+        "check": "make check-mobile",
+        "result": "NOT_RUN",
+        "observed": "make is not available on this Windows host; step 2 fails by design until native and device suites exist."
+      }
+    ],
+    "device": {
+      "kind": "emulator",
+      "serial": "emulator-5554",
+      "android": "16",
+      "api": 36,
+      "build": "Existing dev-client APK; JS from this branch. No native change.",
+      "physicalPhone": "NOT RUN",
+      "ios": "NOT RUN",
+      "screenReader": "NOT RUN"
+    },
+    "runtimeChecks": [
+      {
+        "check": "All four screens and the Home/hub entries at system text size 1.0",
+        "result": "PASS",
+        "screens": [
+          "g2-01-home-agent-card-policy-row.png",
+          "g2-02-agent-tasks-hub.png",
+          "g2-10-intent-top.png",
+          "g2-11-intent-forms-and-sample.png",
+          "g2-12-intent-sample-goal-terms.png",
+          "g2-13-intent-sample-terms-2.png",
+          "g2-14-intent-sample-note-review.png",
+          "g2-15-intent-error-above-ceiling.png",
+          "g2-16-intent-edited-chips.png",
+          "g2-20-review-goal-terms.png",
+          "g2-21-review-terms-bottom.png",
+          "g2-22-review-checks-actions.png",
+          "g2-30-policy-top.png",
+          "g2-31-policy-limits-empty.png",
+          "g2-32-policy-limit-errors.png",
+          "g2-33-policy-order-error.png",
+          "g2-34-policy-recipients-off.png",
+          "g2-35-policy-calls-threshold.png",
+          "g2-36-policy-before-sign-empty.png",
+          "g2-37-policy-unsettled-checks-sign.png",
+          "g2-40-policy-sample-current.png",
+          "g2-41-policy-allowlist-off-warning.png",
+          "g2-42-policy-changes.png",
+          "g2-43-policy-unsettled-stops.png",
+          "g2-44-policy-usdc-disabled.png",
+          "g2-45-policy-usdc-disabled-changes.png",
+          "g2-46-policy-usdc-disabled-stops.png",
+          "g2-50-allowance-top-empty.png",
+          "g2-51-allowance-errors.png",
+          "g2-52-allowance-providers-duration.png",
+          "g2-53-allowance-terms-actions.png"
+        ]
+      },
+      {
+        "check": "Large text, font scale 2.0: Home, Wallet policy, Describe a goal, Review terms and Service allowance reflow without clipping. Emulator restored to 1.0.",
+        "result": "PASS",
+        "observed": "The first 2.0 pass showed the three-option recipient choice overlapping its caption; fixed with the compact segmented layout and recaptured (1.0 shots also recaptured). At 1.0 the 'Allowlist off' chip clipped its last word; fixed with label end padding. Finishing changes recaptured at 1.0 and 2.0 (Home card, intent fallback, policy baseline, disabled asset, draft changes and stop reasons, signing checks).",
+        "screens": [
+          "g2-60-2x-allowance-top.png",
+          "g2-61-2x-allowance-duration.png",
+          "g2-62-2x-allowance-terms.png",
+          "g2-64-2x-policy-baseline.png",
+          "g2-65-2x-policy-changes.png",
+          "g2-66-2x-policy-stops.png",
+          "g2-67-2x-policy-recipients-chip.png",
+          "g2-67-2x-policy-usdc-disabled.png",
+          "g2-68-2x-policy-warning.png",
+          "g2-69-2x-policy-checks-sign.png",
+          "g2-70-2x-home-agent-card.png",
+          "g2-72-2x-intent-fallback.png",
+          "g2-73-2x-intent-draft.png",
+          "g2-74-2x-intent-draft-2.png",
+          "g2-75-2x-review-terms.png",
+          "g2-76-2x-review-terms-2.png",
+          "g2-77-2x-review-actions.png"
+        ]
+      }
+    ],
+    "pending": [
+      "Native signWalletPolicy recomputing list hashes; PolicySigner.kt and PolicySignerTest (P3-A02.T01, T02 native side)",
+      "Real policy read from chain and the outstanding X402 list; Person2 /wallets/:walletId/policy/draft and /submit (P2-A02)",
+      "Real /intents/compile and /permits/draft; signed terms equal the edited form (P3-A02.T03); compiler-unavailable path creating a task (T04)",
+      "ALLOWANCE Permit signing and per-period remaining from chain across a boundary (T05)",
+      "Wallet policy check of task and allowance terms; contacts as an allowlist source (UI-10)",
+      "Maestro flows apps/mobile/e2e/{policy,intent,allowance}.yaml",
+      "Physical Android phone, iOS, screen-reader pass"
+    ],
+    "finishingChanges": [
+      "An absent AssetCap reads 'Agent spending disabled' (baseline card, editor when an asset is off) and the stop reason reads 'Agent spending of <asset> is disabled in the new policy'; never 'No limits' or unlimited. capSummary() in state/policyDraft.ts, tested.",
+      "The labelled sample is titled 'Development baseline' with 'Your policy on chain: Unavailable' above it, so the actual policy and the sample stay distinct.",
+      "The change card is 'What this draft would change' and says it is worked out on this phone against the development baseline, and that nothing changes on chain until the change is signed and confirmed.",
+      "The signing card separates 'Form checks: On this phone only' from 'Native signing check: Not built'.",
+      "Describe a goal states the manual forms work as previews and cannot create a task yet.",
+      "domain/amounts.ts comment scoped explicitly to the two agent assets; not for ETH, imported tokens or personal sends (P3-W02, not built).",
+      "Shared S2 ceilings stay mobile-side constants with the contract-consistency test; an export request for Person1 is prepared outside the repository. No Person1 file is edited."
+    ]
   }
 }

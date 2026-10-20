@@ -5,6 +5,7 @@ import { AccountsScreen } from "../screens/Accounts";
 import { AgentControlsScreen } from "../screens/AgentControls";
 import { AgentTasksScreen } from "../screens/AgentTasks";
 import { AlertsScreen } from "../screens/Alerts";
+import { AllowanceApprovalScreen } from "../screens/AllowanceApproval";
 import { ApprovalScreen } from "../screens/Approval";
 import { ApprovalDetailScreen } from "../screens/ApprovalDetail";
 import { ApprovalsScreen } from "../screens/Approvals";
@@ -12,6 +13,8 @@ import { ActivityScreen } from "../screens/ActivityScreen";
 import { AssetsScreen } from "../screens/Assets";
 import { HomeScreen } from "../screens/HomeScreen";
 import { InspectorScreen } from "../screens/Inspector";
+import { IntentComposeScreen } from "../screens/IntentCompose";
+import { IntentReviewScreen } from "../screens/IntentReview";
 import { IntroScreen, SetupScreen, WelcomeScreen } from "../screens/Onboarding";
 import { ReceiveScreen } from "../screens/Receive";
 import { ScanScreen } from "../screens/Scan";
@@ -23,6 +26,7 @@ import { TaskCreateScreen } from "../screens/TaskCreate";
 import { TokenDetailsScreen } from "../screens/TokenDetails";
 import { TransactionDetailScreen } from "../screens/TransactionDetail";
 import { TransferReviewScreen } from "../screens/TransferReview";
+import { WalletPolicyScreen } from "../screens/WalletPolicy";
 import { TabBar, type TabMeta } from "./TabBar";
 
 export type TabParamList = {
@@ -62,6 +66,12 @@ export type RootStackParamList = {
   ApprovalDetail: { sampleId: string };
   Alerts: undefined;
   AgentControls: undefined;
+  // The policy, intent and allowance screens read their drafts from
+  // state/{policyDraft,intentDraft,taskDraft}.ts.
+  WalletPolicy: undefined;
+  IntentCompose: undefined;
+  IntentReview: undefined;
+  AllowanceApproval: undefined;
 };
 
 const TAB_META: Record<keyof TabParamList, TabMeta> = {
@@ -130,6 +140,13 @@ export function RootNavigator() {
       <Stack.Screen name="ApprovalDetail" component={ApprovalDetailScreen} />
       <Stack.Screen name="Alerts" component={AlertsScreen} />
       <Stack.Screen name="AgentControls" component={AgentControlsScreen} />
+      <Stack.Screen name="WalletPolicy" component={WalletPolicyScreen} />
+      <Stack.Screen name="IntentCompose" component={IntentComposeScreen} />
+      <Stack.Screen name="IntentReview" component={IntentReviewScreen} />
+      <Stack.Screen
+        name="AllowanceApproval"
+        component={AllowanceApprovalScreen}
+      />
     </Stack.Navigator>
   );
 }

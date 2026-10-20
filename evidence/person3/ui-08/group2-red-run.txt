@@ -1,0 +1,62 @@
+Red run of the UI-08 group 2 tests against stub modules, before implementation.
+Command: pnpm --filter @mandate/mobile test (exit 1). Paths and stack traces removed.
+
+not ok 6 - UI-08 allowance: starts empty with nothing chosen
+  "Cannot read properties of undefined (reading 'asset')"
+not ok 7 - UI-08 allowance: limits above the S2 ceilings are rejected
+  Expected values to be strictly equal:
+not ok 8 - UI-08 allowance: one purchase cannot exceed the period cap, and zero is not a limit
+  The expression evaluated to a falsy value:
+not ok 9 - UI-08 allowance: summary states period, caps, providers and lifetime in plain words
+  The input did not match the regular expression /2\.00 DemoUSD each day/. Input:
+not ok 10 - UI-08 allowance: the draft lives with the other task forms and leaving clears it
+  "Cannot read properties of undefined (reading 'providerIds')"
+not ok 22 - UI-08 intent review: shows every shared Terms field, in order
+  Expected values to be strictly deep-equal:
+not ok 23 - UI-08 intent review: without a draft every term is not drafted, never a value
+  Expected values to be strictly equal:
+not ok 24 - UI-08 intent review: shown terms are the owner's edits, not the compiled draft
+  Expected values to be strictly deep-equal:
+not ok 25 - UI-08 intent review: reverting an edit clears its mark
+  Expected values to be strictly deep-equal:
+not ok 26 - UI-08 intent review: edited terms are checked against the S2 ceilings
+  Expected values to be strictly equal:
+not ok 27 - UI-08 intent review: the sample compiles only to a known runbook and editable terms
+  The expression evaluated to a falsy value:
+not ok 28 - UI-08 intent review: drafts belong to one account and leaving clears them
+  Expected values to be strictly equal:
+not ok 29 - UI-08 policy form: S2 ceilings match Person1's contract constants
+  Expected values to be strictly equal:
+not ok 30 - UI-08 policy form: agent amounts parse exactly to six-decimal base units
+  Expected values to be strictly equal:
+not ok 31 - UI-08 policy form: a cap above the S2 ceiling is rejected by the form
+  Expected values to be strictly equal:
+not ok 32 - UI-08 policy form: per payment, per day and per week must be in order
+  Expected values to be strictly equal:
+not ok 33 - UI-08 policy form: at least one asset needs limits, and a disabled asset needs none
+  Expected values to be strictly equal:
+not ok 34 - UI-08 policy form: the empty form starts with nothing chosen and is not complete
+  Expected values to be strictly equal:
+not ok 35 - UI-08 policy form: removing the last allowed recipient turns filtering off and is flagged
+  Expected values to be strictly equal:
+not ok 36 - UI-08 policy form: a recipient is never both allowed and blocked
+  Expected values to be strictly deep-equal:
+not ok 37 - UI-08 policy form: changes say whether they tighten or loosen
+  Expected values to be strictly equal:
+not ok 38 - UI-08 policy form: lists outstanding x402 payments a change would stop (S9.10)
+  Expected values to be strictly deep-equal:
+not ok 39 - UI-08 policy form: drafts belong to one account and network
+  Expected values to be strictly equal:
+# tests 68
+# pass 45
+# fail 23
+
+Finishing change (owner review), red run before the fix: an absent asset cap must read as
+"Agent spending disabled", never as unlimited. capSummary first returned the screen's old wording.
+Command: pnpm --filter @mandate/mobile test (exit 1).
+
+not ok 40 - UI-08 policy form: an asset without a cap reads as agent spending disabled, never unlimited
+  + actual - expected: + 'No limits' - 'Agent spending disabled'
+# tests 69
+# pass 68
+# fail 1
