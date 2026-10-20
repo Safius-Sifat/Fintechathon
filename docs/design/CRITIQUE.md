@@ -153,3 +153,9 @@ Not verified: real-device feel, press-and-hold timing and haptics, New York on A
 Scan: no FAILs at 402x874 and 375x667. First round failed on the Stop button sitting under the tab bar (home indicator contrast); moved above the bar. All 13 frames opened and checked.
 Self-score: 11 of 13 at 4 or above; richness (7) and feature test (12) stay at 3 on purpose. Warning kept: "Only 3 text sizes" on the stop-pending stepper.
 Not verified: press-and-hold timing, push notification timing, real chain confirmation times. Sample data only.
+
+## Pass 4: prove it (11 frames)
+Round 1: every frame after the first rendered blank because helper names (`activity`, `payDetail`) collided with earlier sets; renamed with a `p4_` prefix. Round 2: on 375x667 the finding rows overflowed into the home indicator; reasons are hidden on the small phone only and stay on the detail screen.
+Scan: no FAILs at both sizes. Warning kept: "Only 3 text sizes" on list screens.
+Self-score: 11 of 13 at 4 or above; richness (7) and feature test (12) stay at 3 on purpose.
+Not verified: real findings from the verifier (not built yet), share sheet, explorer links. Sample data only.

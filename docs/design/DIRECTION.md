@@ -164,3 +164,9 @@ Research: `RESEARCH.md`, "Pass 1" (ten studies). Screens: `pass1.html` (`shots/p
 - Co-signature approval uses the press-and-hold seal, with an expiry and "do nothing means no payment".
 - Stop is three separate rows (pause all, end a permission, freeze). Pending and confirmed are different screens. Offline stop reads the chain directly.
 - Sign-out sheet says agents may keep working.
+
+## Addendum: pass 4 (prove it)
+- Activity names who made each row. Agent payment detail shows task, decision, limit, approval and status, and links to the proof.
+- Proof lists the six findings with a glyph, state and one-line reason. The wax red is used only for a failed finding.
+- The service's view and the independent verifier's report are separate screens. Completion stays "Not independent" in both.
+- Export is a file the owner shares through the system sheet.

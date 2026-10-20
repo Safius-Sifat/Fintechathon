@@ -107,3 +107,17 @@ My calls:
 - Stop uses the freeze-sheet pattern: what stops, what keeps working. Pause, end a permission and freeze are separate rows, and sign-out is stated to stop none of them (plan 03 P3-W03).
 - Stop is shown as pending until the chain confirms, with a local "paused here" state and a note that earlier payments may settle (plan 03 P3-05).
 - Task done keeps result, payment and permission as three separate states (plan 03 P3-04.T03).
+
+## Pass 4: prove it
+Studies (Mobbin, iOS):
+- Checklists with a state and a short reason per item: [X eligibility](https://mobbin.com/screens/7428f87f-c496-4f97-b28f-0d2a366d82da), [Binance verification](https://mobbin.com/screens/5fdf3ed1-eb86-4bbe-a8dd-6e26da0cf51f), [Acorns](https://mobbin.com/screens/aa08a076-89da-4937-97ef-9ce983123822), [Vestiaire Collective](https://mobbin.com/screens/ef0b60a2-5048-4ef0-bab6-187854f7402a).
+- History lists with a status and a way to the explorer: [Trust Wallet](https://mobbin.com/screens/33ccda7e-9c7c-43b1-946d-35f8c894749f), [Coinbase Wallet](https://mobbin.com/screens/e7e068c7-5391-491c-b6a3-3d6f251f69b5), [Family](https://mobbin.com/screens/fcebf955-5c8f-4714-b75b-c69533a9efdf), [Coinbase](https://mobbin.com/screens/095bdf78-41c1-400c-8fd2-9db894e5568b), [Kraken filters](https://mobbin.com/screens/4f9b2f94-a6e7-428e-90db-17c2a7ce5d79).
+- Export through the system share sheet with file name and size: [Withings](https://mobbin.com/screens/76d50e09-c1d6-4ed7-b3fb-a63068af7de6), [Visible](https://mobbin.com/screens/9554dd1b-8cac-4a0c-9cff-3e446e78001d), [Buddy](https://mobbin.com/screens/b04ffada-2312-40a9-b8e1-175aef434d10).
+- Who-did-what logs: [TikTok account history](https://mobbin.com/screens/8cc2c4c3-be59-4241-bc90-4e119997b635), [Yahoo Finance recent activity](https://mobbin.com/screens/58c1de3e-56c9-499e-8a38-bad6ad447257), [Temu sign-in activity](https://mobbin.com/screens/0c9545ad-ff0c-467c-932b-6b347095a566), [Meta AI login activity](https://mobbin.com/screens/b3aaaf64-4054-40ea-b1f7-0084d23f4e7a).
+
+My calls:
+- The six findings are exactly integrity, authority, policy, settlement, delivery, completion, with the four states in `packages/schema/src/evidence.ts` (shown as Passed, Failed, Not yet, Not independent). Basis chips come from chain, signature, artifact and recorder_assertion; recorder_assertion reads "Service's own record".
+- Failed is shown plainly. Not yet is not styled as a failure. Unverifiable is its own state, never a pass (plan 04 P4-05).
+- The independent check is a separate screen labelled as not produced by this app, with the verifier's exit-code meaning (0 all pass, 1 fail, 2 pending or unverifiable, 3 error).
+- Activity labels each row You or Agent, and an owner transfer has no task (WalletActivity source and OWNER_CONTROL).
+- Export lists what is in the file and what is left out (no keys, phrases, tokens or reasoning text), and uploads nothing (plan 03 P3-04).
