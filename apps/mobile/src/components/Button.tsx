@@ -9,42 +9,6 @@ import {
 } from "../theme";
 import { Icon, type IconName } from "./Icon";
 
-interface HeroActionProps {
-  label: string;
-  icon: IconName;
-  disabled?: boolean;
-  // Read by screen readers; explains why a disabled action is unavailable.
-  accessibilityHint?: string;
-  onPress?: () => void;
-}
-
-// Pill action on the dark hero card.
-export function HeroAction({
-  label,
-  icon,
-  disabled = false,
-  accessibilityHint,
-  onPress,
-}: HeroActionProps) {
-  const colors = useColors();
-  const styles = useStyles();
-  const fg = disabled ? colors.onInkDisabled : colors.ink;
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityState={{ disabled }}
-      accessibilityHint={accessibilityHint}
-      disabled={disabled}
-      onPress={onPress}
-      android_ripple={{ color: colors.rippleOnRaised }}
-      style={[styles.action, disabled ? styles.disabled : styles.enabled]}
-    >
-      <Icon name={icon} size={18} color={fg} />
-      <Text style={[styles.label, { color: fg }]}>{label}</Text>
-    </Pressable>
-  );
-}
-
 interface PrimaryButtonProps {
   label: string;
   icon?: IconName;
@@ -206,25 +170,4 @@ const useStyles = makeStyles((colors) => ({
     textAlign: "center",
   },
   pressed: { opacity: 0.85 },
-  action: {
-    flexGrow: 1,
-    flexBasis: 0,
-    minWidth: 120,
-    minHeight: touchTarget,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: space.sm,
-    paddingHorizontal: space.lg,
-    paddingVertical: space.sm,
-    borderRadius: radius.pill,
-    overflow: "hidden",
-  },
-  enabled: { backgroundColor: colors.onInk },
-  disabled: {
-    backgroundColor: colors.inkFill,
-    borderWidth: 1,
-    borderColor: colors.inkLine,
-  },
-  label: { ...type.bodyStrong, textAlign: "center", flexShrink: 1 },
 }));
