@@ -4,7 +4,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { AccountsScreen } from "../screens/Accounts";
 import { ActivityScreen } from "../screens/ActivityScreen";
 import { HomeScreen } from "../screens/HomeScreen";
-import { IntroScreen, SetupScreen, WelcomeScreen } from "../screens/Onboarding";
+import { SetupScreen, WelcomeScreen } from "../screens/Onboarding";
 import { ReceiveScreen } from "../screens/Receive";
 import { ScanScreen } from "../screens/Scan";
 import { SendScreen } from "../screens/Send";
@@ -22,9 +22,7 @@ export type TabParamList = {
 // Send, details) are pushed over the tabs in later milestones.
 export type RootStackParamList = {
   Welcome: undefined;
-  Intro: undefined;
-  // direct: opened from Welcome, skipping How it works.
-  Setup: { direct?: boolean } | undefined;
+  Setup: undefined;
   Tabs: NavigatorScreenParams<TabParamList>;
   Accounts: undefined;
   Receive: undefined;
@@ -76,7 +74,6 @@ export function RootNavigator() {
       screenOptions={{ headerShown: false }}
     >
       <Stack.Screen name="Welcome" component={WelcomeScreen} />
-      <Stack.Screen name="Intro" component={IntroScreen} />
       <Stack.Screen name="Setup" component={SetupScreen} />
       <Stack.Screen name="Tabs" component={Tabs} />
       <Stack.Screen name="Accounts" component={AccountsScreen} />

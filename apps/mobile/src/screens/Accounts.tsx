@@ -77,7 +77,7 @@ export function AccountsScreen({ navigation }: Props) {
         <PrimaryButton
           label="Set up a wallet"
           accessibilityHint="Shows the wallet setup options"
-          onPress={() => navigation.navigate("Setup", { direct: true })}
+          onPress={() => navigation.navigate("Setup")}
         />
       </Card>
 
