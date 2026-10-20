@@ -28,3 +28,6 @@ Built:
 Not built, because the capability behind each does not exist yet (`preview` flags in `apps/mobile/src/config/capabilities.ts` are all false, and the repo rules forbid fake results): the real data and actions behind those screens (owner key, signing, the Mandate service, agent wallet, verifier). The recovery phrase, quiz and passphrase screens are native secure screens by rule and are not in JavaScript at all.
 
 Also not done: dark mode (components read static colours), Android adaptive icon, restyling every older screen against the mockups, device checks beyond the iOS simulator.
+
+## Part A status (branch `feat/mobile-redesign-finish`)
+A1 done for a sample of screens (see CRITIQUE.md). A2 done for Home (flat layout); Accounts, Receive, Send, Review, Scan and Activity keep their layout and pick up the new tokens. A3 done: theme hook, light and dark palettes, `userInterfaceStyle: automatic` (needs a native rebuild to take effect on iOS). A4 done: Android adaptive icon. A5 done for the shared blocks (large-text stacking, screen reader labels, 48 point targets); not tested with VoiceOver or TalkBack. A6 done for the hold logic and palette contrast (pure logic only; there is no component renderer in the test setup).

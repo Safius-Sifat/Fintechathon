@@ -159,3 +159,8 @@ Round 1: every frame after the first rendered blank because helper names (`activ
 Scan: no FAILs at both sizes. Warning kept: "Only 3 text sizes" on list screens.
 Self-score: 11 of 13 at 4 or above; richness (7) and feature test (12) stay at 3 on purpose.
 Not verified: real findings from the verifier (not built yet), share sheet, explorer links. Sample data only.
+
+## Build review (iOS simulator, iPhone 17 Pro Max, dark mode)
+Looked at: Welcome, Setup, Home, Agents, Settings, preview gallery, Fund, Lock, Allowance approval (also at accessibility-large text), Proof, Stop pending, Draft review. All render correctly; rows stack at large text; the pinned footer stays in view.
+Not looked at one by one: the other preview screens (same blocks, typechecked). Not checked: a 375x667 phone (no small simulator installed), Android, VoiceOver and TalkBack, light mode on the new Home after the rewrite, the press-and-hold feel.
+Changed after review: the hold-to-seal control now sits below the terms, so the terms are read before signing.

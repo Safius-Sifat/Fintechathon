@@ -76,7 +76,6 @@ export function ApprovePayment({ onBack }: PreviewProps) {
       onBack={onBack}
       footer={<GhostButton label="Decline" />}
     >
-      <HoldToSeal label="Press and hold to approve" />
       <BigAmount value="1.80" unit="DUSD" />
       <Rows>
         <Row label="To" value="Northgate Probes" />
@@ -86,6 +85,7 @@ export function ApprovePayment({ onBack }: PreviewProps) {
       <Note>
         If you do nothing, the payment is not made and the agent is told.
       </Note>
+      <HoldToSeal label="Press and hold to approve" />
     </Page>
   );
 }
