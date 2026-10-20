@@ -1,16 +1,30 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { ActivityIndicator, Pressable, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  Pressable,
+  Text,
+  View,
+  useWindowDimensions,
+} from "react-native";
 import {
   palettes,
   fonts,
   radius,
   type Colors,
   space,
+  stackedFontScale,
   touchTarget,
   type,
   makeStyles,
   useColors,
 } from "../theme";
+import {
+  HOLD_STEPS,
+  holdRelease,
+  holdTick,
+  idleHold,
+  type Hold,
+} from "../state/hold";
 import { Icon, type IconName } from "./Icon";
 import { Seal } from "./Seal";
 
@@ -34,14 +48,29 @@ interface RowProps {
 export function Row({ label, value, detail, onPress, mono }: RowProps) {
   const colors = useColors();
   const styles = useStyles();
+  // At large text sizes the value moves under the label instead of squeezing it.
+  const stacked = useWindowDimensions().fontScale > stackedFontScale;
+  const spoken = [label, detail, value].filter(Boolean).join(". ");
   const body = (
-    <View style={styles.row}>
+    <View
+      style={[styles.row, stacked && styles.rowStacked]}
+      accessible={onPress ? false : true}
+      accessibilityLabel={onPress ? undefined : spoken}
+    >
       <View style={styles.rowText}>
         <Text style={styles.rowLabel}>{label}</Text>
         {detail ? <Text style={styles.rowDetail}>{detail}</Text> : null}
       </View>
       {value ? (
-        <Text style={[styles.rowValue, mono && styles.mono]}>{value}</Text>
+        <Text
+          style={[
+            styles.rowValue,
+            stacked && styles.rowValueStacked,
+            mono && styles.mono,
+          ]}
+        >
+          {value}
+        </Text>
       ) : null}
       {onPress ? (
         <Icon name="chevron-right" size={22} color={colors.ink3} />
@@ -52,6 +81,7 @@ export function Row({ label, value, detail, onPress, mono }: RowProps) {
   return (
     <Pressable
       accessibilityRole="button"
+      accessibilityLabel={spoken}
       onPress={onPress}
       style={({ pressed }) => pressed && styles.pressed}
     >
@@ -95,6 +125,11 @@ export function BigAmount({ value, unit }: { value: string; unit?: string }) {
 }
 
 export type StepState = "done" | "now" | "todo";
+const STEP_WORDS: Record<StepState, string> = {
+  done: "Done",
+  now: "In progress",
+  todo: "Not started",
+};
 export interface StepItem {
   state: StepState;
   title: string;
@@ -107,7 +142,12 @@ export function Steps({ items }: { items: readonly StepItem[] }) {
   return (
     <View style={styles.steps}>
       {items.map((step, i) => (
-        <View key={step.title} style={styles.step}>
+        <View
+          key={step.title}
+          style={styles.step}
+          accessible
+          accessibilityLabel={`${STEP_WORDS[step.state]}. ${step.title}${step.detail ? `. ${step.detail}` : ""}`}
+        >
           <View style={styles.stepMark}>
             {step.state === "done" ? (
               <Icon name="check-circle" size={26} color={colors.ink} />
@@ -258,7 +298,6 @@ export function GhostButton({
 }
 
 const HOLD_MS = 600;
-const STEPS = 48;
 
 // Press and hold to sign. The seal fills while held; releasing early cancels
 // with nothing signed. The caller decides what signing means; in a build that
@@ -272,49 +311,46 @@ export function HoldToSeal({
   onSealed?: () => void;
   disabled?: boolean;
 }) {
-  const colors = useColors();
   const styles = useStyles();
-  const [filled, setFilled] = useState(0);
-  const [sealed, setSealed] = useState(false);
+  const colors = useColors();
+  const [hold, setHold] = useState<Hold>(idleHold);
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
   const stop = () => {
     if (timer.current) clearInterval(timer.current);
     timer.current = null;
   };
   useEffect(() => stop, []);
+  useEffect(() => {
+    if (hold.sealed) {
+      stop();
+      onSealed?.();
+    }
+    // onSealed fires once, when the hold completes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hold.sealed]);
   const start = () => {
-    if (disabled || sealed) return;
+    if (disabled || hold.sealed) return;
     stop();
-    let n = 0;
-    timer.current = setInterval(() => {
-      n += 1;
-      setFilled(n);
-      if (n >= STEPS) {
-        stop();
-        setSealed(true);
-        onSealed?.();
-      }
-    }, HOLD_MS / STEPS);
+    timer.current = setInterval(() => setHold(holdTick), HOLD_MS / HOLD_STEPS);
   };
-  const cancel = () => {
-    if (sealed) return;
+  const release = () => {
     stop();
-    setFilled(0);
+    setHold(holdRelease);
   };
   return (
     <View style={styles.hold}>
-      <Seal size={150} filled={filled} sealed={sealed} />
+      <Seal size={150} filled={hold.filled} sealed={hold.sealed} />
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={label}
         accessibilityHint="Press and hold to confirm"
         disabled={disabled}
         onPressIn={start}
-        onPressOut={cancel}
+        onPressOut={release}
         style={[styles.holdButton, disabled && styles.holdDisabled]}
       >
         <Icon name="fingerprint" size={20} color={colors.onInk} />
-        <Text style={styles.holdLabel}>{sealed ? "Sealed" : label}</Text>
+        <Text style={styles.holdLabel}>{hold.sealed ? "Sealed" : label}</Text>
       </Pressable>
     </View>
   );
@@ -331,6 +367,7 @@ const useStyles = makeStyles((colors) => ({
     borderBottomColor: colors.rule,
     minHeight: touchTarget,
   },
+  rowStacked: { flexDirection: "column", gap: space.xs },
   rowText: { flex: 1, gap: 2 },
   rowLabel: { ...type.body, color: colors.ink },
   rowDetail: { ...type.small, color: colors.ink2 },
@@ -340,6 +377,7 @@ const useStyles = makeStyles((colors) => ({
     maxWidth: "55%",
     textAlign: "right",
   },
+  rowValueStacked: { maxWidth: "100%", textAlign: "left" },
   mono: { fontFamily: fonts.mono },
   pressed: { opacity: 0.7 },
   note: { ...type.small, color: colors.ink2 },
@@ -375,7 +413,7 @@ const useStyles = makeStyles((colors) => ({
   tagText: { ...type.small, color: colors.ink },
   chips: { flexDirection: "row", flexWrap: "wrap", gap: space.sm },
   chip: {
-    minHeight: 44,
+    minHeight: touchTarget,
     paddingHorizontal: space.lg,
     borderRadius: radius.pill,
     borderWidth: 1,
