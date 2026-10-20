@@ -300,7 +300,7 @@ test("P2-A02.T07 agent tokens cannot reach approval, policy, admin, push or inhi
       [
         "POST",
         `/v1/wallets/${s.walletId}/admin/draft`,
-        { command: 5, permitId: s.permitId },
+        { command: 5, permitId: "0x" + "00".repeat(32) },
       ],
       [
         "POST",

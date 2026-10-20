@@ -17,6 +17,7 @@ import {
   SignedSubmitSchema,
   typedDataJson,
   walletDomain,
+  ZERO_HASH,
   type SignedType,
 } from "@mandate/schema";
 import type { Clock } from "@mandate/platform";
@@ -200,6 +201,30 @@ export class ControlService {
     return { state: "REJECTED" };
   }
 
+  // The chain is authoritative: a policy applied by any relayer raises the version.
+  private async chainPolicyVersion(
+    client: PublicClient,
+    address: Address,
+    walletId: string,
+  ) {
+    const deployed = (
+      await this.database.query<{ deployment_block: string | null }>(
+        "SELECT deployment_block::text FROM wallets WHERE id=$1",
+        [walletId],
+      )
+    ).rows[0]?.deployment_block;
+    const events = await client.getContractEvents({
+      address,
+      abi: mandateWalletAbi,
+      eventName: "WalletPolicyUpdated",
+      fromBlock: BigInt(deployed ?? "0"),
+    });
+    return events.reduce(
+      (v, e) => (e.args.version! > v ? e.args.version! : v),
+      0n,
+    );
+  }
+
   private async chainNow(client: PublicClient) {
     return Math.min(
       this.clock(),
@@ -224,7 +249,9 @@ export class ControlService {
     ]);
     const issuedAt = await this.chainNow(client);
     const message = {
-      version: (BigInt(current.rows[0]?.version ?? "0") + 1n).toString(),
+      version: (
+        (await this.chainPolicyVersion(client, address, id)) + 1n
+      ).toString(),
       ...hashWalletPolicyLists(body.lists),
       reviewThreshold: body.policy.reviewThreshold,
       nonce: nonce.toString(),
@@ -265,6 +292,16 @@ export class ControlService {
       })
       .strict()
       .parse(input);
+    // Only REVOKE names a Permit; every other command must carry the zero ID.
+    if (
+      (body.command === AdminCommand.REVOKE) ===
+      (body.permitId === ZERO_HASH)
+    )
+      throw new AuthError(
+        422,
+        "REVOKE needs a permitId; other commands need the zero permitId.",
+        "INTENT_INVALID",
+      );
     const client = this.chain();
     const nonce = await client.readContract({
       address,

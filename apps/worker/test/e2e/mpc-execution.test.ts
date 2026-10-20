@@ -6,6 +6,7 @@ import { randomBytes, randomUUID } from "node:crypto";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import {
+  decodeEventLog,
   encodeFunctionData,
   getAddress,
   recoverAddress,
@@ -14,6 +15,7 @@ import {
 } from "viem";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 import {
+  AdminCommand,
   authorityTypes,
   buildTypedData,
   demoUSDAbi,
@@ -45,6 +47,8 @@ import {
 import { DEFAULT_BUDGETS, Relayer, type Call } from "../../src/relayer.js";
 import { adapterKeygen, Provisioner } from "../../src/provision.js";
 import { adapterClient, Executor } from "../../src/execution.js";
+import { OwnerCommandRelay } from "../../src/owner-commands.js";
+import { ControlService } from "../../../api/src/business/controls.js";
 import {
   admin,
   anvilAccount,
@@ -213,7 +217,10 @@ test("P2-02/P2-04 end to end: per-wallet DKG, owner-signed policy and Permit, th
     db.pool,
     chain.client,
     84532,
-    { normal: { account: anvilAccount(8), ...DEFAULT_BUDGETS.normal } },
+    {
+      normal: { account: anvilAccount(8), ...DEFAULT_BUDGETS.normal },
+      emergency: { account: anvilAccount(7), ...DEFAULT_BUDGETS.emergency },
+    },
     nowSeconds,
   );
   await relayer.register();
@@ -695,6 +702,192 @@ test("P2-02/P2-04 end to end: per-wallet DKG, owner-signed policy and Permit, th
   );
   assert.equal(await balanceOf(providerKey.address), providerMid);
 
+  // 6. Owner controls through the API services: policy v2 lowers the review threshold,
+  // so a 200000 PAY needs the owner's co-signature over the exact Action digest.
+  const principal = {
+    kind: "owner" as const,
+    owner: owner.address.toLowerCase(),
+    session: {
+      sessionId: randomUUID(),
+      ownerAddress: owner.address.toLowerCase(),
+      deviceId: "0x" + "de".repeat(32),
+      authTime: nowSeconds(),
+    },
+  };
+  const controls = new ControlService(db.pool, chain.client, nowSeconds);
+  const commands = new OwnerCommandRelay(
+    db.pool,
+    chain.client,
+    relayer,
+    nowSeconds,
+  );
+  const applyCommand = async (
+    kind: "POLICY" | "ADMIN",
+    draft: { draftId: string; typedData: unknown },
+  ) => {
+    const typed = draft.typedData as {
+      primaryType: "WalletPolicy" | "Admin";
+      message: unknown;
+      domain: unknown;
+    };
+    const signature = await owner.signTypedData(
+      buildTypedData(typed.primaryType, typed.message, typed.domain) as never,
+    );
+    await controls.submitCommand(principal, walletId, kind, {
+      draftId: draft.draftId,
+      ownerSignature: signature,
+    });
+    let state = "";
+    for (
+      let i = 0;
+      i < 20 && state !== "INCLUDED" && state !== "REVERTED";
+      i++
+    ) {
+      state = await commands.advance(draft.draftId);
+      await chain.mine(1);
+    }
+    assert.equal(state, "INCLUDED", kind + " command");
+  };
+  const policyBody = (perTx: string) => ({
+    policy: { reviewThreshold: "150000" },
+    lists: { ...lists, assetCaps: [{ ...lists.assetCaps[0]!, perTx }] },
+  });
+  await applyCommand(
+    "POLICY",
+    await controls.policyDraft(principal, walletId, policyBody("400000")),
+  );
+  // v1 was relayed directly by this test; the chain event sets the next version.
+  const versions = (
+    await db.pool.query(
+      "SELECT version::text FROM wallet_policies WHERE wallet_id=$1",
+      [walletId],
+    )
+  ).rows.map((r) => r.version);
+  assert.deepEqual(versions, ["2"]);
+  const cosigned = await proposeAction("200000", "pay:3");
+  assert.equal(
+    await drive(cosigned.id, ["AWAITING_APPROVAL", "INCLUDED", "DENIED"]),
+    "AWAITING_APPROVAL",
+  );
+  assert.equal(
+    (
+      await db.pool.query("SELECT 1 FROM signing_attempts WHERE action_id=$1", [
+        cosigned.id,
+      ])
+    ).rowCount,
+    0,
+  );
+  const approval = (await controls.approvals(principal)).items[0]!;
+  const approvalSignature = await owner.signTypedData(
+    buildTypedData(
+      "Approval",
+      approval.typedData.message,
+      approval.typedData.domain,
+    ) as never,
+  );
+  assert.deepEqual(
+    await controls.decide(
+      principal,
+      approval.approvalId,
+      { ownerSignature: approvalSignature },
+      true,
+    ),
+    { state: "APPROVED" },
+  );
+  const cosignedFinal = await drive(cosigned.id, [
+    "INCLUDED",
+    "FINALIZED",
+    "DENIED",
+    "REVERTED",
+  ]);
+  assert.ok(
+    ["INCLUDED", "FINALIZED"].includes(cosignedFinal),
+    "co-signed PAY ended " + cosignedFinal,
+  );
+  const cosignedTx = (
+    await db.pool.query("SELECT tx_hash FROM actions WHERE id=$1", [
+      cosigned.id,
+    ])
+  ).rows[0].tx_hash as Hex;
+  const executed = (
+    await chain.client.getTransactionReceipt({ hash: cosignedTx })
+  ).logs
+    .map((l) => {
+      try {
+        return decodeEventLog({ abi: mandateWalletAbi, ...l });
+      } catch {
+        return null;
+      }
+    })
+    .find((e) => e?.eventName === "ActionExecuted");
+  assert.equal(
+    executed?.eventName === "ActionExecuted" && executed.args.ownerApproved,
+    true,
+  );
+
+  // 7. Tightened policy (perTx 100000) applies to the next request before signing.
+  await applyCommand(
+    "POLICY",
+    await controls.policyDraft(principal, walletId, policyBody("100000")),
+  );
+  const tight = await proposeAction("120000", "pay:4");
+  assert.equal(await drive(tight.id, ["DENIED", "INCLUDED"]), "DENIED");
+  assert.deepEqual(
+    (
+      await db.pool.query(
+        "SELECT state FROM signing_attempts WHERE action_id=$1",
+        [tight.id],
+      )
+    ).rows,
+    [{ state: "DENIED" }],
+  );
+  assert.equal(
+    (
+      await db.pool.query("SELECT 1 FROM transactions WHERE action_id=$1", [
+        tight.id,
+      ])
+    ).rowCount,
+    0,
+  );
+
+  // 8. FREEZE on chain: no new signing request at all.
+  await applyCommand(
+    "ADMIN",
+    await controls.adminDraft(principal, walletId, {
+      command: AdminCommand.FREEZE,
+      permitId: ZERO_HASH,
+    }),
+  );
+  await db.pool.query("UPDATE wallets SET inhibited=false WHERE id=$1", [
+    walletId,
+  ]);
+  assert.equal(
+    await chain.client.readContract({
+      address: walletAddress,
+      abi: mandateWalletAbi,
+      functionName: "frozen",
+    }),
+    true,
+  );
+  const frozenPay = await proposeAction("50000", "pay:5");
+  assert.equal(await drive(frozenPay.id, ["DENIED", "INCLUDED"]), "DENIED");
+  assert.equal(
+    (
+      await db.pool.query("SELECT denial_code FROM actions WHERE id=$1", [
+        frozenPay.id,
+      ])
+    ).rows[0].denial_code,
+    "WALLET_FROZEN",
+  );
+  assert.equal(
+    (
+      await db.pool.query("SELECT 1 FROM signing_attempts WHERE action_id=$1", [
+        frozenPay.id,
+      ])
+    ).rowCount,
+    0,
+  );
+
   const evidence = {
     forkBlock: chain.forkBlock.toString(),
     walletAddress,
@@ -705,6 +898,9 @@ test("P2-02/P2-04 end to end: per-wallet DKG, owner-signed policy and Permit, th
     payTxHash: row.tx_hash,
     payRequestId: pay.action.requestId,
     deniedActionRuleCode: deniedRow.denial_code,
+    cosignedTxHash: cosignedTx,
+    tightenedPolicyDenied: true,
+    frozenDenial: "WALLET_FROZEN",
   };
   console.log("E2E_EVIDENCE " + JSON.stringify(evidence));
 });
