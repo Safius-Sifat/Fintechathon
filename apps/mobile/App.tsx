@@ -15,12 +15,14 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { RootNavigator } from "./src/navigation/RootNavigator";
 import { clearAllDrafts } from "./src/state/sendDraft";
 import { useColors } from "./src/theme";
+import { useAutomaticSignIn } from "./src/wallet/api";
 import { loadWallet, lock } from "./src/wallet/session";
 
 // Background time after which the wallet locks itself.
 const LOCK_AFTER_MS = 60_000;
 
 export default function App() {
+  useAutomaticSignIn();
   const colors = useColors();
   const navigationTheme = useMemo<Theme>(
     () => ({
