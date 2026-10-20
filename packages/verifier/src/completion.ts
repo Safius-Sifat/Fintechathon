@@ -1,47 +1,37 @@
-import { type EvidenceBundle, type Finding } from "@mandate/schema";
+import type { EvidenceBundle, Finding } from "@mandate/schema";
+import type { VerifyContext } from "./context.js";
 
-export function checkCompletion(bundle: EvidenceBundle): Finding {
+// Completion rests on the recorder's own event, which is not independent
+// support, so it is never PASS (plan P4-05).
+export function checkCompletion(
+  bundle: EvidenceBundle,
+  _ctx: VerifyContext,
+): Finding {
   const { events } = bundle;
-  const evidenceIds = events.map((e) => e.eventId);
-
-  if (events.length === 0) {
-    return {
-      name: "completion",
-      state: "UNVERIFIABLE",
-      ruleId: "COMPLETION_NO_EVENTS",
-      reason: "No evidence events in bundle to assess completion",
-      evidenceIds,
-      basis: ["recorder_assertion"],
-    };
-  }
-
-  const completedEvent = events.find(
-    (e) =>
-      e.type === "TASK_COMPLETED" ||
-      e.type === "RUNBOOK_COMPLETED" ||
-      e.type === "DELIVERY_RECEIVED" ||
-      e.type === "RESULT_DELIVERED",
+  const ids = events.map((e) => e.eventId);
+  const done = events.find((e) =>
+    [
+      "TASK_COMPLETED",
+      "RUNBOOK_COMPLETED",
+      "DELIVERY_RECEIVED",
+      "RESULT_DELIVERED",
+    ].includes(e.type),
   );
-
-  if (!completedEvent) {
+  if (!done)
     return {
       name: "completion",
       state: "PENDING",
       ruleId: "COMPLETION_IN_PROGRESS",
-      reason: "Task has not reached a terminal completion event",
-      evidenceIds,
+      reason: "The task has no completion event yet",
+      evidenceIds: ids,
       basis: ["recorder_assertion"],
     };
-  }
-
-  // Completion rests only on the recorder's own event, which is not
-  // independent support.
   return {
     name: "completion",
     state: "UNVERIFIABLE",
     ruleId: "COMPLETION_RECORDER_ONLY",
-    reason: `Only the recorder's ${completedEvent.type} event says the task finished`,
-    evidenceIds,
+    reason: `Only the recorder's ${done.type} event says the task finished`,
+    evidenceIds: ids,
     basis: ["recorder_assertion"],
   };
 }

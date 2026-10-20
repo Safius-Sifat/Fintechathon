@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { loadBundle } from "./bundle.js";
+import { loadBundle, loadTrustedEvidenceKey } from "./bundle.js";
 import { verifyBundle, computeExitCode } from "./verifier.js";
 import { writeFile } from "node:fs/promises";
 
@@ -31,7 +31,12 @@ async function main() {
 
   try {
     const bundle = await loadBundle(bundlePath);
-    const report = await verifyBundle(bundle, { rpcUrl });
+    const report = await verifyBundle(bundle, {
+      rpcUrl: rpcUrl || undefined,
+      trustedEvidenceKey: trustedPath
+        ? await loadTrustedEvidenceKey(trustedPath)
+        : undefined,
+    });
 
     console.log("\n================ MANDATE VERIFIER REPORT ================");
     console.log(`Task ID:         ${report.taskId}`);
@@ -47,7 +52,9 @@ async function main() {
       console.log(`  [${icon.padEnd(8)}] ${f.name.toUpperCase()}: ${f.ruleId}`);
       console.log(`            ${f.reason}`);
     }
-    console.log("=========================================================\n");
+    console.log("=========================================================");
+    for (const l of report.limitations) console.log(`  Limitation: ${l}`);
+    console.log("");
 
     if (outPath) {
       await writeFile(outPath, JSON.stringify(report, null, 2), "utf-8");
