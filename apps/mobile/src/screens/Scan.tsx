@@ -283,7 +283,7 @@ const useStyles = makeStyles((colors) => ({
     padding: space.lg,
     gap: space.xs,
     borderRadius: radius.lg,
-    backgroundColor: "rgba(15, 23, 42, 0.78)",
+    backgroundColor: "rgba(15, 19, 21, 0.78)",
   },
   hintTitle: { ...type.bodyStrong, color: colors.onInk, textAlign: "center" },
   hintText: { ...type.small, color: colors.onInkMuted, textAlign: "center" },

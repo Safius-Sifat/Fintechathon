@@ -57,7 +57,7 @@ export function TransferReviewScreen({ navigation }: Props) {
         <Row
           label="Network fee"
           value="Unavailable"
-          detail={`Quote unavailable. Paid by ${FEE_PAYER[source]}`}
+          detail={`Quote unavailable. Paid by: ${FEE_PAYER[source]}`}
         />
       </Rows>
       <Note>
