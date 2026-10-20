@@ -293,7 +293,7 @@ test("P2-03.T05 unknown fields, float/overwidth uints, missing keys and bad scop
     );
   }));
 
-test("P2-03 task creation fails explicitly while the runbook preparation dependency is absent", () =>
+test("P2-03 a task cannot be created on a wallet that is not READY", () =>
   withApi(async (e) => {
     const auth = await e.login(ownerA);
     const walletId = WalletViewSchema.parse(
@@ -305,7 +305,7 @@ test("P2-03 task creation fails explicitly while the runbook preparation depende
       goal: "check the checkout page",
       input: {},
     });
-    assert.equal(r.statusCode, 503);
-    assert.equal(ApiErrorSchema.parse(r.json()).retryable, true);
+    assert.equal(r.statusCode, 409);
+    assert.equal(ApiErrorSchema.parse(r.json()).code, "PERMIT_INACTIVE");
     assert.equal(await count(e, "tasks"), 0);
   }));

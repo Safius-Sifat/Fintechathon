@@ -83,3 +83,8 @@ CREATE TABLE push_deliveries (
   created_at bigint NOT NULL,
   UNIQUE (owner_address, kind, reference_id)
 );
+
+-- Runbook preparation from @mandate/runbooks prepareTask, stored with the task.
+ALTER TABLE tasks ADD COLUMN conditions jsonb;
+ALTER TABLE tasks ADD COLUMN scope jsonb;
+ALTER TABLE tasks ADD COLUMN needs_owner_reason text;

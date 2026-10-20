@@ -44,6 +44,9 @@ importers:
       '@mandate/platform':
         specifier: workspace:*
         version: link:../../packages/platform
+      '@mandate/runbooks':
+        specifier: workspace:*
+        version: link:../../packages/runbooks
       '@mandate/schema':
         specifier: workspace:*
         version: link:../../packages/schema
@@ -184,6 +187,9 @@ importers:
       '@mandate/platform':
         specifier: workspace:*
         version: link:../../packages/platform
+      '@mandate/runbooks':
+        specifier: workspace:*
+        version: link:../../packages/runbooks
       '@mandate/schema':
         specifier: workspace:*
         version: link:../../packages/schema

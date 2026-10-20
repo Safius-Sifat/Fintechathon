@@ -16,6 +16,7 @@ import {
 } from "./business/service.js";
 import { AgenticService } from "./business/agentic.js";
 import { ControlService } from "./business/controls.js";
+import { TaskService } from "./business/tasks.js";
 
 const env = process.env;
 const file = (name: string) => readFile(env[name]!);
@@ -86,6 +87,11 @@ await startFoundationService("api", 3000, async (app, database) => {
       : null,
     database
       ? new ControlService(database, chain?.client ?? null, () =>
+          Math.floor(Date.now() / 1000),
+        )
+      : null,
+    database
+      ? new TaskService(database, chain?.client ?? null, manifest, () =>
           Math.floor(Date.now() / 1000),
         )
       : null,

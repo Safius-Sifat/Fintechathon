@@ -201,30 +201,6 @@ export class ControlService {
     return { state: "REJECTED" };
   }
 
-  // The chain is authoritative: a policy applied by any relayer raises the version.
-  private async chainPolicyVersion(
-    client: PublicClient,
-    address: Address,
-    walletId: string,
-  ) {
-    const deployed = (
-      await this.database.query<{ deployment_block: string | null }>(
-        "SELECT deployment_block::text FROM wallets WHERE id=$1",
-        [walletId],
-      )
-    ).rows[0]?.deployment_block;
-    const events = await client.getContractEvents({
-      address,
-      abi: mandateWalletAbi,
-      eventName: "WalletPolicyUpdated",
-      fromBlock: BigInt(deployed ?? "0"),
-    });
-    return events.reduce(
-      (v, e) => (e.args.version! > v ? e.args.version! : v),
-      0n,
-    );
-  }
-
   private async chainNow(client: PublicClient) {
     return Math.min(
       this.clock(),
@@ -249,8 +225,11 @@ export class ControlService {
     ]);
     const issuedAt = await this.chainNow(client);
     const message = {
+      // policyNonce counts applied policies, so it covers relays outside this service.
       version: (
-        (await this.chainPolicyVersion(client, address, id)) + 1n
+        (BigInt(current.rows[0]?.version ?? "0") > nonce
+          ? BigInt(current.rows[0]!.version)
+          : nonce) + 1n
       ).toString(),
       ...hashWalletPolicyLists(body.lists),
       reviewThreshold: body.policy.reviewThreshold,

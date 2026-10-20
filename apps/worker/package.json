@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@mandate/platform": "workspace:*",
+    "@mandate/runbooks": "workspace:*",
     "@mandate/schema": "workspace:*",
     "pg": "8.16.3",
     "viem": "2.38.5",

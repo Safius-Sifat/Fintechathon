@@ -1,10 +1,11 @@
 import type { FastifyInstance, FastifyRequest } from "fastify";
 import { z, ZodError } from "zod";
-import { CreateTaskRequestSchema, UuidSchema } from "@mandate/schema";
+import { UuidSchema } from "@mandate/schema";
 import { apiError, AuthError } from "../auth/errors.js";
 import type { BusinessService } from "./service.js";
 import type { AgenticService } from "./agentic.js";
 import type { ControlService } from "./controls.js";
+import type { TaskService } from "./tasks.js";
 
 const emptyBody = z.object({}).strict();
 const idParam = z.object({}).catchall(UuidSchema);
@@ -30,6 +31,7 @@ export async function registerBusiness(
   service: BusinessService | null,
   agentic: AgenticService | null,
   controls: ControlService | null,
+  tasks: TaskService | null,
 ) {
   await app.register(async (routes) => {
     routes.addHook("onRequest", async (_request, reply) => {
@@ -271,17 +273,34 @@ export async function registerBusiness(
         );
       },
     );
-    // Task interpretation belongs to Person4's runbook package, which is not yet
-    // implemented; tasks are never created from an uninterpreted goal.
+    const t = () => tasks!;
     routes.post("/v1/tasks", { bodyLimit: 65536 }, async (request) => {
-      await principal(request);
-      idempotencyKey(request);
-      parse(CreateTaskRequestSchema, request.body);
-      throw new AuthError(
-        503,
-        "Runbook preparation dependency (@mandate/runbooks prepareTask) is unavailable.",
-        "RUNBOOK_VERSION",
-      );
+      const key = idempotencyKey(request);
+      const who = await principal(request);
+      return active().task(who, await t().create(who, key, request.body));
     });
+    routes.post(
+      "/v1/tasks/:taskId/run",
+      { bodyLimit: 1024 },
+      async (request) => {
+        const { taskId } = parse(idParam, request.params);
+        parse(emptyBody, request.body);
+        idempotencyKey(request);
+        const who = await principal(request);
+        return active().task(who, await t().run(who, taskId!));
+      },
+    );
+    routes.post("/v1/permits/draft", { bodyLimit: 16384 }, async (request) => {
+      idempotencyKey(request);
+      return t().draft(await principal(request), request.body);
+    });
+    routes.post(
+      "/v1/permits/activate",
+      { bodyLimit: 4096 },
+      async (request) => {
+        idempotencyKey(request);
+        return t().activate(await principal(request), request.body);
+      },
+    );
   });
 }

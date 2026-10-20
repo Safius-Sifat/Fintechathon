@@ -25,6 +25,13 @@ import { expireQuestions } from "./agent-questions.js";
 import { RiskRulesSchema, runSentinel } from "./sentinel.js";
 import { EtherscanClient } from "./history/etherscan.js";
 import { HistoryIndexer } from "./history/backfill.js";
+import {
+  activatePermit,
+  advanceTask,
+  providerDeps,
+  scheduleAdvances,
+} from "./advance.js";
+import { advanceRunbook } from "@mandate/runbooks";
 
 const env = process.env;
 const required = (name: string) => {
@@ -153,11 +160,24 @@ const handlers: Record<string, (job: Job) => Promise<boolean>> = {
     );
     return true;
   },
-  // Runbook advance belongs to Person4's package; until it exists the job fails explicitly.
-  "task.advance": async () => {
-    throw new Error(
-      "Runbook dependency (@mandate/runbooks advance) is unavailable",
+  "permit.activate": (job) =>
+    activatePermit(database, relayer, clock, String(job.payload.draftId)),
+  "task.advance": async (job) => {
+    const result = await advanceTask(
+      database,
+      client,
+      advanceRunbook,
+      (task) =>
+        providerDeps(required("PROVIDER_URL"), () => ({
+          taskId: task.chainTaskId,
+          wallet: task.wallet,
+          asset: task.asset,
+        })),
+      clock,
+      String(job.payload.taskId),
     );
+    if (!result.done && result.runAt) await queue.defer(job, result.runAt);
+    return result.done;
   },
 };
 
@@ -179,6 +199,7 @@ while (!stopping) {
       );
     }
   }
+  await scheduleAdvances(database, clock());
   const open = await database.query<{ id: string }>(
     "SELECT a.id FROM actions a LEFT JOIN reservations r ON r.action_id=a.id WHERE a.state IN ('PROPOSED','RESERVED','AWAITING_APPROVAL','SIGNING','SIGNED','SUBMITTED','UNKNOWN','INCLUDED') OR (a.state IN ('DENIED','REVERTED') AND r.state IN ('RESERVED','UNKNOWN')) ORDER BY a.created_at LIMIT 50",
   );

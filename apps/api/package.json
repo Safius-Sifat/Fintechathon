@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@mandate/platform": "workspace:*",
+    "@mandate/runbooks": "workspace:*",
     "@mandate/schema": "workspace:*",
     "fastify": "5.6.2",
     "jose": "6.1.0",
