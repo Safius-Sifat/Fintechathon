@@ -1,0 +1,52 @@
+Red run of the UI-09 tests (test/ownerControl.test.ts) against stub modules, before implementation.
+Command: pnpm --filter @mandate/mobile test (exit 1). Paths and stack traces removed.
+One test first passed vacuously against an empty stub list and was tightened before this run.
+
+not ok 29 - UI-09 control: owner operations use Person1's Admin command numbers
+  Unknown control unpause
+not ok 30 - UI-09 control: every owner operation is on chain and none needs the service
+  Expected values to be strictly deep-equal:
+not ok 31 - UI-09 control: recovery and owner transfers end permissions; unpause does not restore them
+  Unknown control recover
+not ok 32 - UI-09 control: recovered funds go only to the owner address
+  Unknown control recover
+not ok 33 - UI-09 control: only a confirmed operation counts as done
+  Expected values to be strictly deep-equal:
+not ok 34 - UI-09 control: every fee route names its payer and needs a network and gas
+  Expected values to be strictly deep-equal:
+not ok 35 - UI-09 control: the exported command holds only the signed public fields
+  Expected values to be strictly deep-equal:
+not ok 36 - UI-09 recovery: restore needs words, the optional passphrase and the account index
+  Expected values to be strictly deep-equal:
+not ok 37 - UI-09 recovery: logout and removing the wallet never stop agents
+  Expected values to be strictly deep-equal:
+not ok 38 - UI-09 control: the development sample never shows a confirmed step
+  The expression evaluated to a falsy value:
+# tests 79
+# pass 69
+# fail 10
+
+Clarification pass (owner review): separate Admin and OwnerTransfer types, sweep vs general transfer, expiry and reconciliation, no blanket agent-stop wording.
+Updated tests run red against the previous implementation. Command: pnpm --filter @mandate/mobile test (exit 1).
+
+not ok 29 - UI-09 control: owner operations use Person1's Admin command numbers
+  Unknown control ownerSweep
+not ok 30 - UI-09 control: every owner operation is on chain and none needs the service
+  Expected values to be strictly deep-equal:
+not ok 31 - UI-09 control: recovery and owner transfers end permissions; unpause does not restore them
+  Unknown control ownerSweep
+not ok 32 - UI-09 control: recovery moves funds to the owner address; a general owner transfer goes to a reviewed recipient
+  Unknown control ownerSweep
+not ok 33 - UI-09 control: Admin and OwnerTransfer are separate signed types with their own fields, lifetime and nonce
+  "Cannot destructure property 'admin' of 'import_ownerControl.SIGNED_COMMANDS' as it is undefined."
+not ok 34 - UI-09 control: each owner operation names the signed type it uses
+  "Cannot read properties of undefined (reading 'pause')"
+not ok 37 - UI-09 control: the Admin export holds only public signed fields; the OwnerTransfer export is not defined yet
+  "Cannot read properties of undefined (reading 'admin')"
+not ok 38 - UI-09 control: expiry proves nothing about an earlier copy; reconcile before a replacement
+  The input did not match the regular expression /does not prove/i. Input:
+not ok 39 - UI-09 control: step texts never claim every command stops agents
+  submitted
+# tests 83
+# pass 74
+# fail 9

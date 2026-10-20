@@ -1,5 +1,9 @@
+import type { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
+import type { CompositeScreenProps } from "@react-navigation/native";
+import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Card, DetailRow, SectionTitle } from "../components/Card";
 import { CapabilityRow } from "../components/CapabilityRow";
+import { NavRow } from "../components/NavRow";
 import { Screen } from "../components/Screen";
 import {
   connectionCapabilities,
@@ -7,6 +11,10 @@ import {
   type Capability,
 } from "../config/capabilities";
 import { network } from "../config/network";
+import type {
+  RootStackParamList,
+  TabParamList,
+} from "../navigation/RootNavigator";
 import {
   nativeModuleCapability,
   useNativeModuleState,
@@ -21,7 +29,12 @@ const NETWORK_ROW: Capability = {
   state: "configured",
 };
 
-export function SettingsScreen() {
+type Props = CompositeScreenProps<
+  BottomTabScreenProps<TabParamList, "Settings">,
+  NativeStackScreenProps<RootStackParamList>
+>;
+
+export function SettingsScreen({ navigation }: Props) {
   const nativeModule = nativeModuleCapability(useNativeModuleState());
   return (
     <Screen
@@ -40,6 +53,14 @@ export function SettingsScreen() {
           <CapabilityRow key={capability.id} capability={capability} />
         ))}
       </Card>
+      <NavRow
+        icon="key-chain-variant"
+        tone="blue"
+        label="Recovery and backup"
+        value="Restore your wallet; recover agent funds"
+        accessibilityHint="Opens recovery and backup"
+        onPress={() => navigation.navigate("Recovery")}
+      />
 
       <SectionTitle>Connections</SectionTitle>
       <Card>

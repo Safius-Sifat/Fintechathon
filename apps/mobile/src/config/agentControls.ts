@@ -6,9 +6,20 @@ import type { Tone } from "../theme";
 // Freeze is a temporary stop that keeps permissions; pause and revoke end
 // authority; logout only ends this phone's session with the service. On-
 // chain controls take effect only when their transaction is confirmed.
-// Command numbers are Person1's AdminCommand values (tested).
+// Command numbers are Person1's AdminCommand values (tested). Owner
+// transfer is its own signed type (plan S8.3), so it has no Admin command.
 
-export type ControlId = "freeze" | "unfreeze" | "pause" | "revoke" | "logout";
+export type ControlId =
+  | "freeze"
+  | "unfreeze"
+  | "pause"
+  | "unpause"
+  | "revoke"
+  | "recover"
+  | "recoverLiquid"
+  | "ownerTransfer"
+  | "ownerSweep"
+  | "logout";
 
 export interface AgentControl {
   id: ControlId;
@@ -70,6 +81,20 @@ export const CONTROLS: readonly AgentControl[] = [
     keepsPermissions: false,
   },
   {
+    id: "unpause",
+    command: 1,
+    title: "Unpause",
+    effect: "Lets the agent wallet accept new permissions again.",
+    afterwards:
+      "Permissions ended by a pause or recovery stay ended. Each task needs a new approval.",
+    action: "Unpause agent wallet",
+    icon: "play-circle-outline",
+    tone: "amber",
+    onChain: true,
+    stopsAgentSpending: false,
+    keepsPermissions: false,
+  },
+  {
     id: "revoke",
     command: 2,
     title: "Revoke",
@@ -77,6 +102,68 @@ export const CONTROLS: readonly AgentControl[] = [
     afterwards: "That permission stops working for good.",
     action: "Revoke a permission",
     icon: "close-octagon-outline",
+    tone: "red",
+    onChain: true,
+    stopsAgentSpending: true,
+    keepsPermissions: false,
+  },
+  {
+    id: "recover",
+    command: 3,
+    title: "Recover",
+    effect:
+      "Tries to redeem the approved vault position, then sends DemoUSD to your owner address.",
+    afterwards:
+      "Pauses agents and ends every permission. If the vault cannot redeem, use Recover liquid instead.",
+    action: "Recover to owner",
+    icon: "backup-restore",
+    tone: "red",
+    onChain: true,
+    stopsAgentSpending: true,
+    keepsPermissions: false,
+  },
+  {
+    id: "recoverLiquid",
+    command: 4,
+    title: "Recover liquid",
+    effect:
+      "Sends only liquid DemoUSD to your owner address, with no vault call.",
+    afterwards:
+      "Pauses agents and ends every permission. The vault position stays in the agent wallet.",
+    action: "Recover liquid DemoUSD",
+    icon: "cash-fast",
+    tone: "red",
+    onChain: true,
+    stopsAgentSpending: true,
+    keepsPermissions: false,
+  },
+  {
+    id: "ownerTransfer",
+    command: null,
+    title: "Owner transfer",
+    effect:
+      "Moves one asset out of the agent wallet to a recipient you review and sign. One asset per transfer.",
+    afterwards:
+      "Once confirmed, each transfer pauses agents and ends every permission. Vault shares cannot be moved this way.",
+    action: "Transfer from agent wallet",
+    icon: "bank-transfer-out",
+    tone: "red",
+    onChain: true,
+    stopsAgentSpending: true,
+    keepsPermissions: false,
+  },
+  {
+    // The recovery use of an owner transfer: the signed recipient is the
+    // owner address.
+    id: "ownerSweep",
+    command: null,
+    title: "Sweep to owner",
+    effect:
+      "An owner transfer whose recipient is your owner address. Moves one asset, such as ETH or an imported token, back to you.",
+    afterwards:
+      "Once confirmed, each sweep pauses agents and ends every permission. Vault shares cannot be moved this way.",
+    action: "Sweep to owner",
+    icon: "bank-transfer-in",
     tone: "red",
     onChain: true,
     stopsAgentSpending: true,

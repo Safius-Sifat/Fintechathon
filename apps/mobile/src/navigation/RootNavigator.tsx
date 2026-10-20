@@ -11,12 +11,14 @@ import { ApprovalDetailScreen } from "../screens/ApprovalDetail";
 import { ApprovalsScreen } from "../screens/Approvals";
 import { ActivityScreen } from "../screens/ActivityScreen";
 import { AssetsScreen } from "../screens/Assets";
+import { ControlScreen } from "../screens/Control";
 import { HomeScreen } from "../screens/HomeScreen";
 import { InspectorScreen } from "../screens/Inspector";
 import { IntentComposeScreen } from "../screens/IntentCompose";
 import { IntentReviewScreen } from "../screens/IntentReview";
 import { IntroScreen, SetupScreen, WelcomeScreen } from "../screens/Onboarding";
 import { ReceiveScreen } from "../screens/Receive";
+import { RecoveryScreen } from "../screens/Recovery";
 import { ScanScreen } from "../screens/Scan";
 import { ScheduleScreen } from "../screens/Schedule";
 import { SendScreen } from "../screens/Send";
@@ -72,6 +74,8 @@ export type RootStackParamList = {
   IntentCompose: undefined;
   IntentReview: undefined;
   AllowanceApproval: undefined;
+  Control: undefined;
+  Recovery: undefined;
 };
 
 const TAB_META: Record<keyof TabParamList, TabMeta> = {
@@ -147,6 +151,8 @@ export function RootNavigator() {
         name="AllowanceApproval"
         component={AllowanceApprovalScreen}
       />
+      <Stack.Screen name="Control" component={ControlScreen} />
+      <Stack.Screen name="Recovery" component={RecoveryScreen} />
     </Stack.Navigator>
   );
 }

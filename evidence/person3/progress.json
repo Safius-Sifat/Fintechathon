@@ -1,8 +1,8 @@
 {
   "owner": "Person3",
   "plan": "docs/plans/03 - Android Owner Wallet.md (v7.1)",
-  "updatedAt": "2026-10-20T20:15:00+06:00",
-  "currentCheckpoint": "UI-08 complete: group 1 draft PR #37, group 2 draft PR #38 (depends on #37 -> #36 -> #35, none merged). Next: UI-09 (Control, Recovery).",
+  "updatedAt": "2026-10-20T09:47:00+06:00",
+  "currentCheckpoint": "UI-09 (Control, Recovery) implemented on work/person3-mobile-ui09-control-recovery (branched from #38's branch); owner-requested correction pass applied (Admin vs OwnerTransfer exports, sweep vs general transfer, expiry and reconciliation) and approved by the Person3 owner; draft PR to follow. UI-08 group 1 is draft PR #37, group 2 draft PR #38 (#38 -> #37 -> #36 -> #35, none merged).",
   "priority": "Person3 owner decision 2026-10-19: screens, layouts and UI/UX first. Wallet, security and backend functionality is deferred, not dropped; every task below stays required for the final deliverable.",
   "acceptanceRule": "UI checkpoints are layout and navigation previews. They complete no P3 case: every case below stays open until its own functional, device and iOS evidence exists.",
   "uiCheckpoints": [
@@ -51,7 +51,7 @@
     {
       "id": "UI-09",
       "screens": "Control.tsx, Recovery.tsx",
-      "status": "NOT_STARTED",
+      "status": "APPROVED (owner visual review after the correction pass); draft PR to follow",
       "preparesCases": "P3-05, WQ07, WQ10, WQ12"
     },
     {
@@ -68,7 +68,7 @@
       "approach": "Plan, Agent execution instructions: Node's test runner through the existing pinned tsx; apps/mobile script 'test': 'tsx --test test/*.test.ts'; test names contain the exact case ID; pure domain/view-model/API logic only (no React Native screens in Node).",
       "requiredBefore": "Functional QR and amount validation: apps/mobile/src/domain/{amounts,qr,assets}.ts with apps/mobile/test/{amounts,qr,assets}.test.ts (P3-W02, WQ03, WQ14)",
       "dependencyNote": "Uses the tsx version already pinned in the workspace; any new test dependency is recorded in the lockfile through the agreed narrow exception",
-      "observed": "apps/mobile 'test' and 'check' (tsx/Node test runner) merged in #33; root make check-mobile runs them since #34, then fails on the native gate by design. 14 tests as of UI-06; 35 as of UI-07; 45 as of UI-08 group 1; 69 as of UI-08 group 2."
+      "observed": "apps/mobile 'test' and 'check' (tsx/Node test runner) merged in #33; root make check-mobile runs them since #34, then fails on the native gate by design. 14 tests as of UI-06; 35 as of UI-07; 45 as of UI-08 group 1; 69 as of UI-08 group 2; 83 as of UI-09 (after the correction pass)."
     }
   },
   "platformRule": "v7.1: a case passes only when Android and iOS both pass. Current work is Android only, so Android results are recorded as LOCAL_PASS until P3-X01 exists.",
@@ -147,7 +147,7 @@
     },
     "P3-05": {
       "title": "Controls and standalone recovery sender",
-      "status": "NOT_STARTED",
+      "status": "NOT_STARTED (UI preview only: UI-09)",
       "cases": 6,
       "blockedBy": [
         "P3-02 native signAdmin/signOwnerTransfer",

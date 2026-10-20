@@ -1,12 +1,11 @@
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { StyleSheet, Text, View } from "react-native";
 import { Banner } from "../components/Banner";
-import { OutlineButton } from "../components/Button";
 import { Card, DetailRow, SectionTitle } from "../components/Card";
-import { IconTile } from "../components/IconTile";
 import { Screen } from "../components/Screen";
-import { TaskStateChip } from "../components/TaskStateChip";
-import { findControl, type ControlId } from "../config/agentControls";
+import { ControlCard } from "../components/ControlCard";
+import { NavRow } from "../components/NavRow";
+import type { ControlId } from "../config/agentControls";
 import { network } from "../config/network";
 import type { RootStackParamList } from "../navigation/RootNavigator";
 import { colors, space, type } from "../theme";
@@ -67,61 +66,25 @@ export function AgentControlsScreen({ navigation }: Props) {
       ))}
 
       <Text style={styles.caption}>
-        Sending funds out of the agent wallet with an owner transfer also pauses
+        Once confirmed, an owner transfer out of the agent wallet also pauses
         agents and ends their permissions.
       </Text>
-    </Screen>
-  );
-}
 
-function ControlCard({ id }: { id: ControlId }) {
-  const control = findControl(id);
-  return (
-    <Card>
-      <View style={styles.head}>
-        <IconTile icon={control.icon} tone={control.tone} />
-        <View style={styles.headText}>
-          <Text style={styles.cardTitle}>{control.title}</Text>
-          <TaskStateChip
-            info={{
-              label: control.onChain
-                ? "Acts on chain"
-                : "Acts on the service session",
-              group: "ended",
-            }}
-            icon={control.onChain ? "link-variant" : "cellphone-key"}
-          />
-        </View>
-      </View>
-      <Text style={styles.body}>{control.effect}</Text>
-      <View style={styles.afterwards}>
-        <Text style={styles.label}>Existing permissions</Text>
-        <Text style={styles.body}>{control.afterwards}</Text>
-      </View>
-      <View style={styles.actions}>
-        <OutlineButton
-          label={control.action}
-          icon={control.icon}
-          disabled
-          accessibilityHint={
-            control.onChain
-              ? "Unavailable. Needs the owner key on this phone and the native confirmation screen."
-              : "Unavailable. This build has no session with the Mandate service."
-          }
-        />
-      </View>
-    </Card>
+      <SectionTitle>If the service is down</SectionTitle>
+      <NavRow
+        icon="shield-key-outline"
+        tone="amber"
+        label="Owner control"
+        value="Stop agents and recover funds without the service"
+        accessibilityHint="Opens owner control and recovery of agent wallet funds"
+        onPress={() => navigation.navigate("Control")}
+      />
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
   cardTitle: { ...type.heading, color: colors.ink },
-  body: { ...type.body, color: colors.text },
   caption: { ...type.small, color: colors.textMuted },
-  label: { ...type.label, color: colors.textMuted },
   group: { gap: space.lg },
-  head: { flexDirection: "row", alignItems: "center", gap: space.md },
-  headText: { flex: 1, gap: space.xs },
-  afterwards: { gap: 2 },
-  actions: { flexDirection: "row", flexWrap: "wrap", gap: space.sm },
 });

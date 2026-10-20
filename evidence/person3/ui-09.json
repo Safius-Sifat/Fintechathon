@@ -1,0 +1,140 @@
+{
+  "task": "UI-09",
+  "title": "Owner control and Recovery and backup (layout and navigation only)",
+  "status": "APPROVED (Person3 owner visual review of the corrected screens, 2026-10-20); draft PR to follow",
+  "recordedAt": "2026-10-20T09:47:00+06:00",
+  "branch": "work/person3-mobile-ui09-control-recovery",
+  "baseCommit": "d51a385",
+  "dependency": "Branched from work/person3-mobile-ui08-policy-intent-allowance (draft PR #38), which depends on #37 -> #36 -> #35; none merged. origin/main is 95e91fb.",
+  "note": "UI evidence, kept outside evidence/*/cases/. Completes no P3 case: P3-05 (T01-T06), P3-01 and WQ07/WQ10/WQ12 stay open. Nothing reads the chain, signs, relays, exports, restores or removes anything.",
+  "planReference": "docs/plans/03 - Android Owner Wallet.md v7.1: P3-05 (Control/Recovery, API-offline route, export fields, independent sender, sequential recovery), P3-01 (native-only recovery words), S8.1 (words, passphrase, index; first five addresses), S8.3 (OwnerTransfer pauses and increments the epoch; RECOVER vs RECOVER_LIQUID; sweeps per asset), S8.5 (logout and Remove Wallet do not stop agents), S9.6",
+  "implemented": [
+    "Agent controls: new 'If the service is down' row opening Owner control; control cards now come from the shared components/ControlCard.tsx (same layout); the owner-transfer caption now says the pause applies once the transfer is confirmed",
+    "Settings: 'Recovery and backup' row",
+    "Owner control: what it needs (agent wallet, trusted manifest, trusted RPC, paused/epoch/owner nonces all unavailable; Mandate service and agent signer not needed); who pays the fee with three routes (Mandate relay, your personal account, someone else sends it), each naming the payer and its needs, all not available, and a note that no route works without a network and someone paying gas; from request to effect: prepared, signed not sent, sent waiting for confirmation, confirmed on chain (with the operation's own effect, not a blanket agent stop), failed on chain, expired (does not prove an earlier sent or relayed copy never ran); 'Before preparing a replacement' card: check inclusion, the current nonce for that command type and the authority epoch, which this build cannot read; owner operations Pause, Unpause, Revoke, Recover, Recover liquid and Sweep to owner, each with its effect on permissions and a 'Signed as' row (Admin command up to 30 minutes, or Owner transfer up to 10 minutes), all disabled; recovering several assets is a sequence; note that a sweep is an owner transfer to the owner address while a general owner transfer goes to the recipient the owner reviews and signs; signed command for another sender as two separate cards: Admin command (30 minutes, adminNonce, signed fields command, permitId, nonce, issuedAt, deadline; export schemaVersion, chainId, wallet, admin, ownerSignature, digest) and Owner transfer (10 minutes, ownerTransferNonce, signed fields transferId, asset, recipient, amount, epoch, nonce, issuedAt, deadline; export format not yet defined in the shared interface), both exports disabled, never words or keys, nothing uploaded automatically; labelled development sample sequence with no confirmed step; link to Recovery",
+    "Recovery and backup: 1. restore your wallet on a phone: recovery words, optional passphrase (a different passphrase opens a different wallet), account number 0-19; entered only on a protected native screen; after a restore the first five addresses are checked and an empty first address proves nothing; no server or cloud copy; Restore and Show recovery words disabled; no text fields. 2. recover agent wallet funds: restoring the key restores control but moves nothing and stops nothing; each owner command described with its own effect (Pause stops agents; Recover, Recover liquid and a sweep to owner bring funds to the owner address and each also pauses agents; Unpause stops nothing; counts only once confirmed); link to Owner control labelled 'Pause, recover and sweep to owner'. What does not stop agents: Log out and Remove wallet from this phone, each tagged 'Does not stop agents'; Remove disabled"
+  ],
+  "fixtures": "config/controlSamples.ts, __DEV__ only and labelled Development sample: a three-step recovery sequence (pause sent and waiting, recover liquid signed not sent, vault position remains). No confirmed step, no amounts, no addresses or hashes.",
+  "fabricated": "none outside the labelled development sample",
+  "security": "No text input on either screen (no TextInput in Control.tsx, Recovery.tsx or ControlCard.tsx; the first capture pass also found 0 EditText on Recovery with uiautomator). No recovery words, passphrase or key is collected, generated or shown. No signing, native call, network request, export or secret. Every restore, signing, relay, export and removal action is disabled with a stated reason.",
+  "dependencyChange": "none (type-only imports from the existing @mandate/schema devDependency; no lockfile, native or backend change)",
+  "files": [
+    "apps/mobile/src/screens/{Control,Recovery}.tsx",
+    "apps/mobile/src/components/ControlCard.tsx (extracted from AgentControls)",
+    "apps/mobile/src/config/agentControls.ts (unpause, recover, recoverLiquid, ownerTransfer, ownerSweep)",
+    "apps/mobile/src/config/{ownerControl,controlSamples}.ts",
+    "apps/mobile/src/screens/{AgentControls,SettingsScreen}.tsx (entry rows)",
+    "apps/mobile/src/navigation/RootNavigator.tsx",
+    "apps/mobile/test/ownerControl.test.ts"
+  ],
+  "checks": [
+    {
+      "check": "UI-09 tests before implementation (red, against stub modules)",
+      "command": "pnpm --filter @mandate/mobile test",
+      "result": "FAIL (expected)",
+      "observed": "All 10 new tests failed; the 69 existing tests passed. One test first passed vacuously against an empty stub list and was tightened before the recorded run.",
+      "artifact": "evidence/person3/ui-09/red-run.txt"
+    },
+    {
+      "check": "Correction-pass tests against the previous implementation (red)",
+      "command": "pnpm --filter @mandate/mobile test",
+      "result": "FAIL (expected)",
+      "observed": "9 of 83 failed (changed and new UI-09 tests); 74 passed.",
+      "artifact": "evidence/person3/ui-09/red-run.txt (second section)"
+    },
+    {
+      "check": "pnpm --filter @mandate/mobile check (after corrections)",
+      "result": "PASS",
+      "observed": "83/83 tests (14 UI-09 + 69 existing), typecheck clean"
+    },
+    {
+      "check": "pnpm typecheck (all workspace packages)",
+      "result": "PASS"
+    },
+    {
+      "check": "pnpm check:repository",
+      "result": "PASS (checkedFiles 653, failures [])"
+    },
+    {
+      "check": "prettier --check on changed and new files",
+      "result": "PASS"
+    },
+    {
+      "check": "make check-mobile",
+      "result": "NOT_RUN",
+      "observed": "make is not available on this Windows host; step 2 fails by design until native and device suites exist."
+    }
+  ],
+  "device": {
+    "kind": "emulator",
+    "serial": "emulator-5554",
+    "android": "16",
+    "api": 36,
+    "build": "Existing dev-client APK; JS from this branch through Metro (corrected text confirmed on screen). No native change.",
+    "physicalPhone": "NOT RUN",
+    "ios": "NOT RUN",
+    "screenReader": "NOT RUN"
+  },
+  "runtimeChecks": [
+    {
+      "check": "After corrections: Agent controls, Settings row, Owner control and Recovery and backup at system text size 1.0",
+      "result": "PASS",
+      "note": "02-settings-recovery-row.png is from the first capture pass; SettingsScreen.tsx did not change in the correction pass.",
+      "screens": [
+        "01-agent-controls-owner-row.png",
+        "02-settings-recovery-row.png",
+        "10-control-top.png",
+        "11-control-fee-routes.png",
+        "12-control-steps.png",
+        "13-control-reconcile-pause.png",
+        "14-control-unpause-revoke-recover.png",
+        "15-control-recover-liquid-sweep.png",
+        "16-control-sweep-note-admin-export.png",
+        "17-control-admin-and-transfer-exports.png",
+        "18-control-dev-sample-restore-link.png",
+        "30-recovery-needs.png",
+        "31-recovery-restore-backup.png",
+        "32-recovery-funds-local-actions.png"
+      ]
+    },
+    {
+      "check": "After corrections: large text, font scale 2.0: Recovery and backup and Owner control reflow without clipping. Emulator restored to 1.0.",
+      "result": "PASS",
+      "screens": [
+        "60-2x-recovery-needs.png",
+        "61-2x-recovery-restore.png",
+        "62-2x-recovery-funds.png",
+        "63-2x-recovery-local-actions.png",
+        "70-2x-control-needs.png",
+        "71-2x-control-steps.png",
+        "72-2x-control-expiry.png",
+        "73-2x-control-reconcile.png",
+        "74-2x-control-sweep.png",
+        "75-2x-control-admin-export.png",
+        "76-2x-control-transfer-export.png",
+        "77-2x-control-sample.png"
+      ]
+    }
+  ],
+  "pending": [
+    "Native signAdmin/signOwnerTransfer and the native confirmation view of command, nonce and expiry (P3-02, P3-05)",
+    "Offline trusted chain reads: factory mapping, owner/token/vault/chain against the bundled manifest, adminNonce/authorityEpoch/paused from a chosen trusted RPC (P3-05; trusted manifest deployments/base-sepolia.json from Person1)",
+    "Native relayOwnerOperation with personal gas and the shared nonce journal; Mandate relay via /wallets/:walletId/admin/draft and /submit (Person2)",
+    "Signed command export and tools/relay-admin.ts independent sender with preflight (P3-05.T05, T06)",
+    "Shared export format for a signed OwnerTransfer (not yet in the shared interface; needs a definition from the shared-interface owner before P3-05.T05)",
+    "Confirmed pause/epoch handling, sequential recovery with receipts and remaining positions (P3-05.T01-T04)",
+    "Native RecoveryActivity restore/backup with FLAG_SECURE, passphrase and account index (P3-01, P3-W01); Remove Wallet after native authentication (P3-W01); logout through NativeSession (P3-W03)",
+    "docs/mobile-recovery.md, OwnerEscapeTest.kt, .maestro/owner-control.yaml",
+    "Physical Android phone, iOS, screen-reader pass"
+  ],
+  "corrections": {
+    "requestedBy": "Person3 owner review of the first UI-09 captures",
+    "items": [
+      "Admin and OwnerTransfer are separate signed types: Admin up to 30 minutes with adminNonce, OwnerTransfer up to 10 minutes with ownerTransferNonce; each shows its own typed fields; the Admin export field list is not shown as the OwnerTransfer export (that format is not yet defined in the shared interface). Values tested against @mandate/schema authorityTypes, MAX_ADMIN_SECONDS and MAX_OWNER_TRANSFER_SECONDS.",
+      "Recovery uses 'Sweep to owner' (an owner transfer whose signed recipient is the owner address); a general owner transfer is described with the recipient the owner reviews and signs, not as owner-only.",
+      "Expiry does not prove an earlier sent or independently relayed copy never ran; reconcile inclusion, the current nonce and the epoch before a replacement. Step texts no longer imply that every command stops agents; each operation states its own confirmed effect."
+    ],
+    "scope": "UI text and config only. No signing, relaying, exporting or reconciliation implemented.",
+    "sessionNote": "Started in an earlier session that stopped at its usage limit after the config, Control screen and tests were updated and the red run was recorded; this session verified that state, finished Recovery.tsx, ran the checks and recaptured the screens."
+  }
+}
