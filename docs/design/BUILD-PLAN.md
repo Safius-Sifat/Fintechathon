@@ -19,9 +19,12 @@ Rules for every PR: Conventional Commits, no co-author trailer, `make check-mobi
 
 Order: 0, 1, 2, 3 are independent of backend work and come first. 5 to 8 depend on Person 2, 3 and 4 deliverables; coordinate through Person 1 before building them.
 
-## Status (one branch, `feat/mobile-tokens-fonts`)
-Built: design tokens and bundled Newsreader serif (steps 1), the seal component and redesigned Welcome (2, partly), fourth Agents tab with explicit "not available yet" states (4), seal app icon (9, partly). Existing screens (Home, Setup, Settings and others) pick up the new tokens.
+## Status (one branch, `feat/mobile-tokens-fonts`, PR #42)
+Built:
+- Design tokens and the bundled Newsreader serif; the seal, Page and shared building blocks; redesigned Welcome; the fourth Agents tab with explicit "not available yet" states; the seal app icon.
+- Every designed screen from passes 1 to 4 that can exist without a secret, as layout components in `apps/mobile/src/screens/preview/`: lock, backup status, contacts, transaction detail, network, help; agent setup (intro, provisioning, wallet, fund, compose, draft review, chooser, four task forms, allowance approval, wallet limits and their effects, providers); run and stop (running, why, approval, needs you, done, agent home with alert, stop choices, pause review, pending, confirmed, freeze, offline stop, sign-out); proof (activity by who, payment and owner transfer detail, proof, running proof, three finding details, export, independent check, decisions).
+- They are reachable only in development builds, from Settings, Design preview, and show labelled sample data. The route does not exist in release builds.
 
-Not built, because the capability behind each does not exist yet (`preview` flags in `apps/mobile/src/config/capabilities.ts` are all false, and the repo rules forbid fake results): wallet creation and recovery screens (need the native owner-wallet module), agent setup, run and stop screens (need the Mandate service, signing and the agent wallet), proof screens (need the verifier). Their designs are in `docs/design/source/`. Build each with its capability.
+Not built, because the capability behind each does not exist yet (`preview` flags in `apps/mobile/src/config/capabilities.ts` are all false, and the repo rules forbid fake results): the real data and actions behind those screens (owner key, signing, the Mandate service, agent wallet, verifier). The recovery phrase, quiz and passphrase screens are native secure screens by rule and are not in JavaScript at all.
 
-Also not done: dark mode (components read static colours), Android adaptive icon, a pass on every existing screen against the mockups.
+Also not done: dark mode (components read static colours), Android adaptive icon, restyling every older screen against the mockups, device checks beyond the iOS simulator.
