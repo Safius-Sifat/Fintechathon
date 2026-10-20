@@ -1,8 +1,8 @@
 {
   "owner": "Person3",
   "plan": "docs/plans/03 - Android Owner Wallet.md (v7.1)",
-  "updatedAt": "2026-10-20T09:47:00+06:00",
-  "currentCheckpoint": "UI-09 (Control, Recovery) implemented on work/person3-mobile-ui09-control-recovery (branched from #38's branch); owner-requested correction pass applied (Admin vs OwnerTransfer exports, sweep vs general transfer, expiry and reconciliation) and approved by the Person3 owner; draft PR to follow. UI-08 group 1 is draft PR #37, group 2 draft PR #38 (#38 -> #37 -> #36 -> #35, none merged).",
+  "updatedAt": "2026-10-20T09:52:00+06:00",
+  "currentCheckpoint": "UI-09 submitted: draft PR #39 (depends on #38 -> #37 -> #36 -> #35, none merged). Next: UI-10 (Security and Agent access, Contacts, Network, Help).",
   "priority": "Person3 owner decision 2026-10-19: screens, layouts and UI/UX first. Wallet, security and backend functionality is deferred, not dropped; every task below stays required for the final deliverable.",
   "acceptanceRule": "UI checkpoints are layout and navigation previews. They complete no P3 case: every case below stays open until its own functional, device and iOS evidence exists.",
   "uiCheckpoints": [
@@ -51,7 +51,7 @@
     {
       "id": "UI-09",
       "screens": "Control.tsx, Recovery.tsx",
-      "status": "APPROVED (owner visual review after the correction pass); draft PR to follow",
+      "status": "SUBMITTED: visually approved after the correction pass, draft PR #39 (depends on #38)",
       "preparesCases": "P3-05, WQ07, WQ10, WQ12"
     },
     {

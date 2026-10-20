@@ -1,7 +1,7 @@
 {
   "task": "UI-09",
   "title": "Owner control and Recovery and backup (layout and navigation only)",
-  "status": "APPROVED (Person3 owner visual review of the corrected screens, 2026-10-20); draft PR to follow",
+  "status": "SUBMITTED",
   "recordedAt": "2026-10-20T09:47:00+06:00",
   "branch": "work/person3-mobile-ui09-control-recovery",
   "baseCommit": "d51a385",
@@ -136,5 +136,16 @@
     ],
     "scope": "UI text and config only. No signing, relaying, exporting or reconciliation implemented.",
     "sessionNote": "Started in an earlier session that stopped at its usage limit after the config, Control screen and tests were updated and the red run was recorded; this session verified that state, finished Recovery.tsx, ran the checks and recaptured the screens."
+  },
+  "submission": {
+    "pr": 39,
+    "draft": true,
+    "base": "main",
+    "commit": "5a769e3",
+    "originMain": "95e91fb (unchanged; no merge needed)",
+    "ownerApproval": "Corrected screens visually approved by the Person3 owner on 2026-10-20",
+    "dependency": "#38 (UI-08 group 2) -> #37 (UI-08 group 1) -> #36 (UI-07) -> #35 (UI-06), all unmerged; PR diff against main includes them until they merge. UI-09-only comparison: work/person3-mobile-ui08-policy-intent-allowance...work/person3-mobile-ui09-control-recovery (39 files)",
+    "person1Request": "Shared signed OwnerTransfer export format requested in the PR body (envelope fields, lifetime/nonce/epoch preflight, export fixture from the OwnerTransfer5 vector); kept pending in mobile, no mobile-specific format; no Person1 file edited",
+    "afterDependenciesMerge": "merge origin/main, rerun checks, verify the PR diff contains only UI-09 files"
   }
 }
