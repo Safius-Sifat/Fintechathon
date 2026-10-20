@@ -57,6 +57,9 @@ importers:
       '@mandate/schema':
         specifier: workspace:*
         version: link:../../packages/schema
+      '@mandate/sdk':
+        specifier: workspace:*
+        version: link:../../packages/sdk
 
   apps/mobile:
     dependencies:
@@ -148,6 +151,15 @@ importers:
       '@mandate/platform':
         specifier: workspace:*
         version: link:../../packages/platform
+      '@mandate/schema':
+        specifier: workspace:*
+        version: link:../../packages/schema
+      fastify:
+        specifier: 5.6.2
+        version: 5.6.2
+      viem:
+        specifier: 2.38.5
+        version: 2.38.5(typescript@5.9.3)(zod@3.25.76)
 
   apps/worker:
     dependencies:
@@ -198,6 +210,12 @@ importers:
       '@mandate/schema':
         specifier: workspace:*
         version: link:../schema
+      viem:
+        specifier: 2.38.5
+        version: 2.38.5(typescript@5.9.3)(zod@3.25.76)
+      zod:
+        specifier: 3.25.76
+        version: 3.25.76
 
   packages/schema:
     dependencies:
@@ -225,6 +243,12 @@ importers:
       '@mandate/schema':
         specifier: workspace:*
         version: link:../schema
+      viem:
+        specifier: 2.38.5
+        version: 2.38.5(typescript@5.9.3)(zod@3.25.76)
+      zod:
+        specifier: 3.25.76
+        version: 3.25.76
 
   services/policy:
     dependencies:

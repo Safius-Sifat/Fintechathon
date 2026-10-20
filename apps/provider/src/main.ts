@@ -1,2 +1,6 @@
 import { startFoundationService } from "@mandate/platform";
-await startFoundationService("provider", 3001);
+import { registerProviderRoutes } from "./routes.js";
+
+await startFoundationService("provider", 3001, async (app) => {
+  await registerProviderRoutes(app);
+});

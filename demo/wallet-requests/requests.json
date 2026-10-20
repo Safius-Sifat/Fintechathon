@@ -1,0 +1,83 @@
+{
+  "schema": "mandate-payment-requests/1",
+  "chainId": 84532,
+  "requests": [
+    {
+      "id": "valid-eth-transfer",
+      "name": "Valid ETH Payment Request (1.5 ETH)",
+      "uri": "ethereum:pay-0x6666666666666666666666666666666666666666@84532?value=1500000000000000000",
+      "valid": true,
+      "type": "native",
+      "asset": "0x0000000000000000000000000000000000000000",
+      "symbol": "ETH",
+      "decimals": 18,
+      "amount": "1500000000000000000",
+      "displayedAmount": "1.5 ETH",
+      "recipient": "0x6666666666666666666666666666666666666666",
+      "description": "Standard ERC-681 payment request for native ETH on Base Sepolia."
+    },
+    {
+      "id": "valid-demousd-transfer",
+      "name": "Valid DemoUSD Payment Request (1.5 DemoUSD)",
+      "uri": "ethereum:0x2222222222222222222222222222222222222222@84532/transfer?address=0x6666666666666666666666666666666666666666&uint256=1500000",
+      "valid": true,
+      "type": "erc20",
+      "asset": "0x2222222222222222222222222222222222222222",
+      "symbol": "DemoUSD",
+      "decimals": 6,
+      "amount": "1500000",
+      "displayedAmount": "1.50 DemoUSD",
+      "recipient": "0x6666666666666666666666666666666666666666",
+      "description": "ERC-681 token transfer for DemoUSD on Base Sepolia."
+    },
+    {
+      "id": "valid-plain-address",
+      "name": "Plain Address (No URI Scheme)",
+      "uri": "0x6666666666666666666666666666666666666666",
+      "valid": true,
+      "type": "plain-address",
+      "recipient": "0x6666666666666666666666666666666666666666",
+      "description": "Standard 42-character hex address without amount prefilled."
+    },
+    {
+      "id": "invalid-wrong-chain",
+      "name": "Invalid: Unsupported Chain (@8453 instead of @84532)",
+      "uri": "ethereum:pay-0x6666666666666666666666666666666666666666@8453?value=1",
+      "valid": false,
+      "error": "ERC681_UNSUPPORTED_CHAIN",
+      "description": "Request specifies Base Mainnet (8453) instead of Base Sepolia (84532)."
+    },
+    {
+      "id": "invalid-duplicate-param",
+      "name": "Invalid: Duplicate Parameter (?value=1&value=2)",
+      "uri": "ethereum:pay-0x6666666666666666666666666666666666666666@84532?value=1&value=2",
+      "valid": false,
+      "error": "ERC681_DUPLICATE_PARAM",
+      "description": "Conflicting duplicate query parameters."
+    },
+    {
+      "id": "invalid-unknown-function",
+      "name": "Invalid: Unknown Function (/approve instead of /transfer)",
+      "uri": "ethereum:0x2222222222222222222222222222222222222222@84532/approve?address=0x6666666666666666666666666666666666666666&uint256=1",
+      "valid": false,
+      "error": "ERC681_UNKNOWN_FUNCTION",
+      "description": "Unsupported contract invocation function in payment request."
+    },
+    {
+      "id": "invalid-amount-precision",
+      "name": "Invalid: Scientific Notation / Invalid Amount",
+      "uri": "ethereum:pay-0x6666666666666666666666666666666666666666@84532?value=1.5e18",
+      "valid": false,
+      "error": "ERC681_INVALID_AMOUNT",
+      "description": "Amount is not an integer in atomic base units."
+    },
+    {
+      "id": "invalid-malformed-address",
+      "name": "Invalid: Malformed Address (0x1234)",
+      "uri": "ethereum:pay-0x1234@84532?value=1",
+      "valid": false,
+      "error": "ERC681_INVALID_ADDRESS",
+      "description": "Target address does not match 20-byte Ethereum format."
+    }
+  ]
+}

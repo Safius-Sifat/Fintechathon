@@ -8,7 +8,9 @@
     "default": "./src/index.ts"
   },
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test test/*.test.ts",
+    "check": "tsc --noEmit && tsx --test test/*.test.ts"
   },
   "dependencies": {
     "@mandate/schema": "workspace:*"

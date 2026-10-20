@@ -27,3 +27,7 @@ apps/mobile/android/**/build/
 .DS_Store
 packages/contracts/broadcast/
 deployments/*.local.json
+.agents/
+.claude/
+skills-lock.json
+

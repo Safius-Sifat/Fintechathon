@@ -4,11 +4,13 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "start": "tsx src/index.ts",
     "typecheck": "tsc --noEmit",
-    "dev": "tsx src/index.ts",
-    "cli": "tsx src/index.ts"
+    "test": "tsx --test test/*.test.ts",
+    "check": "tsc --noEmit && tsx --test test/*.test.ts"
   },
   "dependencies": {
-    "@mandate/schema": "workspace:*"
+    "@mandate/schema": "workspace:*",
+    "@mandate/sdk": "workspace:*"
   }
 }

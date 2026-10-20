@@ -5,9 +5,14 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/main.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test test/*.test.ts",
+    "check": "tsc --noEmit && tsx --test test/*.test.ts"
   },
   "dependencies": {
-    "@mandate/platform": "workspace:*"
+    "@mandate/platform": "workspace:*",
+    "@mandate/schema": "workspace:*",
+    "fastify": "5.6.2",
+    "viem": "2.38.5"
   }
 }
