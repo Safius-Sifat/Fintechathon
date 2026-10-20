@@ -11,16 +11,20 @@ import { ApprovalDetailScreen } from "../screens/ApprovalDetail";
 import { ApprovalsScreen } from "../screens/Approvals";
 import { ActivityScreen } from "../screens/ActivityScreen";
 import { AssetsScreen } from "../screens/Assets";
+import { ContactsScreen } from "../screens/Contacts";
 import { ControlScreen } from "../screens/Control";
+import { HelpScreen } from "../screens/Help";
 import { HomeScreen } from "../screens/HomeScreen";
 import { InspectorScreen } from "../screens/Inspector";
 import { IntentComposeScreen } from "../screens/IntentCompose";
 import { IntentReviewScreen } from "../screens/IntentReview";
+import { NetworkScreen } from "../screens/Network";
 import { IntroScreen, SetupScreen, WelcomeScreen } from "../screens/Onboarding";
 import { ReceiveScreen } from "../screens/Receive";
 import { RecoveryScreen } from "../screens/Recovery";
 import { ScanScreen } from "../screens/Scan";
 import { ScheduleScreen } from "../screens/Schedule";
+import { SecurityScreen } from "../screens/Security";
 import { SendScreen } from "../screens/Send";
 import { SettingsScreen } from "../screens/SettingsScreen";
 import { TaskScreen } from "../screens/Task";
@@ -76,6 +80,10 @@ export type RootStackParamList = {
   AllowanceApproval: undefined;
   Control: undefined;
   Recovery: undefined;
+  Security: undefined;
+  Contacts: undefined;
+  Network: undefined;
+  Help: undefined;
 };
 
 const TAB_META: Record<keyof TabParamList, TabMeta> = {
@@ -153,6 +161,10 @@ export function RootNavigator() {
       />
       <Stack.Screen name="Control" component={ControlScreen} />
       <Stack.Screen name="Recovery" component={RecoveryScreen} />
+      <Stack.Screen name="Security" component={SecurityScreen} />
+      <Stack.Screen name="Contacts" component={ContactsScreen} />
+      <Stack.Screen name="Network" component={NetworkScreen} />
+      <Stack.Screen name="Help" component={HelpScreen} />
     </Stack.Navigator>
   );
 }

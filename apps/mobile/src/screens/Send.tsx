@@ -113,8 +113,8 @@ export function SendScreen({ navigation }: Props) {
           <OutlineButton
             label="Contacts"
             icon="account-box-outline"
-            disabled
-            accessibilityHint="Unavailable. Contacts are not built yet."
+            accessibilityHint="Opens Contacts. Picking a contact is not built yet."
+            onPress={() => navigation.navigate("Contacts")}
           />
         </View>
         <Text style={styles.caption}>

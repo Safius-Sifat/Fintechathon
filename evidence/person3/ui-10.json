@@ -1,0 +1,163 @@
+{
+  "task": "UI-10",
+  "title": "Security and agent access, Contacts, Network and Help (layout and navigation only)",
+  "status": "APPROVED (Person3 owner visual review after the clarification pass, 2026-10-20); draft PR to follow",
+  "recordedAt": "2026-10-20T11:15:00+06:00",
+  "branch": "work/person3-mobile-ui10-security-network-help",
+  "baseCommit": "3f80164",
+  "dependency": "Branched from work/person3-mobile-ui09-control-recovery (draft PR #39), which depends on #38 -> #37 -> #36 -> #35; none merged. origin/main is 95e91fb.",
+  "note": "UI evidence, kept outside evidence/*/cases/. Completes no P3 case: P3-W01, P3-W03, P3-W04 and WQ09/WQ10/WQ14 stay open. Nothing locks, signs in, revokes, stores contacts, reads the chain or contacts a network.",
+  "planReference": "docs/plans/03 - Android Owner Wallet.md v7.1: P3-W01 (security settings: backup, auto-lock, session/agent-token controls, logout, local removal), P3-W03 (device session list/revoke and agent-token revoke separate from on-chain revoke; logout explains agents may continue; app lock does not stop approved work), P3-W02 and S8.4 (contacts are labels, not trusted recipient identity; encrypted device storage per chain), S8 Network/Help row (chain/RPC/explorer status, testnet funding guide, offline/stale states, app/build/spec version, support instructions), S8.5 (logout, Stop Agents and Revoke Agent Tokens are separate; Remove Wallet leaves funds and permissions on chain), S4/S8.6 (agent token scopes read, prepare, run, evidence; no owner or admin authority)",
+  "implemented": [
+    "Settings: Network row (Status, offline data and test ETH), Security row (App lock, sessions and agent access), Contacts row, Help row; existing capability rows unchanged",
+    "Security: subtitle says none of the phone, session or token actions stops agents, only owner controls confirmed on chain; preview banner; On this phone: App lock, Recovery words backup and Remove wallet from this phone, each Not available yet with no toggles, plus a link to Recovery and backup; Mandate service sessions: This phone Not signed in, Signed-in devices Unavailable (not an empty list), session is not the owner key, Log out and Sign out other devices disabled, device names are not proof of which phone; Agent access: agent tokens are not the owner key and carry no owner authority, Agent tokens Unavailable, the four schema scopes (Read, Prepare, Run, Evidence) explained, what no token can do (sign with the owner key; approve, pause, revoke or recover; owner transfer; change sessions or devices), Create token and Revoke token disabled, banner 'Revoking a token does not stop agents' (permissions stay in force until an owner control on chain, such as a pause or revoke, is confirmed); What these actions do, with a scope note that the list covers only this screen's actions and that a confirmed Recover, Recover liquid or owner transfer from the agent wallet also pauses agents and ends every permission: Lock the app, Log out, Sign out other devices, Revoke an agent token, Remove wallet from this phone, Pause agents, Revoke a permission, each tagged with where it acts (This phone, Mandate service, On chain) and either 'Agents keep working' or 'Ends permissions once confirmed'; links to Agent controls and Owner control; labelled __DEV__ development sample of two sessions (device names tagged 'Name not verified') and two agent tokens (scopes, limit, expiry; no token values)",
+    "Contacts: 'Contacts are not available yet' with an Unavailable tag (not 'No contacts'); Add contact disabled; A name is not proof: label is not proof of who controls the address, check the full address on review, stored encrypted on this phone and not restored from words, one network per contact; What a contact holds: name, full checked address, network; labelled __DEV__ sample contacts that hold no address at all: the address row reads 'Sample placeholder, not an address'; tagged 'Your label, not verified'",
+    "Send: the Contacts button now opens Contacts (picking a contact is not built); Scan stays disabled",
+    "Network: Base Sepolia, Chain ID 84532, 'Test network: assets have no value'; Status: Network set in this build, Trusted RPC Not configured, Connection Not checked, Latest block Unavailable, Deployment manifest Not loaded, Block explorer Not configured; When the network is down or slow: Unavailable not zero, Stale with block, Unknown stays Unknown; Getting test ETH: three steps with no outside links and a link to Receive",
+    "Help: Your two wallets (personal account, agent wallet, agent signer that is never a receiving address, never added together); Approving agent work; Stopping agents (freeze, pause, revoke; Recover, Recover liquid and an owner transfer also pause agents and end every permission; each counts only once confirmed; lock, logout, token revoke and local removal do not stop agents; Owner control when the service is down); Your recovery words (owner's responsibility, paper and offline, Mandate cannot recover them, Mandate will never ask for them, passphrase opens a different wallet); Test network; Network fees; When a result is unknown; Getting help (no support contact set up in this preview; helpers never need words or keys); links to Recovery and backup, Owner control and Security; About this app: version from app.json, Development preview, network, wallet plan v7.1"
+  ],
+  "fixtures": "config/securitySamples.ts and config/contacts.ts SAMPLE_CONTACTS, __DEV__ only and labelled Development sample. No session IDs, token values, secrets or addresses; sample contacts carry a 'Sample placeholder, not an address' note instead of an address.",
+  "fabricated": "none outside the labelled development samples",
+  "security": "No text input on any UI-10 screen. No recovery words, passphrase, key, session or token is collected, generated, stored or shown. No network request, signing, native call or storage. Every security, session, token and contact action is disabled with a stated reason; nothing is shown as a working toggle.",
+  "dependencyChange": "none (AGENT_SCOPES imported by type in config and by value in tests from the existing @mandate/schema devDependency; no lockfile, native or backend change)",
+  "files": [
+    "apps/mobile/src/screens/{Security,Contacts,Network,Help}.tsx",
+    "apps/mobile/src/config/{securityAccess,securitySamples,contacts,networkStatus,help}.ts",
+    "apps/mobile/src/screens/SettingsScreen.tsx (entry rows)",
+    "apps/mobile/src/screens/Send.tsx (Contacts button opens Contacts)",
+    "apps/mobile/src/navigation/RootNavigator.tsx",
+    "apps/mobile/test/ui10.test.ts"
+  ],
+  "checks": [
+    {
+      "check": "UI-10 tests before implementation (red, against stub modules)",
+      "command": "pnpm --filter @mandate/mobile test",
+      "result": "FAIL (expected)",
+      "observed": "All 11 new tests failed; the 83 existing tests passed.",
+      "artifact": "evidence/person3/ui-10/red-run.txt"
+    },
+    {
+      "check": "Test correction after the first green run",
+      "result": "NOTE",
+      "observed": "One test matched only 'log out' while the Help text says 'logging out'; the pattern was widened and an assertion that those actions 'do not stop agents' was added. The Help text was not changed to satisfy the test."
+    },
+    {
+      "check": "Clarification-pass tests against the previous implementation (red)",
+      "command": "pnpm --filter @mandate/mobile test",
+      "result": "FAIL (expected)",
+      "observed": "3 of 94 failed (new scope test, rewritten contact-sample test, extended Help assertions); 91 passed.",
+      "artifact": "evidence/person3/ui-10/red-run.txt (second section)"
+    },
+    {
+      "check": "pnpm --filter @mandate/mobile check (after the clarification pass)",
+      "result": "PASS",
+      "observed": "94/94 tests (11 UI-10 + 83 existing), typecheck clean"
+    },
+    {
+      "check": "pnpm typecheck (all workspace packages)",
+      "result": "PASS"
+    },
+    {
+      "check": "pnpm check:repository",
+      "result": "PASS (checkedFiles 708, failures [])"
+    },
+    {
+      "check": "prettier --check on changed and new files",
+      "result": "PASS"
+    },
+    {
+      "check": "make check-mobile",
+      "result": "NOT_RUN",
+      "observed": "make is not available on this Windows host; step 2 fails by design until native and device suites exist."
+    }
+  ],
+  "device": {
+    "kind": "emulator",
+    "serial": "emulator-5554",
+    "android": "16",
+    "api": 36,
+    "build": "Existing dev-client APK; JS from this branch through Metro. No native change. Settings shows 'Native wallet module: Not in this build' with this APK, as in the UI-09 captures; unrelated to UI-10.",
+    "physicalPhone": "NOT RUN",
+    "ios": "NOT RUN",
+    "screenReader": "NOT RUN"
+  },
+  "runtimeChecks": [
+    {
+      "check": "After clarifications: Settings rows, Security, Contacts (also opened from Send), Network and Help at system text size 1.0",
+      "result": "PASS",
+      "screens": [
+        "01-settings-network-row.png",
+        "02-settings-security-contacts-help-rows.png",
+        "10-security-local.png",
+        "11-security-sessions-agent-access.png",
+        "12-security-token-banner-scope-note.png",
+        "13-security-these-actions.png",
+        "14-security-links-sample.png",
+        "15-security-sample.png",
+        "20-contacts-unavailable-facts.png",
+        "21-contacts-holds-sample.png",
+        "22-contacts-samples.png",
+        "23-send-contacts-button.png",
+        "24-contacts-from-send.png",
+        "30-network-top.png",
+        "31-network-status-offline.png",
+        "32-network-test-eth.png",
+        "40-help-top-wallets.png",
+        "41-help-approving-stopping.png",
+        "42-help-stopping-recovery-words.png",
+        "43-help-recovery-words-test-network.png",
+        "44-help-fees-unknown-support.png",
+        "45-help-related-about.png"
+      ],
+      "note": "Security, Contacts and Help frames recaptured after the clarification pass; Settings, Send and Network frames are from the first pass (unchanged screens)."
+    },
+    {
+      "check": "After clarifications: large text, font scale 2.0: Contacts, Security, Network and Help reflow without clipping. Emulator restored to 1.0.",
+      "result": "PASS",
+      "screens": [
+        "60-2x-contacts-top.png",
+        "61-2x-contacts-facts.png",
+        "62-2x-contacts-samples.png",
+        "70-2x-security-top.png",
+        "71-2x-security-sessions.png",
+        "72-2x-security-agent-access.png",
+        "73-2x-security-cannot-banner.png",
+        "74-2x-security-these-actions.png",
+        "75-2x-security-chain-actions-links.png",
+        "76-2x-security-sample.png",
+        "80-2x-network-top.png",
+        "81-2x-network-status.png",
+        "82-2x-network-status-2.png",
+        "83-2x-network-offline-test-eth.png",
+        "90-2x-help-top.png",
+        "91-2x-help-approving.png",
+        "92-2x-help-stopping.png",
+        "93-2x-help-recovery-words.png",
+        "94-2x-help-test-network-fees.png",
+        "95-2x-help-unknown-support.png",
+        "96-2x-help-about.png"
+      ],
+      "note": "Contacts, Security and Help recaptured after the clarification pass; Network frames are from the first pass (unchanged screen)."
+    }
+  ],
+  "pending": [
+    "Native app lock with screen lock/biometrics and auto-lock (P3-W01)",
+    "Native backup status and Show recovery words on the protected native screen; Remove Wallet after native authentication and backup acknowledgement with a confirmed pause offered first (P3-01, P3-W01)",
+    "NativeSession login/refresh/logout; GET /v1/auth/sessions and POST /v1/auth/sessions/revoke with a recent signed login (P3-W03; Person2 routes, unverified)",
+    "Agent tokens: POST /agent-tokens and DELETE /agent-tokens/:tokenId with scopes and expiry (Person2 routes, unverified)",
+    "Encrypted contact storage per account and chain, address validation and contact picking in Send (P3-W02)",
+    "Trusted RPC, latest block, explorer and deployment manifest deployments/base-sepolia.json (Person1; not created yet); offline/stale states driven by real reads (P3-W03)",
+    "Support contact and instructions for release (P3-W04)",
+    "apps/mobile/test/{session,states}.test.ts, .maestro/sessions-history.yaml",
+    "Physical Android phone, iOS, screen-reader pass (WQ14)"
+  ],
+  "corrections": {
+    "requestedBy": "Person3 owner review of the first UI-10 captures",
+    "items": [
+      "Development contacts no longer hold address-like values (previously 0x1111.../0x2222...); the address row shows 'Sample placeholder, not an address'. The unused address-grouping helper was removed.",
+      "The Security comparison is titled 'What these actions do' and scoped to this screen's actions, naming Recover, Recover liquid and owner transfers as also ending permissions once confirmed. The subtitle, the token-revoke banner and Help's 'Stopping agents' no longer imply that pause and revoke are the only operations that end permissions."
+    ],
+    "scope": "UI text, config and tests only.",
+    "notChanged": "Already-submitted screens keep their wording: UI-08 Agent controls logout text ('To stop them, freeze, pause or revoke') and UI-09 Recovery ('freeze, pause or revoke from Agent controls, or use owner control'). Both describe how to stop agents rather than claiming exclusivity."
+  }
+}

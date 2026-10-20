@@ -1,0 +1,41 @@
+Red run of the UI-10 tests (test/ui10.test.ts) against stub modules, before implementation.
+Command: pnpm --filter @mandate/mobile test (exit 1). Paths and stack traces removed.
+
+not ok 84 - UI-10 security: only a confirmed on-chain pause or revoke ends existing agent permissions
+  Expected values to be strictly deep-equal:
+not ok 85 - UI-10 agent access: revoking an agent token leaves on-chain permissions in force
+  'missing action revokeAgentToken'
+not ok 86 - UI-10 agent access: scopes match the shared schema and none carries owner authority
+  Expected values to be strictly deep-equal:
+not ok 87 - UI-10 security: no local protection is marked as working
+  Expected values to be strictly deep-equal:
+not ok 88 - UI-10 security: development samples hold no secrets and treat device names as untrusted
+  The expression evaluated to a falsy value:
+not ok 89 - UI-10 contacts: unavailable storage is not shown as an empty list
+  Expected values to be strictly equal:
+not ok 90 - UI-10 contacts: the address is always shown in full
+  Expected values to be strictly equal:
+not ok 91 - UI-10 contacts: samples use obviously fake addresses on Base Sepolia
+  The expression evaluated to a falsy value:
+not ok 92 - UI-10 network: only the configured chain is marked configured
+  The expression evaluated to a falsy value:
+not ok 93 - UI-10 help: recovery words are the owner's responsibility
+  The expression evaluated to a falsy value:
+not ok 94 - UI-10 help: personal account, agent wallet and agent signer stay separate
+  The expression evaluated to a falsy value:
+# tests 94
+# pass 83
+# fail 11
+
+Clarification pass (owner review): contact samples without address-like values; the security action list scoped, with Recover, Recover liquid and owner transfers named as also ending permissions.
+Updated tests run red against the previous implementation. Command: pnpm --filter @mandate/mobile test (exit 1).
+
+not ok 85 - UI-10 security: the action list is scoped; recovery and owner transfers also end permissions
+  'The "string" argument must be of type string. Received type undefined (undefined)'
+not ok 91 - UI-10 contacts: development samples hold no address-like value
+  'Sample: Alex'
+not ok 94 - UI-10 help: personal account, agent wallet and agent signer stay separate
+  The input did not match the regular expression /recover liquid/i. Input:
+# tests 94
+# pass 91
+# fail 3

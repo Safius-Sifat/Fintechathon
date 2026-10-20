@@ -45,6 +45,14 @@ export function SettingsScreen({ navigation }: Props) {
       <Card>
         <CapabilityRow capability={NETWORK_ROW} />
       </Card>
+      <NavRow
+        icon="access-point-network"
+        tone="blue"
+        label="Network"
+        value="Status, offline data and test ETH"
+        accessibilityHint="Opens network details"
+        onPress={() => navigation.navigate("Network")}
+      />
 
       <SectionTitle>Wallet security</SectionTitle>
       <Card>
@@ -53,6 +61,22 @@ export function SettingsScreen({ navigation }: Props) {
           <CapabilityRow key={capability.id} capability={capability} />
         ))}
       </Card>
+      <NavRow
+        icon="shield-lock-outline"
+        tone="green"
+        label="Security"
+        value="App lock, sessions and agent access"
+        accessibilityHint="Opens security and agent access"
+        onPress={() => navigation.navigate("Security")}
+      />
+      <NavRow
+        icon="account-box-outline"
+        tone="violet"
+        label="Contacts"
+        value="Your names for addresses"
+        accessibilityHint="Opens contacts"
+        onPress={() => navigation.navigate("Contacts")}
+      />
       <NavRow
         icon="key-chain-variant"
         tone="blue"
@@ -74,6 +98,14 @@ export function SettingsScreen({ navigation }: Props) {
         <DetailRow label="Build" value="Development preview" />
         <DetailRow label="Milestone" value="P3-01 checkpoint 1" />
       </Card>
+      <NavRow
+        icon="lifebuoy"
+        tone="blue"
+        label="Help"
+        value="How Mandate works"
+        accessibilityHint="Opens help"
+        onPress={() => navigation.navigate("Help")}
+      />
     </Screen>
   );
 }
