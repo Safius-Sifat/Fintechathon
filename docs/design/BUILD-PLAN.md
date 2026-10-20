@@ -19,12 +19,35 @@ Rules for every PR: Conventional Commits, no co-author trailer, `make check-mobi
 
 Order: 0, 1, 2, 3 are independent of backend work and come first. 5 to 8 depend on Person 2, 3 and 4 deliverables; coordinate through Person 1 before building them.
 
-## Status (one branch, `feat/mobile-tokens-fonts`, PR #42)
-Built:
-- Design tokens and the bundled Newsreader serif; the seal, Page and shared building blocks; redesigned Welcome; the fourth Agents tab with explicit "not available yet" states; the seal app icon.
-- Every designed screen from passes 1 to 4 that can exist without a secret, as layout components in `apps/mobile/src/screens/preview/`: lock, backup status, contacts, transaction detail, network, help; agent setup (intro, provisioning, wallet, fund, compose, draft review, chooser, four task forms, allowance approval, wallet limits and their effects, providers); run and stop (running, why, approval, needs you, done, agent home with alert, stop choices, pause review, pending, confirmed, freeze, offline stop, sign-out); proof (activity by who, payment and owner transfer detail, proof, running proof, three finding details, export, independent check, decisions).
-- They are reachable only in development builds, from Settings, Design preview, and show labelled sample data. The route does not exist in release builds.
+## Status after PR #42 (merged)
+Done: design tokens, bundled Newsreader serif, Seal, Page and shared blocks, redesigned Welcome, Agents tab with explicit unavailable states, seal icon, and about 45 layout screens behind the development-only sample preview (`apps/mobile/src/screens/preview/`). Mobile typecheck and tests pass. Only some screens were looked at in the iOS simulator.
 
-Not built, because the capability behind each does not exist yet (`preview` flags in `apps/mobile/src/config/capabilities.ts` are all false, and the repo rules forbid fake results): the real data and actions behind those screens (owner key, signing, the Mandate service, agent wallet, verifier). The recovery phrase, quiz and passphrase screens are native secure screens by rule and are not in JavaScript at all.
+## Remaining work
 
-Also not done: dark mode (components read static colours), Android adaptive icon, restyling every older screen against the mockups, device checks beyond the iOS simulator.
+Two kinds. Part A can be done now by one person in one branch. Part B needs a capability that does not exist yet; each item must be built together with it, because the repo rules forbid fake results (`preview` flags in `apps/mobile/src/config/capabilities.ts` stay false until the code behind them works).
+
+### Part A: doable now, one branch `feat/mobile-redesign-finish`
+| # | Work | Done when |
+|---|---|---|
+| A1 | Look at every preview screen in the simulator at 440 wide and 375x667, fix overflow, clipping and the press-and-hold layout | Each screen opened and noted in `docs/design/CRITIQUE.md`; fixes committed |
+| A2 | Restyle older screens (Home, Accounts, Receive, Send, TransferReview, Scan, Activity) with the new Page, Row and Seal blocks; keep behaviour unchanged | Screens match `docs/design/source/wallet.html`; existing tests pass |
+| A3 | Dark mode: replace static `colors` with a theme hook (`useTheme`) driven by the system setting; dark tokens from `DIRECTION.md` | Every screen readable in both themes; status bar follows |
+| A4 | Android adaptive icon (foreground seal on the ground colour) and iOS icon check in `app.json` | Icon shows correctly on both launchers |
+| A5 | Accessibility pass: large text (stacked rows), VoiceOver and TalkBack labels on blocks, 44/48 point targets | Checked at 130% text on both platforms; gaps listed |
+| A6 | Tests: render tests for Page, Row, Steps, FindingRow and the hold-to-seal timing (cancel early signs nothing) | Tests in `apps/mobile/test`, run by `make check-mobile` |
+
+### Part B: needs other work first (build each with its capability)
+| # | Screen group | Needs | Owner and plan task |
+|---|---|---|---|
+| B1 | Wallet creation, recovery phrase, quiz, passphrase, import | Native secure screens, no seed in JavaScript | Person 3, P3-01 and P3-W01 |
+| B2 | Lock and backup status with real state | Native lock and backup state | Person 3, P3-W01 |
+| B3 | Real Home, Receive, Send, Review, Activity, transaction detail | Wallet, assets and history API, signing | Person 3 P3-W02, Person 2 API |
+| B4 | Agent wallet creation, funding, intent compose and review, four task forms | Mandate service, provisioning, `/v1/intents/compile` | Person 2, with Person 3 P3-03 |
+| B5 | Wallet limits, allowance approval, approvals and alerts | Policy relay, native signing of Permit and Approval | Person 3 P3-A01 and P3-A02 |
+| B6 | Run, stop, pause, freeze, offline stop | Admin signing and chain reads | Person 3 P3-05 |
+| B7 | Proof, export, independent check, decisions | Evidence API and the verifier | Person 4 P4-05, Person 3 P3-04 |
+| B8 | iOS | Native iOS module | Person 3 P3-X01 |
+
+How each B item lands: replace the sample props in its preview screen with real view models from the API or native module, register the real route, set the matching `preview` flag only when it works, add it to `make check-mobile`, and remove the sample entry from the gallery. Changes to shared schema or API contracts go through Person 1.
+
+Order: A1 to A6 first (one PR), then B1 and B2, B3, B4 and B5, B6, B7, B8 as their owners land them.
