@@ -41,12 +41,16 @@ const ACTION_SECONDS = 50;
 // Provider quote/retrieve over the provider service's HTTP routes (S6).
 export function providerDeps(
   baseUrl: string,
+  workerToken: string,
   context: () => { taskId: Hex; wallet: Hex; asset: Hex },
 ): RunbookDeps {
   const post = async (path: string, body: unknown) => {
     const r = await fetch(baseUrl + path, {
       method: "POST",
-      headers: { "content-type": "application/json" },
+      headers: {
+        "content-type": "application/json",
+        authorization: "Bearer " + workerToken,
+      },
       body: JSON.stringify(body),
       signal: AbortSignal.timeout(20_000),
     });

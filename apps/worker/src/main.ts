@@ -75,6 +75,7 @@ const relayer = new Relayer(database, client, 84532, lanes, clock);
 await relayer.register();
 
 const adapterToken = await secret("ADAPTER_INTERNAL_TOKEN_FILE");
+const providerToken = await secret("PROVIDER_WORKER_TOKEN_FILE");
 const adapterUrl = required("ADAPTER_URL");
 const adapter = adapterClient(adapterUrl, adapterToken);
 // After a restore, signing stays off until reconciliation is complete and an
@@ -168,7 +169,7 @@ const handlers: Record<string, (job: Job) => Promise<boolean>> = {
       client,
       advanceRunbook,
       (task) =>
-        providerDeps(required("PROVIDER_URL"), () => ({
+        providerDeps(required("PROVIDER_URL"), providerToken, () => ({
           taskId: task.chainTaskId,
           wallet: task.wallet,
           asset: task.asset,
