@@ -3,26 +3,46 @@ import { MandateClient } from "@mandate/sdk";
 export const MCP_TOOLS = [
   {
     name: "mandate_get_wallet",
-    description: "Query status, spending balance, and limits of a Mandate managed wallet",
+    description:
+      "Query status, spending balance, and limits of a Mandate managed wallet",
     inputSchema: {
       type: "object",
       properties: {
-        walletId: { type: "string", description: "UUID of the wallet to inspect" },
+        walletId: {
+          type: "string",
+          description: "UUID of the wallet to inspect",
+        },
       },
       required: ["walletId"],
     },
   },
   {
-    name: "mandate_prepare_task",
-    description: "Prepare a bounded task proposal (browser-check, liquidity-keeper, scheduled-pay) for owner approval",
+    name: "mandate_create_task",
+    description:
+      "Create a bounded task (browser-check, liquidity-keeper, scheduled-pay) for the owner to approve on their phone",
     inputSchema: {
       type: "object",
       properties: {
-        runbookId: { type: "string", enum: ["browser-check", "liquidity-keeper", "scheduled-pay"] },
-        goal: { type: "string", description: "Human-readable description of the task goal" },
-        input: { type: "object", description: "Typed parameters matching the runbook requirement" },
+        walletId: { type: "string", description: "UUID of the agent wallet" },
+        runbookId: {
+          type: "string",
+          enum: ["browser-check", "liquidity-keeper", "scheduled-pay"],
+        },
+        goal: {
+          type: "string",
+          description: "Human-readable description of the task goal",
+        },
+        input: {
+          type: "object",
+          description: "Typed parameters matching the runbook",
+        },
+        idempotencyKey: {
+          type: "string",
+          description: "Reuse the same key when retrying",
+        },
       },
-      required: ["runbookId", "input"],
+      required: ["walletId", "runbookId", "goal", "input", "idempotencyKey"],
+      additionalProperties: false,
     },
   },
   {
@@ -38,19 +58,24 @@ export const MCP_TOOLS = [
   },
   {
     name: "mandate_run_task",
-    description: "Request the execution of an approved task under active permit boundaries",
+    description:
+      "Request the execution of an approved task under active permit boundaries",
     inputSchema: {
       type: "object",
       properties: {
         taskId: { type: "string", description: "UUID of the task to run" },
-        idempotencyKey: { type: "string", description: "Optional idempotency key" },
+        idempotencyKey: {
+          type: "string",
+          description: "Optional idempotency key",
+        },
       },
       required: ["taskId"],
     },
   },
   {
     name: "mandate_get_evidence",
-    description: "Retrieve signed execution evidence and audit bundle for a completed task",
+    description:
+      "Retrieve signed execution evidence and audit bundle for a completed task",
     inputSchema: {
       type: "object",
       properties: {
@@ -72,29 +97,45 @@ export async function handleToolCall(
     case "mandate_get_wallet":
       result = await client.getWallet(args.walletId);
       break;
-    case "mandate_prepare_task":
-      result = await client.prepareTask(args);
+    case "mandate_create_task": {
+      const { idempotencyKey, ...params } = args;
+      result = await client.createTask(params, idempotencyKey);
       break;
+    }
     case "mandate_get_task":
       result = await client.getTask(args.taskId);
       break;
     case "mandate_run_task":
       result = await client.runTask(args.taskId, args.idempotencyKey);
       break;
-    case "mandate_get_evidence":
-      result = await client.getEvidence(args.taskId);
+    case "mandate_get_evidence": {
+      const zip = await client.getEvidence(args.taskId);
+      result = {
+        bytes: zip.length,
+        note: "Evidence ZIP downloaded; check it with mandate-verify.",
+      };
       break;
+    }
     default:
       throw new Error(`Unknown tool: ${toolName}`);
   }
 
   // Sanitize result: never return authorization tokens or credentials in tool output
-  const text = JSON.stringify(result, (key, value) => {
-    if (key === "token" || key === "jwt" || key === "apiKey" || key === "secret") {
-      return "[REDACTED]";
-    }
-    return value;
-  }, 2);
+  const text = JSON.stringify(
+    result,
+    (key, value) => {
+      if (
+        key === "token" ||
+        key === "jwt" ||
+        key === "apiKey" ||
+        key === "secret"
+      ) {
+        return "[REDACTED]";
+      }
+      return value;
+    },
+    2,
+  );
 
   return {
     content: [{ type: "text", text }],

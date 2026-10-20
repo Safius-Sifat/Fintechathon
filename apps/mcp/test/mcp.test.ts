@@ -7,7 +7,7 @@ test("mcp: lists 5 scoped tools without raw signing bypass", () => {
   assert.equal(MCP_TOOLS.length, 5);
   const toolNames = MCP_TOOLS.map((t) => t.name);
   assert.ok(toolNames.includes("mandate_get_wallet"));
-  assert.ok(toolNames.includes("mandate_prepare_task"));
+  assert.ok(toolNames.includes("mandate_create_task"));
   assert.ok(toolNames.includes("mandate_get_task"));
   assert.ok(toolNames.includes("mandate_run_task"));
   assert.ok(toolNames.includes("mandate_get_evidence"));
@@ -27,7 +27,9 @@ test("mcp: handleToolCall executes tool and redacts secrets", async () => {
     }),
   } as unknown as MandateClient;
 
-  const res = await handleToolCall(mockClient, "mandate_get_task", { taskId: "task-123" });
+  const res = await handleToolCall(mockClient, "mandate_get_task", {
+    taskId: "task-123",
+  });
   assert.ok(res.content[0]?.text);
   assert.ok(res.content[0].text.includes("[REDACTED]"));
   assert.ok(!res.content[0].text.includes("secret-token-to-redact"));
