@@ -2,7 +2,7 @@
   "owner": "Person3",
   "plan": "docs/plans/03 - Android Owner Wallet.md (v7.1)",
   "updatedAt": "2026-10-20T20:15:00+06:00",
-  "currentCheckpoint": "UI-08 group 2 (WalletPolicy, IntentCompose, IntentReview, AllowanceApproval) implemented on work/person3-mobile-ui08-policy-intent-allowance (branched from #37's branch); awaiting Person3 owner visual review, not submitted. UI-08 group 1 is draft PR #37 (depends on #36 -> #35).",
+  "currentCheckpoint": "UI-08 complete: group 1 draft PR #37, group 2 draft PR #38 (depends on #37 -> #36 -> #35, none merged). Next: UI-09 (Control, Recovery).",
   "priority": "Person3 owner decision 2026-10-19: screens, layouts and UI/UX first. Wallet, security and backend functionality is deferred, not dropped; every task below stays required for the final deliverable.",
   "acceptanceRule": "UI checkpoints are layout and navigation previews. They complete no P3 case: every case below stays open until its own functional, device and iOS evidence exists.",
   "uiCheckpoints": [
@@ -45,7 +45,7 @@
     {
       "id": "UI-08",
       "screens": "Approvals, ApprovalDetail, Alerts, AgentControls, WalletPolicy, IntentCompose, IntentReview, AllowanceApproval",
-      "status": "IN_PROGRESS: group 1 (Approvals, ApprovalDetail, Alerts, AgentControls) visually approved, draft PR #37 (depends on #36 -> #35); group 2 (WalletPolicy, IntentCompose, IntentReview, AllowanceApproval) implemented, in owner review, not submitted",
+      "status": "IN_REVIEW: group 1 visually approved, draft PR #37 (depends on #36 -> #35); group 2 visually approved, draft PR #38 (depends on #37)",
       "preparesCases": "P3-A01, P3-A02"
     },
     {

@@ -144,7 +144,7 @@
   },
   "group2": {
     "title": "Wallet policy, Describe a goal (intent compose), Review terms (intent review) and Service allowance (layout, local drafts and form checks only)",
-    "status": "VISUALLY APPROVED by the Person3 owner on 2026-10-20; submission in progress",
+    "status": "SUBMITTED",
     "recordedAt": "2026-10-20T20:15:00+06:00",
     "branch": "work/person3-mobile-ui08-policy-intent-allowance",
     "baseCommit": "fd0b630",
@@ -297,6 +297,17 @@
       "Describe a goal states the manual forms work as previews and cannot create a task yet.",
       "domain/amounts.ts comment scoped explicitly to the two agent assets; not for ETH, imported tokens or personal sends (P3-W02, not built).",
       "Shared S2 ceilings stay mobile-side constants with the contract-consistency test; an export request for Person1 is prepared outside the repository. No Person1 file is edited."
-    ]
+    ],
+    "submission": {
+      "pr": 38,
+      "draft": true,
+      "base": "main",
+      "commit": "84436df",
+      "originMain": "95e91fb (unchanged; no merge needed)",
+      "ownerApproval": "Visually approved by the Person3 owner on 2026-10-20",
+      "dependency": "#37 (UI-08 group 1) -> #36 (UI-07) -> #35 (UI-06), all unmerged; PR diff against main includes them until they merge. Group-2-only comparison: work/person3-mobile-ui08-approvals-controls...work/person3-mobile-ui08-policy-intent-allowance (71 files)",
+      "person1Request": "Shared S2 ceilings export request included in the PR body; no Person1 file edited",
+      "afterDependenciesMerge": "merge origin/main, rerun checks, verify the PR diff contains only UI-08 group 2 files"
+    }
   }
 }
