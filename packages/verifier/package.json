@@ -7,12 +7,18 @@
     "types": "./src/index.ts",
     "default": "./src/index.ts"
   },
+  "bin": {
+    "mandate-verify": "./src/cli.ts"
+  },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "dev": "tsx src/index.ts",
-    "cli": "tsx src/index.ts"
+    "test": "tsx --test test/*.test.ts",
+    "check": "tsc --noEmit && tsx --test test/*.test.ts",
+    "cli": "tsx src/cli.ts"
   },
   "dependencies": {
-    "@mandate/schema": "workspace:*"
+    "@mandate/schema": "workspace:*",
+    "viem": "2.38.5",
+    "zod": "3.25.76"
   }
 }

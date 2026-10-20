@@ -1,0 +1,32 @@
+{
+  "schema": "mandate-provider-config/1",
+  "chainId": 84532,
+  "providers": [
+    {
+      "providerId": "a",
+      "recipient": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+      "capabilities": ["pageLoad", "title"],
+      "price": "200000",
+      "currency": "DemoUSD"
+    },
+    {
+      "providerId": "b",
+      "recipient": "0x6666666666666666666666666666666666666666",
+      "capabilities": ["pageLoad", "title", "formSubmit"],
+      "price": "350000",
+      "currency": "DemoUSD"
+    }
+  ],
+  "targets": [
+    {
+      "targetId": "checkout-healthy",
+      "expectedTitle": "Checkout",
+      "path": "demo/targets/checkout-healthy/index.html"
+    },
+    {
+      "targetId": "checkout-broken",
+      "expectedTitle": "Checkout",
+      "path": "demo/targets/checkout-broken/index.html"
+    }
+  ]
+}

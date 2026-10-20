@@ -1,0 +1,58 @@
+{
+  "schema": "mandate-wallet-scenarios/1",
+  "chainId": 84532,
+  "scenarios": [
+    {
+      "id": "personal-to-second-account",
+      "name": "Personal Account 0 to Personal Account 1 Transfer",
+      "source": "eoa-account-0",
+      "destination": "eoa-account-1",
+      "senderAddress": "0x1111111111111111111111111111111111111111",
+      "recipientAddress": "0x5555555555555555555555555555555555555555",
+      "asset": "0x2222222222222222222222222222222222222222",
+      "symbol": "DemoUSD",
+      "amount": "1000000",
+      "displayedAmount": "1.00 DemoUSD",
+      "gasPayer": "sender",
+      "expectedBalanceChange": {
+        "account0DemoUSD": "-1000000",
+        "account1DemoUSD": "+1000000"
+      },
+      "description": "Direct EOA-to-EOA personal transfer. The user signs locally; no MPC or backend permission required."
+    },
+    {
+      "id": "personal-funds-managed",
+      "name": "Personal Wallet Funds Agent Managed Wallet",
+      "source": "personal-eoa",
+      "destination": "managed-wallet-contract",
+      "senderAddress": "0x1111111111111111111111111111111111111111",
+      "recipientAddress": "0x7777777777777777777777777777777777777777",
+      "asset": "0x2222222222222222222222222222222222222222",
+      "symbol": "DemoUSD",
+      "amount": "2000000",
+      "displayedAmount": "2.00 DemoUSD",
+      "gasPayer": "personal-eoa",
+      "expectedBalanceChange": {
+        "personalDemoUSD": "-2000000",
+        "managedDemoUSD": "+2000000"
+      },
+      "description": "Funding the smart contract wallet to establish an agent spending budget."
+    },
+    {
+      "id": "managed-owner-send",
+      "name": "Owner Direct Send / Emergency Stop from Managed Wallet",
+      "source": "managed-wallet-contract",
+      "destination": "personal-eoa",
+      "managedWalletAddress": "0x7777777777777777777777777777777777777777",
+      "recipientAddress": "0x1111111111111111111111111111111111111111",
+      "asset": "0x2222222222222222222222222222222222222222",
+      "symbol": "DemoUSD",
+      "amount": "2000000",
+      "displayedAmount": "2.00 DemoUSD",
+      "operationType": "OwnerTransfer",
+      "incrementsEpoch": true,
+      "invalidatesActivePermits": true,
+      "description": "Owner signs an on-chain OwnerTransfer directly. This action withdraws funds and increments the wallet epoch, invalidating existing agent permits."
+    }
+  ]
+}

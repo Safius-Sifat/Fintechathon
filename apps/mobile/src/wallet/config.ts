@@ -26,7 +26,7 @@ export const TOKENS: readonly Token[] = [
     symbol: "DUSD",
     name: "DemoUSD",
     address: "0xE030717a657E9194bC086A546fb59aDBc631ad7a",
-    decimals: 18,
+    decimals: 6,
     note: "Base Sepolia",
   },
   {
@@ -46,3 +46,13 @@ export const TOKENS: readonly Token[] = [
 ];
 
 export const MAX_ACCOUNT_INDEX = 19;
+
+// Policy ceilings fixed by the contracts (MandateLimits.sol), in base units of
+// a 6-decimal agent asset.
+export const POLICY_CEILINGS = {
+  perTx: 500_000n,
+  daily: 10_000_000n,
+  weekly: 25_000_000n,
+} as const;
+
+export const AGENT_ASSETS = TOKENS.filter((t) => t.address !== null);
