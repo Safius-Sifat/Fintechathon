@@ -54,7 +54,6 @@ Order: A1 to A6 first (one PR), then B1 and B2, B3, B4 and B5, B6, B7, B8 as the
 
 ## Fast path (decided 2026-10-20)
 Part B no longer waits for native code. The wallet is built in TypeScript with Expo and npm packages (viem, @scure/bip39, expo-secure-store, expo-local-authentication). Steps J1 to J6 are in `docs/plans/03 - Android Owner Wallet.md`, section "Fast path (v7.2)". J1 to J3 and J5 need no Mandate backend; J4 uses the existing auth API; J6 waits for Person 2 and Person 4.
-
 ## Fast path status (branch `feat/mobile-js-wallet`)
 - J1 done: create (phrase shown once, screenshots blocked, 3-word quiz, optional passphrase), restore, Face ID or passcode unlock, auto-lock after a minute in the background, accounts 0–19 with local names, show phrase, remove wallet.
 - J2 done: balances for DemoUSD, ETH and USDC from Base Sepolia, Receive with QR, copy and share, Send with address checksum, decimals and balance checks, fee quote including the L1 fee, Face ID before signing, broadcast, transaction detail with pending, confirmed and failed states, and an Activity list of what this phone sent.
