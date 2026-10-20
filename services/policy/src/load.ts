@@ -32,6 +32,16 @@ export type ActionRecord = {
   reservation_amount: string | null;
   attempt_state: string | null;
   attempt_digest: string | null;
+  approval_state: string | null;
+  approval_expires_at: string | null;
+  approval_signature: string | null;
+  approval_digest: string | null;
+  wallet_policy: { reviewThreshold: string } | null;
+  wallet_lists: {
+    assetCaps: { asset: string; perTx: string }[];
+    allowlist: string[];
+    blocklist: string[];
+  } | null;
 };
 
 // Reads only immutable owner-signed and journaled records selected by ID; the
@@ -47,7 +57,9 @@ export async function loadAction(
         w.wallet_address,w.owner_address,w.provisioning_state,w.mpc_wallet_id,w.executor_address,w.key_version,w.paused,w.frozen,w.inhibited,
         t.runbook_id,p.permit,p.owner_signature,p.authority_state,d.scope,
         r.state AS reservation_state,r.amount::text AS reservation_amount,
-        s.state AS attempt_state,s.digest AS attempt_digest
+        s.state AS attempt_state,s.digest AS attempt_digest,
+        q.state AS approval_state,q.expires_at::text AS approval_expires_at,q.owner_signature AS approval_signature,q.action_digest AS approval_digest,
+        wp.policy AS wallet_policy,wp.lists AS wallet_lists
        FROM actions a
        JOIN wallets w ON w.id=a.wallet_id
        JOIN tasks t ON t.id=a.task_id
@@ -55,6 +67,8 @@ export async function loadAction(
        JOIN permit_drafts d ON d.id=p.draft_id
        LEFT JOIN reservations r ON r.action_id=a.id
        LEFT JOIN signing_attempts s ON s.id=$2 AND s.action_id=a.id
+       LEFT JOIN approval_requests q ON q.action_id=a.id
+       LEFT JOIN LATERAL (SELECT policy,lists FROM wallet_policies WHERE wallet_id=a.wallet_id ORDER BY version DESC LIMIT 1) wp ON true
        WHERE a.id=$1`,
       [actionId, attemptId],
     )

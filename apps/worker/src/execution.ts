@@ -18,7 +18,8 @@ import {
   type Action,
   type Invoice,
 } from "@mandate/schema";
-import { transaction, type Clock } from "@mandate/platform";
+import { transaction, type Clock, type PushSender } from "@mandate/platform";
+import { approvalGate } from "./approvals.js";
 import type { Relayer } from "./relayer.js";
 import {
   reserve,
@@ -92,8 +93,18 @@ type Row = {
   asset: string;
   wallet_address: Address;
   executor_address: Address;
-  permit: { maxPayment: string; spendCap: string; liquidFloor: string };
+  permit: {
+    maxPayment: string;
+    spendCap: string;
+    liquidFloor: string;
+    reviewThreshold: string;
+  };
   reservation_state: string | null;
+  task_id: string;
+  owner_address: string;
+  approval_state: string | null;
+  approval_expires_at: string | null;
+  approval_signature: Hex | null;
 };
 
 const APPROVAL_NONE = { actionDigest: ZERO_HASH, expiresAt: 0n };
@@ -131,8 +142,13 @@ function executeArgs(row: Row, signature: Hex) {
         }
       : EMPTY_INVOICE,
     row.provider_signature ?? "0x",
-    APPROVAL_NONE,
-    "0x",
+    row.approval_state === "APPROVED"
+      ? {
+          actionDigest: row.digest,
+          expiresAt: BigInt(row.approval_expires_at!),
+        }
+      : APPROVAL_NONE,
+    row.approval_state === "APPROVED" ? row.approval_signature! : "0x",
     "0x",
   ] as const;
 }
@@ -144,12 +160,82 @@ export class Executor {
     readonly relayer: Relayer,
     readonly signing: SigningClient,
     readonly clock: Clock,
+    readonly push: PushSender | null = null,
   ) {}
+
+  // Fresh chain state and the owner's co-signature gate every MPC request.
+  private async beforeSigning(row: Row) {
+    const wallet = getAddress(row.wallet_address);
+    const [frozen, paused, inhibited] = await Promise.all([
+      this.client.readContract({
+        address: wallet,
+        abi: mandateWalletAbi,
+        functionName: "frozen",
+      }),
+      this.client.readContract({
+        address: wallet,
+        abi: mandateWalletAbi,
+        functionName: "paused",
+      }),
+      this.database
+        .query<{
+          inhibited: boolean;
+        }>("SELECT inhibited FROM wallets WHERE id=$1", [row.wallet_id])
+        .then((r) => r.rows[0]!.inhibited),
+    ]);
+    if (frozen || paused) {
+      // Nothing is signed yet, so the reservation is released.
+      await transaction(this.database, async (c) => {
+        await this.setState(
+          c,
+          row.id,
+          ["RESERVED", "AWAITING_APPROVAL"],
+          "DENIED",
+          { denial: frozen ? "WALLET_FROZEN" : "PERMIT_INACTIVE" },
+        );
+        await settleReservation(
+          c,
+          row.id,
+          { state: "RELEASED", reason: "DENIED_UNSIGNED" },
+          this.clock(),
+        );
+      });
+      return;
+    }
+    // An off-chain inhibit holds new signing until the owner clears it.
+    if (inhibited) return;
+    const gate = await transaction(this.database, (c) =>
+      approvalGate(
+        c,
+        {
+          id: row.id,
+          walletId: row.wallet_id,
+          taskId: row.task_id,
+          owner: row.owner_address,
+          digest: row.digest,
+          amount: BigInt(row.amount),
+          deadline: BigInt(row.action.deadline),
+          permitThreshold: BigInt(row.permit.reviewThreshold),
+          requestId: row.action.requestId,
+          permitId: row.permit_id,
+        },
+        this.push,
+        this.clock(),
+      ),
+    );
+    if (gate === "PROCEED")
+      await this.setState(
+        this.database,
+        row.id,
+        ["RESERVED", "AWAITING_APPROVAL"],
+        "SIGNING",
+      );
+  }
 
   private async load(actionId: string): Promise<Row> {
     const row = (
       await this.database.query<Row>(
-        "SELECT a.id,a.wallet_id,a.permit_id,a.state,a.action,a.digest,a.invoice,a.provider_signature,a.tx_hash,a.amount::text,a.asset,w.wallet_address,w.executor_address,p.permit,r.state AS reservation_state FROM actions a JOIN wallets w ON w.id=a.wallet_id JOIN permits p ON p.permit_id=a.permit_id LEFT JOIN reservations r ON r.action_id=a.id WHERE a.id=$1",
+        "SELECT a.id,a.wallet_id,a.permit_id,a.state,a.action,a.digest,a.invoice,a.provider_signature,a.tx_hash,a.amount::text,a.asset,a.task_id,w.wallet_address,w.executor_address,w.owner_address,p.permit,r.state AS reservation_state,q.state AS approval_state,q.expires_at::text AS approval_expires_at,q.owner_signature AS approval_signature FROM actions a JOIN wallets w ON w.id=a.wallet_id JOIN permits p ON p.permit_id=a.permit_id LEFT JOIN reservations r ON r.action_id=a.id LEFT JOIN approval_requests q ON q.action_id=a.id WHERE a.id=$1",
         [actionId],
       )
     ).rows[0];
@@ -185,7 +271,8 @@ export class Executor {
         await this.admit(row);
         break;
       case "RESERVED":
-        await this.setState(this.database, row.id, ["RESERVED"], "SIGNING");
+      case "AWAITING_APPROVAL":
+        await this.beforeSigning(row);
         break;
       case "SIGNING":
         await this.sign(row);

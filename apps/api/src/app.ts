@@ -8,6 +8,7 @@ import { AuthService } from "./auth/service.js";
 import { registerAuth } from "./auth/routes.js";
 import { registerBusiness } from "./business/routes.js";
 import { AgenticService } from "./business/agentic.js";
+import { ControlService } from "./business/controls.js";
 import {
   BusinessService,
   type BusinessDependencies,
@@ -39,6 +40,9 @@ export async function createApi(options: ApiOptions) {
           deps.intentCompiler ?? null,
           deps.manifest ?? null,
         )
+      : null,
+    options.database
+      ? new ControlService(options.database, deps.chain?.client ?? null, clock)
       : null,
   );
   return app;

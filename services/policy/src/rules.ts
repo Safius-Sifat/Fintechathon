@@ -39,7 +39,11 @@ export type RuleInput = {
   chain: ChainSnapshot | null;
   recentProposals: number;
   now: bigint;
+  // demo-screening-v1 addresses (lowercase) from the trusted manifest's list file.
+  screening: ReadonlySet<string>;
 };
+// Co-signed Actions and their invoices may live up to 15 minutes (S9.5).
+export const MAX_COSIGNED_ACTION_SECONDS = 900n;
 
 // Evaluates every rule in a fixed order; the decision is the full list of
 // failing rule IDs, so denials are deterministic and reproducible.
@@ -114,11 +118,63 @@ export async function evaluate(input: RuleInput): Promise<string[]> {
     deny("ACTION_BINDING");
   if (now < BigInt(a.issuedAt) || now >= BigInt(a.deadline))
     deny("ACTION_WINDOW");
-  // Owner co-signature (Task 4) is not available here, so every Action must stay
-  // at or under the review threshold and the unapproved lifetime.
-  if (BigInt(a.deadline) - BigInt(a.issuedAt) > MAX_UNAPPROVED_ACTION_SECONDS)
+  // Effective threshold is the lower of the Permit's and the confirmed policy's.
+  const permitThreshold = BigInt(p.reviewThreshold);
+  const policyThreshold = r.wallet_policy
+    ? BigInt(r.wallet_policy.reviewThreshold)
+    : permitThreshold;
+  const threshold =
+    policyThreshold < permitThreshold ? policyThreshold : permitThreshold;
+  let approved = false;
+  if (BigInt(a.amount) > threshold) {
+    if (
+      r.approval_state === "APPROVED" &&
+      r.approval_signature &&
+      r.approval_expires_at &&
+      r.approval_digest === r.digest
+    ) {
+      let approver: Address | null = null;
+      try {
+        approver = await recoverSigner(
+          "Approval",
+          { actionDigest: r.digest, expiresAt: r.approval_expires_at },
+          domain,
+          r.approval_signature as Hex,
+        );
+      } catch {
+        approver = null;
+      }
+      approved =
+        approver?.toLowerCase() === r.owner_address &&
+        BigInt(r.approval_expires_at) <= BigInt(a.deadline) &&
+        now < BigInt(r.approval_expires_at);
+    }
+    if (!approved) deny("REVIEW_REQUIRED");
+  }
+  const lifetime = approved
+    ? MAX_COSIGNED_ACTION_SECONDS
+    : MAX_UNAPPROVED_ACTION_SECONDS;
+  if (BigInt(a.deadline) - BigInt(a.issuedAt) > lifetime)
     deny("ACTION_LIFETIME");
-  if (BigInt(a.amount) > BigInt(p.reviewThreshold)) deny("REVIEW_REQUIRED");
+  // The current on-chain WalletPolicy applies to every request (most restrictive wins).
+  const lists = r.wallet_lists;
+  const target = a.target.toLowerCase();
+  if (lists) {
+    const cap = lists.assetCaps.find(
+      (c) => c.asset.toLowerCase() === p.asset.toLowerCase(),
+    );
+    if (!cap || BigInt(a.amount) > BigInt(cap.perTx)) deny("POLICY_VIOLATION");
+    if (
+      lists.allowlist.length &&
+      !lists.allowlist.some((x) => x.toLowerCase() === target)
+    )
+      deny("POLICY_VIOLATION");
+  }
+  if (
+    lists?.blocklist.some((x) => x.toLowerCase() === target) ||
+    input.screening.has(target)
+  )
+    deny("SCREENING_HIT");
 
   if (a.operation === Operation.PAY) {
     if (p.kind !== Kind.BROWSER && p.kind !== Kind.ALLOWANCE)
@@ -141,8 +197,7 @@ export async function evaluate(input: RuleInput): Promise<string[]> {
       )
         deny("INVOICE_MISMATCH");
       if (
-        BigInt(i.expiresAt) - BigInt(i.issuedAt) >
-          MAX_UNAPPROVED_ACTION_SECONDS ||
+        BigInt(i.expiresAt) - BigInt(i.issuedAt) > lifetime ||
         now < BigInt(i.issuedAt) ||
         now > BigInt(i.expiresAt)
       )

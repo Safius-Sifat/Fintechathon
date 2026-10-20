@@ -4,6 +4,7 @@ import { CreateTaskRequestSchema, UuidSchema } from "@mandate/schema";
 import { apiError, AuthError } from "../auth/errors.js";
 import type { BusinessService } from "./service.js";
 import type { AgenticService } from "./agentic.js";
+import type { ControlService } from "./controls.js";
 
 const emptyBody = z.object({}).strict();
 const idParam = z.object({}).catchall(UuidSchema);
@@ -28,6 +29,7 @@ export async function registerBusiness(
   app: FastifyInstance,
   service: BusinessService | null,
   agentic: AgenticService | null,
+  controls: ControlService | null,
 ) {
   await app.register(async (routes) => {
     routes.addHook("onRequest", async (_request, reply) => {
@@ -182,6 +184,93 @@ export async function registerBusiness(
       idempotencyKey(request);
       return agentic!.compile(await principal(request), request.body);
     });
+    const c = () => controls!;
+    routes.get("/v1/approvals", async (request) =>
+      c().approvals(await principal(request)),
+    );
+    routes.get("/v1/approvals/:approvalId", async (request) => {
+      const { approvalId } = parse(idParam, request.params);
+      return c().approval(await principal(request), approvalId!);
+    });
+    for (const [verb, approve] of [
+      ["sign", true],
+      ["reject", false],
+    ] as const)
+      routes.post(
+        `/v1/approvals/:approvalId/${verb}`,
+        { bodyLimit: 2048 },
+        async (request) => {
+          const { approvalId } = parse(idParam, request.params);
+          idempotencyKey(request);
+          return c().decide(
+            await principal(request),
+            approvalId!,
+            request.body,
+            approve,
+          );
+        },
+      );
+    routes.post(
+      "/v1/wallets/:walletId/policy/draft",
+      { bodyLimit: 65536 },
+      async (request) => {
+        const { walletId } = parse(idParam, request.params);
+        idempotencyKey(request);
+        return c().policyDraft(
+          await principal(request),
+          walletId!,
+          request.body,
+        );
+      },
+    );
+    routes.post(
+      "/v1/wallets/:walletId/admin/draft",
+      { bodyLimit: 2048 },
+      async (request) => {
+        const { walletId } = parse(idParam, request.params);
+        idempotencyKey(request);
+        return c().adminDraft(
+          await principal(request),
+          walletId!,
+          request.body,
+        );
+      },
+    );
+    for (const [path, kind] of [
+      ["policy", "POLICY"],
+      ["admin", "ADMIN"],
+    ] as const)
+      routes.post(
+        `/v1/wallets/:walletId/${path}/submit`,
+        { bodyLimit: 2048 },
+        async (request) => {
+          const { walletId } = parse(idParam, request.params);
+          idempotencyKey(request);
+          return c().submitCommand(
+            await principal(request),
+            walletId!,
+            kind,
+            request.body,
+          );
+        },
+      );
+    routes.post("/v1/devices/push", { bodyLimit: 8192 }, async (request) => {
+      idempotencyKey(request);
+      return c().registerPush(await principal(request), request.body);
+    });
+    routes.post(
+      "/v1/wallets/:walletId/inhibit/clear",
+      { bodyLimit: 1024 },
+      async (request) => {
+        const { walletId } = parse(idParam, request.params);
+        idempotencyKey(request);
+        return c().clearInhibit(
+          await principal(request),
+          walletId!,
+          request.body,
+        );
+      },
+    );
     // Task interpretation belongs to Person4's runbook package, which is not yet
     // implemented; tasks are never created from an uninterpreted goal.
     routes.post("/v1/tasks", { bodyLimit: 65536 }, async (request) => {

@@ -87,6 +87,7 @@ export class PolicyService {
     readonly manifest: DeploymentManifest | null,
     readonly chain: ChainReader | null,
     readonly clock: Clock,
+    readonly screening: ReadonlySet<string> = new Set(),
   ) {}
 
   async check(
@@ -129,6 +130,7 @@ export class PolicyService {
         ? await recentProposals(this.database, record.executor_address, now)
         : 0,
       now: BigInt(now),
+      screening: this.screening,
     });
     // The forwarded message is compared too; it is never a source of expected values.
     const m = input.message;

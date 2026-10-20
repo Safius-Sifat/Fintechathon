@@ -479,6 +479,11 @@ export class AuthService {
         "UPDATE refresh_token_families SET revoked_at=COALESCE(revoked_at,$2) WHERE session_id=ANY($1::uuid[])",
         [ids, now],
       );
+      // Push registrations follow their session.
+      await client.query(
+        "DELETE FROM push_devices WHERE session_id=ANY($1::uuid[])",
+        [ids],
+      );
       const response =
         route === "/v1/auth/logout" ? { revoked: true } : { revokedIds: ids };
       await client.query(
