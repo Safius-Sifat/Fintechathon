@@ -46,7 +46,7 @@ test("sdk: calls API endpoints with Bearer auth and parses response", async () =
       );
     }
 
-    if (url.includes("/v1/tasks/prepare")) {
+    if (url.endsWith("/v1/tasks") && init?.method === "POST") {
       return new Response(
         JSON.stringify({
           taskId: "test-task",
@@ -75,9 +75,16 @@ test("sdk: calls API endpoints with Bearer auth and parses response", async () =
   assert.equal(wallet.address, "0x7777777777777777777777777777777777777777");
   assert.equal(calls[0]?.headers.get("Authorization"), "Bearer test-agent-jwt");
 
-  const prep = await client.prepareTask({
-    runbookId: "browser-check",
-    input: { targetId: "checkout-healthy", checks: ["pageLoad"] },
-  });
+  const prep = await client.createTask(
+    {
+      walletId: "11111111-1111-4111-8111-111111111111",
+      runbookId: "browser-check",
+      goal: "Check the checkout page loads",
+      input: { targetId: "checkout-healthy", checks: ["pageLoad"] },
+    },
+    "retry-key-1",
+  );
   assert.equal(prep.taskId, "test-task");
+  const createCall = calls.find((c) => c.url.endsWith("/v1/tasks"));
+  assert.equal(createCall?.headers.get("Idempotency-Key"), "retry-key-1");
 });

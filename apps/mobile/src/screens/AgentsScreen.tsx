@@ -122,6 +122,13 @@ export function AgentsScreen() {
           <SectionHeading>Money</SectionHeading>
           <Rows>
             <Row
+              label="Approvals"
+              detail="Payments the agent wants to make above your limit."
+              onPress={() =>
+                navigation.navigate("Approvals", { wallet: w.address })
+              }
+            />
+            <Row
               label="Fund the agent wallet"
               detail="A normal send from your account. Funding is not spending."
               onPress={() => {

@@ -54,5 +54,7 @@ function sendResponse(id: any, result: any) {
 }
 
 function sendError(id: any, code: number, message: string) {
-  process.stdout.write(JSON.stringify({ jsonrpc: "2.0", id, error: { code, message } }) + "\n");
+  process.stdout.write(
+    JSON.stringify({ jsonrpc: "2.0", id, error: { code, message } }) + "\n",
+  );
 }

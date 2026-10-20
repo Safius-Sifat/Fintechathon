@@ -1,8 +1,10 @@
 import {
+  type AgentAnswer,
+  type AgentQuestion,
   type WalletView,
-  type EvidenceBundle,
+  AgentAnswerSchema,
+  AgentQuestionSchema,
   WalletViewSchema,
-  EvidenceBundleSchema,
 } from "@mandate/schema";
 
 export type ClientOptions = {
@@ -11,9 +13,10 @@ export type ClientOptions = {
   fetch?: typeof fetch;
 };
 
-export type PrepareTaskParams = {
+export type CreateTaskParams = {
+  walletId: string;
   runbookId: string;
-  goal?: string;
+  goal: string;
   input: Record<string, unknown>;
 };
 
@@ -45,14 +48,41 @@ export class MandateClient {
     return this.request(`/tasks/${encodeURIComponent(taskId)}`);
   }
 
-  async prepareTask(params: PrepareTaskParams): Promise<PrepareTaskResponse> {
-    return this.request("/tasks/prepare", {
+  // POST /v1/tasks. The same idempotency key must be reused on a retry.
+  async createTask(
+    params: CreateTaskParams,
+    idempotencyKey: string,
+  ): Promise<PrepareTaskResponse> {
+    return this.request("/tasks", {
       method: "POST",
+      headers: { "Idempotency-Key": idempotencyKey },
       body: JSON.stringify(params),
     });
   }
 
-  async runTask(taskId: string, idempotencyKey?: string): Promise<{ status: string; taskId: string }> {
+  // Long-polls for the next question the runbook asks the agent. null when
+  // there is none.
+  async nextQuestion(taskId: string): Promise<AgentQuestion | null> {
+    const data = await this.request(
+      `/tasks/${encodeURIComponent(taskId)}/questions/next`,
+    );
+    return data === null ? null : AgentQuestionSchema.parse(data);
+  }
+
+  async answerQuestion(
+    questionId: string,
+    answer: AgentAnswer,
+  ): Promise<{ accepted: true; decisionId: string }> {
+    return this.request(`/questions/${encodeURIComponent(questionId)}/answer`, {
+      method: "POST",
+      body: JSON.stringify(AgentAnswerSchema.parse(answer)),
+    });
+  }
+
+  async runTask(
+    taskId: string,
+    idempotencyKey?: string,
+  ): Promise<{ status: string; taskId: string }> {
     const headers: Record<string, string> = {};
     if (idempotencyKey) {
       headers["Idempotency-Key"] = idempotencyKey;
@@ -63,9 +93,14 @@ export class MandateClient {
     });
   }
 
-  async getEvidence(taskId: string): Promise<EvidenceBundle> {
-    const data = await this.request(`/tasks/${encodeURIComponent(taskId)}/evidence`);
-    return EvidenceBundleSchema.parse(data);
+  // The evidence export is a ZIP; check it with mandate-verify.
+  async getEvidence(taskId: string): Promise<Uint8Array> {
+    const res = await this.fetchFn(
+      `${this.baseUrl}/v1/tasks/${encodeURIComponent(taskId)}/evidence`,
+      { headers: { Authorization: `Bearer ${this.token}` } },
+    );
+    if (!res.ok) throw new Error(`Mandate API request failed (${res.status})`);
+    return new Uint8Array(await res.arrayBuffer());
   }
 
   private async request<T = any>(
