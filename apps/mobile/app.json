@@ -32,6 +32,7 @@
           "recordAudioAndroid": false
         }
       ]
-    ]
+    ],
+    "icon": "./assets/icon.png"
   }
 }
