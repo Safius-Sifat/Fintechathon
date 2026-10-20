@@ -7,6 +7,7 @@ import type { AuthConfig } from "./auth/config.js";
 import { AuthService } from "./auth/service.js";
 import { registerAuth } from "./auth/routes.js";
 import { registerBusiness } from "./business/routes.js";
+import { AgenticService } from "./business/agentic.js";
 import {
   BusinessService,
   type BusinessDependencies,
@@ -25,14 +26,18 @@ export async function createApi(options: ApiOptions) {
       ? new AuthService(options.database, options.auth, clock)
       : null;
   await registerAuth(app, service);
+  const deps = options.business ?? { chain: null };
   await registerBusiness(
     app,
     service && options.database
-      ? new BusinessService(
+      ? new BusinessService(options.database, service, deps, clock)
+      : null,
+    options.database
+      ? new AgenticService(
           options.database,
-          service,
-          options.business ?? { chain: null },
           clock,
+          deps.intentCompiler ?? null,
+          deps.manifest ?? null,
         )
       : null,
   );

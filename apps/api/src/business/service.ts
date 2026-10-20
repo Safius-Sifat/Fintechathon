@@ -19,6 +19,7 @@ import {
   WalletViewSchema,
   type TaskView,
   type WalletView,
+  type DeploymentManifest,
 } from "@mandate/schema";
 import {
   enqueueJob,
@@ -30,6 +31,7 @@ import {
   type Clock,
 } from "@mandate/platform";
 import { AuthError } from "../auth/errors.js";
+import type { IntentCompiler } from "./agentic.js";
 import type { AuthService } from "../auth/service.js";
 import {
   AGENT_TOKEN_PREFIX,
@@ -54,6 +56,8 @@ export type EvidenceDependency = {
 export type BusinessDependencies = {
   chain: ChainDependency | null;
   evidence?: EvidenceDependency | null;
+  intentCompiler?: IntentCompiler | null;
+  manifest?: DeploymentManifest | null;
 };
 
 type WalletRow = {

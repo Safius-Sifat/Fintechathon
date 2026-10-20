@@ -16,6 +16,10 @@
     "0004_history.sql": {
       "kind": "expand",
       "transaction": "required"
+    },
+    "0005_agentic.sql": {
+      "kind": "expand",
+      "transaction": "required"
     }
   }
 }

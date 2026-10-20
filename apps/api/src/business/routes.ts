@@ -3,6 +3,7 @@ import { z, ZodError } from "zod";
 import { CreateTaskRequestSchema, UuidSchema } from "@mandate/schema";
 import { apiError, AuthError } from "../auth/errors.js";
 import type { BusinessService } from "./service.js";
+import type { AgenticService } from "./agentic.js";
 
 const emptyBody = z.object({}).strict();
 const idParam = z.object({}).catchall(UuidSchema);
@@ -26,6 +27,7 @@ const idempotencyKey = (request: FastifyRequest) =>
 export async function registerBusiness(
   app: FastifyInstance,
   service: BusinessService | null,
+  agentic: AgenticService | null,
 ) {
   await app.register(async (routes) => {
     routes.addHook("onRequest", async (_request, reply) => {
@@ -158,6 +160,28 @@ export async function registerBusiness(
         );
       },
     );
+    routes.get("/v1/tasks/:taskId/questions/next", async (request) => {
+      const { taskId } = parse(idParam, request.params);
+      return agentic!.next(await principal(request), taskId!);
+    });
+    routes.post(
+      "/v1/questions/:questionId/answer",
+      { bodyLimit: 8192 },
+      async (request) => {
+        const { questionId } = parse(idParam, request.params);
+        const identity = request.headers["x-mandate-agent"];
+        return agentic!.answer(
+          await principal(request),
+          questionId!,
+          request.body,
+          typeof identity === "string" ? identity : undefined,
+        );
+      },
+    );
+    routes.post("/v1/intents/compile", { bodyLimit: 8192 }, async (request) => {
+      idempotencyKey(request);
+      return agentic!.compile(await principal(request), request.body);
+    });
     // Task interpretation belongs to Person4's runbook package, which is not yet
     // implemented; tasks are never created from an uninterpreted goal.
     routes.post("/v1/tasks", { bodyLimit: 65536 }, async (request) => {
