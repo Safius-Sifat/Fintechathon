@@ -12,7 +12,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Safius-Sifat/Fintechathon/actions"><img src="https://github.com/Safius-Sifat/Fintechathon/actions/workflows/foundation.yml/badge.svg" alt="Test and deploy"></a>
+  <a href="https://github.com/Safius-Sifat/Mandate-Agentic-Wallet/actions"><img src="https://github.com/Safius-Sifat/Mandate-Agentic-Wallet/actions/workflows/foundation.yml/badge.svg" alt="Test and deploy"></a>
   <img src="https://img.shields.io/badge/network-Base%20Sepolia%2084532-0052FF" alt="Base Sepolia">
   <img src="https://img.shields.io/badge/node-22.23.3-339933" alt="Node 22.23.3">
   <img src="https://img.shields.io/badge/pnpm-10.20.0-F69220" alt="pnpm 10.20.0">
@@ -21,7 +21,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Safius-Sifat/Fintechathon">Repository</a> ·
+  <a href="https://github.com/Safius-Sifat/Mandate-Agentic-Wallet">Repository</a> ·
   <a href="https://mandate-demo-04323111.malaysiawest.cloudapp.azure.com/healthz">Live API</a> ·
   <a href="pitch.md">Pitch</a> ·
   <a href="architecture.md">Architecture</a> ·
@@ -114,7 +114,7 @@ Circle's test USDC is used only as a normal token. Mandate does not use any Circ
 ## Project structure
 
 ```text
-Fintechathon/
+Mandate-Agentic-Wallet/
 ├── apps/
 │   ├── api/            Main backend: login, wallets, tasks, approvals, permits, evidence
 │   ├── worker/         Sends signed agent payments and records receipts
@@ -163,8 +163,8 @@ You don't have to install the exact Node and pnpm versions yourself: the `make` 
 ### 2. Run it locally
 
 ```bash
-git clone https://github.com/Safius-Sifat/Fintechathon.git
-cd Fintechathon
+git clone https://github.com/Safius-Sifat/Mandate-Agentic-Wallet.git
+cd Mandate-Agentic-Wallet
 
 make setup         # install packages and create your local .env
 make infra-up      # start PostgreSQL, NATS and Consul in Docker
