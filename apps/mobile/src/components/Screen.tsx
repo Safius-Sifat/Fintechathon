@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { colors, gradients, shadows, space, touchTarget, type } from "../theme";
+import { colors, shadows, space, touchTarget, type } from "../theme";
 import { Icon } from "./Icon";
 
 interface ScreenProps {
@@ -15,7 +15,7 @@ interface ScreenProps {
   children: ReactNode;
 }
 
-// Scrollable screen on the glow canvas. The top inset sits outside the
+// Scrollable screen on the flat ground. The top inset sits outside the
 // scroll view so content never scrolls under the transparent edge-to-edge
 // status bar. On tab screens the tab bar owns the bottom inset.
 export function Screen({
@@ -28,7 +28,6 @@ export function Screen({
   const insets = useSafeAreaInsets();
   return (
     <View style={[styles.root, { paddingTop: insets.top }]}>
-      <View style={styles.canvas} pointerEvents="none" />
       {onBack ? (
         <View style={styles.backRow}>
           <Pressable
@@ -65,10 +64,6 @@ export function Screen({
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.background },
-  canvas: {
-    ...StyleSheet.absoluteFillObject,
-    experimental_backgroundImage: gradients.canvas,
-  },
   backRow: { paddingTop: space.sm, paddingHorizontal: space.lg },
   back: {
     width: touchTarget,

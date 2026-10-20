@@ -18,7 +18,6 @@ import { StatusTag } from "../components/StatusTag";
 import type { RootStackParamList } from "../navigation/RootNavigator";
 import {
   colors,
-  gradients,
   radius,
   shadows,
   space,
@@ -261,14 +260,13 @@ interface FlowLayoutProps {
   children: ReactNode;
 }
 
-// Full-screen flow step: scrolling content on the glow canvas with the
+// Full-screen flow step: scrolling content on the flat ground with the
 // actions pinned above the bottom inset, so they stay reachable at any text
 // size.
 function FlowLayout({ header, footer, children }: FlowLayoutProps) {
   const insets = useSafeAreaInsets();
   return (
     <View style={[styles.root, { paddingTop: insets.top }]}>
-      <View style={styles.canvas} pointerEvents="none" />
       {header}
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
         {children}
@@ -284,10 +282,6 @@ function FlowLayout({ header, footer, children }: FlowLayoutProps) {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.background },
-  canvas: {
-    ...StyleSheet.absoluteFillObject,
-    experimental_backgroundImage: gradients.canvas,
-  },
   scroll: { flex: 1 },
   content: {
     paddingTop: space.lg,

@@ -21,7 +21,6 @@ import { preview } from "../config/capabilities";
 import type { RootStackParamList } from "../navigation/RootNavigator";
 import {
   colors,
-  gradients,
   radius,
   shadows,
   space,
@@ -256,9 +255,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.hero,
     padding: space.xl,
     gap: space.lg,
-    experimental_backgroundImage: gradients.hero,
-    backgroundColor: "#121A2E",
-    boxShadow: shadows.hero,
+    backgroundColor: colors.ink,
   },
   heroTop: {
     flexDirection: "row",

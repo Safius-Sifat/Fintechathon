@@ -1,5 +1,5 @@
 import { Pressable, StyleSheet, Text, useWindowDimensions } from "react-native";
-import { colors, radius, shadows, space, touchTarget, type } from "../theme";
+import { colors, radius, space, touchTarget, type } from "../theme";
 import { Icon, type IconName } from "./Icon";
 
 interface HeroActionProps {
@@ -170,7 +170,6 @@ const styles = StyleSheet.create({
     paddingVertical: space.md,
     borderRadius: radius.pill,
     backgroundColor: colors.ink,
-    boxShadow: shadows.hero,
     overflow: "hidden",
   },
   primaryDisabled: { backgroundColor: colors.surfaceMuted, boxShadow: "none" },
