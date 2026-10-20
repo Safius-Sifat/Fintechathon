@@ -31,8 +31,9 @@ func Normalize(digest [32]byte, r, s, recovery []byte, expected string) ([]byte,
 	sig := make([]byte, 65)
 	copy(sig[:32], rb[:])
 	copy(sig[32:64], sb[:])
-	sig[64] = parity
-	compact := append([]byte{27 + parity}, sig[:64]...)
+	// Ethereum's 65-byte form ends in v=27|28; OpenZeppelin ECDSA rejects 0|1.
+	sig[64] = 27 + parity
+	compact := append([]byte{sig[64]}, sig[:64]...)
 	pub, _, err := ecdsa.RecoverCompact(compact, digest[:])
 	if err != nil {
 		return nil, err

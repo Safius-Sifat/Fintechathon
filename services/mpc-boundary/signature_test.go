@@ -45,6 +45,10 @@ func TestLeadingZeroHighSAndPadding(t *testing.T) {
 	if e != nil || len(sig) != 65 {
 		t.Fatal(e)
 	}
+	// SignCompact is low-S; the Ethereum form is r||s||v with v in {27,28}.
+	if sig[64] != compact[0] || hex.EncodeToString(sig[:64]) != hex.EncodeToString(compact[1:65]) {
+		t.Fatalf("signature is not r||s||v with v=27|28: v=%d", sig[64])
+	}
 	var scalar secp.ModNScalar
 	scalar.SetByteSlice(s)
 	scalar.Negate()

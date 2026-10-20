@@ -46,7 +46,7 @@
   "blockers": [
     "Shared NATS credential allows availability stalls (~181s per unauthorized message); per-identity NATS subject ACLs not implemented.",
     "Production financial store/independent RPC policy/durable worker and reservation integration missing.",
-    "Public Base Sepolia payment drill, Solidity actual-MPC acceptance, Azure4GiB full-stack load and external firewall checks not run."
+    "Public Base Sepolia payment drill and Azure 4GiB full-stack load not run; Solidity acceptance shown only on a local fork."
   ],
   "consulCompatibility": {
     "failedImage": "1.21.5",
@@ -88,5 +88,11 @@
       "evidence/person2/artifacts/mpc-local-20261020/post-denial-recovery-timeout-90s.json"
     ],
     "limitation": "Availability: a holder of the shared NATS credential can stall signing ~181s per unauthorized message; single NATS user with publish > in qualification config. Per-identity subject ACLs not implemented."
+  },
+  "signatureEncodingCorrection": {
+    "found": "2026-10-20 fork end-to-end",
+    "issue": "boundary.Normalize emitted v=0|1; viem recoverAddress accepted it, OpenZeppelin ECDSA in MandateWallet rejected it (InvalidSignature).",
+    "fix": "v=27+parity; boundary test pins r||s||v equal to low-S compact signature",
+    "impact": "Earlier recorded qualification signatures carry v=0|1; they recover correctly but are not contract-acceptable byte-for-byte. Contract acceptance now shown on fork (artifacts/execution-fork-20261020/e2e.json)."
   }
 }
