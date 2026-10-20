@@ -8,7 +8,7 @@ import { Screen } from "../components/Screen";
 import { network } from "../config/network";
 import type { RootStackParamList } from "../navigation/RootNavigator";
 import { clearAllDrafts } from "../state/sendDraft";
-import { signIn, signOut, useApiSession } from "../wallet/api";
+import { signIn, signOut, useApiSession, useApiConnection } from "../wallet/api";
 import { API_ORIGIN } from "../wallet/config";
 import * as session from "../wallet/session";
 import { errorText } from "../wallet/useAsync";
@@ -18,6 +18,7 @@ export function SettingsScreen() {
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { profile } = session.useWallet();
   const api = useApiSession();
+  const connection = useApiConnection();
   const [error, setError] = useState<string | null>(null);
   const run = (f: () => Promise<void>) => () => {
     setError(null);
@@ -82,14 +83,14 @@ export function SettingsScreen() {
         ) : api ? (
           <Row
             label="Signed in"
-            detail={`Until ${new Date(api.expiresAt).toLocaleTimeString()}. Signing out does not stop agents.`}
+            detail={`Until ${new Date(Number(api.expiresAt) * 1000).toLocaleTimeString()}. Signing out does not stop agents.`}
             value="Sign out"
             onPress={run(signOut)}
           />
         ) : (
           <Row
             label="Sign in"
-            detail={`Signs a one-time login for ${API_ORIGIN}.`}
+            detail={connection.status === "connecting" ? "Connecting to the Mandate service…" : connection.status === "error" ? connection.error : `Signs a one-time login for ${API_ORIGIN}.`}
             onPress={run(signIn)}
           />
         )}
