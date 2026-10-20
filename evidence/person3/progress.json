@@ -1,8 +1,8 @@
 {
   "owner": "Person3",
   "plan": "docs/plans/03 - Android Owner Wallet.md (v7.1)",
-  "updatedAt": "2026-10-20T11:28:00+06:00",
-  "currentCheckpoint": "UI-10 (Security and agent access, Contacts, Network, Help) implemented on work/person3-mobile-ui10-security-network-help (branched from #39's branch); owner-requested clarification pass applied and approved by the Person3 owner; draft PR to follow. UI-09 is draft PR #39 (#39 -> #38 -> #37 -> #36 -> #35, none merged).",
+  "updatedAt": "2026-10-20T11:29:00+06:00",
+  "currentCheckpoint": "UI-10 submitted: draft PR #41 (depends on #39 -> #38 -> #37 -> #36 -> #35, none merged). UI-01 to UI-10 previews are all submitted or merged. Next: native-module diagnosis and screen inventory review before choosing the first functional checkpoint.",
   "priority": "Person3 owner decision 2026-10-19: screens, layouts and UI/UX first. Wallet, security and backend functionality is deferred, not dropped; every task below stays required for the final deliverable.",
   "acceptanceRule": "UI checkpoints are layout and navigation previews. They complete no P3 case: every case below stays open until its own functional, device and iOS evidence exists.",
   "uiCheckpoints": [
@@ -57,7 +57,7 @@
     {
       "id": "UI-10",
       "screens": "Security.tsx, Contacts.tsx, Network.tsx, Help.tsx",
-      "status": "APPROVED (owner visual review after the clarification pass); draft PR to follow",
+      "status": "SUBMITTED: visually approved after the clarification pass, draft PR #41 (depends on #39)",
       "preparesCases": "P3-W01, P3-W03, P3-W04, WQ09, WQ10, WQ14"
     }
   ],

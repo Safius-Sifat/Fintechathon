@@ -1,7 +1,7 @@
 {
   "task": "UI-10",
   "title": "Security and agent access, Contacts, Network and Help (layout and navigation only)",
-  "status": "APPROVED (Person3 owner visual review after the clarification pass, 2026-10-20); draft PR to follow",
+  "status": "SUBMITTED",
   "recordedAt": "2026-10-20T11:15:00+06:00",
   "branch": "work/person3-mobile-ui10-security-network-help",
   "baseCommit": "3f80164",
@@ -159,5 +159,16 @@
     ],
     "scope": "UI text, config and tests only.",
     "notChanged": "Already-submitted screens keep their wording: UI-08 Agent controls logout text ('To stop them, freeze, pause or revoke') and UI-09 Recovery ('freeze, pause or revoke from Agent controls, or use owner control'). Both describe how to stop agents rather than claiming exclusivity."
+  },
+  "submission": {
+    "pr": 41,
+    "draft": true,
+    "base": "main",
+    "commit": "343c4aa",
+    "originMain": "95e91fb (unchanged; no merge needed)",
+    "ownerApproval": "Visually approved by the Person3 owner after the clarification pass on 2026-10-20",
+    "dependency": "#39 (UI-09) -> #38 (UI-08 group 2) -> #37 (UI-08 group 1) -> #36 (UI-07) -> #35 (UI-06), all unmerged; PR diff against main includes them until they merge. UI-10-only comparison: work/person3-mobile-ui09-control-recovery...work/person3-mobile-ui10-security-network-help (59 files)",
+    "overlap": "#40 (owner's onboarding PR, not draft) edits RootNavigator.tsx; dry-run merge clean against #35, conflicts from #36 upward on neighbouring lines. Disclosed in the PR body.",
+    "afterDependenciesMerge": "merge origin/main, rerun checks, verify the PR diff contains only UI-10 files"
   }
 }
