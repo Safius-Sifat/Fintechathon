@@ -98,6 +98,20 @@ export async function registerBusiness(
       const { taskId } = parse(idParam, request.params);
       return active().task(await principal(request), taskId!);
     });
+    routes.get("/v1/tasks/:taskId/evidence", async (request, reply) => {
+      const { taskId } = parse(idParam, request.params);
+      const { zip } = await active().evidence(
+        await principal(request),
+        taskId!,
+      );
+      return reply
+        .header("Content-Type", "application/zip")
+        .header(
+          "Content-Disposition",
+          `attachment; filename="evidence-${taskId}.zip"`,
+        )
+        .send(zip);
+    });
     // Task interpretation belongs to Person4's runbook package, which is not yet
     // implemented; tasks are never created from an uninterpreted goal.
     routes.post("/v1/tasks", { bodyLimit: 65536 }, async (request) => {

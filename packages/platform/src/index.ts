@@ -5,3 +5,5 @@ export * from "./outbox.js";
 export * from "./idempotency.js";
 export * from "./chain.js";
 export * from "./keystore.js";
+export * from "./zip.js";
+export * from "./evidence.js";

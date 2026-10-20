@@ -11,6 +11,8 @@ import {
 } from "@mandate/schema";
 import {
   enqueueJob,
+  exportBundle,
+  type EvidenceKey,
   idempotentMutation,
   IdempotencyConflict,
   readWallet,
@@ -34,8 +36,13 @@ export type ChainDependency = {
   // Agent assets from the trusted deployment manifest; the first is DemoUSD.
   assets: readonly { address: Address; symbol: string }[];
 };
+export type EvidenceDependency = {
+  artifactKey: Buffer;
+  key: EvidenceKey;
+};
 export type BusinessDependencies = {
   chain: ChainDependency | null;
+  evidence?: EvidenceDependency | null;
 };
 
 type WalletRow = {
@@ -404,5 +411,41 @@ export class BusinessService {
       findings: [],
       nextPollMs: 2000,
     });
+  }
+
+  // Authenticated export only; requires the explicit evidence scope.
+  async evidence(principal: Principal, taskId: string) {
+    const row = (
+      await this.database.query<{
+        id: string;
+        wallet_id: string;
+        owner_address: string;
+      }>(
+        "SELECT t.id,t.wallet_id,w.owner_address FROM tasks t JOIN wallets w ON w.id=t.wallet_id WHERE t.id=$1",
+        [taskId],
+      )
+    ).rows[0];
+    requireTaskAccess(principal, row, "evidence");
+    const evidence = this.deps.evidence;
+    if (!evidence)
+      throw new AuthError(
+        503,
+        "Evidence keys are not configured.",
+        "EVIDENCE_UNAVAILABLE",
+      );
+    try {
+      return await exportBundle(
+        this.database,
+        evidence.artifactKey,
+        evidence.key,
+        taskId,
+      );
+    } catch {
+      throw new AuthError(
+        503,
+        "Evidence export is unavailable for this task.",
+        "EVIDENCE_UNAVAILABLE",
+      );
+    }
   }
 }
