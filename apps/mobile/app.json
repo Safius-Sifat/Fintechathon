@@ -7,7 +7,12 @@
     "platforms": ["android"],
     "android": {
       "package": "app.mandate.wallet.dev",
-      "blockedPermissions": ["android.permission.RECORD_AUDIO"]
+      "blockedPermissions": ["android.permission.RECORD_AUDIO"],
+      "userInterfaceStyle": "automatic",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#E8ECEB"
+      }
     },
     "extra": {
       "chainId": 84532,
@@ -33,6 +38,7 @@
         }
       ]
     ],
-    "icon": "./assets/icon.png"
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic"
   }
 }
