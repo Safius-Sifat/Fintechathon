@@ -30,7 +30,7 @@ export function checkAuthority(bundle: EvidenceBundle): Finding {
         ruleId: "AUTHORITY_INVALID_PERMIT",
         reason: `Permit schema validation failed: ${parseRes.error.message}`,
         evidenceIds,
-        basis: ["signature"],
+        basis: ["recorder_assertion"],
       };
     }
 
@@ -42,7 +42,7 @@ export function checkAuthority(bundle: EvidenceBundle): Finding {
         ruleId: "AUTHORITY_PERMIT_EXPIRED",
         reason: `Permit expiration ${permit.expiresAt} precedes or equals startsAt ${permit.startsAt}`,
         evidenceIds,
-        basis: ["signature"],
+        basis: ["recorder_assertion"],
       };
     }
   }
@@ -57,17 +57,20 @@ export function checkAuthority(bundle: EvidenceBundle): Finding {
         ruleId: "AUTHORITY_INVALID_ACTION",
         reason: `Action schema validation failed: ${parseRes.error.message}`,
         evidenceIds,
-        basis: ["signature"],
+        basis: ["recorder_assertion"],
       };
     }
   }
 
+  // The records parse, but no signature is recovered and nothing is compared
+  // with the chain, so authority is not proven.
   return {
     name: "authority",
-    state: "PASS",
-    ruleId: "AUTHORITY_VALID",
-    reason: "Authority records, EIP-712 schemas, and lifetime boundaries verified",
+    state: "UNVERIFIABLE",
+    ruleId: "AUTHORITY_SIGNATURES_NOT_CHECKED",
+    reason:
+      "Authority records are well formed; owner, executor and provider signatures were not recovered",
     evidenceIds,
-    basis: ["signature"],
+    basis: ["recorder_assertion"],
   };
 }

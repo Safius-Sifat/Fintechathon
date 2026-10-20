@@ -10,7 +10,10 @@ export function checkDelivery(bundle: EvidenceBundle): Finding {
 
   // Find delivery events or result payloads
   const deliveryEvents = events.filter(
-    (e) => e.type === "RESULT_DELIVERED" || e.type === "DELIVERY_RECEIVED" || (e.payload as any)?.result,
+    (e) =>
+      e.type === "RESULT_DELIVERED" ||
+      e.type === "DELIVERY_RECEIVED" ||
+      (e.payload as any)?.result,
   );
 
   if (deliveryEvents.length === 0) {
@@ -39,12 +42,15 @@ export function checkDelivery(bundle: EvidenceBundle): Finding {
     }
   }
 
+  // Results match the schema, but provider signatures and result hashes
+  // were not checked, so delivery is not proven.
   return {
     name: "delivery",
-    state: "PASS",
-    ruleId: "DELIVERY_VALIDATED",
-    reason: `All delivered results validated against schema with authentic hashes`,
+    state: "UNVERIFIABLE",
+    ruleId: "DELIVERY_SIGNATURES_NOT_CHECKED",
+    reason:
+      "Delivered results match the result schema; provider signatures and result hashes were not checked",
     evidenceIds,
-    basis: ["artifact"],
+    basis: ["recorder_assertion"],
   };
 }

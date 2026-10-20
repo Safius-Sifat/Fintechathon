@@ -23,7 +23,9 @@ async function main() {
   }
 
   if (!bundlePath) {
-    console.error("Usage: mandate-verify --bundle <path> [--trusted <manifest>] [--rpc <url>] [--out <report>]");
+    console.error(
+      "Usage: mandate-verify --bundle <path> [--trusted <manifest>] [--rpc <url>] [--out <report>]",
+    );
     process.exit(3);
   }
 
@@ -36,7 +38,12 @@ async function main() {
     console.log(`Inspection Head: Block ${report.inspectionHead}\n`);
 
     for (const f of report.findings) {
-      const icon = f.state === "PASS" ? "✓ PASS" : f.state === "FAIL" ? "✗ FAIL" : `? ${f.state}`;
+      const icon =
+        f.state === "PASS"
+          ? "✓ PASS"
+          : f.state === "FAIL"
+            ? "✗ FAIL"
+            : `? ${f.state}`;
       console.log(`  [${icon.padEnd(8)}] ${f.name.toUpperCase()}: ${f.ruleId}`);
       console.log(`            ${f.reason}`);
     }

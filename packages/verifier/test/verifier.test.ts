@@ -1,13 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {
-  verifyBundleSync,
-  computeExitCode,
-} from "../src/index.js";
-import {
-  type EvidenceBundle,
-  ZERO_HASH,
-} from "@mandate/schema";
+import { verifyBundleSync, computeExitCode } from "../src/index.js";
+import { type EvidenceBundle, ZERO_HASH } from "@mandate/schema";
 import { type Hex } from "viem";
 
 function buildSampleBundle(): EvidenceBundle {
@@ -130,16 +124,59 @@ function buildSampleBundle(): EvidenceBundle {
   };
 }
 
-test("verifier: verifies authentic bundle and returns all PASS", () => {
+test("verifier: never reports PASS for checks it does not perform", () => {
   const bundle = buildSampleBundle();
   const report = verifyBundleSync(bundle);
 
   assert.equal(report.schemaVersion, 4);
   assert.equal(report.findings.length, 6);
   for (const finding of report.findings) {
-    assert.equal(finding.state, "PASS", `Expected ${finding.name} to PASS`);
+    assert.notEqual(
+      finding.state,
+      "PASS",
+      `${finding.name} must not claim PASS`,
+    );
+    assert.ok(
+      !finding.basis.includes("chain"),
+      `${finding.name} did not read the chain`,
+    );
   }
-  assert.equal(computeExitCode(report), 0);
+  assert.equal(computeExitCode(report), 2);
+  assert.ok(report.limitations.some((l) => l.includes("Not implemented")));
+});
+
+test("verifier: an empty transaction list is not a settlement PASS", () => {
+  const bundle = { ...buildSampleBundle(), transactions: [] };
+  const settlement = verifyBundleSync(bundle).findings.find(
+    (f) => f.name === "settlement",
+  );
+  assert.equal(settlement?.state, "UNVERIFIABLE");
+});
+
+test("verifier: a retained artifact that does not match its hash fails integrity", () => {
+  const bundle = buildSampleBundle();
+  const tampered = {
+    ...bundle,
+    artifactIndex: [
+      {
+        ...(bundle.artifactIndex[0] ?? {
+          artifactId: "shot",
+          retained: true,
+          salt: null,
+          mediaType: "image/png",
+          size: 2,
+        }),
+        artifactId: "shot",
+        retained: true,
+        sha256: ("0x" + "00".repeat(32)) as Hex,
+      },
+    ],
+    artifacts: { shot: "0xabcd" as Hex },
+  } as EvidenceBundle;
+  const integrity = verifyBundleSync(tampered).findings.find(
+    (f) => f.name === "integrity",
+  );
+  assert.equal(integrity?.state, "FAIL");
 });
 
 test("verifier: detects tampered event hash and fails integrity with exit code 1", () => {
@@ -158,7 +195,9 @@ test("verifier: reports PENDING for unconfirmed transactions with exit code 2", 
   bundle.transactions[0]!.confirmations = 1; // fewer than 3 confirmations
 
   const report = verifyBundleSync(bundle);
-  const settlementFinding = report.findings.find((f) => f.name === "settlement");
+  const settlementFinding = report.findings.find(
+    (f) => f.name === "settlement",
+  );
   assert.equal(settlementFinding?.state, "PENDING");
   assert.equal(computeExitCode(report), 2);
 });

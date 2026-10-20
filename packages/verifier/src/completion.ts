@@ -1,7 +1,4 @@
-import {
-  type EvidenceBundle,
-  type Finding,
-} from "@mandate/schema";
+import { type EvidenceBundle, type Finding } from "@mandate/schema";
 
 export function checkCompletion(bundle: EvidenceBundle): Finding {
   const { events } = bundle;
@@ -37,11 +34,13 @@ export function checkCompletion(bundle: EvidenceBundle): Finding {
     };
   }
 
+  // Completion rests only on the recorder's own event, which is not
+  // independent support.
   return {
     name: "completion",
-    state: "PASS",
-    ruleId: "COMPLETION_ACHIEVED",
-    reason: `Task reached verified completion event: ${completedEvent.type}`,
+    state: "UNVERIFIABLE",
+    ruleId: "COMPLETION_RECORDER_ONLY",
+    reason: `Only the recorder's ${completedEvent.type} event says the task finished`,
     evidenceIds,
     basis: ["recorder_assertion"],
   };
