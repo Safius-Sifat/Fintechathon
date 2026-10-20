@@ -1,0 +1,4 @@
+
+> @mandate/platform@0.0.0 typecheck /private/tmp/fintechathon-person2-continue/packages/platform
+> tsc --noEmit
+

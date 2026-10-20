@@ -1,0 +1,106 @@
+TAP version 13
+# Subtest: OPS-CFG-01 production rejects developer/runtime credentials
+ok 1 - OPS-CFG-01 production rejects developer/runtime credentials
+  ---
+  duration_ms: 1.817791
+  type: 'test'
+  ...
+# Subtest: OPS-CFG-02 production cannot disable or override TLS
+ok 2 - OPS-CFG-02 production cannot disable or override TLS
+  ---
+  duration_ms: 0.956792
+  type: 'test'
+  ...
+# Subtest: OPS-CFG-03 role and CA are explicit, with verified TLS
+ok 3 - OPS-CFG-03 role and CA are explicit, with verified TLS
+  ---
+  duration_ms: 32.056459
+  type: 'test'
+  ...
+# Subtest: OPS-CFG-04 explicit test URL needs no production credentials
+ok 4 - OPS-CFG-04 explicit test URL needs no production credentials
+  ---
+  duration_ms: 0.769208
+  type: 'test'
+  ...
+# Subtest: OPS-RUN-01 apply records commit and releases an acquired lock
+ok 5 - OPS-RUN-01 apply records commit and releases an acquired lock
+  ---
+  duration_ms: 6.178125
+  type: 'test'
+  ...
+# Subtest: OPS-RUN-02 second application is a no-op
+ok 6 - OPS-RUN-02 second application is a no-op
+  ---
+  duration_ms: 1.055709
+  type: 'test'
+  ...
+# Subtest: OPS-RUN-03 checksum/missing file stops before changes
+ok 7 - OPS-RUN-03 checksum/missing file stops before changes
+  ---
+  duration_ms: 8.4625
+  type: 'test'
+  ...
+# Subtest: OPS-RUN-04 failed SQL rolls back and does not record success
+ok 8 - OPS-RUN-04 failed SQL rolls back and does not record success
+  ---
+  duration_ms: 1.0985
+  type: 'test'
+  ...
+# Subtest: OPS-RUN-05 bounded lock timeout never unlocks someone else's lock
+ok 9 - OPS-RUN-05 bounded lock timeout never unlocks someone else's lock
+  ---
+  duration_ms: 26.099833
+  type: 'test'
+  ...
+# Subtest: OPS-RUN-06 cleanup failure cannot turn a failed run green
+ok 10 - OPS-RUN-06 cleanup failure cannot turn a failed run green
+  ---
+  duration_ms: 4.610875
+  type: 'test'
+  ...
+# Subtest: OPS-RUN-07 invalid schema/timeout and retroactive versions reject
+ok 11 - OPS-RUN-07 invalid schema/timeout and retroactive versions reject
+  ---
+  duration_ms: 1.763667
+  type: 'test'
+  ...
+# Subtest: OPS-MIG-01 discovers exact reviewed bytes and stable checksums
+ok 12 - OPS-MIG-01 discovers exact reviewed bytes and stable checksums
+  ---
+  duration_ms: 37.710292
+  type: 'test'
+  ...
+# Subtest: OPS-MIG-02 manifest/files must match, with unique valid versions
+ok 13 - OPS-MIG-02 manifest/files must match, with unique valid versions
+  ---
+  duration_ms: 41.652583
+  type: 'test'
+  ...
+# Subtest: OPS-MIG-03 manual/destructive/nontransactional/procedural SQL cannot enter automatic lane
+ok 14 - OPS-MIG-03 manual/destructive/nontransactional/procedural SQL cannot enter automatic lane
+  ---
+  duration_ms: 20.604125
+  type: 'test'
+  ...
+# Subtest: OPS-MIG-04 quotes/comments cannot disguise a second destructive statement
+ok 15 - OPS-MIG-04 quotes/comments cannot disguise a second destructive statement
+  ---
+  duration_ms: 1.298333
+  type: 'test'
+  ...
+# Subtest: OPS-MIG-05 symlinked SQL is rejected
+ok 16 - OPS-MIG-05 symlinked SQL is rejected
+  ---
+  duration_ms: 10.919583
+  type: 'test'
+  ...
+1..16
+# tests 16
+# suites 0
+# pass 16
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 650.728625

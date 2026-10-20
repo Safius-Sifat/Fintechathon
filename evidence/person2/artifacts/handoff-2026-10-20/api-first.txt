@@ -1,0 +1,27 @@
+
+> @mandate/api@0.0.0 check /private/tmp/fintechathon-person2-continue/apps/api
+> tsc --noEmit && tsx --test test/*.test.ts
+
+node:net:1919
+      const error = new UVExceptionWithHostPort(rval, 'listen', address, port);
+                    ^
+
+Error: listen EPERM: operation not permitted /var/folders/hx/ck2ny5vj4m1d3_18yyxbvjsr0000gn/T/tsx-501/13027.pipe
+    at Server.setupListenHandle [as _listen2] (node:net:1919:21)
+    at listenInCluster (node:net:1998:12)
+    at Server.listen (node:net:2120:5)
+    at file:///private/tmp/fintechathon-person2-continue/node_modules/.pnpm/tsx@4.20.6/node_modules/tsx/dist/cli.mjs:53:31537
+    at new Promise (<anonymous>)
+    at createIpcServer (file:///private/tmp/fintechathon-person2-continue/node_modules/.pnpm/tsx@4.20.6/node_modules/tsx/dist/cli.mjs:53:31515)
+    at async file:///private/tmp/fintechathon-person2-continue/node_modules/.pnpm/tsx@4.20.6/node_modules/tsx/dist/cli.mjs:55:459 {
+  code: 'EPERM',
+  errno: -1,
+  syscall: 'listen',
+  address: '/var/folders/hx/ck2ny5vj4m1d3_18yyxbvjsr0000gn/T/tsx-501/13027.pipe',
+  port: -1
+}
+
+Node.js v22.23.3
+/private/tmp/fintechathon-person2-continue/apps/api:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @mandate/api@0.0.0 check: `tsc --noEmit && tsx --test test/*.test.ts`
+Exit status 1

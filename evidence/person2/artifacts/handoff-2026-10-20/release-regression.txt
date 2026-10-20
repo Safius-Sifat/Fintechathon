@@ -1,0 +1,62 @@
+
+> mandate@0.0.0 test:release /private/tmp/fintechathon-person2-continue
+> node --import tsx --test scripts/test/*.test.mjs
+
+TAP version 13
+# Subtest: P1-06.T05 complete evidence and a matching manifest pass
+ok 1 - P1-06.T05 complete evidence and a matching manifest pass
+  ---
+  duration_ms: 5.901083
+  type: 'test'
+  ...
+# Subtest: P1-06.T05 a missing mandatory case keeps the release incomplete
+ok 2 - P1-06.T05 a missing mandatory case keeps the release incomplete
+  ---
+  duration_ms: 1.445208
+  type: 'test'
+  ...
+# Subtest: P1-06.T05 a failed case fails even when another record passes
+ok 3 - P1-06.T05 a failed case fails even when another record passes
+  ---
+  duration_ms: 1.150041
+  type: 'test'
+  ...
+# Subtest: P1-06.T05 local, blocked and malformed results do not count as PASS
+ok 4 - P1-06.T05 local, blocked and malformed results do not count as PASS
+  ---
+  duration_ms: 1.07175
+  type: 'test'
+  ...
+# Subtest: P1-06.T05 a case file that is not an array of records is reported and not counted
+ok 5 - P1-06.T05 a case file that is not an array of records is reported and not counted
+  ---
+  duration_ms: 1.203333
+  type: 'test'
+  ...
+# Subtest: P1-06.T05 an absent or schema-invalid manifest blocks the release
+ok 6 - P1-06.T05 an absent or schema-invalid manifest blocks the release
+  ---
+  duration_ms: 2.815
+  type: 'test'
+  ...
+# Subtest: P1-06.T05 a manifest that differs from the recorded deployment fails
+ok 7 - P1-06.T05 a manifest that differs from the recorded deployment fails
+  ---
+  duration_ms: 1.172958
+  type: 'test'
+  ...
+# Subtest: P1-06.T05 the repository today is not releasable
+ok 8 - P1-06.T05 the repository today is not releasable
+  ---
+  duration_ms: 8.77075
+  type: 'test'
+  ...
+1..8
+# tests 8
+# suites 0
+# pass 8
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 296.658709

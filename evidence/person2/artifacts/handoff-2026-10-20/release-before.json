@@ -1,0 +1,12 @@
+{
+  "command": [
+    "./scripts/pnpm.sh",
+    "release:check"
+  ],
+  "exitCode": 1,
+  "startedAt": "2026-10-20T08:34:44.049487+00:00",
+  "finishedAt": "2026-10-20T08:34:47.881003+00:00",
+  "sourceCommit": "e1c093d979250292c142d9cb91272f9d2fc8ece8",
+  "schemaCommit": "04f80a06aef361b305d20f6e371862939a4ec1ba",
+  "log": "evidence/person2/artifacts/handoff-2026-10-20/release-before.txt"
+}
