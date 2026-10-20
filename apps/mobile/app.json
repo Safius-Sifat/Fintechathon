@@ -4,7 +4,7 @@
     "slug": "mandate-wallet",
     "version": "0.0.0",
     "orientation": "portrait",
-    "platforms": ["android"],
+    "platforms": ["android", "ios"],
     "android": {
       "package": "app.mandate.wallet.dev",
       "blockedPermissions": ["android.permission.RECORD_AUDIO"],
@@ -16,7 +16,9 @@
     },
     "extra": {
       "chainId": 84532,
-      "stage": "bootstrap"
+      "stage": "bootstrap",
+      "rpcUrl": "https://sepolia.base.org",
+      "apiOrigin": null
     },
     "plugins": [
       [
@@ -36,9 +38,28 @@
           "microphonePermission": false,
           "recordAudioAndroid": false
         }
+      ],
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Mandate uses Face ID to unlock your wallet and confirm each signature."
+        }
+      ],
+      [
+        "expo-secure-store",
+        {
+          "faceIDPermission": "Mandate uses Face ID to protect your recovery phrase."
+        }
       ]
     ],
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "automatic"
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "bundleIdentifier": "app.mandate.wallet.dev",
+      "supportsTablet": false,
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    }
   }
 }
