@@ -62,7 +62,7 @@
   {
     "caseId": "P2-04.T04",
     "taskId": "P2-04",
-    "status": "LOCAL_PASS",
+    "status": "BLOCKED",
     "sourceCommit": "cf0c61eb367d7bb2c276faf0d280b0c094880925",
     "assessedAt": "2026-10-20T11:27:28.615775+00:00",
     "environment": {
@@ -73,12 +73,12 @@
       "qualificationOnly": true
     },
     "command": "MPC_PRIVATE_DIR=<local> node scripts/ops/with-test-postgres.mjs 'apps/worker/test/e2e/*.test.ts'",
-    "exitCode": 0,
+    "exitCode": null,
     "expected": "Simulation failure after signature: no broadcast, reservation retained",
     "observed": "Executor marks DENIED SIMULATION_REVERT and keeps the reservation; release only after chain proof (deadline passed and usedRequest false). Observed live during e2e debugging (InvalidSignature before the v-byte fix).",
     "artifactRefs": [],
     "limitations": [
-      "No dedicated committed test case asserts this path; observed in e2e run history."
+      "Implemented (executor keeps reservation on SIMULATION_REVERT) but no committed test asserts it yet."
     ]
   },
   {
