@@ -4,7 +4,11 @@ import Fastify from "fastify";
 import { recoverTypedDataAddress, type Hex } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { buildTypedData, hashCanonical, invoiceDomain } from "@mandate/schema";
+import { mkdtemp } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { registerProviderRoutes } from "../src/routes.js";
+import { InvoiceStore } from "../src/store.js";
 
 // Public Anvil test keys #2 and #3. Never real keys.
 const KEY_A =
@@ -14,7 +18,8 @@ const KEY_B =
 
 async function app(keys: { a?: Hex; b?: Hex }) {
   const server = Fastify();
-  await registerProviderRoutes(server, { keys });
+  const dir = await mkdtemp(join(tmpdir(), "provider-"));
+  await registerProviderRoutes(server, { keys, store: new InvoiceStore(dir) });
   return server;
 }
 
@@ -104,7 +109,7 @@ test("provider: A refuses formSubmit and B quotes it at 350000", async () => {
   assert.equal(b.json().invoice.amount, "350000");
 });
 
-test("provider: results are refused until payment checks and the browser runner exist", async () => {
+test("provider: results are refused when delivery is not configured", async () => {
   const server = await app({ a: KEY_A });
   const res = await server.inject({
     method: "POST",
@@ -115,5 +120,5 @@ test("provider: results are refused until payment checks and the browser runner 
       paymentTxHash: ("0x" + "56".repeat(32)) as Hex,
     },
   });
-  assert.equal(res.statusCode, 501);
+  assert.equal(res.statusCode, 503);
 });

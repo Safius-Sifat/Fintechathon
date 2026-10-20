@@ -31,3 +31,6 @@ deployments/*.local.json
 .claude/
 skills-lock.json
 
+
+# Provider invoice records (local runs)
+.provider-data/
