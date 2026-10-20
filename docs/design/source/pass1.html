@@ -291,8 +291,8 @@ const home = () => `<div class="body home">
   <div class="hero"><div class="lab">Personal account</div><div class="big"><span class="num">128.00</span><span class="u">DUSD</span></div><div class="cap2">Test funds. No market value.</div></div>
   <div class="tiles"><div class="tile">${svg('recv')}Receive</div><div class="tile">${svg('send')}Send</div><div class="tile">${svg('scan')}Scan</div></div>
   <div class="h2 flex0">Agents<a>See all</a></div>
-  <div class="row agent r1" style="border-top:none"><div class="grow"><b style="font-weight:600">Atlas asks to start a task</b><small>Freight quotes, 12.00 DUSD budget</small></div><span class="tag wax">Needs you</span></div>
-  <div class="row agent r2">${dial(.632)}<div class="grow"><b style="font-weight:600">Atlas</b><small>Working. 7.58 left of 12.00</small></div><div class="round" style="border:1.25px solid var(--ink);width:40px;height:40px;border-radius:20px"><span class="pause-glyph" style="color:var(--ink)"><i style="height:13px"></i><i style="height:13px"></i></span></div></div>
+  <div class="row agent r1" style="border-top:none"><div class="grow"><b style="font-weight:600">The agent asks to start a task</b><small>Check the checkout, 3.00 DUSD budget</small></div><span class="tag wax">Needs you</span></div>
+  <div class="row agent r2">${dial(.867)}<div class="grow"><b style="font-weight:600">Agent</b><small>Working. 2.60 left of 3.00</small></div><div class="round" style="border:1.25px solid var(--ink);width:40px;height:40px;border-radius:20px"><span class="pause-glyph" style="color:var(--ink)"><i style="height:13px"></i><i style="height:13px"></i></span></div></div>
   <div class="h2 flex0">Tokens</div>
   <div class="row r0" style="border-top:none">${tok('dusd')}<div class="grow">DemoUSD<small>Base Sepolia</small></div><span class="amt tnum">128.00</span></div>
   <div class="row r3">${tok('eth')}<div class="grow">Ether<small>Test ETH, pays network fees</small></div><span class="amt tnum">0.0412</span></div>
@@ -305,7 +305,7 @@ const tokenDetail = () => `<div class="body">
   <div class="hero" style="margin-top:20px"><div class="lab">Balance</div><div class="big"><span class="num">128.00</span><span class="u">DUSD</span></div><div class="cap2">Test funds. No market value.</div></div>
   <div class="tiles"><div class="tile">${svg('recv')}Receive</div><div class="tile">${svg('send')}Send</div></div>
   <div class="h2 flex0">History<a>View all</a></div>
-  <div class="row" style="border-top:none"><div class="grow"><b style="font-weight:600">${SEAL_MARK}You funded Atlas</b><small>18:20, yesterday</small></div><span class="amt tnum">−40.00</span></div>
+  <div class="row" style="border-top:none"><div class="grow"><b style="font-weight:600">${SEAL_MARK}You funded the agent</b><small>18:20, yesterday</small></div><span class="amt tnum">−50.00</span></div>
   <div class="row"><div class="grow">Received<small>From 0x9f2c…c41a, 12 Oct</small></div><span class="amt tnum">+100.00</span></div>
   <div class="row"><div class="grow">Received<small>From the DemoUSD faucet, 12 Oct</small></div><span class="amt tnum">+68.00</span></div>
 </div>` + TABS('w');
@@ -347,14 +347,14 @@ const activity = () => `<div class="body act">
   <div style="display:flex;gap:8px;margin-top:14px;flex:none"><span class="pill" style="background:var(--ink);color:var(--on-ink);border-color:var(--ink)">All</span><span class="pill">Sent</span><span class="pill">Received</span><span class="pill">Agent</span></div>
   <div class="h2 flex0" style="margin-top:22px">Today</div>
   <div class="row" style="border-top:.5px solid var(--rule)"><span class="mono sm" style="width:42px">14:55</span><div class="grow">Sending<small>To 0x9f2c…c41a</small></div><div class="amt tnum">−40.00<small><span class="tag">Pending</span></small></div></div>
-  <div class="row"><span class="mono sm" style="width:42px">14:51</span><div class="grow">Harbour Index<small>Atlas, port fees</small></div><div class="amt tnum">−1.10</div></div>
-  <div class="row"><span class="mono sm" style="width:42px">14:49</span><div class="grow">Kestrel Data<small>Atlas, lane rates</small></div><div class="amt tnum">−0.42</div></div>
-  <div class="row"><span class="mono sm" style="width:42px">14:31</span><div class="grow"><b style="font-weight:600">${SEAL_MARK}You approved a task</b><small>Freight quotes, Rotterdam to Savannah</small></div><div class="amt tnum">12.00<small>budget</small></div></div>
+  <div class="row"><span class="mono sm" style="width:42px">14:51</span><div class="grow">Tessel Checks<small>Agent, page check</small></div><div class="amt tnum">−0.40</div></div>
+  <div class="row"><span class="mono sm" style="width:42px">14:49</span><div class="grow">Northgate Probes<small>Agent, page check</small></div><div class="amt tnum">−0.55</div></div>
+  <div class="row"><span class="mono sm" style="width:42px">14:31</span><div class="grow"><b style="font-weight:600">${SEAL_MARK}You approved a task</b><small>Check the demo shop checkout</small></div><div class="amt tnum">3.00<small>budget</small></div></div>
   <div class="h2 flex0">Yesterday</div>
-  <div class="row" style="border-top:.5px solid var(--rule)"><span class="mono sm" style="width:42px">18:20</span><div class="grow"><b style="font-weight:600">${SEAL_MARK}You funded Atlas</b><small>Funding, not spending</small></div><div class="amt tnum">−40.00</div></div>
-  <div class="row" data-scrolls><span class="mono sm" style="width:42px">16:05</span><div class="grow"><b style="font-weight:600">${SEAL_MARK}You paused Atlas</b><small>Earlier permissions ended</small></div><div class="amt">&nbsp;</div></div>
-  <div class="row" data-scrolls><span class="mono sm" style="width:42px">15:58</span><div class="grow">Kestrel Data<small>Atlas, lane rates</small></div><div class="amt tnum">−0.42</div></div>
-  <div class="row" data-scrolls><span class="mono sm" style="width:42px">15:49</span><div class="grow">Portline API<small>Atlas, transit times</small></div><div class="amt tnum">−0.30</div></div>
+  <div class="row" style="border-top:.5px solid var(--rule)"><span class="mono sm" style="width:42px">18:20</span><div class="grow"><b style="font-weight:600">${SEAL_MARK}You funded the agent</b><small>Funding, not spending</small></div><div class="amt tnum">−50.00</div></div>
+  <div class="row" data-scrolls><span class="mono sm" style="width:42px">16:05</span><div class="grow"><b style="font-weight:600">${SEAL_MARK}You paused the agent</b><small>Earlier permissions ended</small></div><div class="amt">&nbsp;</div></div>
+  <div class="row" data-scrolls><span class="mono sm" style="width:42px">15:58</span><div class="grow">Northgate Probes<small>Agent, page check</small></div><div class="amt tnum">−0.55</div></div>
+  <div class="row" data-scrolls><span class="mono sm" style="width:42px">15:49</span><div class="grow">Tessel Checks<small>Agent, page check</small></div><div class="amt tnum">−0.40</div></div>
 </div>` + TABS('h');
 
 const accounts = () => `<div class="dim" data-behind></div><div class="body home" data-behind style="opacity:1">${home().split('<div class="tabbar')[0].replace('<div class="body home">','').replace(/<\/div>\s*$/,'')}</div>
@@ -370,9 +370,9 @@ const accounts = () => `<div class="dim" data-behind></div><div class="body home
 const agents = () => `<div class="body">
   <div class="title" style="margin-top:12px">Agents</div>
   <div class="h2 flex0" style="margin-top:22px">Waiting for you</div>
-  <div class="row" style="border-top:.5px solid var(--rule)"><div class="grow"><b style="font-weight:600">New task from Atlas</b><small>Freight quotes, 12.00 DUSD budget</small></div><span class="tag wax">Needs you</span>${svg('chev','chev')}</div>
+  <div class="row" style="border-top:.5px solid var(--rule)"><div class="grow"><b style="font-weight:600">New task from the agent</b><small>Check the checkout, 3.00 DUSD budget</small></div><span class="tag wax">Needs you</span>${svg('chev','chev')}</div>
   <div class="h2 flex0">Your agents</div>
-  <div class="row" style="border-top:.5px solid var(--rule)">${dial(.632)}<div class="grow"><b style="font-weight:600">Atlas</b><small>Working since 14:31</small></div><div class="amt tnum">7.58<small>left of 12.00</small></div>${svg('chev','chev')}</div>
+  <div class="row" style="border-top:.5px solid var(--rule)">${dial(.867)}<div class="grow"><b style="font-weight:600">Agent</b><small>Working since 14:31</small></div><div class="amt tnum">2.60<small>left of 3.00</small></div>${svg('chev','chev')}</div>
   <div class="row r3">${dial(0,true)}<div class="grow"><b style="font-weight:600">Brindle</b><small>Paused by you, 16:05</small></div><div class="amt tnum">0.00<small>no active task</small></div>${svg('chev','chev')}</div>
   <div class="h2 flex0">Rules</div>
   <div class="row" style="border-top:.5px solid var(--rule)"><div class="grow">Wallet limits<small>What any agent may spend or pay</small></div>${svg('chev','chev')}</div>
@@ -382,33 +382,33 @@ const agents = () => `<div class="body">
 
 const agentDetail = () => `<div class="body dseal">
   <div class="tool"><div class="round glass">${svg('back')}</div><div class="round glass">${svg('filter')}</div></div>
-  <div style="margin-top:8px"><div style="font-family:var(--ny);font-weight:600;font-size:38px;letter-spacing:-.9px;line-height:1">Atlas</div><div class="sm" style="margin-top:6px;display:flex;align-items:center;gap:7px"><span class="dot"></span>Working, since 14:31</div></div>
-  <div class="seal-wrap">${seal({})}<div class="c"><div class="num">7.58</div><div class="unit">DUSD left</div></div></div>
-  <div class="sm" style="text-align:center;margin-top:6px">of 12.00 for this task · 4.42 spent</div>
-  <div class="sm" style="margin-top:14px;font-weight:600;color:var(--ink)">Freight quotes, Rotterdam to Savannah</div>
-  <div class="step" style="margin-top:6px">${DONE}<div style="flex:1">Lane rates<small>Kestrel Data</small></div><span class="tnum">0.42</span></div>
-  <div class="step">${DONE}<div style="flex:1">Transit times<small>Portline API</small></div><span class="tnum">0.30</span></div>
-  <div class="step">${SPIN}<div style="flex:1">Port fees<small>Paying Harbour Index</small></div><span class="tnum">1.10</span></div>
+  <div style="margin-top:8px"><div style="font-family:var(--ny);font-weight:600;font-size:38px;letter-spacing:-.9px;line-height:1">Agent</div><div class="sm" style="margin-top:6px;display:flex;align-items:center;gap:7px"><span class="dot"></span>Working, since 14:31</div></div>
+  <div class="seal-wrap">${seal({})}<div class="c"><div class="num">2.60</div><div class="unit">DUSD left</div></div></div>
+  <div class="sm" style="text-align:center;margin-top:6px">of 3.00 for this task · 0.40 spent</div>
+  <div class="sm" style="margin-top:14px;font-weight:600;color:var(--ink)">Check the demo shop checkout</div>
+  <div class="step" style="margin-top:6px">${DONE}<div style="flex:1">Two quotes received<small>Tessel Checks, Northgate Probes</small></div><span class="tnum"></span></div>
+  <div class="step">${DONE}<div style="flex:1">Provider chosen<small>Tessel Checks, lowest quote</small></div><span class="tnum"></span></div>
+  <div class="step">${SPIN}<div style="flex:1">Paying<small>Tessel Checks</small></div><span class="tnum">0.40</span></div>
   <div class="step todo r3">${TODO}<div style="flex:1">Compile the report</div></div>
-  <div class="row r3" style="margin-top:6px"><div class="grow" style="font-size:15px">Most per payment<small>Can pay 3 approved providers</small></div><span class="tnum" style="font-size:15px">1.50 DUSD</span>${svg('chev','chev')}</div>
-  <div class="cap" style="margin-top:auto;margin-bottom:34px"><span class="pause-glyph"><i></i><i></i></span>Pause Atlas</div>
+  <div class="row r3" style="margin-top:6px"><div class="grow" style="font-size:15px">Most per payment<small>Can pay 2 approved providers</small></div><span class="tnum" style="font-size:15px">1.00 DUSD</span>${svg('chev','chev')}</div>
+  <div class="cap" style="margin-top:auto;margin-bottom:34px"><span class="pause-glyph"><i></i><i></i></span>Pause the agent</div>
 </div>`;
 
 function approve(state) {
   const mode = state===0?'rest':state===1?'press':'sealed';
-  const centre = state===2 ? `<div class="num" style="color:var(--on-accent)">12.00</div><div class="unit" style="color:var(--on-accent)">Sealed 14:57</div>` : `<div class="num">12.00</div><div class="unit">DUSD budget</div>`;
-  const cta = state===2 ? `<div class="cap">Atlas can start</div>` : `<div class="cap"><svg class="ic" style="stroke:var(--on-ink);width:18px;height:18px" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.4"/></svg>Press and hold to seal</div>`;
+  const centre = state===2 ? `<div class="num" style="color:var(--on-accent)">3.00</div><div class="unit" style="color:var(--on-accent)">Sealed 14:57</div>` : `<div class="num">3.00</div><div class="unit">DUSD budget</div>`;
+  const cta = state===2 ? `<div class="cap">The agent can start</div>` : `<div class="cap"><svg class="ic" style="stroke:var(--on-ink);width:18px;height:18px" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.4"/></svg>Press and hold to seal</div>`;
   return `<div class="body appr">
     <div class="tool"><div class="round glass">${svg('back')}</div>${state===2?'':'<div class="decline">Decline</div>'}</div>
-    <div class="title" style="margin-top:14px">New task from Atlas</div>
-    <div class="sub">Compare freight quotes, Rotterdam to Savannah.</div>
+    <div class="title" style="margin-top:14px">New task from the agent</div>
+    <div class="sub">Check that the demo shop checkout loads and accepts its form.</div>
     <div class="seal-wrap">${seal({mode, p:0.62, spent:0, ticks:false})}<div class="c">${centre}</div></div>
     <div class="terms">
-      <div class="row"><span class="k">Most per payment</span><span class="v tnum">1.50 DUSD</span></div>
-      <div class="row"><span class="k">Can pay</span><span class="v">Kestrel Data<br>Portline API<br>Harbour Index</span></div>
+      <div class="row"><span class="k">Most per payment</span><span class="v tnum">1.00 DUSD</span></div>
+      <div class="row"><span class="k">Can pay</span><span class="v">Tessel Checks<br>Northgate Probes</span></div>
       <div class="row"><span class="k">Ends</span><span class="v">20 Oct, 18:00</span></div>
     </div>
-    <div class="note">You can pause Atlas at any time, even when the Mandate service is offline.</div>
+    <div class="note">You can pause the agent at any time, even when the Mandate service is offline.</div>
     <div class="foot">${cta}</div>
   </div>`;
 }
@@ -421,7 +421,7 @@ const settings = () => `<div class="body">
   <div class="row"><div class="grow">Ask for Face ID to open the app</div><div class="sw"></div></div>
   <div class="row"><div class="grow">Ask for Face ID to send<small>Includes owner transfers and approvals</small></div><div class="sw"></div></div>
   <div class="h2 flex0">Agents</div>
-  <div class="row" style="border-top:.5px solid var(--rule)"><div class="grow">Atlas<small>Up to 12.00 DUSD, ends 20 Oct 18:00</small></div>${svg('chev','chev')}</div>
+  <div class="row" style="border-top:.5px solid var(--rule)"><div class="grow">Agent<small>Up to 3.00 DUSD, ends 20 Oct 18:00</small></div>${svg('chev','chev')}</div>
   <div class="row"><div class="grow">Wallet limits</div>${svg('chev','chev')}</div>
   <div class="row"><div class="grow">Pause all agents<small>Stops every agent. Works without the Mandate service.</small></div><span class="pause-glyph" style="color:var(--ink)"><i style="height:13px"></i><i style="height:13px"></i></span></div>
   <div class="h2 flex0">Network</div>
@@ -431,12 +431,12 @@ const settings = () => `<div class="body">
 const payDetail = () => `<div class="body">
   <div class="tool"><div class="round glass">${svg('back')}</div><div class="round glass">${svg('share')}</div></div>
   <div style="margin-top:14px;display:flex;align-items:center;gap:7px" class="sm"><span class="tag">Confirmed</span><span>14:51, today</span></div>
-  <div class="num" style="font-size:56px;margin-top:14px">−1.10 <span style="font-family:var(--sf);font-size:17px;letter-spacing:0;color:var(--ink2);font-weight:500">DUSD</span></div>
-  <div class="sm" style="margin-top:8px">Atlas paid Harbour Index for port fees</div>
+  <div class="num" style="font-size:56px;margin-top:14px">−0.40 <span style="font-family:var(--sf);font-size:17px;letter-spacing:0;color:var(--ink2);font-weight:500">DUSD</span></div>
+  <div class="sm" style="margin-top:8px">The agent paid Tessel Checks for a page check</div>
   <div class="h2 flex0" style="margin-top:26px">Authorised by you</div>
-  <div class="row" style="border-top:.5px solid var(--rule)"><div class="grow" style="font-size:15px"><b style="font-weight:600">${SEAL_MARK}Freight quotes, Rotterdam to Savannah</b><small>Sealed 14:31 · 12.00 DUSD budget</small></div>${svg('chev','chev')}</div>
-  <div class="row"><div class="grow" style="font-size:15px">This payment<small>Within the 1.50 per-payment limit</small></div><span class="tnum" style="font-size:15px">1.10 of 1.50</span></div>
-  <div class="row r3"><div class="grow" style="font-size:15px">Budget left after<small>Before this payment: 8.68</small></div><span class="tnum" style="font-size:15px">7.58</span></div>
+  <div class="row" style="border-top:.5px solid var(--rule)"><div class="grow" style="font-size:15px"><b style="font-weight:600">${SEAL_MARK}Check the demo shop checkout</b><small>Sealed 14:31 · 3.00 DUSD budget</small></div>${svg('chev','chev')}</div>
+  <div class="row"><div class="grow" style="font-size:15px">This payment<small>Within the 1.00 per-payment limit</small></div><span class="tnum" style="font-size:15px">0.40 of 1.00</span></div>
+  <div class="row r3"><div class="grow" style="font-size:15px">Budget left after<small>Before this payment: 3.00</small></div><span class="tnum" style="font-size:15px">2.60</span></div>
   <div class="h2 flex0">Details</div>
   <div class="row" style="border-top:.5px solid var(--rule)"><span class="sm" style="width:96px">Paid to</span><div class="grow addr" style="text-align:right">0xB7d0…3e51<small style="font-family:var(--sf)">Approved provider</small></div></div>
   <div class="row r3"><span class="sm" style="width:96px">Network</span><div class="grow" style="text-align:right;font-size:15px">Base Sepolia</div></div>
