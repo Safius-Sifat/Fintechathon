@@ -12,6 +12,10 @@ import {
   recoverAddress,
   type Address,
   type Hex,
+  createPublicClient,
+  custom,
+  http,
+  toFunctionSelector,
 } from "viem";
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 import {
@@ -46,7 +50,11 @@ import {
 } from "../../../../services/policy/test/db/fixture.js";
 import { DEFAULT_BUDGETS, Relayer, type Call } from "../../src/relayer.js";
 import { adapterKeygen, Provisioner } from "../../src/provision.js";
-import { adapterClient, Executor } from "../../src/execution.js";
+import {
+  adapterClient,
+  Executor,
+  simulationCapabilities,
+} from "../../src/execution.js";
 import { OwnerCommandRelay } from "../../src/owner-commands.js";
 import { ControlService } from "../../../api/src/business/controls.js";
 import {
@@ -554,9 +562,37 @@ test("P2-02/P2-04 end to end: per-wallet DKG, owner-signed policy and Permit, th
     );
     return { id, action, invoice, providerSignature };
   };
+  // The executor's RPC counts post-sign execute simulations and can drop them.
+  const executeSelector = toFunctionSelector(
+    mandateWalletAbi.find(
+      (x) => x.type === "function" && x.name === "execute",
+    )!,
+  );
+  const upstream = http(chain.rpcUrl, { retryCount: 0 })({});
+  const simulation = { calls: 0, failNext: 0 };
+  const executorClient = createPublicClient({
+    transport: custom(
+      {
+        request: async ({ method, params }) => {
+          if (method === "eth_maxPriorityFeePerGas") return "0xf4240";
+          const call =
+            method === "eth_call" ? (params as [{ data?: string }])[0] : null;
+          if (call?.data?.startsWith(executeSelector)) {
+            simulation.calls++;
+            if (simulation.failNext > 0) {
+              simulation.failNext--;
+              throw new Error("upstream RPC timeout");
+            }
+          }
+          return upstream.request({ method, params });
+        },
+      },
+      { retryCount: 0 },
+    ),
+  });
   const executorService = new Executor(
     db.pool,
-    chain.client,
+    executorClient,
     relayer,
     adapterClient("http://127.0.0.1:18732", adapterToken),
     nowSeconds,
@@ -573,6 +609,8 @@ test("P2-02/P2-04 end to end: per-wallet DKG, owner-signed policy and Permit, th
   };
 
   const providerBefore = await balanceOf(providerKey.address);
+  // P2-A03.T05: the first post-sign simulation hits an RPC outage.
+  simulation.failNext = 1;
   const pay = await proposeAction("200000", "pay:1");
   const signStart = Date.now();
   const final = await drive(pay.id, [
@@ -764,6 +802,18 @@ test("P2-02/P2-04 end to end: per-wallet DKG, owner-signed policy and Permit, th
     )
   ).rows.map((r) => r.version);
   assert.deepEqual(versions, ["2"]);
+  // P2-A03.T05/T06: one failed and one successful simulation; nothing released meanwhile.
+  assert.equal(simulation.calls, 2);
+  assert.equal(
+    (
+      await db.pool.query("SELECT denial_code FROM actions WHERE id=$1", [
+        pay.id,
+      ])
+    ).rows[0].denial_code,
+    "SIMULATION_UNAVAILABLE",
+  );
+  const capabilities = await simulationCapabilities(executorClient);
+  assert.equal(capabilities.ethCall, true);
   const cosigned = await proposeAction("200000", "pay:3");
   assert.equal(
     await drive(cosigned.id, ["AWAITING_APPROVAL", "INCLUDED", "DENIED"]),
@@ -804,6 +854,8 @@ test("P2-02/P2-04 end to end: per-wallet DKG, owner-signed policy and Permit, th
     ["INCLUDED", "FINALIZED"].includes(cosignedFinal),
     "co-signed PAY ended " + cosignedFinal,
   );
+  // P2-A03.T06: the co-signed PAY needed exactly one post-sign simulation.
+  assert.equal(simulation.calls, 3);
   const cosignedTx = (
     await db.pool.query("SELECT tx_hash FROM actions WHERE id=$1", [
       cosigned.id,
@@ -901,6 +953,8 @@ test("P2-02/P2-04 end to end: per-wallet DKG, owner-signed policy and Permit, th
     cosignedTxHash: cosignedTx,
     tightenedPolicyDenied: true,
     frozenDenial: "WALLET_FROZEN",
+    simulationCalls: simulation.calls,
+    simulateV1Supported: capabilities.simulateV1,
   };
   console.log("E2E_EVIDENCE " + JSON.stringify(evidence));
 });

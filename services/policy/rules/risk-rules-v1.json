@@ -1,0 +1,8 @@
+{
+  "version": "risk-rules-v1",
+  "velocity": {
+    "deniedActionsWindowSeconds": 600,
+    "deniedActionsThreshold": 3
+  },
+  "recommendation": "FREEZE"
+}

@@ -1,0 +1,198 @@
+[
+  {
+    "caseId": "P2-A03.T01",
+    "taskId": "P2-A03",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "cac9a55c9a43f9a8f6a8b940cd53d2bf1ca76e0c",
+    "assessedAt": "2026-10-20T11:58:13.458228+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia (local)",
+      "mpc": "local 3-node MPCium 90e3ee3 where noted",
+      "qualificationOnly": true
+    },
+    "command": "./scripts/pnpm.sh test:db",
+    "exitCode": 0,
+    "expected": "Screening/blocklist SCREENING_HIT, no authorizer signature",
+    "observed": "Screening set and confirmed blocklist both deny; mismatched list hash refuses to load.",
+    "artifactRefs": [],
+    "limitations": []
+  },
+  {
+    "caseId": "P2-A03.T02",
+    "taskId": "P2-A03",
+    "status": "BLOCKED",
+    "sourceCommit": "cac9a55c9a43f9a8f6a8b940cd53d2bf1ca76e0c",
+    "assessedAt": "2026-10-20T11:58:13.458228+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia (local)",
+      "mpc": "local 3-node MPCium 90e3ee3 where noted",
+      "qualificationOnly": true
+    },
+    "command": "./scripts/pnpm.sh test:db",
+    "exitCode": null,
+    "expected": "CALL simulation over-pull SIMULATION_MISMATCH",
+    "observed": "CALL operations are denied OPERATION_UNSUPPORTED before signing; advanced simulation not implemented.",
+    "artifactRefs": [],
+    "limitations": [
+      "CALL/X402/vault execution not implemented."
+    ]
+  },
+  {
+    "caseId": "P2-A03.T03",
+    "taskId": "P2-A03",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "cac9a55c9a43f9a8f6a8b940cd53d2bf1ca76e0c",
+    "assessedAt": "2026-10-20T11:58:13.458228+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia (local)",
+      "mpc": "local 3-node MPCium 90e3ee3 where noted",
+      "qualificationOnly": true
+    },
+    "command": "./scripts/pnpm.sh test:db",
+    "exitCode": 0,
+    "expected": "Three denials in 10 minutes inhibit, alert, push",
+    "observed": "Third in-window denial creates one RISK alert with rules hash, inhibits, RISK_ALERT event, push NO_DEVICE; no duplicate.",
+    "artifactRefs": [],
+    "limitations": [
+      "No real FCM/APNs credentials: delivery recorded UNSUPPORTED/NO_DEVICE."
+    ]
+  },
+  {
+    "caseId": "P2-A03.T04",
+    "taskId": "P2-A03",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "cac9a55c9a43f9a8f6a8b940cd53d2bf1ca76e0c",
+    "assessedAt": "2026-10-20T11:58:13.458228+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia (local)",
+      "mpc": "local 3-node MPCium 90e3ee3 where noted",
+      "qualificationOnly": true
+    },
+    "command": "./scripts/pnpm.sh test:db",
+    "exitCode": 0,
+    "expected": "Only owner clears inhibit",
+    "observed": "Agent 403, other owner 403, stale login 401 REAUTH_REQUIRED, fresh owner clears.",
+    "artifactRefs": [],
+    "limitations": []
+  },
+  {
+    "caseId": "P2-A03.T05",
+    "taskId": "P2-A03",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "cac9a55c9a43f9a8f6a8b940cd53d2bf1ca76e0c",
+    "assessedAt": "2026-10-20T11:58:13.458228+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia (local)",
+      "mpc": "local 3-node MPCium 90e3ee3 where noted",
+      "qualificationOnly": true
+    },
+    "command": "MPC_PRIVATE_DIR=<local> node scripts/ops/with-test-postgres.mjs 'apps/worker/test/e2e/*.test.ts'",
+    "exitCode": 0,
+    "expected": "Simulation RPC unavailable after signing",
+    "observed": "Injected outage: SIMULATION_UNAVAILABLE, Action stays SIGNED, reservation kept, retry simulated once and included.",
+    "artifactRefs": [
+      "evidence/person2/artifacts/execution-fork-20261020/e2e.json"
+    ],
+    "limitations": []
+  },
+  {
+    "caseId": "P2-A03.T06",
+    "taskId": "P2-A03",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "cac9a55c9a43f9a8f6a8b940cd53d2bf1ca76e0c",
+    "assessedAt": "2026-10-20T11:58:13.458228+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia (local)",
+      "mpc": "local 3-node MPCium 90e3ee3 where noted",
+      "qualificationOnly": true
+    },
+    "command": "MPC_PRIVATE_DIR=<local> node scripts/ops/with-test-postgres.mjs 'apps/worker/test/e2e/*.test.ts'",
+    "exitCode": 0,
+    "expected": "Exactly one post-sign eth_call",
+    "observed": "Counted execute eth_call per attempt: co-signed PAY used exactly one.",
+    "artifactRefs": [
+      "evidence/person2/artifacts/execution-fork-20261020/e2e.json"
+    ],
+    "limitations": []
+  },
+  {
+    "caseId": "P2-A03.T07",
+    "taskId": "P2-A03",
+    "status": "BLOCKED",
+    "sourceCommit": "cac9a55c9a43f9a8f6a8b940cd53d2bf1ca76e0c",
+    "assessedAt": "2026-10-20T11:58:13.458228+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia (local)",
+      "mpc": "local 3-node MPCium 90e3ee3 where noted",
+      "qualificationOnly": true
+    },
+    "command": "./scripts/pnpm.sh test:db",
+    "exitCode": null,
+    "expected": "DEPOSIT/WITHDRAW/CALL advanced simulation",
+    "observed": "Operations not implemented (policy denies).",
+    "artifactRefs": [],
+    "limitations": [
+      "Needs liquidity runbook and eth_simulateV1 effect checks."
+    ]
+  },
+  {
+    "caseId": "P2-A03.T08",
+    "taskId": "P2-A03",
+    "status": "BLOCKED",
+    "sourceCommit": "cac9a55c9a43f9a8f6a8b940cd53d2bf1ca76e0c",
+    "assessedAt": "2026-10-20T11:58:13.458228+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia (local)",
+      "mpc": "local 3-node MPCium 90e3ee3 where noted",
+      "qualificationOnly": true
+    },
+    "command": "./scripts/pnpm.sh test:db",
+    "exitCode": null,
+    "expected": "Post-sign failure then deadline: reservation until reconciliation",
+    "observed": "Release requires deadline passed and usedRequest false at latest block; no committed test.",
+    "artifactRefs": [],
+    "limitations": [
+      "Finalized-history check uses latest block, not finalized head."
+    ]
+  },
+  {
+    "caseId": "P2-A03.T09",
+    "taskId": "P2-A03",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "cac9a55c9a43f9a8f6a8b940cd53d2bf1ca76e0c",
+    "assessedAt": "2026-10-20T11:58:13.458228+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia (local)",
+      "mpc": "local 3-node MPCium 90e3ee3 where noted",
+      "qualificationOnly": true
+    },
+    "command": "MPC_PRIVATE_DIR=<local> node scripts/ops/with-test-postgres.mjs 'apps/worker/test/e2e/*.test.ts'",
+    "exitCode": 0,
+    "expected": "eth_call without eth_simulateV1",
+    "observed": "simulationCapabilities reports per-method support (fork: ethCall true, simulateV1 true); PAY needs only eth_call.",
+    "artifactRefs": [
+      "evidence/person2/artifacts/execution-fork-20261020/e2e.json"
+    ],
+    "limitations": [
+      "No RPC lacking eth_simulateV1 was tested."
+    ]
+  }
+]

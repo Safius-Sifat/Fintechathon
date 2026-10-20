@@ -1,6 +1,9 @@
 import type { Pool, PoolClient } from "pg";
 import {
+  BaseError,
   decodeEventLog,
+  ExecutionRevertedError,
+  RawContractError,
   encodeFunctionData,
   getAddress,
   recoverAddress,
@@ -402,9 +405,25 @@ export class Executor {
       value: 0n,
     };
     const sender = this.relayer.lanes.normal?.account.address;
+    // Exactly one post-sign simulation per attempt, against fresh state.
     try {
       await this.client.call({ account: sender, ...call });
-    } catch {
+    } catch (error) {
+      const reverted =
+        error instanceof BaseError &&
+        !!error.walk(
+          (e) =>
+            e instanceof ExecutionRevertedError ||
+            e instanceof RawContractError,
+        );
+      if (!reverted) {
+        // RPC unavailable: keep the signed Action and reservation, retry later.
+        await this.database.query(
+          "UPDATE actions SET denial_code='SIMULATION_UNAVAILABLE',updated_at=$2 WHERE id=$1 AND state='SIGNED'",
+          [row.id, this.clock()],
+        );
+        return;
+      }
       // A usable signature exists, so the reservation is kept until chain history
       // proves the Action can no longer execute.
       await this.setState(this.database, row.id, ["SIGNED"], "DENIED", {
@@ -533,4 +552,23 @@ export class Executor {
       ),
     );
   }
+}
+
+// Advanced effect simulation needs eth_simulateV1; ordinary payments need only eth_call.
+export async function simulationCapabilities(
+  client: PublicClient,
+): Promise<{ ethCall: boolean; simulateV1: boolean }> {
+  const probe = (method: string, params: unknown[]) =>
+    client.request({ method: method as never, params: params as never }).then(
+      () => true,
+      (e: { code?: number }) => e?.code !== -32601 && e?.code !== -32602,
+    );
+  const block = { blockStateCalls: [{ calls: [] }] };
+  return {
+    ethCall: await probe("eth_call", [
+      { to: "0x0000000000000000000000000000000000000000", data: "0x" },
+      "latest",
+    ]),
+    simulateV1: await probe("eth_simulateV1", [block, "latest"]),
+  };
 }

@@ -1,12 +1,12 @@
 {
-  "forkBlock": "48364317",
-  "walletAddress": "0xbcE71D1B89b5b155D2aF63fBb9D9Db632EDeC0eb",
-  "executor": "0xB14924Dca934cd29E84A34e2bFf9325dCA666F98",
-  "mpcWalletId": "436be006-e57c-4a8d-9877-92b56a51b8a2",
-  "dkgMs": 18932,
-  "signToInclusionMs": 3848,
-  "payTxHash": "0x526f9dc250aea6a5eb620a0d7993bcd1d31f114308d6e2526fcf8f349e6628a6",
-  "payRequestId": "0xf4b32958d42d8d7f0278b603c1aa0e3dd9d6cb073f033dc557fe9a77dc345879",
+  "forkBlock": "48364535",
+  "walletAddress": "0x196782F47babAbA83b378Ad476007913Da205Aae",
+  "executor": "0x96172BDbb8eD1D944e4Ab132864C0c60BAC9863c",
+  "mpcWalletId": "682350a7-6d72-40c2-85d8-a2268f17ca7a",
+  "dkgMs": 18732,
+  "signToInclusionMs": 4345,
+  "payTxHash": "0x5494a82b57923ddd7d4c2e0b703f795630e8d19d7f41c8a46aa32d6e512d08c6",
+  "payRequestId": "0x332a3f509133829a997bd3116bab2a8d73d5169a77447bb4022d0dd8d77cff69",
   "deniedActionRuleCode": "POLICY_VIOLATION",
   "result": "LOCAL_PASS",
   "chain": "anvil fork of Base Sepolia (chainId 84532), deployed Person1 contracts at manifest addresses/code hashes; not a public transaction",
@@ -26,16 +26,20 @@
     "Action edited after digest commit: policy DIGEST_MISMATCH, attempt DENIED, reservation RELEASED DENIED_UNSIGNED, no transaction",
     "Policy v2 via API ControlService + emergency-lane relay; 200000 PAY above 150000 threshold waited AWAITING_APPROVAL with no MPC attempt, owner Approval verified, executed with ownerApproved=true",
     "Policy v3 perTx 100000: 120000 PAY denied by policy before signing (attempt DENIED, no transaction)",
-    "Admin FREEZE relayed: next PAY DENIED WALLET_FROZEN with no MPC attempt"
+    "Admin FREEZE relayed: next PAY DENIED WALLET_FROZEN with no MPC attempt",
+    "First PAY simulation hit an injected RPC outage: SIMULATION_UNAVAILABLE, signed Action and reservation kept, retry simulated once and included",
+    "Co-signed PAY used exactly one post-sign execute eth_call"
   ],
-  "recordedAt": "2026-10-20T11:49:59.263098+00:00",
+  "recordedAt": "2026-10-20T11:58:13.458228+00:00",
   "history": [
     {
       "payTxHash": "0x732c9752f3439bfd77a58f8773e0d63a4706f081931e017766c30aa89a777bac",
       "recordedAt": "2026-10-20T11:05:52.971226+00:00"
     }
   ],
-  "cosignedTxHash": "0xfd3bccc03acf188ceb2f968d6fb6502add48ff504bc67d4c14c2f1e5097fbfce",
+  "cosignedTxHash": "0xa812583d9c6b22d7e59990d65bc08f247d2ab0f59599cfe6e86d7233d189a34a",
   "tightenedPolicyDenied": true,
-  "frozenDenial": "WALLET_FROZEN"
+  "frozenDenial": "WALLET_FROZEN",
+  "simulationCalls": 3,
+  "simulateV1Supported": true
 }

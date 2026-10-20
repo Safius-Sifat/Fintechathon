@@ -1,0 +1,144 @@
+[
+  {
+    "caseId": "P2-A01.T01",
+    "taskId": "P2-A01",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "cac9a55c9a43f9a8f6a8b940cd53d2bf1ca76e0c",
+    "assessedAt": "2026-10-20T11:58:13.458228+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia (local)",
+      "mpc": "local 3-node MPCium 90e3ee3 where noted",
+      "qualificationOnly": true
+    },
+    "command": "./scripts/pnpm.sh test:db",
+    "exitCode": 0,
+    "expected": "Unlisted option/out-of-bounds/address field rejected",
+    "observed": "AGENT_ANSWER_INVALID 422; missing identity header 422; question stays OPEN.",
+    "artifactRefs": [],
+    "limitations": []
+  },
+  {
+    "caseId": "P2-A01.T02",
+    "taskId": "P2-A01",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "cac9a55c9a43f9a8f6a8b940cd53d2bf1ca76e0c",
+    "assessedAt": "2026-10-20T11:58:13.458228+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia (local)",
+      "mpc": "local 3-node MPCium 90e3ee3 where noted",
+      "qualificationOnly": true
+    },
+    "command": "./scripts/pnpm.sh test:db",
+    "exitCode": 0,
+    "expected": "Second different answer 409",
+    "observed": "Identical repeat returns same decisionId; different answer 409; AGENT_DECISION bound to token.",
+    "artifactRefs": [],
+    "limitations": []
+  },
+  {
+    "caseId": "P2-A01.T03",
+    "taskId": "P2-A01",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "cac9a55c9a43f9a8f6a8b940cd53d2bf1ca76e0c",
+    "assessedAt": "2026-10-20T11:58:13.458228+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia (local)",
+      "mpc": "local 3-node MPCium 90e3ee3 where noted",
+      "qualificationOnly": true
+    },
+    "command": "./scripts/pnpm.sh test:db",
+    "exitCode": 0,
+    "expected": "Bounds recomputed at answer time",
+    "observed": "After another 600000 reservation, 800000 rejected and 400000 accepted.",
+    "artifactRefs": [],
+    "limitations": []
+  },
+  {
+    "caseId": "P2-A01.T04",
+    "taskId": "P2-A01",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "cac9a55c9a43f9a8f6a8b940cd53d2bf1ca76e0c",
+    "assessedAt": "2026-10-20T11:58:13.458228+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia (local)",
+      "mpc": "local 3-node MPCium 90e3ee3 where noted",
+      "qualificationOnly": true
+    },
+    "command": "./scripts/pnpm.sh test:db",
+    "exitCode": 0,
+    "expected": "Default applied once, AGENT_TIMEOUT",
+    "observed": "Default applied once; no-default question FAILED and task NEEDS_OWNER.",
+    "artifactRefs": [],
+    "limitations": []
+  },
+  {
+    "caseId": "P2-A01.T05",
+    "taskId": "P2-A01",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "cac9a55c9a43f9a8f6a8b940cd53d2bf1ca76e0c",
+    "assessedAt": "2026-10-20T11:58:13.458228+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia (local)",
+      "mpc": "local 3-node MPCium 90e3ee3 where noted",
+      "qualificationOnly": true
+    },
+    "command": "./scripts/pnpm.sh test:db",
+    "exitCode": 0,
+    "expected": "Restart while AWAITING_AGENT resumes same question",
+    "observed": "Re-recording the same question is a no-op (one row, one event).",
+    "artifactRefs": [],
+    "limitations": []
+  },
+  {
+    "caseId": "P2-A01.T06",
+    "taskId": "P2-A01",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "cac9a55c9a43f9a8f6a8b940cd53d2bf1ca76e0c",
+    "assessedAt": "2026-10-20T11:58:13.458228+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia (local)",
+      "mpc": "local 3-node MPCium 90e3ee3 where noted",
+      "qualificationOnly": true
+    },
+    "command": "./scripts/pnpm.sh test:db",
+    "exitCode": 0,
+    "expected": "Other task/read-only token 403",
+    "observed": "Read-only, other-task run token and owner JWT 403 on next and answer.",
+    "artifactRefs": [],
+    "limitations": []
+  },
+  {
+    "caseId": "P2-A01.T07",
+    "taskId": "P2-A01",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "cac9a55c9a43f9a8f6a8b940cd53d2bf1ca76e0c",
+    "assessedAt": "2026-10-20T11:58:13.458228+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia (local)",
+      "mpc": "local 3-node MPCium 90e3ee3 where noted",
+      "qualificationOnly": true
+    },
+    "command": "./scripts/pnpm.sh test:db",
+    "exitCode": 0,
+    "expected": "Unknown provider/asset/template INTENT_INVALID, no draft",
+    "observed": "Three invalid compiler outputs 422 with no row; valid stored; agent token 403; no compiler 503.",
+    "artifactRefs": [],
+    "limitations": [
+      "Person4 compiler not implemented; test uses an injected fixture compiler."
+    ]
+  }
+]

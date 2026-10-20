@@ -3,6 +3,7 @@ import { Pool } from "pg";
 import { connectChain, systemClock } from "@mandate/platform";
 import { DeploymentManifestSchema } from "@mandate/schema";
 import { PolicyService, rpcChainReader } from "./authorize.js";
+import { loadScreening } from "./screening.js";
 import { createPolicyServer } from "./server.js";
 
 const env = process.env;
@@ -31,8 +32,15 @@ const chain = env.POLICY_RPC_URL
   ? rpcChainReader(await connectChain(env.POLICY_RPC_URL, 84532))
   : null;
 const token = (await readFile(env.POLICY_INTERNAL_TOKEN_FILE, "utf8")).trim();
+const screening = manifest
+  ? await loadScreening(
+      env.SCREENING_LIST_FILE ??
+        new URL("../rules/demo-screening-v1.json", import.meta.url).pathname,
+      manifest.screening.listHash,
+    )
+  : new Set<string>();
 const app = createPolicyServer(
-  new PolicyService(database, manifest, chain, systemClock),
+  new PolicyService(database, manifest, chain, systemClock, screening),
   token,
 );
 app.addHook("onClose", () => database.end());

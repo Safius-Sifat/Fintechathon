@@ -1,5 +1,11 @@
 {
- "extends": "../../../../tsconfig.base.json",
- "compilerOptions": {"strict":true,"noUncheckedIndexedAccess":true,"exactOptionalPropertyTypes":true,"noImplicitOverride":true,"target":"ES2022"},
- "include": ["./*.ts"]
+  "extends": "../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitOverride": true,
+    "target": "ES2022"
+  },
+  "include": ["./*.ts"]
 }

@@ -269,3 +269,44 @@ test("P2-02.T05 forged owner or provider signatures, missing manifest and unauth
     await app.close();
   });
 });
+
+test("P2-A03.T01 recipients on the screening list or wallet blocklist deny SCREENING_HIT before any authorizer signature", async () => {
+  await withFixture(async (pool, f) => {
+    const screened = await new PolicyService(
+      pool,
+      f.manifest,
+      freshChain(),
+      () => now,
+      new Set([f.provider.address.toLowerCase()]),
+    ).check({
+      actionId: f.actionId,
+      attemptId: f.attemptId,
+      message: f.message,
+    });
+    assert.equal(screened.allowed, false);
+    assert.ok(screened.ruleIds.includes("SCREENING_HIT"));
+    await pool.query(
+      "INSERT INTO wallet_policies(wallet_id,version,policy,lists,tx_hash,created_at) VALUES($1,1,$2,$3,$4,$5)",
+      [
+        f.walletId,
+        { reviewThreshold: "500000" },
+        {
+          assetCaps: [{ asset: f.permit.asset, perTx: "400000" }],
+          allowlist: [],
+          blocklist: [f.provider.address],
+          templates: [],
+        },
+        "0x" + "ab".repeat(32),
+        now,
+      ],
+    );
+    assert.ok((await check(pool, f)).ruleIds.includes("SCREENING_HIT"));
+  });
+  const { loadScreening } = await import("../../src/screening.js");
+  const path = new URL("../../rules/demo-screening-v1.json", import.meta.url)
+    .pathname;
+  await assert.rejects(
+    loadScreening(path, "0x" + "00".repeat(32)),
+    /hash does not match/,
+  );
+});
