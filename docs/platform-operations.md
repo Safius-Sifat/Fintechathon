@@ -51,3 +51,113 @@ The database runner creates a temporary database/password/TLS certificate, runs 
 - Actual Base Sepolia action/payment/admin/owner-transfer and active Permit/token logout/stop checks remain unexecuted by this change. `/readyz` continues to return 503; fixture parity does not satisfy it.
 
 No migration or runtime behavior changed here. Existing fresh-start/migration and forward-only recovery instructions remain in [SETUP.md](SETUP.md) and [OWNER-SESSIONS.md](api/OWNER-SESSIONS.md). No deployment, funding, signing, backup restoration, Docker startup or chain transaction was performed for this handoff.
+
+## Local three-node MPC qualification — 2026-10-20
+
+This milestone supplies Go adapter/authorizer boundary packages and an isolated
+qualification command. Financial signing readiness remains unavailable until the
+immutable Action/Permit/Invoice/reservation store, durable attempt journal,
+independent RPC financial policy and worker integration exist. No signing HTTP
+endpoint is enabled. The qualification fixture source is explicitly disposable;
+it consumes only checked-in Action vectors recomputed by the authoritative shared
+TypeScript helper. Its leading-zero digest is a separately labelled raw32 test
+vector, not a new valid on-chain Action.
+
+From any working directory, set `REPO` to this checkout's absolute path:
+
+```sh
+REPO=/absolute/path/to/fintechathon
+"$REPO/infra/scripts/build-mpc.sh"
+export MPC_NODE_IMAGE=sha256:ACTUAL_IMAGE_ID_PRINTED_ABOVE
+export MPC_PRIVATE_DIR=/opt/mandate/private/mpc
+python3 "$REPO/infra/scripts/setup-mpc-qualification.py"
+"$REPO/infra/scripts/qualify-mpc.sh"
+```
+
+On macOS use an absent directory below `/private/tmp` instead of `/opt`. Setup
+refuses existing paths and never overwrites identities. It invokes the pinned
+`mpcium-cli generate-peers -n 3 --output ...`, `generate-identity --node nodeN
+--peers ... --output-dir ... --encrypt`, `generate-initiator --node-name
+mandate-adapter-a --output-dir ... --encrypt`, and `generate-authorizer --name
+mandate-policy-v1 --output-dir ... --encrypt`. CLI password prompts use a private
+PTY; passwords and encrypted identity files remain outside Git and image layers.
+Each node sees only its own encrypted private identity and all peers' public
+identity files; distinct Docker share volumes contain encrypted Badger data and
+backups. Every node uses the same generated32-byte chain code and threshold1,
+with keygen/sign concurrency1 and mandatory authorizer `mandate-policy-v1`.
+
+The image builds the untouched lock commit with Go1.25.8, `CGO_ENABLED=0`, Linux
+and the Docker engine's architecture. The pinned Golang build/runtime base and
+NATS/Consul image digests are in `compose.mpcium.yaml` and `Dockerfile.mpcium`.
+Build inputs contain only the compiled node binary. Retain upstream Apache2.0
+LICENSE; this integration is not a cryptographic audit.
+
+The dedicated bridge has no node host ports. NATS14222 and Consul18500 bind only
+127.0.0.1. NATS requires a generated local certificate plus username/password;
+actual wrong-credential denial is tested. Consul uses ACL default deny and the
+transport check asserts anonymous read/write/service-registration denial and
+encoded traversal rejection. This isolated qualification currently uses its own
+bootstrap ACL token for node KV operations; split administrative/bootstrap and
+restricted node tokens before production deployment. TLS is exercised for NATS;
+Consul HTTP is limited to the dedicated bridge and host loopback. Local transport
+certificates expire after two days. Host disk encryption/firewall and public
+interface reachability must be qualified on the actual Azure host.
+
+Consul1.21.5 rejected MPCium's scoped `threshold_keyinfo/CLIENT:WALLET` keys with
+HTTP500; the first failure is preserved. The compatible pinned Consul1.22.7 keeps
+`disable_kv_key_validation=false`. Its official `validateKVKey` accepts a colon
+and rejects encoded traversal. No MPCium source or cryptographic code was
+modified. See [HashiCorp KV docs](https://developer.hashicorp.com/consul/docs/automate/kv/store)
+and [v1.22.7 source](https://github.com/hashicorp/consul/blob/v1.22.7/agent/kvs_endpoint.go).
+Current Fystack installation docs show threshold2, while its security docs say
+t+1. At pinned commit90e3ee3, `sign_consumer.go` requires configured threshold+1
+and `config.prod.yaml.template` uses1. Local qualification uses1 and reports
+actual pair/single results; it does not import current docs' example value.
+
+`qualify-mpc.sh` checks the source pin/configuration, builds the upstream-client
+CLI, subscribes before publish, uses stable client ID `mandate-adapter-a` with an
+exclusive local process lock, and runs twenty fresh signatures, all pairs, each
+single signer, one/two outages, restart and missing/wrong/mutated authorizations.
+Wrong/late result IDs and signatures are covered in Go tests. All results bind
+wallet+attempt+network and recover the registered executor on the exact stored32
+bytes; upstream results do not carry a digest/keyVersion, so immutable attempt
+lookup and cryptographic recovery supply that binding. Fresh MPC signatures need
+not equal the fixed-account fixture bytes. Production `Store.Begin` must enforce
+unique attempts and durable executor exclusion; timeout remains SIGNING_UNKNOWN,
+with reservation retained until reconciliation. The adapter exposes only
+`SignAction(actionId)` to its application caller.
+
+Raw CLI output goes into private run directories. Public reports contain only
+public vectors, IDs, timings and hashes. The script restores all three signers in
+its dedicated project even when a case fails; it does not remove volumes. To stop
+only this project, preserve the exported variables and run:
+
+```sh
+docker compose -f "$REPO/infra/release/compose.mpcium.yaml" down
+```
+
+Do not use `down -v` unless deliberately destroying these disposable shares.
+These qualification identities/executor are test material and must never be
+registered for a funded production wallet. The local Docker engine has about8GiB
+and10CPUs; the actual Azure2CPU/4GiB full-stack fit and public Base Sepolia outage
+payment drill remain unqualified. No publisher key was accessed and no transaction
+was broadcast. A VM administrator remains able to access all shares and the
+policy key; this single-host PoC does not resist host compromise.
+
+Fast CI, after `build-mpc.sh` or an exact verified upstream checkout and normal
+workspace installation:
+
+```sh
+GOTOOLCHAIN=go1.25.8 go -C "$REPO/services/mpc-boundary" test -race -count=1 ./...
+GOTOOLCHAIN=go1.25.8 go -C "$REPO/services/mpc-adapter" test -race -count=1 ./...
+GOTOOLCHAIN=go1.25.8 go -C "$REPO/services/mpc-authorizer" test -race -count=1 ./...
+GOTOOLCHAIN=go1.25.8 go -C "$REPO/services/mpc-boundary" vet ./...
+GOTOOLCHAIN=go1.25.8 go -C "$REPO/services/mpc-adapter" vet ./...
+GOTOOLCHAIN=go1.25.8 go -C "$REPO/services/mpc-authorizer" vet ./...
+"$REPO/scripts/pnpm.sh" --filter @mandate/schema exec tsc --noEmit -p "$REPO/services/mpc-adapter/internal/qualification/tsconfig.json"
+docker compose -f "$REPO/infra/release/compose.mpcium.yaml" config --quiet
+```
+
+The compose check needs valid `MPC_PRIVATE_DIR` and immutable `MPC_NODE_IMAGE`
+values but starts nothing. Real DKG is the separate explicit qualification script;
+fast unit CI cannot establish financial or public-chain readiness.
