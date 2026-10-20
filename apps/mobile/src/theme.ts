@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import {
+  Platform,
   StyleSheet,
   useColorScheme,
   type ImageStyle,
@@ -72,7 +73,7 @@ export const touchTarget = 48;
 export const fonts = {
   serif: "Newsreader_500Medium",
   serifBold: "Newsreader_600SemiBold",
-  mono: "monospace",
+  mono: Platform.select({ ios: "Menlo", default: "monospace" }),
 } as const;
 
 export const type = {

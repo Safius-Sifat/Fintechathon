@@ -1,3 +1,7 @@
+import type { Address } from "viem";
+import { updateDraft } from "../state/sendDraft";
+import { useDraftContext } from "../state/useSendDraft";
+import { parseScan } from "../wallet/core";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import {
   CameraView,
@@ -52,6 +56,7 @@ export function ScanScreen({ navigation }: Props) {
   }, [getPermission]);
 
   const close = () => navigation.goBack();
+  const context = useDraftContext();
 
   if (!permission) {
     return (
@@ -60,7 +65,16 @@ export function ScanScreen({ navigation }: Props) {
       </Screen>
     );
   }
-  if (permission.granted) return <Scanner onClose={close} />;
+  if (permission.granted)
+    return (
+      <Scanner
+        onClose={close}
+        onSend={(address) => {
+          updateDraft(context, { recipient: address });
+          navigation.replace("Send");
+        }}
+      />
+    );
 
   if (permission.status === "undetermined") {
     return (
@@ -150,11 +164,18 @@ interface ScanResult {
   sample: boolean;
 }
 
-function Scanner({ onClose }: { onClose: () => void }) {
+function Scanner({
+  onClose,
+  onSend,
+}: {
+  onClose: () => void;
+  onSend: (address: Address) => void;
+}) {
   const colors = useColors();
   const styles = useStyles();
   const insets = useSafeAreaInsets();
   const [scanned, setScanned] = useState<ScanResult | null>(null);
+  const parsed = scanned && !scanned.sample ? parseScan(scanned.text) : null;
 
   const onScanned = (result: BarcodeScanningResult) =>
     setScanned({ text: result.data, sample: false });
@@ -232,11 +253,21 @@ function Scanner({ onClose }: { onClose: () => void }) {
               {scanned.text}
             </Text>
           </ScrollView>
+          {parsed ? (
+            <PrimaryButton
+              label={
+                parsed.wrongChain ? "Wrong network" : "Send to this address"
+              }
+              disabled={parsed.wrongChain}
+              onPress={() => onSend(parsed.address)}
+            />
+          ) : null}
           <View style={styles.notice}>
             <Icon name="information-outline" size={20} color={colors.ink2} />
             <Text style={styles.noticeText}>
-              Reading payment requests is not available yet. Nothing was paid,
-              sent or saved.
+              {parsed?.wrongChain
+                ? "This code is for another network. Sending there from Base Sepolia would lose the funds."
+                : "Scanning never pays or signs anything. Nothing was sent or saved."}
             </Text>
           </View>
           <PrimaryButton

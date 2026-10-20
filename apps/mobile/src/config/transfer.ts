@@ -3,7 +3,7 @@
 // agent wallet and ends its active permissions.
 
 export type TransferSource = "personal" | "agent";
-export type TransferAsset = "ETH" | "DemoUSD";
+export type TransferAsset = "DemoUSD" | "ETH" | "USDC";
 
 export const SOURCE_LABELS: Record<TransferSource, string> = {
   personal: "Personal account",
