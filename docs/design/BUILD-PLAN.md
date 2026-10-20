@@ -18,3 +18,10 @@ Rules for every PR: Conventional Commits, no co-author trailer, `make check-mobi
 | 9 | Icon and polish | Export the seal "M" icon, small-phone scroll checks, accessibility sizes, dark mode pass. | Checked on device or simulator; limits stated. |
 
 Order: 0, 1, 2, 3 are independent of backend work and come first. 5 to 8 depend on Person 2, 3 and 4 deliverables; coordinate through Person 1 before building them.
+
+## Status (one branch, `feat/mobile-tokens-fonts`)
+Built: design tokens and bundled Newsreader serif (steps 1), the seal component and redesigned Welcome (2, partly), fourth Agents tab with explicit "not available yet" states (4), seal app icon (9, partly). Existing screens (Home, Setup, Settings and others) pick up the new tokens.
+
+Not built, because the capability behind each does not exist yet (`preview` flags in `apps/mobile/src/config/capabilities.ts` are all false, and the repo rules forbid fake results): wallet creation and recovery screens (need the native owner-wallet module), agent setup, run and stop screens (need the Mandate service, signing and the agent wallet), proof screens (need the verifier). Their designs are in `docs/design/source/`. Build each with its capability.
+
+Also not done: dark mode (components read static colours), Android adaptive icon, a pass on every existing screen against the mockups.
