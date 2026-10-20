@@ -1,6 +1,10 @@
 import { Card, DetailRow, SectionTitle } from "../components/Card";
 import { CapabilityRow } from "../components/CapabilityRow";
 import { Screen } from "../components/Screen";
+import { Row, Rows } from "../components/blocks";
+import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type { RootStackParamList } from "../navigation/RootNavigator";
 import {
   connectionCapabilities,
   securityCapabilities,
@@ -23,6 +27,8 @@ const NETWORK_ROW: Capability = {
 
 export function SettingsScreen() {
   const nativeModule = nativeModuleCapability(useNativeModuleState());
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   return (
     <Screen
       title="Settings"
@@ -47,6 +53,19 @@ export function SettingsScreen() {
           <CapabilityRow key={capability.id} capability={capability} />
         ))}
       </Card>
+
+      {__DEV__ ? (
+        <>
+          <SectionTitle>Development</SectionTitle>
+          <Rows>
+            <Row
+              label="Design preview"
+              detail="Sample-data screens for review"
+              onPress={() => navigation.navigate("PreviewIndex")}
+            />
+          </Rows>
+        </>
+      ) : null}
 
       <SectionTitle>About</SectionTitle>
       <Card>

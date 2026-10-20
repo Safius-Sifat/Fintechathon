@@ -37,5 +37,5 @@ const styles = StyleSheet.create({
     backgroundColor: colors.personal,
   },
   text: { ...type.label, color: colors.ink },
-  testnet: { ...type.label, color: colors.agent },
+  testnet: { ...type.label, color: colors.textMuted },
 });

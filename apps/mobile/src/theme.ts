@@ -1,53 +1,53 @@
-// Visual direction: soft light wallet UI (cool off-white canvas with blue and
-// peach glows, white cards, dark navy hero, tinted icon tiles). Personal =
-// blue, Agent = amber; the two are never mixed in one surface.
+// Visual direction: calm instrument. Cool grey ground, ink text, hairline
+// rules, and one wax-red accent that means "signed by you". The accent is
+// never used for danger. See docs/design/DIRECTION.md.
 
 export const colors = {
-  background: "#F4F6FA",
-  surface: "#FFFFFF",
-  surfaceMuted: "#EEF1F6",
-  hairline: "rgba(15, 23, 42, 0.07)",
-  ink: "#0F172A",
-  text: "#0F172A",
-  textMuted: "#5B6475",
-  textSubtle: "#8A93A3",
-  textDisabled: "#9AA3B2",
-  onDark: "#FFFFFF",
-  onDarkMuted: "rgba(255, 255, 255, 0.68)",
-  onDarkDisabled: "rgba(255, 255, 255, 0.45)",
-  heroFill: "rgba(255, 255, 255, 0.10)",
-  heroLine: "rgba(255, 255, 255, 0.14)",
-  personal: "#2F6BDF",
-  agent: "#C2620E",
-  ok: "#1E8A4C",
-  stop: "#C23B33",
+  ground: "#E8ECEB",
+  raised: "#F4F6F5",
+  ink: "#14191C",
+  ink2: "#454E54",
+  ink3: "#5A646A",
+  rule: "#C6CDCF",
+  accent: "#8F2A2E",
+  waxTint: "#D9C2C3",
+  onInk: "#F4F6F5",
+  onAccent: "#F4F6F5",
+  // Aliases used by existing components; migrate to the names above.
+  background: "#E8ECEB",
+  surface: "#F4F6F5",
+  surfaceMuted: "#DDE3E2",
+  hairline: "#C6CDCF",
+  text: "#14191C",
+  textMuted: "#454E54",
+  textSubtle: "#5A646A",
+  textDisabled: "#6E787E",
+  onDark: "#F4F6F5",
+  onDarkMuted: "rgba(244, 246, 245, 0.72)",
+  onDarkDisabled: "rgba(244, 246, 245, 0.5)",
+  heroFill: "rgba(244, 246, 245, 0.10)",
+  heroLine: "rgba(244, 246, 245, 0.18)",
+  personal: "#14191C",
+  agent: "#8F2A2E",
+  ok: "#14191C",
+  stop: "#14191C",
 } as const;
 
-// Icon tile tones (background, glyph).
+// Icon tile tones. The design uses one neutral tile, so every tone matches.
+const neutralTile = { bg: "#DDE3E2", fg: "#14191C" } as const;
 export const tones = {
-  blue: { bg: "#E6EEFF", fg: "#2F6BDF" },
-  amber: { bg: "#FFEEDD", fg: "#C2620E" },
-  green: { bg: "#E2F5EA", fg: "#1E8A4C" },
-  violet: { bg: "#EEE9FF", fg: "#6A4BD8" },
-  slate: { bg: "#EAEEF4", fg: "#475569" },
+  blue: neutralTile,
+  amber: neutralTile,
+  green: neutralTile,
+  violet: neutralTile,
+  slate: neutralTile,
 } as const;
 
 export type Tone = keyof typeof tones;
 
-export const gradients = {
-  // Ambient canvas glows behind every screen.
-  canvas:
-    "radial-gradient(circle at 0% 0%, rgba(140, 178, 255, 0.40) 0%, rgba(140, 178, 255, 0) 60%), " +
-    "radial-gradient(circle at 100% 12%, rgba(255, 196, 148, 0.38) 0%, rgba(255, 196, 148, 0) 55%)",
-  hero:
-    "radial-gradient(circle at 100% 0%, rgba(120, 160, 255, 0.35) 0%, rgba(120, 160, 255, 0) 55%), " +
-    "linear-gradient(135deg, #22304F 0%, #121A2E 55%, #0B1120 100%)",
-} as const;
-
 export const shadows = {
-  card: "0px 6px 18px rgba(15, 23, 42, 0.06)",
-  hero: "0px 12px 28px rgba(15, 23, 42, 0.22)",
-  bar: "0px -4px 16px rgba(15, 23, 42, 0.05)",
+  card: "0px 1px 2px rgba(20, 25, 28, 0.06)",
+  bar: "0px -1px 0px rgba(20, 25, 28, 0.08)",
 } as const;
 
 export const space = {
@@ -64,22 +64,48 @@ export const radius = {
   sm: 8,
   md: 12,
   tile: 14,
-  lg: 20,
-  hero: 24,
+  lg: 26,
+  hero: 27,
   pill: 999,
 } as const;
 
 // Minimum touch target (Android accessibility guidance: 48dp).
 export const touchTarget = 48;
 
+// Newsreader is bundled (App.tsx loads it) so the serif voice is the same on
+// Android and iOS. Mono is the platform monospace.
 export const fonts = {
+  serif: "Newsreader_500Medium",
+  serifBold: "Newsreader_600SemiBold",
   mono: "monospace",
 } as const;
 
 export const type = {
-  title: { fontSize: 30, lineHeight: 36, fontWeight: "700" },
-  hero: { fontSize: 28, lineHeight: 34, fontWeight: "700" },
-  heading: { fontSize: 17, lineHeight: 22, fontWeight: "700" },
+  display: {
+    fontFamily: fonts.serifBold,
+    fontSize: 56,
+    lineHeight: 60,
+    letterSpacing: -1.5,
+  },
+  title: {
+    fontFamily: fonts.serifBold,
+    fontSize: 38,
+    lineHeight: 42,
+    letterSpacing: -0.9,
+  },
+  hero: {
+    fontFamily: fonts.serifBold,
+    fontSize: 28,
+    lineHeight: 32,
+    letterSpacing: -0.6,
+  },
+  voice: {
+    fontFamily: fonts.serif,
+    fontSize: 22,
+    lineHeight: 27,
+    letterSpacing: -0.4,
+  },
+  heading: { fontSize: 17, lineHeight: 22, fontWeight: "600" },
   body: { fontSize: 15, lineHeight: 21, fontWeight: "400" },
   bodyStrong: { fontSize: 15, lineHeight: 21, fontWeight: "600" },
   small: { fontSize: 13, lineHeight: 18, fontWeight: "400" },
