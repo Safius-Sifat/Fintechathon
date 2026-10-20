@@ -197,8 +197,9 @@ CREATE TABLE transactions (
 );
 -- Replacement keeps nonce; every hash in a nonce lineage is retained.
 CREATE INDEX transactions_lane_nonce ON transactions(sender, nonce);
-CREATE UNIQUE INDEX transactions_one_live_per_nonce ON transactions(sender, nonce)
-  WHERE state IN ('JOURNALED','BROADCAST','UNKNOWN','INCLUDED','FINALIZED');
+-- One original per sender nonce; fee replacements reference it and keep its nonce.
+CREATE UNIQUE INDEX transactions_one_original_per_nonce ON transactions(sender, nonce)
+  WHERE replaces IS NULL;
 
 CREATE TABLE jobs (
   id uuid PRIMARY KEY,

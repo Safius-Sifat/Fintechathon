@@ -74,7 +74,7 @@ export async function readWallet(
   executor: Address,
   assets: readonly { address: Address; symbol: string }[],
 ): Promise<WalletChainState> {
-  const blockNumber = await client.getBlockNumber();
+  const blockNumber = await client.getBlockNumber({ cacheTime: 0 });
   const read = <T>(functionName: string, args: readonly unknown[] = []) =>
     client.readContract({
       address: wallet,
