@@ -3,11 +3,12 @@ import { Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Icon, type IconName } from "../components/Icon";
 import {
+  makeStyles,
+  radius,
   shadows,
   space,
   touchTarget,
   type,
-  makeStyles,
   useColors,
 } from "../theme";
 
@@ -17,8 +18,8 @@ export interface TabMeta {
   iconSelected: IconName;
 }
 
-// Plain bottom bar: outline icons with labels; the selected tab switches to a
-// filled glyph and dark ink with a bold label.
+// Floating pill bar: outline icons with labels; the selected tab sits on a
+// soft pill and its label turns to full ink.
 export function TabBar({
   state,
   navigation,
@@ -29,71 +30,79 @@ export function TabBar({
   const insets = useSafeAreaInsets();
   return (
     <View
-      accessibilityRole="tablist"
-      style={[styles.bar, { paddingBottom: Math.max(insets.bottom, space.sm) }]}
+      style={[
+        styles.wrap,
+        { paddingBottom: Math.max(insets.bottom, space.md) },
+      ]}
     >
-      {state.routes.map((route, index) => {
-        const selected = state.index === index;
-        const tab = meta[route.name];
-        const color = selected ? colors.ink : colors.ink3;
-        const onPress = () => {
-          const event = navigation.emit({
-            type: "tabPress",
-            target: route.key,
-            canPreventDefault: true,
-          });
-          if (!selected && !event.defaultPrevented) {
-            navigation.navigate(route.name, route.params);
-          }
-        };
-        return (
-          <Pressable
-            key={route.key}
-            accessibilityRole="tab"
-            accessibilityState={{ selected }}
-            accessibilityLabel={tab.label}
-            onPress={onPress}
-            android_ripple={{
-              color: colors.ripple,
-              borderless: true,
-            }}
-            style={styles.item}
-          >
-            <Icon
-              name={selected ? tab.iconSelected : tab.icon}
-              size={24}
-              color={color}
-            />
-            <Text
-              style={[styles.label, { color }, selected && styles.selected]}
-              numberOfLines={1}
-              maxFontSizeMultiplier={1.5}
+      <View accessibilityRole="tablist" style={styles.bar}>
+        {state.routes.map((route, index) => {
+          const selected = state.index === index;
+          const tab = meta[route.name];
+          const color = selected ? colors.ink : colors.ink3;
+          const onPress = () => {
+            const event = navigation.emit({
+              type: "tabPress",
+              target: route.key,
+              canPreventDefault: true,
+            });
+            if (!selected && !event.defaultPrevented) {
+              navigation.navigate(route.name, route.params);
+            }
+          };
+          return (
+            <Pressable
+              key={route.key}
+              accessibilityRole="tab"
+              accessibilityState={{ selected }}
+              accessibilityLabel={tab?.label}
+              onPress={onPress}
+              style={[styles.item, selected && styles.itemSelected]}
             >
-              {tab.label}
-            </Text>
-          </Pressable>
-        );
-      })}
+              <Icon
+                name={selected ? tab!.iconSelected : tab!.icon}
+                size={24}
+                color={color}
+              />
+              <Text
+                style={[
+                  styles.label,
+                  { color },
+                  selected && styles.labelSelected,
+                ]}
+                numberOfLines={1}
+              >
+                {tab?.label}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
     </View>
   );
 }
 
 const useStyles = makeStyles((colors) => ({
+  wrap: { paddingHorizontal: space.lg, backgroundColor: colors.ground },
   bar: {
     flexDirection: "row",
+    alignItems: "center",
+    padding: space.xs,
+    borderRadius: radius.hero + 4,
     backgroundColor: colors.raised,
-    borderTopWidth: 1,
-    borderTopColor: colors.rule,
-    paddingTop: space.sm,
-    boxShadow: shadows.bar,
+    borderWidth: 1,
+    borderColor: colors.rule,
+    boxShadow: shadows.card,
   },
   item: {
     flex: 1,
-    minHeight: touchTarget + space.md,
+    minHeight: touchTarget + space.lg,
     alignItems: "center",
     justifyContent: "center",
     gap: 2,
+    borderRadius: radius.hero,
   },
-  label: { ...type.label, fontWeight: "500" },
-  selected: { fontWeight: "700" },
+  itemSelected: { backgroundColor: colors.tile },
+  label: { ...type.label },
+  labelSelected: { fontWeight: "700" },
 }));

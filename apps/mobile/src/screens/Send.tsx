@@ -1,13 +1,10 @@
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useEffect } from "react";
 import { Text, TextInput, View } from "react-native";
-import { Banner } from "../components/Banner";
-import { OutlineButton, PrimaryButton, TextButton } from "../components/Button";
-import { Card, DetailRow } from "../components/Card";
+import { PrimaryButton } from "../components/Button";
+import { Chips, Keypad } from "../components/blocks";
 import { Icon } from "../components/Icon";
-import { Screen } from "../components/Screen";
-import { Segmented } from "../components/Segmented";
-import { FEE_PAYER, SOURCE_LABELS } from "../config/transfer";
+import { Frame, RoundButton } from "../components/Page";
 import { network } from "../config/network";
 import type { RootStackParamList } from "../navigation/RootNavigator";
 import {
@@ -17,7 +14,7 @@ import {
   type SendDraft,
 } from "../state/sendDraft";
 import { currentDraftContext, useSendDraft } from "../state/useSendDraft";
-import { fonts, radius, space, type, makeStyles, useColors } from "../theme";
+import { fonts, makeStyles, radius, space, type, useColors } from "../theme";
 
 // Send form preview. The fields work locally so the layout can be reviewed,
 // but nothing typed here is checked: there is no balance, fee quote, address
@@ -44,53 +41,31 @@ export function SendScreen({ navigation }: Props) {
   );
 
   return (
-    <Screen
+    <Frame
       title="Send"
-      subtitle={`Send test funds on ${network.name}.`}
       onBack={() => navigation.goBack()}
+      right={
+        <RoundButton
+          icon="qrcode-scan"
+          label="Scan a payment request"
+          onPress={() => navigation.navigate("Scan")}
+        />
+      }
+      footer={
+        <PrimaryButton
+          label="Review"
+          disabled={!canReview}
+          accessibilityHint={
+            canReview
+              ? "Shows the transfer details. Nothing is sent."
+              : "Enter a recipient and an amount first."
+          }
+          onPress={() => navigation.navigate("TransferReview")}
+        />
+      }
     >
-      <Card>
-        <Segmented
-          label="From"
-          options={[
-            { key: "personal", label: SOURCE_LABELS.personal },
-            {
-              key: "agent",
-              label: SOURCE_LABELS.agent,
-              detail: "Not connected",
-            },
-          ]}
-          selected={source}
-          onSelect={(key) => set({ source: key })}
-        />
-        <DetailRow
-          label={source === "personal" ? "Account" : "Agent wallet"}
-          value={source === "personal" ? "No account yet" : "Not connected"}
-          muted
-        />
-        <DetailRow label="Spendable" value="Unavailable" muted />
-        {source === "agent" ? <OwnerTransferNote /> : null}
-      </Card>
-
-      <Card>
-        <Segmented
-          label="Asset"
-          options={[
-            { key: "ETH", label: "ETH" },
-            { key: "DemoUSD", label: "DemoUSD" },
-          ]}
-          selected={asset}
-          onSelect={(key) => set({ asset: key })}
-        />
-        <Text style={styles.caption}>
-          {asset === "ETH"
-            ? "Test ETH on Base Sepolia."
-            : "DemoUSD, Mandate's test token. The network fee is still paid in ETH."}
-        </Text>
-      </Card>
-
-      <Card>
-        <Text style={styles.fieldLabel} nativeID="recipient-label">
+      <View style={styles.toRow}>
+        <Text style={styles.toLabel} nativeID="recipient-label">
           To
         </Text>
         <TextInput
@@ -103,84 +78,47 @@ export function SendScreen({ navigation }: Props) {
           autoCorrect={false}
           autoComplete="off"
           spellCheck={false}
-          style={[styles.input, styles.mono]}
+          style={styles.toInput}
         />
-        <View style={styles.actions}>
-          <OutlineButton
-            label="Scan"
-            icon="qrcode-scan"
-            disabled
-            accessibilityHint="Unavailable. Reading payment requests is not built yet."
-          />
-          <OutlineButton
-            label="Contacts"
-            icon="account-box-outline"
-            disabled
-            accessibilityHint="Unavailable. Contacts are not built yet."
-          />
-        </View>
-        <Text style={styles.caption}>
-          Address checks are not built yet. What you type here is not checked.
+      </View>
+
+      <View style={styles.amountBlock}>
+        <Text
+          style={styles.amount}
+          accessibilityLabel={`Amount ${amount === "" ? "0" : amount} ${asset}`}
+          adjustsFontSizeToFit
+          numberOfLines={1}
+        >
+          {amount === "" ? "0" : amount}
         </Text>
-      </Card>
-
-      <Card>
-        <Text style={styles.fieldLabel} nativeID="amount-label">
-          Amount
+        <Chips
+          options={[
+            { key: "DemoUSD", label: "DemoUSD" },
+            { key: "ETH", label: "ETH" },
+          ]}
+          selected={asset}
+          onSelect={(key) => set({ asset: key })}
+        />
+        <Text style={styles.available}>
+          Available: unavailable. Nothing is checked or sent in this build.
         </Text>
-        <View style={styles.amountRow}>
-          <TextInput
-            accessibilityLabelledBy="amount-label"
-            value={amount}
-            onChangeText={(text) => set({ amount: text })}
-            placeholder="0.0"
-            placeholderTextColor={colors.ink3}
-            keyboardType="decimal-pad"
-            style={[styles.input, styles.amountInput]}
-          />
-          <Text style={styles.assetSuffix}>{asset}</Text>
-        </View>
-        <View style={styles.actions}>
-          <OutlineButton
-            label="Max"
-            icon="arrow-collapse-up"
-            disabled
-            accessibilityHint="Unavailable. The spendable balance is unknown."
-          />
-        </View>
-        <Text style={styles.caption}>
-          The spendable balance is unavailable, and amounts are not checked yet.
-        </Text>
-      </Card>
+      </View>
 
-      <Card>
-        <Text style={styles.fieldLabel}>Network fee</Text>
-        <DetailRow label="Fee" value="Quote unavailable" muted />
-        <DetailRow label="Paid by" value={FEE_PAYER[source]} />
-      </Card>
+      <View style={styles.fromRow}>
+        <Text style={styles.toLabel}>From</Text>
+        <Chips
+          options={[
+            { key: "personal", label: "Personal account" },
+            { key: "agent", label: "Agent wallet" },
+          ]}
+          selected={source}
+          onSelect={(key) => set({ source: key })}
+        />
+      </View>
+      {source === "agent" ? <OwnerTransferNote /> : null}
 
-      <PrimaryButton
-        label="Review"
-        disabled={!canReview}
-        accessibilityHint={
-          canReview
-            ? "Shows the transfer details. Nothing is sent."
-            : "Enter a recipient and an amount first."
-        }
-        onPress={() => navigation.navigate("TransferReview")}
-      />
-      <TextButton
-        label="Discard draft"
-        accessibilityHint="Clears the recipient, amount and choices"
-        onPress={() => clearDraft(context)}
-      />
-
-      <Banner
-        icon="information-outline"
-        title="Not available in this build"
-        body="Balances, fee quotes, address and amount checks, and signing are not built yet. Nothing can be sent."
-      />
-    </Screen>
+      <Keypad value={amount} onChange={(next) => set({ amount: next })} />
+    </Frame>
   );
 }
 
@@ -205,24 +143,45 @@ export function OwnerTransferNote() {
 }
 
 const useStyles = makeStyles((colors) => ({
-  caption: { ...type.small, color: colors.ink2 },
-  fieldLabel: { ...type.heading, color: colors.ink },
-  input: {
+  toRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: space.lg,
+    borderTopWidth: 1,
+    borderTopColor: colors.rule,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.rule,
+    minHeight: 56,
+  },
+  toLabel: { ...type.body, color: colors.ink2 },
+  toInput: {
     ...type.body,
-    minHeight: 52,
-    paddingHorizontal: space.md,
-    paddingVertical: space.sm,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.outline,
-    backgroundColor: colors.raised,
+    flex: 1,
+    fontFamily: fonts.mono,
+    color: colors.ink,
+    paddingVertical: space.md,
+  },
+  fromRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    alignItems: "center",
+    gap: space.md,
+    borderTopWidth: 1,
+    borderTopColor: colors.rule,
+    paddingTop: space.md,
+  },
+  amountBlock: {
+    alignItems: "center",
+    gap: space.md,
+    paddingVertical: space.md,
+  },
+  amount: {
+    fontFamily: fonts.serifBold,
+    fontSize: 72,
+    lineHeight: 80,
     color: colors.ink,
   },
-  mono: { fontFamily: fonts.mono },
-  amountRow: { flexDirection: "row", alignItems: "center", gap: space.md },
-  amountInput: { flex: 1, fontSize: 22, lineHeight: 28 },
-  assetSuffix: { ...type.bodyStrong, color: colors.ink2 },
-  actions: { flexDirection: "row", flexWrap: "wrap", gap: space.sm },
+  available: { ...type.small, color: colors.ink2, textAlign: "center" },
   callout: {
     flexDirection: "row",
     alignItems: "flex-start",

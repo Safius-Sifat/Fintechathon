@@ -164,3 +164,7 @@ Not verified: real findings from the verifier (not built yet), share sheet, expl
 Looked at: Welcome, Setup, Home, Agents, Settings, preview gallery, Fund, Lock, Allowance approval (also at accessibility-large text), Proof, Stop pending, Draft review. All render correctly; rows stack at large text; the pinned footer stays in view.
 Not looked at one by one: the other preview screens (same blocks, typechecked). Not checked: a 375x667 phone (no small simulator installed), Android, VoiceOver and TalkBack, light mode on the new Home after the rewrite, the press-and-hold feel.
 Changed after review: the hold-to-seal control now sits below the terms, so the terms are read before signing.
+
+## Rebuild to the mockups (iOS simulator, light mode)
+The first build kept the old card and icon-tile layouts and only recoloured them, so Welcome, Setup and the wallet screens did not look like the mockups. Rebuilt to the mockup compositions: Welcome (seal with tick ring and stroked M, left-aligned serif headline, hairline rows), Setup, Wallet (account chip, serif headline, three tiles, Agents and Tokens sections), Receive, Send (keypad), Review, Activity (filter chips), Settings and Agents (serif section headings and hairline rows), and the floating pill tab bar. Real values are replaced by honest "Unavailable" and "No wallet yet" states.
+Checked in the simulator: Welcome, Setup, Wallet, Receive, Send, Activity, Settings. Not looked at after the rebuild: Review, Accounts, Agents, Scan, dark mode on the new screens.

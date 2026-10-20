@@ -281,18 +281,28 @@ export function Chips<K extends string>({
 export function GhostButton({
   label,
   onPress,
+  disabled,
 }: {
   label: string;
   onPress?: () => void;
+  disabled?: boolean;
 }) {
   const styles = useStyles();
   return (
     <Pressable
       accessibilityRole="button"
+      accessibilityState={{ disabled: disabled === true }}
+      disabled={disabled}
       onPress={onPress}
-      style={({ pressed }) => [styles.ghost, pressed && styles.pressed]}
+      style={({ pressed }) => [
+        styles.ghost,
+        disabled && styles.ghostDisabled,
+        pressed && styles.pressed,
+      ]}
     >
-      <Text style={styles.ghostLabel}>{label}</Text>
+      <Text style={[styles.ghostLabel, disabled && styles.ghostLabelDisabled]}>
+        {label}
+      </Text>
     </Pressable>
   );
 }
@@ -356,7 +366,193 @@ export function HoldToSeal({
   );
 }
 
+// Serif section heading with an optional action on the right ("See all").
+export function SectionHeading({
+  children,
+  action,
+  onAction,
+}: {
+  children: string;
+  action?: string;
+  onAction?: () => void;
+}) {
+  const styles = useStyles();
+  return (
+    <View style={styles.sectionHead}>
+      <Text style={styles.sectionTitle} accessibilityRole="header">
+        {children}
+      </Text>
+      {action ? (
+        <Pressable
+          accessibilityRole="button"
+          onPress={onAction}
+          hitSlop={8}
+          style={({ pressed }) => pressed && styles.pressed}
+        >
+          <Text style={styles.sectionAction}>{action}</Text>
+        </Pressable>
+      ) : null}
+    </View>
+  );
+}
+
+// Square action tile: icon over a label (Receive, Send, Scan).
+export function ActionTile({
+  icon,
+  label,
+  onPress,
+  disabled,
+}: {
+  icon: IconName;
+  label: string;
+  onPress?: () => void;
+  disabled?: boolean;
+}) {
+  const styles = useStyles();
+  const colors = useColors();
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      accessibilityState={{ disabled: disabled === true }}
+      disabled={disabled}
+      onPress={onPress}
+      style={({ pressed }) => [styles.tile, pressed && styles.pressed]}
+    >
+      <Icon name={icon} size={26} color={disabled ? colors.ink4 : colors.ink} />
+      <Text style={[styles.tileLabel, disabled && { color: colors.ink4 }]}>
+        {label}
+      </Text>
+    </Pressable>
+  );
+}
+
+// Round token mark with a row title, subtitle and a right-hand value.
+export function TokenRow({
+  mark,
+  title,
+  subtitle,
+  value,
+  onPress,
+}: {
+  mark: ReactNode;
+  title: string;
+  subtitle: string;
+  value: string;
+  onPress?: () => void;
+}) {
+  const styles = useStyles();
+  const body = (
+    <View
+      style={styles.tokenRow}
+      accessible
+      accessibilityLabel={`${title}. ${subtitle}. ${value}`}
+    >
+      <View style={styles.tokenMark}>{mark}</View>
+      <View style={styles.rowText}>
+        <Text style={styles.tokenTitle}>{title}</Text>
+        <Text style={styles.rowDetail}>{subtitle}</Text>
+      </View>
+      <Text style={styles.tokenValue}>{value}</Text>
+    </View>
+  );
+  if (!onPress) return body;
+  return (
+    <Pressable accessibilityRole="button" onPress={onPress}>
+      {body}
+    </Pressable>
+  );
+}
+
+// Decimal keypad for amounts. It only edits the text it is given.
+export function Keypad({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (next: string) => void;
+}) {
+  const styles = useStyles();
+  const colors = useColors();
+  const press = (key: string) => {
+    if (key === "back") return onChange(value.slice(0, -1));
+    if (key === "." && (value.includes(".") || value === "")) {
+      return onChange(value === "" ? "0." : value);
+    }
+    if (value === "0" && key !== ".") return onChange(key);
+    onChange(value + key);
+  };
+  const keys = ["1", "2", "3", "4", "5", "6", "7", "8", "9", ".", "0", "back"];
+  return (
+    <View style={styles.keypad}>
+      {keys.map((key) => (
+        <Pressable
+          key={key}
+          accessibilityRole="button"
+          accessibilityLabel={key === "back" ? "Delete" : key}
+          onPress={() => press(key)}
+          style={({ pressed }) => [styles.key, pressed && styles.pressed]}
+        >
+          {key === "back" ? (
+            <Icon name="backspace-outline" size={26} color={colors.ink} />
+          ) : (
+            <Text style={styles.keyText}>{key}</Text>
+          )}
+        </Pressable>
+      ))}
+    </View>
+  );
+}
+
 const useStyles = makeStyles((colors) => ({
+  sectionHead: {
+    flexDirection: "row",
+    alignItems: "baseline",
+    justifyContent: "space-between",
+    marginTop: space.sm,
+  },
+  sectionTitle: { ...type.hero, color: colors.ink },
+  sectionAction: { ...type.body, color: colors.ink2 },
+  tile: {
+    flex: 1,
+    minHeight: 86,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.rule,
+    backgroundColor: colors.raised,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: space.sm,
+  },
+  tileLabel: { ...type.bodyStrong, color: colors.ink },
+  tokenRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: space.md,
+    paddingVertical: space.md,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.rule,
+  },
+  tokenMark: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    borderWidth: 1,
+    borderColor: colors.rule,
+    backgroundColor: colors.raised,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  tokenTitle: { ...type.body, fontSize: 19, color: colors.ink },
+  tokenValue: { ...type.body, fontSize: 19, color: colors.ink2 },
+  keypad: { flexDirection: "row", flexWrap: "wrap" },
+  key: {
+    width: "33.333%",
+    height: 54,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  keyText: { fontSize: 32, color: colors.ink },
   rows: { borderTopWidth: 1, borderTopColor: colors.rule },
   row: {
     flexDirection: "row",
@@ -433,6 +629,8 @@ const useStyles = makeStyles((colors) => ({
     paddingHorizontal: space.xl,
   },
   ghostLabel: { ...type.bodyStrong, fontSize: 16, color: colors.ink },
+  ghostDisabled: { borderColor: colors.rule },
+  ghostLabelDisabled: { color: colors.ink4 },
   hold: { alignItems: "center", gap: space.lg },
   holdButton: {
     alignSelf: "stretch",

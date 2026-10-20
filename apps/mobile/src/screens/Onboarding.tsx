@@ -1,376 +1,117 @@
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
-import type { ReactNode } from "react";
-import {
-  Pressable,
-  ScrollView,
-  Text,
-  View,
-  useWindowDimensions,
-} from "react-native";
+import { ScrollView, Text, View, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Banner } from "../components/Banner";
 import { PrimaryButton, TextButton } from "../components/Button";
-import { Icon, type IconName } from "../components/Icon";
-import { IconTile } from "../components/IconTile";
+import { GhostButton, Note, Row, Rows } from "../components/blocks";
+import { Page } from "../components/Page";
 import { Seal } from "../components/Seal";
-import { StatusTag } from "../components/StatusTag";
 import type { RootStackParamList } from "../navigation/RootNavigator";
-import {
-  radius,
-  shadows,
-  space,
-  touchTarget,
-  type,
-  type Tone,
-  makeStyles,
-  useColors,
-} from "../theme";
+import { makeStyles, space, type } from "../theme";
 
-// First-run flow: Welcome (with how it works) -> Set up your wallet -> app.
-// Creating and restoring a wallet run on native screens that are not built
-// yet, so setup only explains them; nothing here collects recovery words.
+// First-run flow: Welcome -> Set up your wallet -> app. Creating and restoring
+// a wallet run on native screens that are not built yet, so setup only says so;
+// nothing here collects recovery words.
 
 type Props<T extends keyof RootStackParamList> = NativeStackScreenProps<
   RootStackParamList,
   T
 >;
 
-const HOW_IT_WORKS: readonly {
-  icon: IconName;
-  tone: Tone;
-  title: string;
-  body: string;
-}[] = [
-  {
-    icon: "cellphone-key",
-    tone: "blue",
-    title: "Your wallet stays on this phone",
-    body: "Your recovery phrase and keys never leave the device and are never sent to Mandate.",
-  },
-  {
-    icon: "robot-outline",
-    tone: "amber",
-    title: "Agents get a separate wallet",
-    body: "You fund it and approve each task's budget. Your personal funds are never mixed in.",
-  },
-  {
-    icon: "hand-back-left-outline",
-    tone: "green",
-    title: "You can always stop them",
-    body: "Pause an agent or move its funds back yourself, even when the Mandate service is offline.",
-  },
-  {
-    icon: "flask-outline",
-    tone: "violet",
-    title: "Test network only",
-    body: "Mandate runs on Base Sepolia with test funds. Nothing here is real money.",
-  },
-];
+const HOW_IT_WORKS = [
+  "Your wallet stays on this phone",
+  "Agents get a separate wallet",
+  "You can always stop them",
+  "Test network only",
+] as const;
 
 export function WelcomeScreen({ navigation }: Props<"Welcome">) {
   const styles = useStyles();
+  const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
-  const sealSize = Math.min(width - space.xl * 2, 200);
+  const sealSize = Math.min(width - space.xl * 2, 230);
   return (
-    <FlowLayout
-      footer={
-        <>
-          <PrimaryButton
-            label="Get started"
-            onPress={() => navigation.navigate("Setup")}
-          />
-          <TextButton
-            label="I have a recovery phrase"
-            accessibilityHint="Shows how restoring a wallet will work"
-            onPress={() => navigation.navigate("Setup")}
-          />
-        </>
-      }
-    >
-      <View style={styles.sealRow}>
-        <Seal size={sealSize} />
-      </View>
-      <View style={styles.welcomeBrand}>
-        <Text style={styles.welcomeTitle} accessibilityRole="header">
+    <View style={[styles.root, { paddingTop: insets.top }]}>
+      <ScrollView
+        style={styles.flex}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.sealRow}>
+          <Seal size={sealSize} />
+        </View>
+        <Text style={styles.title} accessibilityRole="header">
           Your agent. Your money. Real work.
         </Text>
-        <Text style={styles.welcomeTagline}>Mandate</Text>
+        <Rows>
+          {HOW_IT_WORKS.map((line) => (
+            <Row key={line} label={line} />
+          ))}
+        </Rows>
+        <Note>Preview build. Wallet features are not built yet.</Note>
+      </ScrollView>
+      <View
+        style={[styles.footer, { paddingBottom: insets.bottom + space.lg }]}
+      >
+        <PrimaryButton
+          label="Get started"
+          onPress={() => navigation.navigate("Setup")}
+        />
+        <TextButton
+          label="I have a recovery phrase"
+          accessibilityHint="Shows how restoring a wallet will work"
+          onPress={() => navigation.navigate("Setup")}
+        />
       </View>
-      <Text style={styles.welcomeBody}>
-        A wallet that lives on your phone, and AI agents that spend only within
-        the limits you approve.
-      </Text>
-      <View style={styles.pointList}>
-        {HOW_IT_WORKS.map((point) => (
-          <View
-            key={point.title}
-            style={styles.point}
-            accessible
-            accessibilityLabel={`${point.title}. ${point.body}`}
-          >
-            <IconTile icon={point.icon} tone={point.tone} />
-            <View style={styles.pointText}>
-              <Text style={styles.pointTitle}>{point.title}</Text>
-              <Text style={styles.pointBody}>{point.body}</Text>
-            </View>
-          </View>
-        ))}
-      </View>
-      <Banner
-        icon="information-outline"
-        title="Preview build"
-        body="This describes how the wallet is designed to work. Wallet features are not built yet."
-      />
-    </FlowLayout>
+    </View>
   );
 }
 
 export function SetupScreen({ navigation }: Props<"Setup">) {
   const styles = useStyles();
+  const { width } = useWindowDimensions();
+  const sealSize = Math.min(width - space.xl * 2, 220);
   return (
-    <FlowLayout
-      header={<BackHeader onBack={() => navigation.goBack()} />}
+    <Page
+      title="Set up your wallet"
+      subtitle="The keys stay on this phone. Mandate never sees your recovery phrase."
+      onBack={() => navigation.goBack()}
       footer={
-        <PrimaryButton
-          label="Explore the preview"
-          accessibilityHint="Opens the app without a wallet"
-          onPress={() =>
-            navigation.reset({ index: 0, routes: [{ name: "Tabs" }] })
-          }
-        />
+        <>
+          <PrimaryButton
+            label="Create a new wallet"
+            disabled
+            accessibilityHint="Not available in this build"
+          />
+          <GhostButton label="I have a recovery phrase" disabled />
+          <Note>Preview build. Creating a wallet is not built yet.</Note>
+          <TextButton
+            label="Explore the preview"
+            accessibilityHint="Opens the app without a wallet"
+            onPress={() =>
+              navigation.reset({ index: 0, routes: [{ name: "Tabs" }] })
+            }
+          />
+        </>
       }
     >
-      <StepTitle
-        title="Set up your wallet"
-        subtitle="Both options will run on secure screens of their own. Neither is available in this build."
-      />
-      <SetupOption
-        icon="plus-circle-outline"
-        tone="blue"
-        title="Create a new wallet"
-        body="You get a new 12-word recovery phrase and confirm that you have written it down."
-      />
-      <SetupOption
-        icon="backup-restore"
-        tone="violet"
-        title="Restore a wallet"
-        body="Enter your recovery phrase, and your passphrase if you added one. A different passphrase opens a different wallet."
-      />
-      <View style={styles.notes}>
-        <Text style={styles.notesTitle} accessibilityRole="header">
-          Before you start
-        </Text>
-        <Note
-          icon="pencil-outline"
-          text="Write your recovery phrase on paper. Mandate cannot recover it for you."
-        />
-        <Note
-          icon="alert-outline"
-          text="Anyone who has your phrase can take your funds. Never share it."
-        />
-        <Note
-          icon="lock-outline"
-          text="You will only ever enter the phrase on a protected screen, never in an ordinary text field."
-        />
+      <View style={styles.setupSeal}>
+        <Seal size={sealSize} />
       </View>
-      <Banner
-        icon="information-outline"
-        title="Not available in this build"
-        body="Wallet creation and restore come in a later milestone. Until then you can explore the app without a wallet."
-      />
-    </FlowLayout>
-  );
-}
-
-interface SetupOptionProps {
-  icon: IconName;
-  tone: Tone;
-  title: string;
-  body: string;
-}
-
-// An unavailable choice: rendered as a disabled control so screen readers
-// announce it as a button that cannot be used yet.
-function SetupOption({ icon, tone, title, body }: SetupOptionProps) {
-  const styles = useStyles();
-  return (
-    <Pressable
-      disabled
-      accessibilityRole="button"
-      accessibilityState={{ disabled: true }}
-      accessibilityLabel={`${title}. Not available yet. ${body}`}
-      style={styles.option}
-    >
-      <View style={styles.optionTop}>
-        <IconTile icon={icon} tone={tone} />
-        <StatusTag state="notBuilt" />
-      </View>
-      <Text style={styles.optionTitle}>{title}</Text>
-      <Text style={styles.optionBody}>{body}</Text>
-    </Pressable>
-  );
-}
-
-function Note({ icon, text }: { icon: IconName; text: string }) {
-  const colors = useColors();
-  const styles = useStyles();
-  return (
-    <View style={styles.note}>
-      <Icon name={icon} size={20} color={colors.ink2} />
-      <Text style={styles.noteText}>{text}</Text>
-    </View>
-  );
-}
-
-function StepTitle({ title, subtitle }: { title: string; subtitle: string }) {
-  const styles = useStyles();
-  return (
-    <View style={styles.stepTitle}>
-      <Text style={styles.title} accessibilityRole="header">
-        {title}
-      </Text>
-      <Text style={styles.subtitle}>{subtitle}</Text>
-    </View>
-  );
-}
-
-function BackHeader({ onBack }: { onBack: () => void }) {
-  const colors = useColors();
-  const styles = useStyles();
-  return (
-    <View style={styles.stepHeader}>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel="Back"
-        onPress={onBack}
-        style={({ pressed }) => [styles.back, pressed && styles.pressed]}
-      >
-        <Icon name="chevron-left" size={28} color={colors.ink} />
-      </Pressable>
-    </View>
-  );
-}
-
-interface FlowLayoutProps {
-  header?: ReactNode;
-  footer: ReactNode;
-  children: ReactNode;
-}
-
-// Full-screen flow step: scrolling content on the flat ground with the
-// actions pinned above the bottom inset, so they stay reachable at any text
-// size.
-function FlowLayout({ header, footer, children }: FlowLayoutProps) {
-  const styles = useStyles();
-  const insets = useSafeAreaInsets();
-  return (
-    <View style={[styles.root, { paddingTop: insets.top }]}>
-      {header}
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
-        {children}
-      </ScrollView>
-      <View
-        style={[styles.footer, { paddingBottom: insets.bottom + space.lg }]}
-      >
-        {footer}
-      </View>
-    </View>
+    </Page>
   );
 }
 
 const useStyles = makeStyles((colors) => ({
   root: { flex: 1, backgroundColor: colors.ground },
-  scroll: { flex: 1 },
+  flex: { flex: 1 },
   content: {
     paddingTop: space.lg,
     paddingHorizontal: space.xl,
     paddingBottom: space.xl,
     gap: space.lg,
   },
-  footer: {
-    paddingTop: space.md,
-    paddingHorizontal: space.xl,
-    gap: space.xs,
-  },
-  pressed: { opacity: 0.7 },
-
-  welcomeBrand: { alignItems: "center", gap: space.xs },
-  welcomeTitle: {
-    ...type.title,
-    color: colors.ink,
-    textAlign: "center",
-  },
-  welcomeTagline: {
-    ...type.body,
-    color: colors.ink2,
-    textAlign: "center",
-  },
-  sealRow: { alignItems: "center", paddingTop: space.lg },
-  welcomeBody: {
-    ...type.body,
-    fontSize: 16,
-    lineHeight: 23,
-    color: colors.ink,
-    textAlign: "center",
-    paddingHorizontal: space.sm,
-  },
-
-  stepHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: space.md,
-    paddingTop: space.sm,
-    paddingHorizontal: space.lg,
-  },
-  back: {
-    width: touchTarget,
-    height: touchTarget,
-    borderRadius: touchTarget / 2,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: colors.raised,
-    boxShadow: shadows.card,
-  },
-
-  stepTitle: { gap: space.sm },
+  sealRow: { alignItems: "center", paddingVertical: space.sm },
   title: { ...type.title, color: colors.ink },
-  subtitle: { ...type.body, color: colors.ink2 },
-
-  pointList: {
-    backgroundColor: colors.raised,
-    borderColor: colors.rule,
-    borderWidth: 1,
-    borderRadius: radius.lg,
-    padding: space.lg,
-    gap: space.lg,
-    boxShadow: shadows.card,
-  },
-  point: { flexDirection: "row", alignItems: "flex-start", gap: space.md },
-  pointText: { flex: 1, gap: 2 },
-  pointTitle: { ...type.bodyStrong, color: colors.ink },
-  pointBody: { ...type.small, color: colors.ink2 },
-
-  option: {
-    backgroundColor: colors.raised,
-    borderColor: colors.rule,
-    borderWidth: 1,
-    borderRadius: radius.lg,
-    padding: space.lg,
-    gap: space.sm,
-    boxShadow: shadows.card,
-  },
-  optionTop: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: space.sm,
-  },
-  optionTitle: { ...type.heading, color: colors.ink2 },
-  optionBody: { ...type.small, color: colors.ink2 },
-
-  notes: { gap: space.md, paddingHorizontal: space.xs },
-  notesTitle: { ...type.heading, color: colors.ink },
-  note: { flexDirection: "row", alignItems: "flex-start", gap: space.md },
-  noteText: { ...type.body, color: colors.ink, flex: 1 },
+  footer: { paddingTop: space.md, paddingHorizontal: space.xl, gap: space.xs },
+  setupSeal: { alignItems: "center", paddingTop: space.xxxl },
 }));

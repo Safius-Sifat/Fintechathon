@@ -1,62 +1,59 @@
-import { Card, DetailRow, SectionTitle } from "../components/Card";
-import { CapabilityRow } from "../components/CapabilityRow";
-import { Screen } from "../components/Screen";
-import { Row, Rows } from "../components/blocks";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import type { RootStackParamList } from "../navigation/RootNavigator";
+import { Row, Rows, SectionHeading } from "../components/blocks";
+import { Screen } from "../components/Screen";
+import { statusLabel } from "../components/StatusTag";
 import {
   connectionCapabilities,
   securityCapabilities,
   type Capability,
 } from "../config/capabilities";
 import { network } from "../config/network";
+import type { RootStackParamList } from "../navigation/RootNavigator";
 import {
   nativeModuleCapability,
   useNativeModuleState,
 } from "../state/nativeStatus";
 
-const NETWORK_ROW: Capability = {
-  id: "network",
-  title: network.name,
-  detail: `Chain ID ${network.chainId}${network.isTestnet ? " · Testnet" : ""}`,
-  icon: "access-point-network",
-  tone: "blue",
-  state: "configured",
-};
+function CapabilityRows({ items }: { items: readonly Capability[] }) {
+  return (
+    <Rows>
+      {items.map((c) => (
+        <Row
+          key={c.id}
+          label={c.title}
+          detail={c.detail}
+          value={c.stateLabel ?? statusLabel(c.state)}
+        />
+      ))}
+    </Rows>
+  );
+}
 
 export function SettingsScreen() {
   const nativeModule = nativeModuleCapability(useNativeModuleState());
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   return (
-    <Screen
-      title="Settings"
-      subtitle="What this build can and cannot do. Nothing is marked available until it works."
-    >
-      <SectionTitle>Network</SectionTitle>
-      <Card>
-        <CapabilityRow capability={NETWORK_ROW} />
-      </Card>
+    <Screen title="Settings">
+      <SectionHeading>Security</SectionHeading>
+      <CapabilityRows items={[nativeModule, ...securityCapabilities]} />
 
-      <SectionTitle>Wallet security</SectionTitle>
-      <Card>
-        <CapabilityRow capability={nativeModule} />
-        {securityCapabilities.map((capability) => (
-          <CapabilityRow key={capability.id} capability={capability} />
-        ))}
-      </Card>
+      <SectionHeading>Connections</SectionHeading>
+      <CapabilityRows items={connectionCapabilities} />
 
-      <SectionTitle>Connections</SectionTitle>
-      <Card>
-        {connectionCapabilities.map((capability) => (
-          <CapabilityRow key={capability.id} capability={capability} />
-        ))}
-      </Card>
+      <SectionHeading>Network</SectionHeading>
+      <Rows>
+        <Row
+          label={network.name}
+          detail={`Chain ${network.chainId}${network.isTestnet ? ". Test network only." : ""}`}
+          value="Configured"
+        />
+      </Rows>
 
       {__DEV__ ? (
         <>
-          <SectionTitle>Development</SectionTitle>
+          <SectionHeading>Development</SectionHeading>
           <Rows>
             <Row
               label="Design preview"
@@ -67,11 +64,11 @@ export function SettingsScreen() {
         </>
       ) : null}
 
-      <SectionTitle>About</SectionTitle>
-      <Card>
-        <DetailRow label="Build" value="Development preview" />
-        <DetailRow label="Milestone" value="P3-01 checkpoint 1" />
-      </Card>
+      <SectionHeading>About</SectionHeading>
+      <Rows>
+        <Row label="Build" value="Development preview" />
+        <Row label="Milestone" value="P3-01 checkpoint 1" />
+      </Rows>
     </Screen>
   );
 }

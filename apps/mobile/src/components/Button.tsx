@@ -21,7 +21,7 @@ interface PrimaryButtonProps {
 // Full-width dark pill for the main action of a flow step.
 export function PrimaryButton({
   label,
-  icon = "arrow-right",
+  icon,
   disabled = false,
   accessibilityHint,
   onPress,
@@ -43,8 +43,8 @@ export function PrimaryButton({
         pressed && styles.pressed,
       ]}
     >
+      {icon ? <Icon name={icon} size={20} color={fg} /> : null}
       <Text style={[styles.primaryLabel, { color: fg }]}>{label}</Text>
-      <Icon name={icon} size={20} color={fg} />
     </Pressable>
   );
 }
