@@ -1,0 +1,43 @@
+name: mandate-mpc-qualification
+x-node: &node
+  image: ${MPC_NODE_IMAGE:?run pinned build script first}
+  working_dir: /app
+  entrypoint: [mpcium]
+  networks: [mpc]
+  restart: "no"
+  stop_grace_period: 20s
+services:
+  nats:
+    image: nats:2.11.8-alpine@sha256:71092f77d707a4a81b12aca5096d6b2d2e07ad16aa57c84066940a17af74f61a
+    user: "0:0"
+    command: [-c, /private/nats.conf]
+    ports: ["127.0.0.1:14222:4222"]
+    volumes: ["${MPC_PRIVATE_DIR:?required}/nats.conf:/private/nats.conf:ro", "${MPC_PRIVATE_DIR}/tls/runtime:/tls:ro", "nats-data:/data"]
+    networks: [mpc]
+  consul:
+    image: hashicorp/consul:1.22.7@sha256:a230dcea0bb107bd7958a912d1429fb7f9d399637de7ffb814b34412b9e8c543
+    command: [agent, -config-file=/private/consul.hcl]
+    ports: ["127.0.0.1:18500:8500"]
+    volumes: ["${MPC_PRIVATE_DIR}/consul.hcl:/private/consul.hcl:ro", "consul-data:/consul/data"]
+    networks: [mpc]
+  node0:
+    <<: *node
+    command: [start, --name, node0, --config, /app/config.json, --peers, /app/peers.json, --decrypt-private-key, --identity-password-file, /app/identity-password, --password-file, /app/db-password]
+    volumes: ["${MPC_PRIVATE_DIR}/node0:/app:ro", "${MPC_PRIVATE_DIR}/tls/runtime:/tls:ro", "node0-share:/shares"]
+  node1:
+    <<: *node
+    command: [start, --name, node1, --config, /app/config.json, --peers, /app/peers.json, --decrypt-private-key, --identity-password-file, /app/identity-password, --password-file, /app/db-password]
+    volumes: ["${MPC_PRIVATE_DIR}/node1:/app:ro", "${MPC_PRIVATE_DIR}/tls/runtime:/tls:ro", "node1-share:/shares"]
+  node2:
+    <<: *node
+    command: [start, --name, node2, --config, /app/config.json, --peers, /app/peers.json, --decrypt-private-key, --identity-password-file, /app/identity-password, --password-file, /app/db-password]
+    volumes: ["${MPC_PRIVATE_DIR}/node2:/app:ro", "${MPC_PRIVATE_DIR}/tls/runtime:/tls:ro", "node2-share:/shares"]
+networks:
+  mpc:
+    driver: bridge
+volumes:
+  nats-data:
+  consul-data:
+  node0-share:
+  node1-share:
+  node2-share:

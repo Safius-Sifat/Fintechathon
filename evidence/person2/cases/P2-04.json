@@ -1,0 +1,186 @@
+[
+  {
+    "caseId": "P2-04.T01",
+    "taskId": "P2-04",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "cf0c61eb367d7bb2c276faf0d280b0c094880925",
+    "assessedAt": "2026-10-20T11:27:28.615775+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "node": "22.23.3 (pinned)",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia 84532 at latest block (local, no public transaction)",
+      "qualificationOnly": true
+    },
+    "command": "./scripts/pnpm.sh test:db",
+    "exitCode": 0,
+    "expected": "Race for last 500000 with 350000 each: one admitted",
+    "observed": "10 rounds: exactly one ADMITTED, one DAILY_CAP; included+open never exceeds cap.",
+    "artifactRefs": [],
+    "limitations": []
+  },
+  {
+    "caseId": "P2-04.T02",
+    "taskId": "P2-04",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "cf0c61eb367d7bb2c276faf0d280b0c094880925",
+    "assessedAt": "2026-10-20T11:27:28.615775+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "node": "22.23.3 (pinned)",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia 84532 at latest block (local, no public transaction)",
+      "qualificationOnly": true
+    },
+    "command": "./scripts/pnpm.sh test:db",
+    "exitCode": 0,
+    "expected": "Crash at each boundary: one action, original bytes reused",
+    "observed": "Fork: crash after journal, after broadcast, after inclusion rebroadcast identical bytes; value moved once; nonce advanced once.",
+    "artifactRefs": [],
+    "limitations": []
+  },
+  {
+    "caseId": "P2-04.T03",
+    "taskId": "P2-04",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "cf0c61eb367d7bb2c276faf0d280b0c094880925",
+    "assessedAt": "2026-10-20T11:27:28.615775+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "node": "22.23.3 (pinned)",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia 84532 at latest block (local, no public transaction)",
+      "qualificationOnly": true
+    },
+    "command": "./scripts/pnpm.sh test:db",
+    "exitCode": 0,
+    "expected": "Lost RPC response: UNKNOWN, reconciled without second payment",
+    "observed": "Connection loss after send leaves UNKNOWN; reconcile INCLUDED; single transaction row.",
+    "artifactRefs": [],
+    "limitations": []
+  },
+  {
+    "caseId": "P2-04.T04",
+    "taskId": "P2-04",
+    "status": "BLOCKED",
+    "sourceCommit": "cf0c61eb367d7bb2c276faf0d280b0c094880925",
+    "assessedAt": "2026-10-20T11:27:28.615775+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "node": "22.23.3 (pinned)",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia 84532 at latest block (local, no public transaction)",
+      "qualificationOnly": true
+    },
+    "command": "MPC_PRIVATE_DIR=<local> node scripts/ops/with-test-postgres.mjs 'apps/worker/test/e2e/*.test.ts'",
+    "exitCode": null,
+    "expected": "Simulation failure after signature: no broadcast, reservation retained",
+    "observed": "Executor marks DENIED SIMULATION_REVERT and keeps the reservation; release only after chain proof (deadline passed and usedRequest false). Observed live during e2e debugging (InvalidSignature before the v-byte fix).",
+    "artifactRefs": [],
+    "limitations": [
+      "Implemented (executor keeps reservation on SIMULATION_REVERT) but no committed test asserts it yet."
+    ]
+  },
+  {
+    "caseId": "P2-04.T05",
+    "taskId": "P2-04",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "cf0c61eb367d7bb2c276faf0d280b0c094880925",
+    "assessedAt": "2026-10-20T11:27:28.615775+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "node": "22.23.3 (pinned)",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia 84532 at latest block (local, no public transaction)",
+      "qualificationOnly": true
+    },
+    "command": "./scripts/pnpm.sh test:db",
+    "exitCode": 0,
+    "expected": "UNKNOWN across UTC midnight still reserves",
+    "observed": "Yesterday's UNKNOWN 350000 denies a 350000 request today, allows 150000; time never releases UNKNOWN.",
+    "artifactRefs": [],
+    "limitations": []
+  },
+  {
+    "caseId": "P2-04.T06",
+    "taskId": "P2-04",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "cf0c61eb367d7bb2c276faf0d280b0c094880925",
+    "assessedAt": "2026-10-20T11:27:28.615775+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "node": "22.23.3 (pinned)",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia 84532 at latest block (local, no public transaction)",
+      "qualificationOnly": true
+    },
+    "command": "./scripts/pnpm.sh test:db",
+    "exitCode": 0,
+    "expected": "Refund does not replenish gross caps",
+    "observed": "Refund restores liquidity but permit gross cap denies 350000, admits 150000.",
+    "artifactRefs": [],
+    "limitations": []
+  },
+  {
+    "caseId": "P2-04.T07",
+    "taskId": "P2-04",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "cf0c61eb367d7bb2c276faf0d280b0c094880925",
+    "assessedAt": "2026-10-20T11:27:28.615775+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "node": "22.23.3 (pinned)",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia 84532 at latest block (local, no public transaction)",
+      "qualificationOnly": true
+    },
+    "command": "./scripts/pnpm.sh test:db",
+    "exitCode": 0,
+    "expected": "Reorg removes provisional receipt and reconciles",
+    "observed": "Fork evm_revert: reorg reported, receipt cleared, identical bytes rebroadcast, value moved once; executor returns action to SUBMITTED and reservation to UNKNOWN.",
+    "artifactRefs": [],
+    "limitations": []
+  },
+  {
+    "caseId": "P2-04.T08",
+    "taskId": "P2-04",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "cf0c61eb367d7bb2c276faf0d280b0c094880925",
+    "assessedAt": "2026-10-20T11:27:28.615775+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "node": "22.23.3 (pinned)",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia 84532 at latest block (local, no public transaction)",
+      "qualificationOnly": true
+    },
+    "command": "./scripts/pnpm.sh test:db",
+    "exitCode": 0,
+    "expected": "Normal budget exhausted, emergency lane continues",
+    "observed": "Normal FeeBudgetExceeded with nonce untouched; emergency journals and records actual <= estimated fee.",
+    "artifactRefs": [],
+    "limitations": []
+  },
+  {
+    "caseId": "P2-04.T09",
+    "taskId": "P2-04",
+    "status": "BLOCKED",
+    "sourceCommit": "cf0c61eb367d7bb2c276faf0d280b0c094880925",
+    "assessedAt": "2026-10-20T11:27:28.615775+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "node": "22.23.3 (pinned)",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia 84532 at latest block (local, no public transaction)",
+      "qualificationOnly": true
+    },
+    "command": "./scripts/pnpm.sh test:db",
+    "exitCode": null,
+    "expected": "Schedule advances: same decisionKey, period paid once",
+    "observed": "Unique (task,decisionKey) and (permit,period) indexes exist; schedule runbook advance (Person4) unavailable.",
+    "artifactRefs": [],
+    "limitations": [
+      "Needs Person4 scheduled-pay runbook."
+    ]
+  }
+]

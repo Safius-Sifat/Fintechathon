@@ -8,6 +8,18 @@
     "0002_auth_sessions.sql": {
       "kind": "expand",
       "transaction": "required"
+    },
+    "0003_business.sql": {
+      "kind": "expand",
+      "transaction": "required"
+    },
+    "0004_history.sql": {
+      "kind": "expand",
+      "transaction": "required"
+    },
+    "0005_agentic.sql": {
+      "kind": "expand",
+      "transaction": "required"
     }
   }
 }

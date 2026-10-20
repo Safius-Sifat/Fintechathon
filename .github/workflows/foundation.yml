@@ -30,12 +30,28 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16
+        with:
+          go-version: 1.25.8
+          cache-dependency-path: |
+            services/mpc-boundary/go.sum
+            services/mpc-adapter/go.sum
+            services/mpc-authorizer/go.sum
+      - name: MPC boundary, adapter and authorizer (vet, race tests)
+        run: |
+          node scripts/fetch-mpcium.mjs
+          test "$(git -C vendor/mpcium rev-parse HEAD)" = 90e3ee3c15e6698ade5626ff6c6b49d2453d8ce2
+          for module in mpc-boundary mpc-adapter mpc-authorizer; do
+            (cd "services/$module" && go vet ./... && go test -race -count=1 ./...)
+          done
       - run: pnpm check:repository
       - run: pnpm typecheck
       - run: pnpm test:ops
       - run: pnpm test:release
       - run: pnpm test:migrations
       - run: pnpm --filter @mandate/api check
+      - run: pnpm --filter @mandate/worker check
+      - run: pnpm --filter @mandate/policy check
       - run: pnpm test:db
       - run: pnpm --filter @mandate/schema check
       - name: Contract tests and ABI sync

@@ -1,0 +1,14 @@
+{
+  "command": [
+    "./scripts/pnpm.sh",
+    "--filter",
+    "@mandate/platform",
+    "typecheck"
+  ],
+  "exitCode": 0,
+  "startedAt": "2026-10-20T08:35:45.247033+00:00",
+  "finishedAt": "2026-10-20T08:35:49.505132+00:00",
+  "sourceCommit": "6676e6f4376bd4e827ab63861beb9b0d9c01587b",
+  "schemaCommit": "04f80a06aef361b305d20f6e371862939a4ec1ba",
+  "log": "evidence/person2/artifacts/handoff-2026-10-20/platform-typecheck.txt"
+}

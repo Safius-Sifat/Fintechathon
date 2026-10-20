@@ -1,25 +1,193 @@
-{
-  "owner": "Person2",
-  "milestone": "M0/W0 auth and database foundation",
-  "sourceBase": "27fd925e89803b5e5166ca286642dc694ffd07d3",
-  "schemaBase": "b67035614c9f1ed456384dee0cd6cf1ef9a59f32",
-  "environment": "macOS arm64, pinned Node22.23.3/pnpm10.20.0, disposable PostgreSQL16.10 with verified TLS",
-  "command": "pnpm test:db",
-  "expected": "Server consumer acceptance passes; financial readiness remains503",
-  "status": "LOCAL_PASS",
-  "limitations": [
-    "Native signing/device exchange not executed",
-    "Financial provisioning and MPC qualification not implemented",
-    "No cloud deployment or chain transaction"
-  ],
-  "task": "P2-03",
-  "scope": "Auth/session subset only; full task remains in progress",
-  "cases": [
-    "T01 twenty concurrent auth mutations share one persisted response; changed body409",
-    "T02 session owner isolation403; owner token cannot authenticate as another account",
-    "T05 strict auth validators422 and bounded body/rate handling",
-    "M0 ingress: trusted client buckets isolated, untrusted/spoofed forwarding rejected, unsupported content type415 nonretryable"
-  ],
-  "observed": "Assertions executed in apps/api/test/db/auth.test.ts; command results in implementation report",
-  "exitStatus": 0
-}
+[
+  {
+    "caseId": "P2-03.T01",
+    "taskId": "P2-03",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "cf0c61eb367d7bb2c276faf0d280b0c094880925",
+    "assessedAt": "2026-10-20T11:27:28.615775+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "node": "22.23.3 (pinned)",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia 84532 at latest block (local, no public transaction)",
+      "qualificationOnly": true
+    },
+    "command": "./scripts/pnpm.sh test:db",
+    "exitCode": 0,
+    "expected": "20 concurrent same key/body -> one record; changed body 409",
+    "observed": "One wallet, one job, one idempotency row; changed agent-token body 409; token never re-revealed (apps/api/test/db/business.test.ts).",
+    "artifactRefs": [],
+    "limitations": [],
+    "history": [
+      {
+        "status": "BLOCKED",
+        "observed": "Full financial case not run: financial business mutation and payment outbox are absent. Auth revocation idempotency ran successfully but is narrower.",
+        "assessedAt": "2026-10-20T08:37:09.132600+00:00"
+      }
+    ]
+  },
+  {
+    "caseId": "P2-03.T02",
+    "taskId": "P2-03",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "cf0c61eb367d7bb2c276faf0d280b0c094880925",
+    "assessedAt": "2026-10-20T11:27:28.615775+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "node": "22.23.3 (pinned)",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia 84532 at latest block (local, no public transaction)",
+      "qualificationOnly": true
+    },
+    "command": "./scripts/pnpm.sh test:db",
+    "exitCode": 0,
+    "expected": "Cross-tenant JWT/agent token 403 AUTH_SCOPE without disclosure",
+    "observed": "Foreign wallet/task/token, task-restricted and scope-missing tokens 403; unknown IDs indistinguishable; revoked/expired tokens 401.",
+    "artifactRefs": [],
+    "limitations": [],
+    "history": [
+      {
+        "status": "BLOCKED",
+        "observed": "Full wallet/task/evidence and agent-token case not run. Local session owner isolation was exercised.",
+        "assessedAt": "2026-10-20T08:37:09.132600+00:00"
+      }
+    ]
+  },
+  {
+    "caseId": "P2-03.T03",
+    "taskId": "P2-03",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "cf0c61eb367d7bb2c276faf0d280b0c094880925",
+    "assessedAt": "2026-10-20T11:27:28.615775+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "node": "22.23.3 (pinned)",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia 84532 at latest block (local, no public transaction)",
+      "qualificationOnly": true
+    },
+    "command": "./scripts/pnpm.sh test:db",
+    "exitCode": 0,
+    "expected": "Lost response between deployment and DKG resumes same wallet",
+    "observed": "Fork: one journaled createWallet, restart re-reads journal; externally deployed wallet discovered with zero journaled tx; keygen retries same MPC wallet ID (apps/worker/test/db/provision.test.ts). Real DKG via adapter in e2e.",
+    "artifactRefs": [],
+    "limitations": [],
+    "history": [
+      {
+        "status": "BLOCKED",
+        "observed": "Not run: canonical provisioning/DKG orchestration is not implemented.",
+        "assessedAt": "2026-10-20T08:37:09.132600+00:00"
+      }
+    ]
+  },
+  {
+    "caseId": "P2-03.T04",
+    "taskId": "P2-03",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "cf0c61eb367d7bb2c276faf0d280b0c094880925",
+    "assessedAt": "2026-10-20T11:27:28.615775+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "node": "22.23.3 (pinned)",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia 84532 at latest block (local, no public transaction)",
+      "qualificationOnly": true
+    },
+    "command": "./scripts/pnpm.sh test:db",
+    "exitCode": 0,
+    "expected": "Missing code/mapping, keygen failure, executor mismatch never READY",
+    "observed": "Wrong factory code hash, failed/malformed keygen and executor mismatch FAILED; absent keygen waits in KEYGEN.",
+    "artifactRefs": [],
+    "limitations": [],
+    "history": [
+      {
+        "status": "BLOCKED",
+        "observed": "Not run: provisioning and executor qualification are absent.",
+        "assessedAt": "2026-10-20T08:37:09.132600+00:00"
+      }
+    ]
+  },
+  {
+    "caseId": "P2-03.T05",
+    "taskId": "P2-03",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "cf0c61eb367d7bb2c276faf0d280b0c094880925",
+    "assessedAt": "2026-10-20T11:27:28.615775+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "node": "22.23.3 (pinned)",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia 84532 at latest block (local, no public transaction)",
+      "qualificationOnly": true
+    },
+    "command": "./scripts/pnpm.sh test:db",
+    "exitCode": 0,
+    "expected": "Unknown field, float, overwidth uint, invalid transition 422 no side effects",
+    "observed": "Nine malformed bodies 422 with no row changes; DB CHECK rejects READY without fields and overwidth epoch.",
+    "artifactRefs": [],
+    "limitations": [],
+    "history": [
+      {
+        "status": "BLOCKED",
+        "observed": "Full financial validator/state-transition case not run. Auth request validation/rate/body bounds ran successfully.",
+        "assessedAt": "2026-10-20T08:37:09.132600+00:00"
+      }
+    ]
+  },
+  {
+    "caseId": "P2-03.T06",
+    "taskId": "P2-03",
+    "status": "BLOCKED",
+    "sourceCommit": "cf0c61eb367d7bb2c276faf0d280b0c094880925",
+    "assessedAt": "2026-10-20T11:27:28.615775+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "node": "22.23.3 (pinned)",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia 84532 at latest block (local, no public transaction)",
+      "qualificationOnly": true
+    },
+    "command": "./scripts/pnpm.sh test:db",
+    "exitCode": null,
+    "expected": "Pause/revoke draft sets local inhibit, confirmed only by receipt",
+    "observed": "Admin draft/submit routes not implemented; owner-transfer draft sets inhibit and confirms pause only from OwnerTransferExecuted.",
+    "artifactRefs": [],
+    "limitations": [
+      "Admin (pause/revoke/freeze) draft/submit is outstanding; planned with Task 4 freeze."
+    ],
+    "history": [
+      {
+        "status": "BLOCKED",
+        "observed": "Not run: admin draft/local-inhibit/receipt state machine is absent.",
+        "assessedAt": "2026-10-20T08:37:09.132600+00:00"
+      }
+    ]
+  },
+  {
+    "caseId": "P2-03.T07",
+    "taskId": "P2-03",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "cf0c61eb367d7bb2c276faf0d280b0c094880925",
+    "assessedAt": "2026-10-20T11:27:28.615775+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "node": "22.23.3 (pinned)",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia 84532 at latest block (local, no public transaction)",
+      "qualificationOnly": true
+    },
+    "command": "./scripts/pnpm.sh test:db",
+    "exitCode": 0,
+    "expected": "Racing leases/outbox: one transition; lease recovery keeps idempotency",
+    "observed": "Ten concurrent leases yield one; expired lease cannot complete; outbox consumers publish each message once; idempotency survives (apps/api/test/db/storage.test.ts).",
+    "artifactRefs": [],
+    "limitations": [],
+    "history": [
+      {
+        "status": "BLOCKED",
+        "observed": "Not run: financial worker/outbox leases and action transitions are absent.",
+        "assessedAt": "2026-10-20T08:37:09.132600+00:00"
+      }
+    ]
+  }
+]

@@ -1,0 +1,128 @@
+[
+  {
+    "caseId": "P2-W03.T01",
+    "taskId": "P2-W03",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "cf0c61eb367d7bb2c276faf0d280b0c094880925",
+    "assessedAt": "2026-10-20T11:27:28.615775+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "node": "22.23.3 (pinned)",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia 84532 at latest block (local, no public transaction)",
+      "qualificationOnly": true
+    },
+    "command": "./scripts/pnpm.sh test:db",
+    "exitCode": 0,
+    "expected": "Duplicate submit one operation; changed signature rejects",
+    "observed": "Three concurrent same-signature submits identical, one relay job, one transaction; different signature 409.",
+    "artifactRefs": [],
+    "limitations": []
+  },
+  {
+    "caseId": "P2-W03.T02",
+    "taskId": "P2-W03",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "cf0c61eb367d7bb2c276faf0d280b0c094880925",
+    "assessedAt": "2026-10-20T11:27:28.615775+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "node": "22.23.3 (pinned)",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia 84532 at latest block (local, no public transaction)",
+      "qualificationOnly": true
+    },
+    "command": "./scripts/pnpm.sh test:db",
+    "exitCode": 0,
+    "expected": "Agent token, wrong signer, foreign owner, stale epoch denied",
+    "observed": "Agent 403, other owner 403, other signer 422, stale epoch/nonce 409 before relay.",
+    "artifactRefs": [],
+    "limitations": []
+  },
+  {
+    "caseId": "P2-W03.T03",
+    "taskId": "P2-W03",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "cf0c61eb367d7bb2c276faf0d280b0c094880925",
+    "assessedAt": "2026-10-20T11:27:28.615775+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "node": "22.23.3 (pinned)",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia 84532 at latest block (local, no public transaction)",
+      "qualificationOnly": true
+    },
+    "command": "./scripts/pnpm.sh test:db",
+    "exitCode": 0,
+    "expected": "Revert: no fake pause/epoch; inhibit retained",
+    "observed": "Insufficient-balance transfer REVERTED; epoch unchanged; inhibit stays.",
+    "artifactRefs": [],
+    "limitations": []
+  },
+  {
+    "caseId": "P2-W03.T04",
+    "taskId": "P2-W03",
+    "status": "BLOCKED",
+    "sourceCommit": "cf0c61eb367d7bb2c276faf0d280b0c094880925",
+    "assessedAt": "2026-10-20T11:27:28.615775+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "node": "22.23.3 (pinned)",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia 84532 at latest block (local, no public transaction)",
+      "qualificationOnly": true
+    },
+    "command": "./scripts/pnpm.sh test:db",
+    "exitCode": null,
+    "expected": "Transfer while earlier agent action uncertain",
+    "observed": "Old-epoch permits INVALIDATED on inclusion; reservations released only by chain proof. Joint scenario test not written.",
+    "artifactRefs": [],
+    "limitations": [
+      "Combined uncertain-action + owner transfer scenario not yet exercised."
+    ]
+  },
+  {
+    "caseId": "P2-W03.T05",
+    "taskId": "P2-W03",
+    "status": "BLOCKED",
+    "sourceCommit": "cf0c61eb367d7bb2c276faf0d280b0c094880925",
+    "assessedAt": "2026-10-20T11:27:28.615775+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "node": "22.23.3 (pinned)",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia 84532 at latest block (local, no public transaction)",
+      "qualificationOnly": true
+    },
+    "command": "./scripts/pnpm.sh test:db",
+    "exitCode": null,
+    "expected": "Sponsor down, native personal-gas relay succeeds",
+    "observed": "Requires Person3 native signer/relay.",
+    "artifactRefs": [],
+    "limitations": [
+      "Person3 dependency."
+    ]
+  },
+  {
+    "caseId": "P2-W03.T06",
+    "taskId": "P2-W03",
+    "status": "BLOCKED",
+    "sourceCommit": "cf0c61eb367d7bb2c276faf0d280b0c094880925",
+    "assessedAt": "2026-10-20T11:27:28.615775+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "node": "22.23.3 (pinned)",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia 84532 at latest block (local, no public transaction)",
+      "qualificationOnly": true
+    },
+    "command": "./scripts/pnpm.sh test:db",
+    "exitCode": null,
+    "expected": "Native transfer registered by hash attributed only after verification",
+    "observed": "Registration requires involvement; OWNER_CONTROL attribution needs indexer/receipt path with native signer.",
+    "artifactRefs": [],
+    "limitations": [
+      "Person3 dependency."
+    ]
+  }
+]

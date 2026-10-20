@@ -1,0 +1,1 @@
+Using pinned Node22.23.3 and pnpm10.20.0 through npm exec (no global installation changes).

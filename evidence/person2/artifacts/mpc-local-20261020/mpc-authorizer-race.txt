@@ -1,0 +1,32 @@
+{"Time":"2026-10-20T15:11:37.223497+06:00","Action":"start","Package":"mandate.local/mpc-authorizer/internal"}
+{"Time":"2026-10-20T15:11:37.798961+06:00","Action":"run","Package":"mandate.local/mpc-authorizer/internal","Test":"TestMissingPolicyCannotStart"}
+{"Time":"2026-10-20T15:11:37.799159+06:00","Action":"output","Package":"mandate.local/mpc-authorizer/internal","Test":"TestMissingPolicyCannotStart","Output":"=== RUN   TestMissingPolicyCannotStart\n"}
+{"Time":"2026-10-20T15:11:37.799176+06:00","Action":"output","Package":"mandate.local/mpc-authorizer/internal","Test":"TestMissingPolicyCannotStart","Output":"--- PASS: TestMissingPolicyCannotStart (0.00s)\n"}
+{"Time":"2026-10-20T15:11:37.799184+06:00","Action":"pass","Package":"mandate.local/mpc-authorizer/internal","Test":"TestMissingPolicyCannotStart","Elapsed":0}
+{"Time":"2026-10-20T15:11:37.799187+06:00","Action":"run","Package":"mandate.local/mpc-authorizer/internal","Test":"TestIndependentRecordAndInitiator"}
+{"Time":"2026-10-20T15:11:37.799188+06:00","Action":"output","Package":"mandate.local/mpc-authorizer/internal","Test":"TestIndependentRecordAndInitiator","Output":"=== RUN   TestIndependentRecordAndInitiator\n"}
+{"Time":"2026-10-20T15:11:37.799189+06:00","Action":"run","Package":"mandate.local/mpc-authorizer/internal","Test":"TestIndependentRecordAndInitiator/valid"}
+{"Time":"2026-10-20T15:11:37.79919+06:00","Action":"output","Package":"mandate.local/mpc-authorizer/internal","Test":"TestIndependentRecordAndInitiator/valid","Output":"=== RUN   TestIndependentRecordAndInitiator/valid\n"}
+{"Time":"2026-10-20T15:11:37.807404+06:00","Action":"output","Package":"mandate.local/mpc-authorizer/internal","Test":"TestIndependentRecordAndInitiator/valid","Output":"--- PASS: TestIndependentRecordAndInitiator/valid (0.01s)\n"}
+{"Time":"2026-10-20T15:11:37.807412+06:00","Action":"pass","Package":"mandate.local/mpc-authorizer/internal","Test":"TestIndependentRecordAndInitiator/valid","Elapsed":0.01}
+{"Time":"2026-10-20T15:11:37.80742+06:00","Action":"run","Package":"mandate.local/mpc-authorizer/internal","Test":"TestIndependentRecordAndInitiator/caller-digest"}
+{"Time":"2026-10-20T15:11:37.807422+06:00","Action":"output","Package":"mandate.local/mpc-authorizer/internal","Test":"TestIndependentRecordAndInitiator/caller-digest","Output":"=== RUN   TestIndependentRecordAndInitiator/caller-digest\n"}
+{"Time":"2026-10-20T15:11:37.80952+06:00","Action":"output","Package":"mandate.local/mpc-authorizer/internal","Test":"TestIndependentRecordAndInitiator/caller-digest","Output":"--- PASS: TestIndependentRecordAndInitiator/caller-digest (0.00s)\n"}
+{"Time":"2026-10-20T15:11:37.809528+06:00","Action":"pass","Package":"mandate.local/mpc-authorizer/internal","Test":"TestIndependentRecordAndInitiator/caller-digest","Elapsed":0}
+{"Time":"2026-10-20T15:11:37.809538+06:00","Action":"run","Package":"mandate.local/mpc-authorizer/internal","Test":"TestIndependentRecordAndInitiator/missing-record"}
+{"Time":"2026-10-20T15:11:37.809539+06:00","Action":"output","Package":"mandate.local/mpc-authorizer/internal","Test":"TestIndependentRecordAndInitiator/missing-record","Output":"=== RUN   TestIndependentRecordAndInitiator/missing-record\n"}
+{"Time":"2026-10-20T15:11:37.811142+06:00","Action":"output","Package":"mandate.local/mpc-authorizer/internal","Test":"TestIndependentRecordAndInitiator/missing-record","Output":"--- PASS: TestIndependentRecordAndInitiator/missing-record (0.00s)\n"}
+{"Time":"2026-10-20T15:11:37.811146+06:00","Action":"pass","Package":"mandate.local/mpc-authorizer/internal","Test":"TestIndependentRecordAndInitiator/missing-record","Elapsed":0}
+{"Time":"2026-10-20T15:11:37.811157+06:00","Action":"run","Package":"mandate.local/mpc-authorizer/internal","Test":"TestIndependentRecordAndInitiator/wrong-initiator"}
+{"Time":"2026-10-20T15:11:37.811159+06:00","Action":"output","Package":"mandate.local/mpc-authorizer/internal","Test":"TestIndependentRecordAndInitiator/wrong-initiator","Output":"=== RUN   TestIndependentRecordAndInitiator/wrong-initiator\n"}
+{"Time":"2026-10-20T15:11:37.814089+06:00","Action":"output","Package":"mandate.local/mpc-authorizer/internal","Test":"TestIndependentRecordAndInitiator/wrong-initiator","Output":"--- PASS: TestIndependentRecordAndInitiator/wrong-initiator (0.00s)\n"}
+{"Time":"2026-10-20T15:11:37.814092+06:00","Action":"pass","Package":"mandate.local/mpc-authorizer/internal","Test":"TestIndependentRecordAndInitiator/wrong-initiator","Elapsed":0}
+{"Time":"2026-10-20T15:11:37.814101+06:00","Action":"run","Package":"mandate.local/mpc-authorizer/internal","Test":"TestIndependentRecordAndInitiator/denied-policy"}
+{"Time":"2026-10-20T15:11:37.814102+06:00","Action":"output","Package":"mandate.local/mpc-authorizer/internal","Test":"TestIndependentRecordAndInitiator/denied-policy","Output":"=== RUN   TestIndependentRecordAndInitiator/denied-policy\n"}
+{"Time":"2026-10-20T15:11:37.816164+06:00","Action":"output","Package":"mandate.local/mpc-authorizer/internal","Test":"TestIndependentRecordAndInitiator/denied-policy","Output":"--- PASS: TestIndependentRecordAndInitiator/denied-policy (0.00s)\n"}
+{"Time":"2026-10-20T15:11:37.81617+06:00","Action":"pass","Package":"mandate.local/mpc-authorizer/internal","Test":"TestIndependentRecordAndInitiator/denied-policy","Elapsed":0}
+{"Time":"2026-10-20T15:11:37.81619+06:00","Action":"output","Package":"mandate.local/mpc-authorizer/internal","Test":"TestIndependentRecordAndInitiator","Output":"--- PASS: TestIndependentRecordAndInitiator (0.02s)\n"}
+{"Time":"2026-10-20T15:11:37.816199+06:00","Action":"pass","Package":"mandate.local/mpc-authorizer/internal","Test":"TestIndependentRecordAndInitiator","Elapsed":0.02}
+{"Time":"2026-10-20T15:11:37.816212+06:00","Action":"output","Package":"mandate.local/mpc-authorizer/internal","Output":"PASS\n"}
+{"Time":"2026-10-20T15:11:38.823857+06:00","Action":"output","Package":"mandate.local/mpc-authorizer/internal","Output":"ok  \tmandate.local/mpc-authorizer/internal\t1.600s\n"}
+{"Time":"2026-10-20T15:11:38.823905+06:00","Action":"pass","Package":"mandate.local/mpc-authorizer/internal","Elapsed":1.6}

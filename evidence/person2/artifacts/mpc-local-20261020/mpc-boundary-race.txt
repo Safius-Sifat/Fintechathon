@@ -1,0 +1,76 @@
+{"Time":"2026-10-20T15:11:32.003171+06:00","Action":"start","Package":"mandate.local/mpc-boundary"}
+{"Time":"2026-10-20T15:11:32.718888+06:00","Action":"run","Package":"mandate.local/mpc-boundary","Test":"TestAuthorizationMutations"}
+{"Time":"2026-10-20T15:11:32.718934+06:00","Action":"output","Package":"mandate.local/mpc-boundary","Test":"TestAuthorizationMutations","Output":"=== RUN   TestAuthorizationMutations\n"}
+{"Time":"2026-10-20T15:11:32.718956+06:00","Action":"run","Package":"mandate.local/mpc-boundary","Test":"TestAuthorizationMutations/keytype"}
+{"Time":"2026-10-20T15:11:32.718958+06:00","Action":"output","Package":"mandate.local/mpc-boundary","Test":"TestAuthorizationMutations/keytype","Output":"=== RUN   TestAuthorizationMutations/keytype\n"}
+{"Time":"2026-10-20T15:11:32.724982+06:00","Action":"output","Package":"mandate.local/mpc-boundary","Test":"TestAuthorizationMutations/keytype","Output":"--- PASS: TestAuthorizationMutations/keytype (0.01s)\n"}
+{"Time":"2026-10-20T15:11:32.725015+06:00","Action":"pass","Package":"mandate.local/mpc-boundary","Test":"TestAuthorizationMutations/keytype","Elapsed":0.01}
+{"Time":"2026-10-20T15:11:32.725225+06:00","Action":"run","Package":"mandate.local/mpc-boundary","Test":"TestAuthorizationMutations/wallet"}
+{"Time":"2026-10-20T15:11:32.725229+06:00","Action":"output","Package":"mandate.local/mpc-boundary","Test":"TestAuthorizationMutations/wallet","Output":"=== RUN   TestAuthorizationMutations/wallet\n"}
+{"Time":"2026-10-20T15:11:32.726578+06:00","Action":"output","Package":"mandate.local/mpc-boundary","Test":"TestAuthorizationMutations/wallet","Output":"--- PASS: TestAuthorizationMutations/wallet (0.00s)\n"}
+{"Time":"2026-10-20T15:11:32.726598+06:00","Action":"pass","Package":"mandate.local/mpc-boundary","Test":"TestAuthorizationMutations/wallet","Elapsed":0}
+{"Time":"2026-10-20T15:11:32.726601+06:00","Action":"run","Package":"mandate.local/mpc-boundary","Test":"TestAuthorizationMutations/network"}
+{"Time":"2026-10-20T15:11:32.726602+06:00","Action":"output","Package":"mandate.local/mpc-boundary","Test":"TestAuthorizationMutations/network","Output":"=== RUN   TestAuthorizationMutations/network\n"}
+{"Time":"2026-10-20T15:11:32.728488+06:00","Action":"output","Package":"mandate.local/mpc-boundary","Test":"TestAuthorizationMutations/network","Output":"--- PASS: TestAuthorizationMutations/network (0.00s)\n"}
+{"Time":"2026-10-20T15:11:32.728496+06:00","Action":"pass","Package":"mandate.local/mpc-boundary","Test":"TestAuthorizationMutations/network","Elapsed":0}
+{"Time":"2026-10-20T15:11:32.728509+06:00","Action":"run","Package":"mandate.local/mpc-boundary","Test":"TestAuthorizationMutations/attempt"}
+{"Time":"2026-10-20T15:11:32.728521+06:00","Action":"output","Package":"mandate.local/mpc-boundary","Test":"TestAuthorizationMutations/attempt","Output":"=== RUN   TestAuthorizationMutations/attempt\n"}
+{"Time":"2026-10-20T15:11:32.730431+06:00","Action":"output","Package":"mandate.local/mpc-boundary","Test":"TestAuthorizationMutations/attempt","Output":"--- PASS: TestAuthorizationMutations/attempt (0.00s)\n"}
+{"Time":"2026-10-20T15:11:32.730442+06:00","Action":"pass","Package":"mandate.local/mpc-boundary","Test":"TestAuthorizationMutations/attempt","Elapsed":0}
+{"Time":"2026-10-20T15:11:32.730459+06:00","Action":"run","Package":"mandate.local/mpc-boundary","Test":"TestAuthorizationMutations/digest"}
+{"Time":"2026-10-20T15:11:32.73046+06:00","Action":"output","Package":"mandate.local/mpc-boundary","Test":"TestAuthorizationMutations/digest","Output":"=== RUN   TestAuthorizationMutations/digest\n"}
+{"Time":"2026-10-20T15:11:32.732279+06:00","Action":"output","Package":"mandate.local/mpc-boundary","Test":"TestAuthorizationMutations/digest","Output":"--- PASS: TestAuthorizationMutations/digest (0.00s)\n"}
+{"Time":"2026-10-20T15:11:32.732289+06:00","Action":"pass","Package":"mandate.local/mpc-boundary","Test":"TestAuthorizationMutations/digest","Elapsed":0}
+{"Time":"2026-10-20T15:11:32.732333+06:00","Action":"run","Package":"mandate.local/mpc-boundary","Test":"TestAuthorizationMutations/path"}
+{"Time":"2026-10-20T15:11:32.732353+06:00","Action":"output","Package":"mandate.local/mpc-boundary","Test":"TestAuthorizationMutations/path","Output":"=== RUN   TestAuthorizationMutations/path\n"}
+{"Time":"2026-10-20T15:11:32.734153+06:00","Action":"output","Package":"mandate.local/mpc-boundary","Test":"TestAuthorizationMutations/path","Output":"--- PASS: TestAuthorizationMutations/path (0.00s)\n"}
+{"Time":"2026-10-20T15:11:32.734162+06:00","Action":"pass","Package":"mandate.local/mpc-boundary","Test":"TestAuthorizationMutations/path","Elapsed":0}
+{"Time":"2026-10-20T15:11:32.734182+06:00","Action":"run","Package":"mandate.local/mpc-boundary","Test":"TestAuthorizationMutations/empty-path"}
+{"Time":"2026-10-20T15:11:32.734207+06:00","Action":"output","Package":"mandate.local/mpc-boundary","Test":"TestAuthorizationMutations/empty-path","Output":"=== RUN   TestAuthorizationMutations/empty-path\n"}
+{"Time":"2026-10-20T15:11:32.736159+06:00","Action":"output","Package":"mandate.local/mpc-boundary","Test":"TestAuthorizationMutations/empty-path","Output":"--- PASS: TestAuthorizationMutations/empty-path (0.00s)\n"}
+{"Time":"2026-10-20T15:11:32.736173+06:00","Action":"pass","Package":"mandate.local/mpc-boundary","Test":"TestAuthorizationMutations/empty-path","Elapsed":0}
+{"Time":"2026-10-20T15:11:32.736196+06:00","Action":"run","Package":"mandate.local/mpc-boundary","Test":"TestAuthorizationMutations/initiator"}
+{"Time":"2026-10-20T15:11:32.736199+06:00","Action":"output","Package":"mandate.local/mpc-boundary","Test":"TestAuthorizationMutations/initiator","Output":"=== RUN   TestAuthorizationMutations/initiator\n"}
+{"Time":"2026-10-20T15:11:32.739589+06:00","Action":"output","Package":"mandate.local/mpc-boundary","Test":"TestAuthorizationMutations/initiator","Output":"--- PASS: TestAuthorizationMutations/initiator (0.00s)\n"}
+{"Time":"2026-10-20T15:11:32.739593+06:00","Action":"pass","Package":"mandate.local/mpc-boundary","Test":"TestAuthorizationMutations/initiator","Elapsed":0}
+{"Time":"2026-10-20T15:11:32.739612+06:00","Action":"run","Package":"mandate.local/mpc-boundary","Test":"TestAuthorizationMutations/missing-record"}
+{"Time":"2026-10-20T15:11:32.739615+06:00","Action":"output","Package":"mandate.local/mpc-boundary","Test":"TestAuthorizationMutations/missing-record","Output":"=== RUN   TestAuthorizationMutations/missing-record\n"}
+{"Time":"2026-10-20T15:11:32.741281+06:00","Action":"output","Package":"mandate.local/mpc-boundary","Test":"TestAuthorizationMutations/missing-record","Output":"--- PASS: TestAuthorizationMutations/missing-record (0.00s)\n"}
+{"Time":"2026-10-20T15:11:32.741294+06:00","Action":"pass","Package":"mandate.local/mpc-boundary","Test":"TestAuthorizationMutations/missing-record","Elapsed":0}
+{"Time":"2026-10-20T15:11:32.741302+06:00","Action":"run","Package":"mandate.local/mpc-boundary","Test":"TestAuthorizationMutations/policy"}
+{"Time":"2026-10-20T15:11:32.741304+06:00","Action":"output","Package":"mandate.local/mpc-boundary","Test":"TestAuthorizationMutations/policy","Output":"=== RUN   TestAuthorizationMutations/policy\n"}
+{"Time":"2026-10-20T15:11:32.743733+06:00","Action":"output","Package":"mandate.local/mpc-boundary","Test":"TestAuthorizationMutations/policy","Output":"--- PASS: TestAuthorizationMutations/policy (0.00s)\n"}
+{"Time":"2026-10-20T15:11:32.743751+06:00","Action":"pass","Package":"mandate.local/mpc-boundary","Test":"TestAuthorizationMutations/policy","Elapsed":0}
+{"Time":"2026-10-20T15:11:32.743755+06:00","Action":"run","Package":"mandate.local/mpc-boundary","Test":"TestAuthorizationMutations/replay"}
+{"Time":"2026-10-20T15:11:32.743756+06:00","Action":"output","Package":"mandate.local/mpc-boundary","Test":"TestAuthorizationMutations/replay","Output":"=== RUN   TestAuthorizationMutations/replay\n"}
+{"Time":"2026-10-20T15:11:32.747028+06:00","Action":"output","Package":"mandate.local/mpc-boundary","Test":"TestAuthorizationMutations/replay","Output":"--- PASS: TestAuthorizationMutations/replay (0.00s)\n"}
+{"Time":"2026-10-20T15:11:32.747036+06:00","Action":"pass","Package":"mandate.local/mpc-boundary","Test":"TestAuthorizationMutations/replay","Elapsed":0}
+{"Time":"2026-10-20T15:11:32.747127+06:00","Action":"output","Package":"mandate.local/mpc-boundary","Test":"TestAuthorizationMutations","Output":"--- PASS: TestAuthorizationMutations (0.03s)\n"}
+{"Time":"2026-10-20T15:11:32.74714+06:00","Action":"pass","Package":"mandate.local/mpc-boundary","Test":"TestAuthorizationMutations","Elapsed":0.03}
+{"Time":"2026-10-20T15:11:32.747152+06:00","Action":"run","Package":"mandate.local/mpc-boundary","Test":"TestUpstreamBytesAndDeterministicInitiator"}
+{"Time":"2026-10-20T15:11:32.747154+06:00","Action":"output","Package":"mandate.local/mpc-boundary","Test":"TestUpstreamBytesAndDeterministicInitiator","Output":"=== RUN   TestUpstreamBytesAndDeterministicInitiator\n"}
+{"Time":"2026-10-20T15:11:32.75112+06:00","Action":"output","Package":"mandate.local/mpc-boundary","Test":"TestUpstreamBytesAndDeterministicInitiator","Output":"--- PASS: TestUpstreamBytesAndDeterministicInitiator (0.00s)\n"}
+{"Time":"2026-10-20T15:11:32.751133+06:00","Action":"pass","Package":"mandate.local/mpc-boundary","Test":"TestUpstreamBytesAndDeterministicInitiator","Elapsed":0}
+{"Time":"2026-10-20T15:11:32.751138+06:00","Action":"run","Package":"mandate.local/mpc-boundary","Test":"TestMandatoryAuthorizer"}
+{"Time":"2026-10-20T15:11:32.75114+06:00","Action":"output","Package":"mandate.local/mpc-boundary","Test":"TestMandatoryAuthorizer","Output":"=== RUN   TestMandatoryAuthorizer\n"}
+{"Time":"2026-10-20T15:11:32.751172+06:00","Action":"output","Package":"mandate.local/mpc-boundary","Test":"TestMandatoryAuthorizer","Output":"--- PASS: TestMandatoryAuthorizer (0.00s)\n"}
+{"Time":"2026-10-20T15:11:32.751182+06:00","Action":"pass","Package":"mandate.local/mpc-boundary","Test":"TestMandatoryAuthorizer","Elapsed":0}
+{"Time":"2026-10-20T15:11:32.751187+06:00","Action":"run","Package":"mandate.local/mpc-boundary","Test":"TestMissingProductionDependencies"}
+{"Time":"2026-10-20T15:11:32.751188+06:00","Action":"output","Package":"mandate.local/mpc-boundary","Test":"TestMissingProductionDependencies","Output":"=== RUN   TestMissingProductionDependencies\n"}
+{"Time":"2026-10-20T15:11:32.751222+06:00","Action":"output","Package":"mandate.local/mpc-boundary","Test":"TestMissingProductionDependencies","Output":"--- PASS: TestMissingProductionDependencies (0.00s)\n"}
+{"Time":"2026-10-20T15:11:32.75123+06:00","Action":"pass","Package":"mandate.local/mpc-boundary","Test":"TestMissingProductionDependencies","Elapsed":0}
+{"Time":"2026-10-20T15:11:32.751255+06:00","Action":"run","Package":"mandate.local/mpc-boundary","Test":"TestRejectNonCanonicalIDs"}
+{"Time":"2026-10-20T15:11:32.751257+06:00","Action":"output","Package":"mandate.local/mpc-boundary","Test":"TestRejectNonCanonicalIDs","Output":"=== RUN   TestRejectNonCanonicalIDs\n"}
+{"Time":"2026-10-20T15:11:32.75835+06:00","Action":"output","Package":"mandate.local/mpc-boundary","Test":"TestRejectNonCanonicalIDs","Output":"--- PASS: TestRejectNonCanonicalIDs (0.01s)\n"}
+{"Time":"2026-10-20T15:11:32.758361+06:00","Action":"pass","Package":"mandate.local/mpc-boundary","Test":"TestRejectNonCanonicalIDs","Elapsed":0.01}
+{"Time":"2026-10-20T15:11:32.758364+06:00","Action":"run","Package":"mandate.local/mpc-boundary","Test":"TestGoldenActionSignatures"}
+{"Time":"2026-10-20T15:11:32.758365+06:00","Action":"output","Package":"mandate.local/mpc-boundary","Test":"TestGoldenActionSignatures","Output":"=== RUN   TestGoldenActionSignatures\n"}
+{"Time":"2026-10-20T15:11:32.853837+06:00","Action":"output","Package":"mandate.local/mpc-boundary","Test":"TestGoldenActionSignatures","Output":"--- PASS: TestGoldenActionSignatures (0.10s)\n"}
+{"Time":"2026-10-20T15:11:32.853854+06:00","Action":"pass","Package":"mandate.local/mpc-boundary","Test":"TestGoldenActionSignatures","Elapsed":0.1}
+{"Time":"2026-10-20T15:11:32.853858+06:00","Action":"run","Package":"mandate.local/mpc-boundary","Test":"TestLeadingZeroHighSAndPadding"}
+{"Time":"2026-10-20T15:11:32.853859+06:00","Action":"output","Package":"mandate.local/mpc-boundary","Test":"TestLeadingZeroHighSAndPadding","Output":"=== RUN   TestLeadingZeroHighSAndPadding\n"}
+{"Time":"2026-10-20T15:11:32.878889+06:00","Action":"output","Package":"mandate.local/mpc-boundary","Test":"TestLeadingZeroHighSAndPadding","Output":"--- PASS: TestLeadingZeroHighSAndPadding (0.02s)\n"}
+{"Time":"2026-10-20T15:11:32.8789+06:00","Action":"pass","Package":"mandate.local/mpc-boundary","Test":"TestLeadingZeroHighSAndPadding","Elapsed":0.02}
+{"Time":"2026-10-20T15:11:32.878904+06:00","Action":"output","Package":"mandate.local/mpc-boundary","Output":"PASS\n"}
+{"Time":"2026-10-20T15:11:33.887803+06:00","Action":"output","Package":"mandate.local/mpc-boundary","Output":"ok  \tmandate.local/mpc-boundary\t1.884s\n"}
+{"Time":"2026-10-20T15:11:33.887833+06:00","Action":"pass","Package":"mandate.local/mpc-boundary","Elapsed":1.885}

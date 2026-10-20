@@ -1,0 +1,150 @@
+[
+  {
+    "caseId": "P2-A02.T01",
+    "taskId": "P2-A02",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "cac9a55c9a43f9a8f6a8b940cd53d2bf1ca76e0c",
+    "assessedAt": "2026-10-20T11:58:13.458228+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia (local)",
+      "mpc": "local 3-node MPCium 90e3ee3 where noted",
+      "qualificationOnly": true
+    },
+    "command": "MPC_PRIVATE_DIR=<local> node scripts/ops/with-test-postgres.mjs 'apps/worker/test/e2e/*.test.ts'",
+    "exitCode": 0,
+    "expected": "Above-threshold Action waits, no MPC request",
+    "observed": "DB test and fork e2e: AWAITING_APPROVAL with zero signing attempts until owner Approval; executed with ownerApproved=true.",
+    "artifactRefs": [
+      "evidence/person2/artifacts/execution-fork-20261020/e2e.json"
+    ],
+    "limitations": []
+  },
+  {
+    "caseId": "P2-A02.T02",
+    "taskId": "P2-A02",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "cac9a55c9a43f9a8f6a8b940cd53d2bf1ca76e0c",
+    "assessedAt": "2026-10-20T11:58:13.458228+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia (local)",
+      "mpc": "local 3-node MPCium 90e3ee3 where noted",
+      "qualificationOnly": true
+    },
+    "command": "./scripts/pnpm.sh test:db",
+    "exitCode": 0,
+    "expected": "Wrong digest or expired signature refused",
+    "observed": "Other-digest and other-signer signatures 422; expired 409 then gate REJECTED.",
+    "artifactRefs": [],
+    "limitations": []
+  },
+  {
+    "caseId": "P2-A02.T03",
+    "taskId": "P2-A02",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "cac9a55c9a43f9a8f6a8b940cd53d2bf1ca76e0c",
+    "assessedAt": "2026-10-20T11:58:13.458228+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia (local)",
+      "mpc": "local 3-node MPCium 90e3ee3 where noted",
+      "qualificationOnly": true
+    },
+    "command": "./scripts/pnpm.sh test:db",
+    "exitCode": 0,
+    "expected": "Rejection releases reservation, OWNER_REJECTION",
+    "observed": "Action REJECTED, reservation RELEASED/REJECTED, OWNER_REJECTION event, no attempt.",
+    "artifactRefs": [],
+    "limitations": []
+  },
+  {
+    "caseId": "P2-A02.T04",
+    "taskId": "P2-A02",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "cac9a55c9a43f9a8f6a8b940cd53d2bf1ca76e0c",
+    "assessedAt": "2026-10-20T11:58:13.458228+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia (local)",
+      "mpc": "local 3-node MPCium 90e3ee3 where noted",
+      "qualificationOnly": true
+    },
+    "command": "MPC_PRIVATE_DIR=<local> node scripts/ops/with-test-postgres.mjs 'apps/worker/test/e2e/*.test.ts'",
+    "exitCode": 0,
+    "expected": "Tightened policy applies to next request",
+    "observed": "Fork e2e policy v3 perTx 100000: 120000 PAY attempt DENIED by policy, no transaction.",
+    "artifactRefs": [
+      "evidence/person2/artifacts/execution-fork-20261020/e2e.json"
+    ],
+    "limitations": []
+  },
+  {
+    "caseId": "P2-A02.T05",
+    "taskId": "P2-A02",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "cac9a55c9a43f9a8f6a8b940cd53d2bf1ca76e0c",
+    "assessedAt": "2026-10-20T11:58:13.458228+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia (local)",
+      "mpc": "local 3-node MPCium 90e3ee3 where noted",
+      "qualificationOnly": true
+    },
+    "command": "MPC_PRIVATE_DIR=<local> node scripts/ops/with-test-postgres.mjs 'apps/worker/test/e2e/*.test.ts'",
+    "exitCode": 0,
+    "expected": "Frozen on chain: no new signing",
+    "observed": "Fork e2e FREEZE relayed: next PAY DENIED WALLET_FROZEN, zero attempts.",
+    "artifactRefs": [
+      "evidence/person2/artifacts/execution-fork-20261020/e2e.json"
+    ],
+    "limitations": []
+  },
+  {
+    "caseId": "P2-A02.T06",
+    "taskId": "P2-A02",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "cac9a55c9a43f9a8f6a8b940cd53d2bf1ca76e0c",
+    "assessedAt": "2026-10-20T11:58:13.458228+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia (local)",
+      "mpc": "local 3-node MPCium 90e3ee3 where noted",
+      "qualificationOnly": true
+    },
+    "command": "./scripts/pnpm.sh test:db",
+    "exitCode": 0,
+    "expected": "DemoUSD/USDC reservations independent",
+    "observed": "Concurrent 400000 DUSD and 400000 USDC both admitted; another DUSD 200000 DAILY_CAP.",
+    "artifactRefs": [],
+    "limitations": [
+      "USDC execution path not exercised on chain."
+    ]
+  },
+  {
+    "caseId": "P2-A02.T07",
+    "taskId": "P2-A02",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "cac9a55c9a43f9a8f6a8b940cd53d2bf1ca76e0c",
+    "assessedAt": "2026-10-20T11:58:13.458228+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia (local)",
+      "mpc": "local 3-node MPCium 90e3ee3 where noted",
+      "qualificationOnly": true
+    },
+    "command": "./scripts/pnpm.sh test:db",
+    "exitCode": 0,
+    "expected": "Agent token on approval/policy routes 403",
+    "observed": "Six owner-control routes 403 for an all-scope agent token.",
+    "artifactRefs": [],
+    "limitations": []
+  }
+]

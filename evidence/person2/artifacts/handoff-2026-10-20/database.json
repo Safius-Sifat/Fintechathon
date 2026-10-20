@@ -1,0 +1,16 @@
+{
+  "command": [
+    "./scripts/pnpm.sh",
+    "test:db"
+  ],
+  "exitCode": 0,
+  "startedAt": "2026-10-20T08:34:53.778508+00:00",
+  "finishedAt": "2026-10-20T08:35:05.851094+00:00",
+  "sourceCommit": "e1c093d979250292c142d9cb91272f9d2fc8ece8",
+  "schemaCommit": "04f80a06aef361b305d20f6e371862939a4ec1ba",
+  "log": "evidence/person2/artifacts/handoff-2026-10-20/database.txt",
+  "sourceChanges": {
+    "apps/api/test/golden-vectors.test.ts": "git-blob:81576236e9b29a934a218570ae0979075e3ad432"
+  },
+  "note": "Vector suite was uncommitted at this run; its exact bytes are identified above and committed unchanged in 6676e6f4376bd4e827ab63861beb9b0d9c01587b. The DB command does not discover this non-DB suite."
+}

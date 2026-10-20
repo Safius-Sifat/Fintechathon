@@ -1,0 +1,270 @@
+[
+  {
+    "sourceCommit": "ffcaf3996ff7445f5b9b9a6300041bc5c3e6fda4",
+    "schemaCommit": "04f80a06aef361b305d20f6e371862939a4ec1ba",
+    "assessedAt": "2026-10-20T09:12:53.552857+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "go": "1.25.8",
+      "docker": "28.4.0",
+      "dockerCPUs": 10,
+      "dockerMemoryBytes": 8218034176,
+      "chainExecution": null,
+      "qualificationOnly": true
+    },
+    "exitCode": 0,
+    "caseId": "P2-01.T01",
+    "taskId": "P2-01",
+    "status": "LOCAL_PASS",
+    "command": "MPC_PRIVATE_DIR=/private/tmp/mandate-mpc-qualification-20261020 .cache/mpcium/bin/qualify sign20",
+    "expected": "20 fresh MPC signatures recover registered executor on raw32, including leading zero.",
+    "observed": "Two independently executed20-session batches recovered40/40 signatures; retained primary batch20/20 also independently recovered in viem. Leading-zero digest is a raw32 test vector derived from a public fixture, not a new valid financial Action.",
+    "artifactRefs": [
+      "evidence/person2/artifacts/mpc-local-20261020/twenty-signatures.json",
+      "evidence/person2/artifacts/mpc-local-20261020/initial-twenty-signatures.json",
+      "evidence/person2/artifacts/mpc-local-20261020/viem.txt",
+      "evidence/person2/artifacts/mpc-local-20261020/config-hashes.json"
+    ],
+    "limitations": [
+      "Disposable local fixed-vector qualification only; no financial DB, relayer, reservation or public-chain transaction.",
+      "Azure2CPU/4GiB full-stack capacity and public-interface firewall remain unqualified."
+    ],
+    "localChecks": []
+  },
+  {
+    "sourceCommit": "ffcaf3996ff7445f5b9b9a6300041bc5c3e6fda4",
+    "schemaCommit": "04f80a06aef361b305d20f6e371862939a4ec1ba",
+    "assessedAt": "2026-10-20T09:12:53.552857+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "go": "1.25.8",
+      "docker": "28.4.0",
+      "dockerCPUs": 10,
+      "dockerMemoryBytes": 8218034176,
+      "chainExecution": null,
+      "qualificationOnly": true
+    },
+    "exitCode": 0,
+    "caseId": "P2-01.T02",
+    "taskId": "P2-01",
+    "status": "LOCAL_PASS",
+    "command": "infra/scripts/qualify-mpc.sh",
+    "expected": "Each single signer fails without ordinary-key fallback.",
+    "observed": "Each single0/1/2 returned DENIED with ready=1,required=2; zero usable signatures.",
+    "artifactRefs": [
+      "evidence/person2/artifacts/mpc-local-20261020/single-0.json",
+      "evidence/person2/artifacts/mpc-local-20261020/single-1.json",
+      "evidence/person2/artifacts/mpc-local-20261020/single-2.json"
+    ],
+    "limitations": [
+      "Disposable local fixed-vector qualification only; no financial DB, relayer, reservation or public-chain transaction.",
+      "Azure2CPU/4GiB full-stack capacity and public-interface firewall remain unqualified."
+    ],
+    "localChecks": []
+  },
+  {
+    "sourceCommit": "ffcaf3996ff7445f5b9b9a6300041bc5c3e6fda4",
+    "schemaCommit": "04f80a06aef361b305d20f6e371862939a4ec1ba",
+    "assessedAt": "2026-10-20T09:12:53.552857+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "go": "1.25.8",
+      "docker": "28.4.0",
+      "dockerCPUs": 10,
+      "dockerMemoryBytes": 8218034176,
+      "chainExecution": null,
+      "qualificationOnly": true
+    },
+    "exitCode": 0,
+    "caseId": "P2-01.T02b",
+    "taskId": "P2-01",
+    "status": "LOCAL_PASS",
+    "command": "infra/scripts/qualify-mpc.sh",
+    "expected": "Every pair signs for the same executor.",
+    "observed": "Pairs0+1,0+2,1+2 each returned a recovered signature for 0x443ff3ca757f8d774acee949dab6661676ee1ef8.",
+    "artifactRefs": [
+      "evidence/person2/artifacts/mpc-local-20261020/pair-01.json",
+      "evidence/person2/artifacts/mpc-local-20261020/pair-02.json",
+      "evidence/person2/artifacts/mpc-local-20261020/pair-12.json"
+    ],
+    "limitations": [
+      "Disposable local fixed-vector qualification only; no financial DB, relayer, reservation or public-chain transaction.",
+      "Azure2CPU/4GiB full-stack capacity and public-interface firewall remain unqualified."
+    ],
+    "localChecks": []
+  },
+  {
+    "sourceCommit": "ffcaf3996ff7445f5b9b9a6300041bc5c3e6fda4",
+    "schemaCommit": "04f80a06aef361b305d20f6e371862939a4ec1ba",
+    "assessedAt": "2026-10-20T09:12:53.552857+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "go": "1.25.8",
+      "docker": "28.4.0",
+      "dockerCPUs": 10,
+      "dockerMemoryBytes": 8218034176,
+      "chainExecution": null,
+      "qualificationOnly": true
+    },
+    "exitCode": 0,
+    "caseId": "P2-01.T02c",
+    "taskId": "P2-01",
+    "status": "LOCAL_PASS",
+    "command": "infra/scripts/qualify-mpc.sh",
+    "expected": "One outage still signs; two outages fail closed.",
+    "observed": "Stopping node0 still signed; stopping node1 too returned DENIED,ready=1,required=2. No signature produced for failed request.",
+    "artifactRefs": [
+      "evidence/person2/artifacts/mpc-local-20261020/outage-one.json",
+      "evidence/person2/artifacts/mpc-local-20261020/outage-two.json"
+    ],
+    "limitations": [
+      "Disposable local fixed-vector qualification only; no financial DB, relayer, reservation or public-chain transaction.",
+      "Azure2CPU/4GiB full-stack capacity and public-interface firewall remain unqualified.",
+      "Actual Base Sepolia payment/reservation demo remains blocked; no financial worker exists."
+    ],
+    "localChecks": []
+  },
+  {
+    "sourceCommit": "ffcaf3996ff7445f5b9b9a6300041bc5c3e6fda4",
+    "schemaCommit": "04f80a06aef361b305d20f6e371862939a4ec1ba",
+    "assessedAt": "2026-10-20T09:12:53.552857+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "go": "1.25.8",
+      "docker": "28.4.0",
+      "dockerCPUs": 10,
+      "dockerMemoryBytes": 8218034176,
+      "chainExecution": null,
+      "qualificationOnly": true
+    },
+    "exitCode": 0,
+    "caseId": "P2-01.T03",
+    "taskId": "P2-01",
+    "status": "LOCAL_PASS",
+    "command": "GOTOOLCHAIN=go1.25.8 go -C services/mpc-boundary test -race -count=1 ./...",
+    "expected": "Disabled/missing/empty/wrong authorizer config refuses readiness.",
+    "observed": "Boundary ValidateAuthorization rejects every unsafe config; runner independently validates all3node configs and matching identity. Application financial readiness remains503.",
+    "artifactRefs": [
+      "evidence/person2/artifacts/mpc-local-20261020/mpc-boundary-race.txt",
+      "evidence/person2/artifacts/mpc-local-20261020/public-identities.json"
+    ],
+    "limitations": [
+      "No production signing entrypoint is enabled."
+    ],
+    "localChecks": []
+  },
+  {
+    "sourceCommit": "ffcaf3996ff7445f5b9b9a6300041bc5c3e6fda4",
+    "schemaCommit": "04f80a06aef361b305d20f6e371862939a4ec1ba",
+    "assessedAt": "2026-10-20T09:12:53.552857+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "go": "1.25.8",
+      "docker": "28.4.0",
+      "dockerCPUs": 10,
+      "dockerMemoryBytes": 8218034176,
+      "chainExecution": null,
+      "qualificationOnly": true
+    },
+    "exitCode": 0,
+    "caseId": "P2-01.T04",
+    "taskId": "P2-01",
+    "status": "LOCAL_PASS",
+    "command": "MPC_PRIVATE_DIR=... python3 infra/scripts/check-mpc-transport.py",
+    "expected": "Unauthorized transport requests denied.",
+    "observed": "NATS wrong credentials rejected with required mutual TLS; Consul anonymous read/write/register403 and encoded traversal500. Only127.0.0.1 coordinator bindings; nodes expose no host ports.",
+    "artifactRefs": [
+      "evidence/person2/artifacts/mpc-local-20261020/transport-denials.json",
+      "evidence/person2/artifacts/mpc-local-20261020/runtime-surface.json"
+    ],
+    "limitations": [
+      "Disposable local fixed-vector qualification only; no financial DB, relayer, reservation or public-chain transaction.",
+      "Azure2CPU/4GiB full-stack capacity and public-interface firewall remain unqualified.",
+      "Consul uses isolated bootstrap token for this local ceremony; production restricted node token remains required."
+    ],
+    "localChecks": []
+  },
+  {
+    "sourceCommit": "ffcaf3996ff7445f5b9b9a6300041bc5c3e6fda4",
+    "schemaCommit": "04f80a06aef361b305d20f6e371862939a4ec1ba",
+    "assessedAt": "2026-10-20T09:43:25.086948+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "go": "1.25.8",
+      "docker": "28.4.0",
+      "dockerCPUs": 10,
+      "dockerMemoryBytes": 8218034176,
+      "chainExecution": null,
+      "qualificationOnly": true
+    },
+    "exitCode": 1,
+    "caseId": "P2-01.T05",
+    "taskId": "P2-01",
+    "status": "LOCAL_PASS",
+    "command": "MPC_PRIVATE_DIR=/private/tmp/mandate-mpc-qualification-20261020 .cache/mpcium/bin/qualify post-denial-recovery",
+    "expected": "Restart reloads shares; mismatched/late result rejected; fresh sessions remain usable.",
+    "observed": "Restart reloaded persistent shares with the same executor; wrong wallet/attempt/network/digest/key and late results rejected. After three denials (missing, wrong, mutated with re-signed initiator) the following valid request signed and recovered the executor at 543s, 0.6s after the last denial drained; the earlier 90s timeout was queue head-of-line blocking, not a lost session.",
+    "artifactRefs": [
+      "evidence/person2/artifacts/mpc-local-20261020/idle-recovery-sign.json",
+      "evidence/person2/artifacts/mpc-local-20261020/mpc-adapter-race.txt",
+      "evidence/person2/artifacts/mpc-local-20261020/post-denial-recovery.json",
+      "evidence/person2/artifacts/mpc-local-20261020/restart-persistent-share.json"
+    ],
+    "limitations": [
+      "Each unauthorized request holds the single signing slot ~181s (no reply, 45s wait, MaxDeliver 4); availability limitation with the shared qualification NATS credential.",
+      "Disposable local qualification only."
+    ],
+    "localChecks": [],
+    "history": [
+      {
+        "status": "BLOCKED",
+        "observed": "Normal signer restart passed with same executor before invalid authorization tests; adapter wrong wallet/attempt/network/digest/key and late results rejected. Later valid session after transport restart and invalid authorization backlog timed out90s.",
+        "limitations": [
+          "Post-denial queue recovery is unresolved; no queued request was purged and no secret/key regenerated."
+        ],
+        "assessedAt": "2026-10-20T09:12:53.552857+00:00"
+      }
+    ]
+  },
+  {
+    "sourceCommit": "ffcaf3996ff7445f5b9b9a6300041bc5c3e6fda4",
+    "schemaCommit": "04f80a06aef361b305d20f6e371862939a4ec1ba",
+    "assessedAt": "2026-10-20T09:43:25.086948+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "go": "1.25.8",
+      "docker": "28.4.0",
+      "dockerCPUs": 10,
+      "dockerMemoryBytes": 8218034176,
+      "chainExecution": null,
+      "qualificationOnly": true
+    },
+    "exitCode": 1,
+    "caseId": "P2-01.T06",
+    "taskId": "P2-01",
+    "status": "LOCAL_PASS",
+    "command": "MPC_PRIVATE_DIR=/private/tmp/mandate-mpc-qualification-20261020 .cache/mpcium/bin/qualify post-denial-recovery",
+    "expected": "Exact pinned topology remains blocked on observed failure.",
+    "observed": "Pinned topology matched expectations: three-node DKG, 2-of-3 quorum, single nodes denied, outages, restart and post-denial recovery all observed. No mismatch to block on; the earlier Consul 1.21.5 failure was resolved by pinned 1.22.7 with key validation enabled.",
+    "artifactRefs": [
+      "evidence/person2/artifacts/mpc-local-20261020/dkg-first-error.txt",
+      "evidence/person2/artifacts/mpc-local-20261020/dkg.json",
+      "evidence/person2/artifacts/mpc-local-20261020/idle-recovery-sign.json",
+      "evidence/person2/artifacts/mpc-local-20261020/post-denial-recovery.json"
+    ],
+    "limitations": [
+      "Release G1 still requires Azure 2CPU/4GiB full-stack run and the public Base Sepolia outage drill."
+    ],
+    "localChecks": [],
+    "history": [
+      {
+        "status": "BLOCKED",
+        "observed": "Initial Consul1.21.5 key validation failure fixed by pinned1.22.7 with validation enabled. Three-node DKG and2participant quorum proven, but post-denial fresh signing timed out90s; release G1 remains BLOCKED.",
+        "limitations": [
+          "Pinned event consumer returns on authorization failure without reply; sign consumer waits45s then NAK/redelivers. No cryptographic patch or stream purge."
+        ],
+        "assessedAt": "2026-10-20T09:12:53.552857+00:00"
+      }
+    ]
+  }
+]

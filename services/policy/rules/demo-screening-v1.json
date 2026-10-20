@@ -1,0 +1,5 @@
+{
+  "listId": "demo-screening-v1",
+  "note": "Demonstration screening list; not a sanctions list.",
+  "addresses": ["0x000000000000000000000000000000000000dead"]
+}

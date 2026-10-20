@@ -1,0 +1,146 @@
+[
+  {
+    "caseId": "P2-W02.T01",
+    "taskId": "P2-W02",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "cf0c61eb367d7bb2c276faf0d280b0c094880925",
+    "assessedAt": "2026-10-20T11:27:28.615775+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "node": "22.23.3 (pinned)",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia 84532 at latest block (local, no public transaction)",
+      "qualificationOnly": true
+    },
+    "command": "./scripts/pnpm.sh test:db",
+    "exitCode": 0,
+    "expected": "429/quota/malformed/unavailable never verified empty",
+    "observed": "Five failure modes FAILED with explicit gap, no activity; explicit empty result COMPLETE.",
+    "artifactRefs": [],
+    "limitations": [
+      "Indexer is a local stand-in; real Etherscan V2 key not supplied (BLOCKED for credential-qualified backfill)."
+    ]
+  },
+  {
+    "caseId": "P2-W02.T02",
+    "taskId": "P2-W02",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "cf0c61eb367d7bb2c276faf0d280b0c094880925",
+    "assessedAt": "2026-10-20T11:27:28.615775+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "node": "22.23.3 (pinned)",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia 84532 at latest block (local, no public transaction)",
+      "qualificationOnly": true
+    },
+    "command": "./scripts/pnpm.sh test:db",
+    "exitCode": 0,
+    "expected": "Personal backfill before factory deployment; managed from creation",
+    "observed": "Personal coverage starts before wallet block; managed starts at wallet deployment block.",
+    "artifactRefs": [],
+    "limitations": []
+  },
+  {
+    "caseId": "P2-W02.T03",
+    "taskId": "P2-W02",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "cf0c61eb367d7bb2c276faf0d280b0c094880925",
+    "assessedAt": "2026-10-20T11:27:28.615775+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "node": "22.23.3 (pinned)",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia 84532 at latest block (local, no public transaction)",
+      "qualificationOnly": true
+    },
+    "command": "./scripts/pnpm.sh test:db",
+    "exitCode": 0,
+    "expected": "Duplicate log across pages + registration: one event",
+    "observed": "Duplicated items and repeated backfills yield one activity per side; registration creates no activity itself.",
+    "artifactRefs": [],
+    "limitations": []
+  },
+  {
+    "caseId": "P2-W02.T04",
+    "taskId": "P2-W02",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "cf0c61eb367d7bb2c276faf0d280b0c094880925",
+    "assessedAt": "2026-10-20T11:27:28.615775+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "node": "22.23.3 (pinned)",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia 84532 at latest block (local, no public transaction)",
+      "qualificationOnly": true
+    },
+    "command": "./scripts/pnpm.sh test:db",
+    "exitCode": 0,
+    "expected": "Indexer claim absent from receipt not verified",
+    "observed": "Wrong-value claim stored INDEXER_ASSERTION/UNKNOWN; no alert.",
+    "artifactRefs": [],
+    "limitations": []
+  },
+  {
+    "caseId": "P2-W02.T05",
+    "taskId": "P2-W02",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "cf0c61eb367d7bb2c276faf0d280b0c094880925",
+    "assessedAt": "2026-10-20T11:27:28.615775+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "node": "22.23.3 (pinned)",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia 84532 at latest block (local, no public transaction)",
+      "qualificationOnly": true
+    },
+    "command": "./scripts/pnpm.sh test:db",
+    "exitCode": 0,
+    "expected": "Funding not double expense; categories distinct",
+    "observed": "Personal->managed DemoUSD is FUNDING on both sides; native send OUTGOING with fee on payer. Owner transfer/agent categories implemented via receipt events.",
+    "artifactRefs": [],
+    "limitations": [
+      "OWNER_CONTROL/AGENT categorization not exercised in this test."
+    ]
+  },
+  {
+    "caseId": "P2-W02.T06",
+    "taskId": "P2-W02",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "cf0c61eb367d7bb2c276faf0d280b0c094880925",
+    "assessedAt": "2026-10-20T11:27:28.615775+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "node": "22.23.3 (pinned)",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia 84532 at latest block (local, no public transaction)",
+      "qualificationOnly": true
+    },
+    "command": "./scripts/pnpm.sh test:db",
+    "exitCode": 0,
+    "expected": "Unrelated hash/foreign account rejected",
+    "observed": "Unrelated and unknown hashes 422; other owner and agent token 403; clientRequestId conflict 409.",
+    "artifactRefs": [],
+    "limitations": []
+  },
+  {
+    "caseId": "P2-W02.T07",
+    "taskId": "P2-W02",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "cf0c61eb367d7bb2c276faf0d280b0c094880925",
+    "assessedAt": "2026-10-20T11:27:28.615775+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "node": "22.23.3 (pinned)",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia 84532 at latest block (local, no public transaction)",
+      "qualificationOnly": true
+    },
+    "command": "./scripts/pnpm.sh test:db",
+    "exitCode": 0,
+    "expected": "Internal trace only stays assertion",
+    "observed": "txlistinternal item stored INDEXER_ASSERTION/UNKNOWN.",
+    "artifactRefs": [],
+    "limitations": []
+  }
+]

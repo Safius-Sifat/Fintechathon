@@ -1,28 +1,347 @@
-{
-  "owner": "Person2",
-  "milestone": "M0/W0 auth and database foundation",
-  "sourceBase": "27fd925e89803b5e5166ca286642dc694ffd07d3",
-  "schemaBase": "b67035614c9f1ed456384dee0cd6cf1ef9a59f32",
-  "environment": "macOS arm64, pinned Node22.23.3/pnpm10.20.0, disposable PostgreSQL16.10 with verified TLS",
-  "command": "pnpm test:db",
-  "expected": "Server consumer acceptance passes; financial readiness remains503",
-  "status": "LOCAL_PASS",
-  "limitations": [
-    "Native signing/device exchange not executed",
-    "Financial provisioning and MPC qualification not implemented",
-    "No cloud deployment or chain transaction"
-  ],
-  "task": "P2-W01",
-  "scope": "Auth/session subset only; full task remains in progress",
-  "cases": [
-    "T01 exact challenge/replay/mutations/concurrent consume",
-    "T02 atomic refresh rotation, replay family revocation, random-token non-revocation",
-    "T03 seven-day idle/thirty-day absolute bounds",
-    "T04 original auth_time persists through refresh",
-    "T05 invalid JWT/revoked session/DB failure deny access",
-    "T06 logout only current API session; financial readiness503",
-    "T07 owner isolation with identical device IDs"
-  ],
-  "observed": "Assertions executed in apps/api/test/db/auth.test.ts; command results in implementation report",
-  "exitStatus": 0
-}
+[
+  {
+    "caseId": "P2-W01.T01",
+    "taskId": "P2-W01",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "6676e6f4376bd4e827ab63861beb9b0d9c01587b",
+    "workingTreeDigest": "git-tree:79e24be2e15366510c988850e96528bc1440a17c",
+    "schemaCommit": "04f80a06aef361b305d20f6e371862939a4ec1ba",
+    "environment": {
+      "os": "macOS arm64",
+      "node": "22.23.3",
+      "pnpm": "10.20.0",
+      "database": "Disposable PostgreSQL 16.10 bound to 127.0.0.1 with verified TLS; no user database",
+      "nativeDevice": null,
+      "chainExecution": null,
+      "mpcExecution": null
+    },
+    "command": "./scripts/pnpm.sh test:db",
+    "testName": "P2-W01.T01 exact Login2 succeeds once, challenge consumption races create one session; P2-W01.T01 signed origin/device/domain/owner mutations, unknown fields and expiry reject",
+    "exitCode": 0,
+    "expected": "First exact Login2 challenge succeeds once; replay, mutated device/origin/address/domain and expiry reject without a new session.",
+    "observed": "Backend subset observed: eight concurrent consumes yielded one200/seven401 and one session. Mutated origin/device/signer/domain rejected401; unknown owner field422; foreign Origin401; expiry at300s401 with zero sessions.",
+    "startedAt": "2026-10-20T08:35:55.333291+00:00",
+    "finishedAt": "2026-10-20T08:36:04.865447+00:00",
+    "assessedAt": "2026-10-20T08:37:09.132600+00:00",
+    "artifactRefs": [
+      "evidence/person2/artifacts/handoff-2026-10-20/database-final.txt",
+      "docs/platform-operations.md"
+    ],
+    "limitations": [
+      "Public fixture signer is software only. Actual phone signature and NativeSession exchange are not executed."
+    ],
+    "localChecks": [
+      {
+        "status": "LOCAL_PASS",
+        "scope": "Server auth/session subset only",
+        "testNames": [
+          "P2-W01.T01 exact Login2 succeeds once, challenge consumption races create one session",
+          "P2-W01.T01 signed origin/device/domain/owner mutations, unknown fields and expiry reject"
+        ],
+        "command": "./scripts/pnpm.sh test:db",
+        "exitCode": 0,
+        "startedAt": "2026-10-20T08:35:55.333291+00:00",
+        "finishedAt": "2026-10-20T08:36:04.865447+00:00",
+        "observed": "Two named tests exercised exact challenge races and signed mutations/rejections; refresh token is32bytes and only its hash was found in database rows.",
+        "artifactRefs": [
+          "evidence/person2/artifacts/handoff-2026-10-20/database-final.txt"
+        ]
+      }
+    ]
+  },
+  {
+    "caseId": "P2-W01.T02",
+    "taskId": "P2-W01",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "6676e6f4376bd4e827ab63861beb9b0d9c01587b",
+    "workingTreeDigest": "git-tree:79e24be2e15366510c988850e96528bc1440a17c",
+    "schemaCommit": "04f80a06aef361b305d20f6e371862939a4ec1ba",
+    "environment": {
+      "os": "macOS arm64",
+      "node": "22.23.3",
+      "pnpm": "10.20.0",
+      "database": "Disposable PostgreSQL 16.10 bound to 127.0.0.1 with verified TLS; no user database",
+      "nativeDevice": null,
+      "chainExecution": null,
+      "mpcExecution": null
+    },
+    "command": "./scripts/pnpm.sh test:db",
+    "testName": "P2-W01.T02 rotation races revoke family, including the winning JWT; random tokens cannot revoke; P2-W01.T02 sequential used-token replay revocation commits before its 401 response",
+    "exitCode": 0,
+    "expected": "Atomic refresh rotation allows at most one winner; consumed-token reuse revokes family, requiring fresh signed login.",
+    "observed": "Backend subset observed: concurrent refresh statuses200/401, old and winning JWTs401, winner refresh401; sequential token replay revoked rotated JWT before401; random token did not revoke valid access; new signed fixture login recovered access.",
+    "startedAt": "2026-10-20T08:35:55.333291+00:00",
+    "finishedAt": "2026-10-20T08:36:04.865447+00:00",
+    "assessedAt": "2026-10-20T08:37:09.132600+00:00",
+    "artifactRefs": [
+      "evidence/person2/artifacts/handoff-2026-10-20/database-final.txt",
+      "docs/platform-operations.md"
+    ],
+    "limitations": [
+      "Native client single-flight and response-loss recovery/relogin UI are pending."
+    ],
+    "localChecks": [
+      {
+        "status": "LOCAL_PASS",
+        "scope": "Server auth/session subset only",
+        "testNames": [
+          "P2-W01.T02 rotation races revoke family, including the winning JWT; random tokens cannot revoke",
+          "P2-W01.T02 sequential used-token replay revocation commits before its 401 response"
+        ],
+        "command": "./scripts/pnpm.sh test:db",
+        "exitCode": 0,
+        "startedAt": "2026-10-20T08:35:55.333291+00:00",
+        "finishedAt": "2026-10-20T08:36:04.865447+00:00",
+        "observed": "Both concurrent and sequential replay tests passed against real PostgreSQL.",
+        "artifactRefs": [
+          "evidence/person2/artifacts/handoff-2026-10-20/database-final.txt"
+        ]
+      }
+    ]
+  },
+  {
+    "caseId": "P2-W01.T03",
+    "taskId": "P2-W01",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "6676e6f4376bd4e827ab63861beb9b0d9c01587b",
+    "workingTreeDigest": "git-tree:79e24be2e15366510c988850e96528bc1440a17c",
+    "schemaCommit": "04f80a06aef361b305d20f6e371862939a4ec1ba",
+    "environment": {
+      "os": "macOS arm64",
+      "node": "22.23.3",
+      "pnpm": "10.20.0",
+      "database": "Disposable PostgreSQL 16.10 bound to 127.0.0.1 with verified TLS; no user database",
+      "nativeDevice": null,
+      "chainExecution": null,
+      "mpcExecution": null
+    },
+    "command": "./scripts/pnpm.sh test:db",
+    "testName": "P2-W01.T03 seven-day idle and thirty-day absolute limits survive refresh",
+    "exitCode": 0,
+    "expected": "Seven-day idle/thirty-day absolute expiry rejects refresh; local seed/address/factory mapping remain unchanged.",
+    "observed": "Backend expiry subset observed: refresh at604800s401; four rotations six days apart succeeded while auth_time remained original; at2592000s401 and refresh expiry never exceeded absolute bound.",
+    "startedAt": "2026-10-20T08:35:55.333291+00:00",
+    "finishedAt": "2026-10-20T08:36:04.865447+00:00",
+    "assessedAt": "2026-10-20T08:37:09.132600+00:00",
+    "artifactRefs": [
+      "evidence/person2/artifacts/handoff-2026-10-20/database-final.txt",
+      "docs/platform-operations.md"
+    ],
+    "limitations": [
+      "Seed/address preservation and factory mapping were not asserted on a native device or chain."
+    ],
+    "localChecks": [
+      {
+        "status": "LOCAL_PASS",
+        "scope": "Server auth/session subset only",
+        "testNames": [
+          "P2-W01.T03 seven-day idle and thirty-day absolute limits survive refresh"
+        ],
+        "command": "./scripts/pnpm.sh test:db",
+        "exitCode": 0,
+        "startedAt": "2026-10-20T08:35:55.333291+00:00",
+        "finishedAt": "2026-10-20T08:36:04.865447+00:00",
+        "observed": "Real database tokens were exercised with an injected test clock; this is not a thirty-day wall-clock soak.",
+        "artifactRefs": [
+          "evidence/person2/artifacts/handoff-2026-10-20/database-final.txt"
+        ]
+      }
+    ]
+  },
+  {
+    "caseId": "P2-W01.T04",
+    "taskId": "P2-W01",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "6676e6f4376bd4e827ab63861beb9b0d9c01587b",
+    "workingTreeDigest": "git-tree:79e24be2e15366510c988850e96528bc1440a17c",
+    "schemaCommit": "04f80a06aef361b305d20f6e371862939a4ec1ba",
+    "environment": {
+      "os": "macOS arm64",
+      "node": "22.23.3",
+      "pnpm": "10.20.0",
+      "database": "Disposable PostgreSQL 16.10 bound to 127.0.0.1 with verified TLS; no user database",
+      "nativeDevice": null,
+      "chainExecution": null,
+      "mpcExecution": null
+    },
+    "command": "./scripts/pnpm.sh test:db",
+    "testName": "P2-W01.T04 fresh refresh preserves original auth_time and cannot revoke other/all sessions",
+    "exitCode": 0,
+    "expected": "Refreshing a session whose signed-login auth_time is older than5min cannot authorize other/all-session revoke.",
+    "observed": "Original auth_time survived refresh after301s; ALL and other-session revoke returned401 REAUTH_REQUIRED; target remained accessible; fresh fixture-signed login could revoke it.",
+    "startedAt": "2026-10-20T08:35:55.333291+00:00",
+    "finishedAt": "2026-10-20T08:36:04.865447+00:00",
+    "assessedAt": "2026-10-20T08:37:09.132600+00:00",
+    "artifactRefs": [
+      "evidence/person2/artifacts/handoff-2026-10-20/database-final.txt",
+      "docs/platform-operations.md"
+    ],
+    "limitations": [
+      "Actual phone consent and native re-login flow remain unexecuted."
+    ],
+    "localChecks": [
+      {
+        "status": "LOCAL_PASS",
+        "scope": "Server auth/session subset only",
+        "testNames": [
+          "P2-W01.T04 fresh refresh preserves original auth_time and cannot revoke other/all sessions"
+        ],
+        "command": "./scripts/pnpm.sh test:db",
+        "exitCode": 0,
+        "startedAt": "2026-10-20T08:35:55.333291+00:00",
+        "finishedAt": "2026-10-20T08:36:04.865447+00:00",
+        "observed": "Both ALL and explicit other-session IDs rejected with REAUTH_REQUIRED after refresh.",
+        "artifactRefs": [
+          "evidence/person2/artifacts/handoff-2026-10-20/database-final.txt"
+        ]
+      }
+    ]
+  },
+  {
+    "caseId": "P2-W01.T05",
+    "taskId": "P2-W01",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "6676e6f4376bd4e827ab63861beb9b0d9c01587b",
+    "workingTreeDigest": "git-tree:79e24be2e15366510c988850e96528bc1440a17c",
+    "schemaCommit": "04f80a06aef361b305d20f6e371862939a4ec1ba",
+    "environment": {
+      "os": "macOS arm64",
+      "node": "22.23.3",
+      "pnpm": "10.20.0",
+      "database": "Disposable PostgreSQL 16.10 bound to 127.0.0.1 with verified TLS; no user database",
+      "nativeDevice": null,
+      "chainExecution": null,
+      "mpcExecution": null
+    },
+    "command": "./scripts/pnpm.sh test:db",
+    "testName": "P2-W01.T05 JWT expiry, signature, audience, issuer, algorithm, type and DB identity are checked",
+    "exitCode": 0,
+    "expected": "Revoked session/unexpired JWT and unavailable auth DB deny private API access; direct local wallet still works.",
+    "observed": "Backend subset observed: auth_time/type/owner/device/session/issuer/audience/signature/algorithm mutations and expired JWT rejected401; closed DB pool returned503 retryable without leaking pool detail; health remained200. Revoked JWT denial was exercised by T02 and T04.",
+    "startedAt": "2026-10-20T08:35:55.333291+00:00",
+    "finishedAt": "2026-10-20T08:36:04.865447+00:00",
+    "assessedAt": "2026-10-20T08:37:09.132600+00:00",
+    "artifactRefs": [
+      "evidence/person2/artifacts/handoff-2026-10-20/database-final.txt",
+      "docs/platform-operations.md"
+    ],
+    "limitations": [
+      "Closed pool models auth-store unavailability; no actual database crash/network partition or direct native RPC/keys check."
+    ],
+    "localChecks": [
+      {
+        "status": "LOCAL_PASS",
+        "scope": "Server auth/session subset only",
+        "testNames": [
+          "P2-W01.T05 JWT expiry, signature, audience, issuer, algorithm, type and DB identity are checked"
+        ],
+        "command": "./scripts/pnpm.sh test:db",
+        "exitCode": 0,
+        "startedAt": "2026-10-20T08:35:55.333291+00:00",
+        "finishedAt": "2026-10-20T08:36:04.865447+00:00",
+        "observed": "Untrusted JWT variants and DB-unavailable private access were denied; revocation assertions additionally appear in T02/T04 logs.",
+        "artifactRefs": [
+          "evidence/person2/artifacts/handoff-2026-10-20/database-final.txt"
+        ]
+      }
+    ]
+  },
+  {
+    "caseId": "P2-W01.T06",
+    "taskId": "P2-W01",
+    "status": "BLOCKED",
+    "sourceCommit": "6676e6f4376bd4e827ab63861beb9b0d9c01587b",
+    "workingTreeDigest": "git-tree:79e24be2e15366510c988850e96528bc1440a17c",
+    "schemaCommit": "04f80a06aef361b305d20f6e371862939a4ec1ba",
+    "environment": {
+      "os": "macOS arm64",
+      "node": "22.23.3",
+      "pnpm": "10.20.0",
+      "database": "Disposable PostgreSQL 16.10 bound to 127.0.0.1 with verified TLS; no user database",
+      "nativeDevice": null,
+      "chainExecution": null,
+      "mpcExecution": null
+    },
+    "command": null,
+    "testName": null,
+    "exitCode": null,
+    "expected": "Logout with active on-chain Permit/agent token kills only API session; separate confirmed stop is required for chain authority.",
+    "observed": "Full active-permit/token/chain case not run. Backend logout subset passed; current stop endpoint501 and readiness503 do not prove active on-chain authority behavior.",
+    "startedAt": null,
+    "finishedAt": null,
+    "assessedAt": "2026-10-20T08:37:09.132600+00:00",
+    "artifactRefs": [
+      "evidence/person2/artifacts/handoff-2026-10-20/database-final.txt",
+      "docs/platform-operations.md"
+    ],
+    "limitations": [
+      "No active on-chain Permit or agent token was created or inspected. No chain state, authority display or native wallet behavior was tested."
+    ],
+    "localChecks": [
+      {
+        "status": "LOCAL_PASS",
+        "scope": "Server auth/session subset only",
+        "testNames": [
+          "P2-W01.T06 logout only revokes current API session and cannot replay cached authorization"
+        ],
+        "command": "./scripts/pnpm.sh test:db",
+        "exitCode": 0,
+        "startedAt": "2026-10-20T08:35:55.333291+00:00",
+        "finishedAt": "2026-10-20T08:36:04.865447+00:00",
+        "observed": "Current-session logout200; cached replay401; access/refresh401; independent session200; owner identity persisted; stop501; readyz503.",
+        "artifactRefs": [
+          "evidence/person2/artifacts/handoff-2026-10-20/database-final.txt"
+        ]
+      }
+    ]
+  },
+  {
+    "caseId": "P2-W01.T07",
+    "taskId": "P2-W01",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "6676e6f4376bd4e827ab63861beb9b0d9c01587b",
+    "workingTreeDigest": "git-tree:79e24be2e15366510c988850e96528bc1440a17c",
+    "schemaCommit": "04f80a06aef361b305d20f6e371862939a4ec1ba",
+    "environment": {
+      "os": "macOS arm64",
+      "node": "22.23.3",
+      "pnpm": "10.20.0",
+      "database": "Disposable PostgreSQL 16.10 bound to 127.0.0.1 with verified TLS; no user database",
+      "nativeDevice": null,
+      "chainExecution": null,
+      "mpcExecution": null
+    },
+    "command": "./scripts/pnpm.sh test:db",
+    "testName": "P2-W01.T07 sessions are isolated by owner despite reused deviceId, revoke rejects foreign IDs atomically",
+    "exitCode": 0,
+    "expected": "Independent A/B sessions and untrusted reused device label cannot leak tokens/sessions/private annotations or confer authority.",
+    "observed": "Backend session subset observed: reused deviceId did not merge identities; A listed only its two sessions; foreign mixed revoke403 was atomic; cross-owner refresh401; A ALL-revoke preserved B200.",
+    "startedAt": "2026-10-20T08:35:55.333291+00:00",
+    "finishedAt": "2026-10-20T08:36:04.865447+00:00",
+    "assessedAt": "2026-10-20T08:37:09.132600+00:00",
+    "artifactRefs": [
+      "evidence/person2/artifacts/handoff-2026-10-20/database-final.txt",
+      "docs/platform-operations.md"
+    ],
+    "limitations": [
+      "Native account switching, untrusted device-label UI and private annotations were not exercised. Agent-token separation is pending."
+    ],
+    "localChecks": [
+      {
+        "status": "LOCAL_PASS",
+        "scope": "Server auth/session subset only",
+        "testNames": [
+          "P2-W01.T07 sessions are isolated by owner despite reused deviceId, revoke rejects foreign IDs atomically"
+        ],
+        "command": "./scripts/pnpm.sh test:db",
+        "exitCode": 0,
+        "startedAt": "2026-10-20T08:35:55.333291+00:00",
+        "finishedAt": "2026-10-20T08:36:04.865447+00:00",
+        "observed": "Session listing, foreign revoke, cross-owner refresh and ALL revoke were checked against independent real database owners.",
+        "artifactRefs": [
+          "evidence/person2/artifacts/handoff-2026-10-20/database-final.txt"
+        ]
+      }
+    ]
+  }
+]

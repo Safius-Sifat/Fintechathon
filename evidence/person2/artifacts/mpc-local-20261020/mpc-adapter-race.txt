@@ -1,0 +1,22 @@
+{"Time":"2026-10-20T15:11:34.506189+06:00","Action":"start","Package":"mandate.local/mpc-adapter/cmd/qualify"}
+{"Time":"2026-10-20T15:11:34.506246+06:00","Action":"output","Package":"mandate.local/mpc-adapter/cmd/qualify","Output":"?   \tmandate.local/mpc-adapter/cmd/qualify\t[no test files]\n"}
+{"Time":"2026-10-20T15:11:34.506302+06:00","Action":"skip","Package":"mandate.local/mpc-adapter/cmd/qualify","Elapsed":0}
+{"Time":"2026-10-20T15:11:34.772725+06:00","Action":"start","Package":"mandate.local/mpc-adapter/internal"}
+{"Time":"2026-10-20T15:11:34.772779+06:00","Action":"start","Package":"mandate.local/mpc-adapter/internal/qualification"}
+{"Time":"2026-10-20T15:11:34.772794+06:00","Action":"output","Package":"mandate.local/mpc-adapter/internal/qualification","Output":"?   \tmandate.local/mpc-adapter/internal/qualification\t[no test files]\n"}
+{"Time":"2026-10-20T15:11:34.772803+06:00","Action":"skip","Package":"mandate.local/mpc-adapter/internal/qualification","Elapsed":0}
+{"Time":"2026-10-20T15:11:35.154543+06:00","Action":"run","Package":"mandate.local/mpc-adapter/internal","Test":"TestResultBindingAndDuplicateAction"}
+{"Time":"2026-10-20T15:11:35.154583+06:00","Action":"output","Package":"mandate.local/mpc-adapter/internal","Test":"TestResultBindingAndDuplicateAction","Output":"=== RUN   TestResultBindingAndDuplicateAction\n"}
+{"Time":"2026-10-20T15:11:35.258212+06:00","Action":"output","Package":"mandate.local/mpc-adapter/internal","Test":"TestResultBindingAndDuplicateAction","Output":"--- PASS: TestResultBindingAndDuplicateAction (0.10s)\n"}
+{"Time":"2026-10-20T15:11:35.258229+06:00","Action":"pass","Package":"mandate.local/mpc-adapter/internal","Test":"TestResultBindingAndDuplicateAction","Elapsed":0.1}
+{"Time":"2026-10-20T15:11:35.258239+06:00","Action":"run","Package":"mandate.local/mpc-adapter/internal","Test":"TestTimeoutUnknownAndUnavailable"}
+{"Time":"2026-10-20T15:11:35.258241+06:00","Action":"output","Package":"mandate.local/mpc-adapter/internal","Test":"TestTimeoutUnknownAndUnavailable","Output":"=== RUN   TestTimeoutUnknownAndUnavailable\n"}
+{"Time":"2026-10-20T15:11:35.28122+06:00","Action":"output","Package":"mandate.local/mpc-adapter/internal","Test":"TestTimeoutUnknownAndUnavailable","Output":"--- PASS: TestTimeoutUnknownAndUnavailable (0.02s)\n"}
+{"Time":"2026-10-20T15:11:35.281227+06:00","Action":"pass","Package":"mandate.local/mpc-adapter/internal","Test":"TestTimeoutUnknownAndUnavailable","Elapsed":0.02}
+{"Time":"2026-10-20T15:11:35.281239+06:00","Action":"run","Package":"mandate.local/mpc-adapter/internal","Test":"TestRequiresDependencies"}
+{"Time":"2026-10-20T15:11:35.281241+06:00","Action":"output","Package":"mandate.local/mpc-adapter/internal","Test":"TestRequiresDependencies","Output":"=== RUN   TestRequiresDependencies\n"}
+{"Time":"2026-10-20T15:11:35.2813+06:00","Action":"output","Package":"mandate.local/mpc-adapter/internal","Test":"TestRequiresDependencies","Output":"--- PASS: TestRequiresDependencies (0.00s)\n"}
+{"Time":"2026-10-20T15:11:35.281304+06:00","Action":"pass","Package":"mandate.local/mpc-adapter/internal","Test":"TestRequiresDependencies","Elapsed":0}
+{"Time":"2026-10-20T15:11:35.28132+06:00","Action":"output","Package":"mandate.local/mpc-adapter/internal","Output":"PASS\n"}
+{"Time":"2026-10-20T15:11:36.290106+06:00","Action":"output","Package":"mandate.local/mpc-adapter/internal","Output":"ok  \tmandate.local/mpc-adapter/internal\t1.517s\n"}
+{"Time":"2026-10-20T15:11:36.290163+06:00","Action":"pass","Package":"mandate.local/mpc-adapter/internal","Elapsed":1.517}

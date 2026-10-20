@@ -1,0 +1,105 @@
+[
+  {
+    "caseId": "P2-W04.T01",
+    "taskId": "P2-W04",
+    "status": "BLOCKED",
+    "sourceCommit": "1dff9fabb1e472c29e2ee82823656b56b64cc661",
+    "assessedAt": "2026-10-20T12:11:02.348013+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia (local)",
+      "qualificationOnly": true
+    },
+    "command": "n/a",
+    "exitCode": null,
+    "expected": "App logout during task does not change authority",
+    "observed": "Logout revokes only the API session and push devices (tested); on-chain grant unaffected by design.",
+    "artifactRefs": [],
+    "limitations": [
+      "Needs Person3 installed app."
+    ]
+  },
+  {
+    "caseId": "P2-W04.T02",
+    "taskId": "P2-W04",
+    "status": "BLOCKED",
+    "sourceCommit": "1dff9fabb1e472c29e2ee82823656b56b64cc661",
+    "assessedAt": "2026-10-20T12:11:02.348013+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia (local)",
+      "qualificationOnly": true
+    },
+    "command": "n/a",
+    "exitCode": null,
+    "expected": "API stopped: native personal send and owner relay",
+    "observed": "Owner commands need no MPC or API consent on chain.",
+    "artifactRefs": [],
+    "limitations": [
+      "Needs Person3 native path."
+    ]
+  },
+  {
+    "caseId": "P2-W04.T03",
+    "taskId": "P2-W04",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "1dff9fabb1e472c29e2ee82823656b56b64cc661",
+    "assessedAt": "2026-10-20T12:11:02.348013+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia (local)",
+      "qualificationOnly": true
+    },
+    "command": "pnpm test:db",
+    "exitCode": 0,
+    "expected": "Indexer unavailable: explicit coverage, RPC balance",
+    "observed": "Indexer failures produce FAILED coverage with gaps; registration and balances use RPC.",
+    "artifactRefs": [],
+    "limitations": [
+      "No real Etherscan credential."
+    ]
+  },
+  {
+    "caseId": "P2-W04.T04",
+    "taskId": "P2-W04",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "1dff9fabb1e472c29e2ee82823656b56b64cc661",
+    "assessedAt": "2026-10-20T12:11:02.348013+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia (local)",
+      "qualificationOnly": true
+    },
+    "command": "case files",
+    "exitCode": 0,
+    "expected": "Blocked cases keep milestone incomplete",
+    "observed": "All blocked cases recorded BLOCKED with dependency; mpcium lock remains local-qualified-public-gates-pending; /readyz 503.",
+    "artifactRefs": [],
+    "limitations": []
+  },
+  {
+    "caseId": "P2-W04.T05",
+    "taskId": "P2-W04",
+    "status": "BLOCKED",
+    "sourceCommit": "1dff9fabb1e472c29e2ee82823656b56b64cc661",
+    "assessedAt": "2026-10-20T12:11:02.348013+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia (local)",
+      "qualificationOnly": true
+    },
+    "command": "n/a",
+    "exitCode": null,
+    "expected": "APK/iOS/API/contracts/verifier manifest cross-check",
+    "observed": "API uses chain 84532, wallet domain 5, Login 2 from shared schema.",
+    "artifactRefs": [],
+    "limitations": [
+      "Needs final manifests from Person1/3/4."
+    ]
+  }
+]

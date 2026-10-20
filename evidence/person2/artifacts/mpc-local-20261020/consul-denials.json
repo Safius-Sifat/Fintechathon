@@ -1,0 +1,27 @@
+[
+  {
+    "name": "colon-key",
+    "httpStatus": 200,
+    "result": "LOCAL_PASS"
+  },
+  {
+    "name": "anonymous-read",
+    "httpStatus": 403,
+    "result": "LOCAL_PASS"
+  },
+  {
+    "name": "anonymous-write",
+    "httpStatus": 403,
+    "result": "LOCAL_PASS"
+  },
+  {
+    "name": "anonymous-register",
+    "httpStatus": 403,
+    "result": "LOCAL_PASS"
+  },
+  {
+    "name": "traversal",
+    "httpStatus": 500,
+    "result": "LOCAL_PASS"
+  }
+]

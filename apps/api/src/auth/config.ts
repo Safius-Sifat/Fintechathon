@@ -25,8 +25,12 @@ export function validateAuthConfig(config: AuthConfig): AuthConfig {
 export async function loadAuthConfig(
   env: NodeJS.ProcessEnv,
 ): Promise<AuthConfig | null> {
-  if (!env.AUTH_ORIGIN || !env.AUTH_JWT_SECRET_FILE) return null;
-  const encoded = (await readFile(env.AUTH_JWT_SECRET_FILE, "utf8")).trim();
+  // The key comes from a file or, in the release container, the runtime env file.
+  if (!env.AUTH_ORIGIN || (!env.AUTH_JWT_SECRET_FILE && !env.AUTH_JWT_SECRET))
+    return null;
+  const encoded = env.AUTH_JWT_SECRET_FILE
+    ? (await readFile(env.AUTH_JWT_SECRET_FILE, "utf8")).trim()
+    : env.AUTH_JWT_SECRET!.trim();
   if (!/^[A-Za-z0-9_-]{43,}$/.test(encoded))
     throw new Error("Invalid authentication key encoding");
   const signingKey = Buffer.from(encoded, "base64url");

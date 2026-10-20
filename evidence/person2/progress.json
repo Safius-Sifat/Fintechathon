@@ -1,29 +1,79 @@
 {
   "owner": "Person2",
-  "updatedAt": "2026-10-18T13:03:56.830834+00:00",
-  "milestone": "M0/W0 auth/session foundation",
+  "updatedAt": "2026-10-20T08:37:09.132600+00:00",
+  "milestone": "M0/W0 auth/session foundation and v7 API consumer parity; broader tasks incomplete",
   "tasks": {
     "P2-03": {
       "status": "IN_PROGRESS",
       "localEvidence": [
-        "Forward-only auth/session migration and shared Login2 consumer acceptance",
-        "Authenticated owner mutation idempotency",
-        "Explicit trusted loopback ingress with forwarded-client rate isolation and spoof resistance"
+        "Auth-only session-revoke idempotency:20 concurrent requests/one persisted response; changed session body409. This is not financial/outbox T01 acceptance.",
+        "Auth session owner isolation and request bounds; no wallet/task/evidence/agent-token acceptance."
       ],
       "blockedBy": [
         "Financial business tables, provisioning, worker/outbox and financial acceptance remain later work"
-      ]
+      ],
+      "requiredCases": [
+        "P2-03.T01",
+        "P2-03.T02",
+        "P2-03.T03",
+        "P2-03.T04",
+        "P2-03.T05",
+        "P2-03.T06",
+        "P2-03.T07"
+      ],
+      "caseSummary": {
+        "PASS": 0,
+        "LOCAL_PASS": 0,
+        "BLOCKED": 7,
+        "NOT_RUN": 0
+      }
     },
     "P2-W01": {
       "status": "IN_PROGRESS",
       "localEvidence": [
-        "Server session rotation/revocation/account-isolation cases pass against real PostgreSQL"
+        "Real PostgreSQL server-side Login2, refresh/replay, expiry, reauth, revocation/outage and session-isolation assertions; LOCAL_PASS scoped to backend."
       ],
       "blockedBy": [
-        "Person3 native signing/NativeSession integration and installed-device acceptance pending"
-      ]
+        "Person3 actual native signing/NativeSession exchange and installed-device acceptance pending.",
+        "T06 requires active chain Permit/agent token and authority display; not exercised.",
+        "Local funds/keys/RPC independence after expiry/logout/outage remains native/chain acceptance."
+      ],
+      "requiredCases": [
+        "P2-W01.T01",
+        "P2-W01.T02",
+        "P2-W01.T03",
+        "P2-W01.T04",
+        "P2-W01.T05",
+        "P2-W01.T06",
+        "P2-W01.T07"
+      ],
+      "caseSummary": {
+        "PASS": 0,
+        "LOCAL_PASS": 6,
+        "BLOCKED": 1,
+        "NOT_RUN": 0
+      }
     }
   },
   "financialReadiness": false,
-  "mpcQualification": "NOT_IMPLEMENTED"
+  "mpcQualification": "NOT_IMPLEMENTED",
+  "sourceCommit": "6676e6f4376bd4e827ab63861beb9b0d9c01587b",
+  "schemaCommit": "04f80a06aef361b305d20f6e371862939a4ec1ba",
+  "apiGoldenVectorParity": {
+    "status": "LOCAL_PASS",
+    "sourceCommit": "6676e6f4376bd4e827ab63861beb9b0d9c01587b",
+    "schemaCommit": "04f80a06aef361b305d20f6e371862939a4ec1ba",
+    "testFile": "apps/api/test/golden-vectors.test.ts",
+    "valid": 7,
+    "negativeOrMutation": 31,
+    "apiSuiteTests": 42,
+    "artifactRefs": [
+      "evidence/person2/artifacts/handoff-2026-10-20/api.txt"
+    ],
+    "limitations": [
+      "Shared schema consumption only; no MPC signing, financial route execution, native signing or chain transaction."
+    ]
+  },
+  "milestonePassedAt": null,
+  "handoffDoc": "docs/platform-operations.md"
 }

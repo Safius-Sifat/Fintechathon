@@ -1,0 +1,6 @@
+{
+  "dockerVersion": "28.4.0",
+  "dockerCPUs": 10,
+  "dockerMemoryBytes": 8218034176,
+  "azure4GiBQualification": false
+}

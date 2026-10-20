@@ -1,0 +1,3 @@
+node scripts/not-ready.mjs check-platform
+check-platform: acceptance/implementation is not available in the bootstrap. Follow the assigned handoff in docs/plans/.
+make: *** [check-platform] Error 1

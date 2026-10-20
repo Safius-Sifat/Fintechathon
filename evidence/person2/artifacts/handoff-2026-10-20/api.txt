@@ -1,0 +1,269 @@
+
+> @mandate/api@0.0.0 check /private/tmp/fintechathon-person2-continue/apps/api
+> tsc --noEmit && tsx --test test/*.test.ts
+
+TAP version 13
+# Subtest: auth configuration requires an explicit strong key and exact HTTPS origin
+ok 1 - auth configuration requires an explicit strong key and exact HTTPS origin
+  ---
+  duration_ms: 9.497083
+  type: 'test'
+  ...
+# Subtest: unconfigured auth fails closed while foundation health stays available
+ok 2 - unconfigured auth fails closed while foundation health stays available
+  ---
+  duration_ms: 61.552792
+  type: 'test'
+  ...
+# Subtest: proxy trust defaults off and accepts only explicit IP addresses for API ingress
+ok 3 - proxy trust defaults off and accepts only explicit IP addresses for API ingress
+  ---
+  duration_ms: 18.807542
+  type: 'test'
+  ...
+# {"level":30,"time":1792485357005,"pid":14101,"hostname":"Safiuss-MacBook-Air.local","msg":"Server listening at http://127.0.0.1:58769"}
+# Subtest: API startup reads the explicit trusted ingress configuration
+ok 4 - API startup reads the explicit trusted ingress configuration
+  ---
+  duration_ms: 38.137708
+  type: 'test'
+  ...
+# {"level":30,"time":1792485357006,"pid":14101,"hostname":"Safiuss-MacBook-Air.local","reqId":"req-1","req":{"method":"GET","url":"/peer","host":"localhost:80","remoteAddress":"203.0.113.10"},"msg":"incoming request"}
+# {"level":30,"time":1792485357007,"pid":14101,"hostname":"Safiuss-MacBook-Air.local","reqId":"req-1","res":{"statusCode":200},"responseTime":0.4696660041809082,"msg":"request completed"}
+# Subtest: P2 parity login-v7.json/login2: exact digest, typed data and supplied signer
+ok 5 - P2 parity login-v7.json/login2: exact digest, typed data and supplied signer
+  ---
+  duration_ms: 98.661875
+  type: 'test'
+  ...
+# Subtest: P2 parity login-v7.json/unknown-field: SCHEMA_REJECT
+ok 6 - P2 parity login-v7.json/unknown-field: SCHEMA_REJECT
+  ---
+  duration_ms: 2.059083
+  type: 'test'
+  ...
+# Subtest: P2 parity login-v7.json/null-field: SCHEMA_REJECT
+ok 7 - P2 parity login-v7.json/null-field: SCHEMA_REJECT
+  ---
+  duration_ms: 0.674875
+  type: 'test'
+  ...
+# Subtest: P2 parity login-v7.json/missing-field: SCHEMA_REJECT
+ok 8 - P2 parity login-v7.json/missing-field: SCHEMA_REJECT
+  ---
+  duration_ms: 1.370917
+  type: 'test'
+  ...
+# Subtest: P2 parity login-v7.json/wrong-chain: DOMAIN_REJECT
+ok 9 - P2 parity login-v7.json/wrong-chain: DOMAIN_REJECT
+  ---
+  duration_ms: 0.548208
+  type: 'test'
+  ...
+# Subtest: P2 parity login-v7.json/old-domain-version: DOMAIN_REJECT
+ok 10 - P2 parity login-v7.json/old-domain-version: DOMAIN_REJECT
+  ---
+  duration_ms: 0.39525
+  type: 'test'
+  ...
+# Subtest: P2 parity login-v7.json/one-unit-change: SIGNER_MISMATCH
+ok 11 - P2 parity login-v7.json/one-unit-change: SIGNER_MISMATCH
+  ---
+  duration_ms: 10.872375
+  type: 'test'
+  ...
+# Subtest: P2 parity login-v7.json/reordered-fields: SIGNER_MISMATCH
+ok 12 - P2 parity login-v7.json/reordered-fields: SIGNER_MISMATCH
+  ---
+  duration_ms: 10.288416
+  type: 'test'
+  ...
+# Subtest: P2 parity login-v7.json/device-changed: SIGNER_MISMATCH
+ok 13 - P2 parity login-v7.json/device-changed: SIGNER_MISMATCH
+  ---
+  duration_ms: 13.677875
+  type: 'test'
+  ...
+# Subtest: P2 parity login-v7.json/origin-changed: SIGNER_MISMATCH
+ok 14 - P2 parity login-v7.json/origin-changed: SIGNER_MISMATCH
+  ---
+  duration_ms: 8.531125
+  type: 'test'
+  ...
+# Subtest: P2 parity owner-transfer-v7.json/sweep-demousd: exact digest, typed data and supplied signer
+ok 15 - P2 parity owner-transfer-v7.json/sweep-demousd: exact digest, typed data and supplied signer
+  ---
+  duration_ms: 11.666417
+  type: 'test'
+  ...
+# Subtest: P2 parity owner-transfer-v7.json/sweep-eth: exact digest, typed data and supplied signer
+ok 16 - P2 parity owner-transfer-v7.json/sweep-eth: exact digest, typed data and supplied signer
+  ---
+  duration_ms: 9.042541
+  type: 'test'
+  ...
+# Subtest: P2 parity owner-transfer-v7.json/unknown-field: SCHEMA_REJECT
+ok 17 - P2 parity owner-transfer-v7.json/unknown-field: SCHEMA_REJECT
+  ---
+  duration_ms: 0.999375
+  type: 'test'
+  ...
+# Subtest: P2 parity owner-transfer-v7.json/null-field: SCHEMA_REJECT
+ok 18 - P2 parity owner-transfer-v7.json/null-field: SCHEMA_REJECT
+  ---
+  duration_ms: 0.620583
+  type: 'test'
+  ...
+# Subtest: P2 parity owner-transfer-v7.json/missing-field: SCHEMA_REJECT
+ok 19 - P2 parity owner-transfer-v7.json/missing-field: SCHEMA_REJECT
+  ---
+  duration_ms: 0.840375
+  type: 'test'
+  ...
+# Subtest: P2 parity owner-transfer-v7.json/wrong-chain: DOMAIN_REJECT
+ok 20 - P2 parity owner-transfer-v7.json/wrong-chain: DOMAIN_REJECT
+  ---
+  duration_ms: 1.018458
+  type: 'test'
+  ...
+# Subtest: P2 parity owner-transfer-v7.json/old-domain-version: DOMAIN_REJECT
+ok 21 - P2 parity owner-transfer-v7.json/old-domain-version: DOMAIN_REJECT
+  ---
+  duration_ms: 1.52725
+  type: 'test'
+  ...
+# Subtest: P2 parity owner-transfer-v7.json/one-unit-change: SIGNER_MISMATCH
+ok 22 - P2 parity owner-transfer-v7.json/one-unit-change: SIGNER_MISMATCH
+  ---
+  duration_ms: 7.822792
+  type: 'test'
+  ...
+# Subtest: P2 parity owner-transfer-v7.json/reordered-fields: SIGNER_MISMATCH
+ok 23 - P2 parity owner-transfer-v7.json/reordered-fields: SIGNER_MISMATCH
+  ---
+  duration_ms: 8.216416
+  type: 'test'
+  ...
+# Subtest: P2 parity owner-transfer-v7.json/zero-amount: SCHEMA_REJECT
+ok 24 - P2 parity owner-transfer-v7.json/zero-amount: SCHEMA_REJECT
+  ---
+  duration_ms: 1.3855
+  type: 'test'
+  ...
+# Subtest: P2 parity admin-v7.json/freeze: exact digest, typed data and supplied signer
+ok 25 - P2 parity admin-v7.json/freeze: exact digest, typed data and supplied signer
+  ---
+  duration_ms: 7.097625
+  type: 'test'
+  ...
+# Subtest: P2 parity admin-v7.json/pause: exact digest, typed data and supplied signer
+ok 26 - P2 parity admin-v7.json/pause: exact digest, typed data and supplied signer
+  ---
+  duration_ms: 7.958916
+  type: 'test'
+  ...
+# Subtest: P2 parity admin-v7.json/unknown-field: SCHEMA_REJECT
+ok 27 - P2 parity admin-v7.json/unknown-field: SCHEMA_REJECT
+  ---
+  duration_ms: 1.085791
+  type: 'test'
+  ...
+# Subtest: P2 parity admin-v7.json/null-field: SCHEMA_REJECT
+ok 28 - P2 parity admin-v7.json/null-field: SCHEMA_REJECT
+  ---
+  duration_ms: 0.202
+  type: 'test'
+  ...
+# Subtest: P2 parity admin-v7.json/missing-field: SCHEMA_REJECT
+ok 29 - P2 parity admin-v7.json/missing-field: SCHEMA_REJECT
+  ---
+  duration_ms: 0.840375
+  type: 'test'
+  ...
+# Subtest: P2 parity admin-v7.json/wrong-chain: DOMAIN_REJECT
+ok 30 - P2 parity admin-v7.json/wrong-chain: DOMAIN_REJECT
+  ---
+  duration_ms: 1.113375
+  type: 'test'
+  ...
+# Subtest: P2 parity admin-v7.json/old-domain-version: DOMAIN_REJECT
+ok 31 - P2 parity admin-v7.json/old-domain-version: DOMAIN_REJECT
+  ---
+  duration_ms: 1.076166
+  type: 'test'
+  ...
+# Subtest: P2 parity admin-v7.json/one-unit-change: SIGNER_MISMATCH
+ok 32 - P2 parity admin-v7.json/one-unit-change: SIGNER_MISMATCH
+  ---
+  duration_ms: 25.464125
+  type: 'test'
+  ...
+# Subtest: P2 parity admin-v7.json/reordered-fields: SIGNER_MISMATCH
+ok 33 - P2 parity admin-v7.json/reordered-fields: SIGNER_MISMATCH
+  ---
+  duration_ms: 10.227916
+  type: 'test'
+  ...
+# Subtest: P2 parity action-v7.json/pay-provider-a: exact digest, typed data and supplied signer
+ok 34 - P2 parity action-v7.json/pay-provider-a: exact digest, typed data and supplied signer
+  ---
+  duration_ms: 7.936667
+  type: 'test'
+  ...
+# Subtest: P2 parity action-v7.json/call-template-deposit: exact digest, typed data and supplied signer
+ok 35 - P2 parity action-v7.json/call-template-deposit: exact digest, typed data and supplied signer
+  ---
+  duration_ms: 7.424958
+  type: 'test'
+  ...
+# Subtest: P2 parity action-v7.json/unknown-field: SCHEMA_REJECT
+ok 36 - P2 parity action-v7.json/unknown-field: SCHEMA_REJECT
+  ---
+  duration_ms: 1.118542
+  type: 'test'
+  ...
+# Subtest: P2 parity action-v7.json/null-field: SCHEMA_REJECT
+ok 37 - P2 parity action-v7.json/null-field: SCHEMA_REJECT
+  ---
+  duration_ms: 0.512167
+  type: 'test'
+  ...
+# Subtest: P2 parity action-v7.json/missing-field: SCHEMA_REJECT
+ok 38 - P2 parity action-v7.json/missing-field: SCHEMA_REJECT
+  ---
+  duration_ms: 0.341959
+  type: 'test'
+  ...
+# Subtest: P2 parity action-v7.json/wrong-chain: DOMAIN_REJECT
+ok 39 - P2 parity action-v7.json/wrong-chain: DOMAIN_REJECT
+  ---
+  duration_ms: 1.31275
+  type: 'test'
+  ...
+# Subtest: P2 parity action-v7.json/old-domain-version: DOMAIN_REJECT
+ok 40 - P2 parity action-v7.json/old-domain-version: DOMAIN_REJECT
+  ---
+  duration_ms: 1.754958
+  type: 'test'
+  ...
+# Subtest: P2 parity action-v7.json/one-unit-change: SIGNER_MISMATCH
+ok 41 - P2 parity action-v7.json/one-unit-change: SIGNER_MISMATCH
+  ---
+  duration_ms: 7.635958
+  type: 'test'
+  ...
+# Subtest: P2 parity action-v7.json/reordered-fields: SIGNER_MISMATCH
+ok 42 - P2 parity action-v7.json/reordered-fields: SIGNER_MISMATCH
+  ---
+  duration_ms: 9.723583
+  type: 'test'
+  ...
+1..42
+# tests 42
+# suites 0
+# pass 42
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1593.579042

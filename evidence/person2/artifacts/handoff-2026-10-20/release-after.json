@@ -1,0 +1,16 @@
+{
+  "command": [
+    "./scripts/pnpm.sh",
+    "release:check"
+  ],
+  "exitCode": 1,
+  "startedAt": "2026-10-20T08:37:53.729741+00:00",
+  "finishedAt": "2026-10-20T08:37:56.955929+00:00",
+  "sourceCommit": "6676e6f4376bd4e827ab63861beb9b0d9c01587b",
+  "schemaCommit": "04f80a06aef361b305d20f6e371862939a4ec1ba",
+  "log": "evidence/person2/artifacts/handoff-2026-10-20/release-after.txt",
+  "evidenceInputSha256": {
+    "evidence/person2/cases/P2-03.json": "a1a4653700e12e13fd5bd7dc913fa2dba0f407602a68f90830f103e285c40e84",
+    "evidence/person2/cases/P2-W01.json": "f221660f2ea9e242acb29053d6918b59b2bd61c6f781bf91be73cbd441aab3c5"
+  }
+}
