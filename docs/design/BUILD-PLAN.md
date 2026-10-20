@@ -63,3 +63,14 @@ Part B no longer waits for native code. The wallet is built in TypeScript with E
 - J5 built, not exercised: pause, resume, freeze and unfreeze signed as EIP-712 Admin and sent with `applyAdmin` from the personal account. The test accounts have no agent wallet, so the screen shows that honestly.
 - J6 not started: needs Person 2 and Person 4 endpoints.
 - Checked on the iOS simulator: restore with the public test phrase, Face ID unlock, real balances, Receive QR, Send and Review with a live fee quote. Not checked: creating a new wallet end to end, broadcasting a send, Android, a physical phone.
+
+## On-chain agent wallet (branch `feat/mobile-agent-wallet-onchain`)
+Done without the Mandate service, because the contracts let the owner act directly:
+- Create the agent wallet from the phone (`WalletFactory.createWallet`).
+- Fund it with a normal send, prefilled from the Agents tab.
+- Move funds out with a signed OwnerTransfer (`applyOwnerTransfer`); the screen says this pauses all agents.
+- Edit wallet limits and allow and block lists, signed as WalletPolicy (`applyWalletPolicy`), with the contract ceilings checked first. The chain cannot list the allow and block entries back, so the phone keeps the lists it last signed.
+- Recent agent wallet events from the chain. The public RPC answers log queries over at most 200 blocks, so this covers about the last hour.
+- Permit and Approval checks for task approval and payment co-signature, tested against the fixtures. No screen calls them until the service exists.
+Fixed: DemoUSD has 6 decimals on chain; the app had assumed 18.
+Not exercised on chain: creating an agent wallet, move out, limits, pause and freeze. They need a funded account and broadcast real test transactions.
