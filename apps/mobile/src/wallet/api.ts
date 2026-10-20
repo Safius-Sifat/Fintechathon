@@ -86,6 +86,9 @@ export const useApiSession = () =>
   useSyncExternalStore(subscribe, () => session);
 export const useApiConnection = () =>
   useSyncExternalStore(subscribe, () => connection);
+export const serviceSignedIn = () =>
+  session !== null &&
+  BigInt(session.expiresAt) > BigInt(Math.floor(Date.now() / 1000));
 function ownerNow() {
   const account = currentAccount();
   return getWalletState().status === "unlocked" && account

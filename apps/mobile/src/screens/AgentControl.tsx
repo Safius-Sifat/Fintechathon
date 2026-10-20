@@ -4,7 +4,7 @@ import { Banner } from "../components/Banner";
 import { GhostButton, HoldToSeal, Note, Row, Rows } from "../components/blocks";
 import { Page } from "../components/Page";
 import type { RootStackParamList } from "../navigation/RootNavigator";
-import { applyAdmin } from "../wallet/chain";
+import { applyAdmin } from "../wallet/relay";
 import type { AdminCommandName } from "../wallet/core";
 import { shortAddress } from "../wallet/format";
 import { currentAccount } from "../wallet/session";
@@ -47,8 +47,9 @@ const EFFECTS: Record<AdminCommandName, [string, string][]> = {
   ],
 };
 
-// Signs one owner command (EIP-712 Admin, valid 30 minutes) and sends it from
-// the personal account, which pays the fee. No Mandate service involved.
+// Signs one owner command (EIP-712 Admin, valid 30 minutes). The Mandate
+// service relays it when this wallet is registered; otherwise the personal
+// account sends it and pays the fee.
 export function AgentControlScreen({ navigation, route }: Props) {
   const { command, wallet } = route.params;
   const account = currentAccount();
@@ -67,7 +68,7 @@ export function AgentControlScreen({ navigation, route }: Props) {
   return (
     <Page
       title={TITLES[command]}
-      subtitle="You sign this on your phone. It does not need the Mandate service."
+      subtitle="You sign this on your phone. It works without the Mandate service."
       onBack={() => navigation.goBack()}
       footer={
         <GhostButton label="Cancel" onPress={() => navigation.goBack()} />
@@ -78,7 +79,10 @@ export function AgentControlScreen({ navigation, route }: Props) {
         {EFFECTS[command].map(([k, v]) => (
           <Row key={k} label={k} value={v} />
         ))}
-        <Row label="Fee" value="Paid in ETH from your account" />
+        <Row
+          label="Fee"
+          value="Relayed by Mandate, or paid from your account"
+        />
       </Rows>
       {error ? (
         <Banner icon="alert-outline" title="Not done" body={error} />

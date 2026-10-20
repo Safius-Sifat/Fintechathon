@@ -14,16 +14,12 @@ import {
 import { Page } from "../components/Page";
 import type { RootStackParamList } from "../navigation/RootNavigator";
 import { fonts, makeStyles, radius, space, type, useColors } from "../theme";
-import {
-  applyPolicy,
-  balanceOf,
-  ownerTransfer,
-  readPolicy,
-} from "../wallet/chain";
+import { balanceOf, ownerTransfer, readPolicy } from "../wallet/chain";
 import { AGENT_ASSETS, POLICY_CEILINGS, TOKENS } from "../wallet/config";
 import { checkAddress, checkAmount } from "../wallet/core";
 import { formatAmount, shortAddress, tokenByName } from "../wallet/format";
 import { readSignedLists } from "../wallet/local";
+import { applyPolicy } from "../wallet/relay";
 import { currentAccount } from "../wallet/session";
 import { checkPolicy, type AssetCap } from "../wallet/typed";
 import { errorText, useAsync } from "../wallet/useAsync";
@@ -199,9 +195,16 @@ export function WalletLimitsScreen({ navigation, route }: LimitProps) {
         : { perTx: "", daily: "", weekly: "" };
     }
     setCaps(next);
-    setThreshold(toText(current.data.policy.reviewThreshold, 6));
-    setAllow(current.data.lists?.allowlist ?? []);
-    setBlock(current.data.lists?.blocklist ?? []);
+    // No threshold (max uint) asks for nothing; at the per-payment ceiling
+    // that is the same rule, shown as a readable amount.
+    const th = current.data.policy.reviewThreshold;
+    setThreshold(
+      toText(th > POLICY_CEILINGS.perTx ? POLICY_CEILINGS.perTx : th, 6),
+    );
+    // Keep addresses added while the chain read was still loading.
+    const lists = current.data.lists;
+    setAllow((l) => [...(lists?.allowlist ?? []), ...(l ?? [])]);
+    setBlock((l) => [...(lists?.blocklist ?? []), ...(l ?? [])]);
   }
 
   const parsed = (() => {
@@ -275,6 +278,9 @@ export function WalletLimitsScreen({ navigation, route }: LimitProps) {
           title="Could not read the limits"
           body={current.error}
         />
+      ) : null}
+      {current.loading && !caps ? (
+        <Note>Reading the current limits from the chain…</Note>
       ) : null}
       {caps
         ? AGENT_ASSETS.map((t) => (
