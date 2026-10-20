@@ -52,7 +52,11 @@ export type RootStackParamList = {
   Lock: undefined;
   ShowPhrase: undefined;
   Contacts: { pick?: boolean };
-  TxDetail: { hash: Hash; origin?: "phone" | "agent" | "service"; taskId?: string };
+  TxDetail: {
+    hash: Hash;
+    origin?: "phone" | "agent" | "service";
+    taskId?: string;
+  };
   AgentControl: { command: AdminCommandName; wallet: Address };
   OwnerMoveOut: { wallet: Address };
   WalletLimits: { wallet: Address };
@@ -123,7 +127,10 @@ export function RootNavigator() {
   const { status } = useWallet();
   if (status === "loading") return null;
   return (
-    <Stack.Navigator key={`${status}:${currentAccount()?.address ?? ""}`} screenOptions={{ headerShown: false }}>
+    <Stack.Navigator
+      key={`${status}:${currentAccount()?.address ?? ""}`}
+      screenOptions={{ headerShown: false }}
+    >
       {status === "none" ? (
         <>
           <Stack.Screen name="Welcome" component={WelcomeScreen} />

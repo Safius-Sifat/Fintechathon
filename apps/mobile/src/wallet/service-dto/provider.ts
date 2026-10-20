@@ -26,4 +26,3 @@ export const BrowserResultSchema = z
     logHash: Hex32Schema,
   })
   .strict();
-

@@ -41,7 +41,9 @@ export function useWallet(): WalletState {
 export const getWalletState = () => state;
 export function subscribeWallet(listener: () => void) {
   listeners.add(listener);
-  return () => { listeners.delete(listener); };
+  return () => {
+    listeners.delete(listener);
+  };
 }
 
 export function currentAccount(): AccountMeta | null {
@@ -145,7 +147,13 @@ export async function signerForCurrent(reason: string): Promise<HDAccount> {
   if (!seed || !meta) throw new vault.AuthError("Unlock the wallet first.");
   const unlockedSeed = seed;
   await vault.confirmOwner(reason);
-  if (state.status !== "unlocked" || seed !== unlockedSeed || currentAccount()?.address !== meta.address)
-    throw new vault.AuthError("The wallet was locked or the account changed. Nothing was signed.");
+  if (
+    state.status !== "unlocked" ||
+    seed !== unlockedSeed ||
+    currentAccount()?.address !== meta.address
+  )
+    throw new vault.AuthError(
+      "The wallet was locked or the account changed. Nothing was signed.",
+    );
   return deriveAccount(unlockedSeed, meta.index);
 }

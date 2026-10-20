@@ -1,7 +1,19 @@
 // Mobile runtime mirror of packages/schema. Schema imports are test-only.
 import { z } from "zod";
 import { CHAIN_ID } from "./runtime";
-const LocalTxStateSchema = z.enum(["DRAFT", "AWAITING_SIGNATURE", "SIGNED", "SUBMITTED", "INCLUDED", "FINALIZED", "REVERTED", "REPLACED", "UNKNOWN", "CANCELLED", "REORGED"]);
+const LocalTxStateSchema = z.enum([
+  "DRAFT",
+  "AWAITING_SIGNATURE",
+  "SIGNED",
+  "SUBMITTED",
+  "INCLUDED",
+  "FINALIZED",
+  "REVERTED",
+  "REPLACED",
+  "UNKNOWN",
+  "CANCELLED",
+  "REORGED",
+]);
 import { AddressSchema, Hex32Schema, Uint256, Uint64 } from "./primitives";
 
 export const ACTIVITY_CATEGORIES = [

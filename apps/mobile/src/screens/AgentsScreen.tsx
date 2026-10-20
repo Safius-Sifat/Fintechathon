@@ -89,8 +89,8 @@ export function AgentsScreen() {
           <Voice>No agent wallet for this account.</Voice>
           <Note>
             An agent wallet is a separate contract you own. Creating it costs a
-            small network fee in ETH. Register with the Mandate service below
-            to run tasks.
+            small network fee in ETH. Register with the Mandate service below to
+            run tasks.
           </Note>
           <PrimaryButton
             label={busy ? "Creating…" : "Create agent wallet"}
@@ -203,7 +203,10 @@ export function AgentsScreen() {
                   label={EVENT_LABELS[e.name] ?? e.name}
                   detail={`Block ${e.block.toString()}`}
                   onPress={() =>
-                    navigation.navigate("TxDetail", { hash: e.hash, origin: "service" })
+                    navigation.navigate("TxDetail", {
+                      hash: e.hash,
+                      origin: "service",
+                    })
                   }
                 />
               ))}

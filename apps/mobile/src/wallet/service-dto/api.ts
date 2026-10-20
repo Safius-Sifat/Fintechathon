@@ -129,7 +129,9 @@ export const TermsSchema = z
   })
   .strict();
 
-const ApprovalSchema = z.object({ actionDigest: Hex32Schema, expiresAt: Uint64 }).strict();
+const ApprovalSchema = z
+  .object({ actionDigest: Hex32Schema, expiresAt: Uint64 })
+  .strict();
 const typedDataJsonSchema = <P extends string, M extends z.ZodTypeAny>(
   primaryType: P,
   message: M,
@@ -146,7 +148,8 @@ const typedDataJsonSchema = <P extends string, M extends z.ZodTypeAny>(
     .strict();
 export const TypedPermitSchema = typedDataJsonSchema("Permit", PermitSchema);
 export const TypedApprovalSchema = typedDataJsonSchema(
-  "Approval", ApprovalSchema,
+  "Approval",
+  ApprovalSchema,
 );
 
 export const OwnerApprovalSchema = z
@@ -301,7 +304,6 @@ export const ApprovalRequestSchema = z
     state: z.enum(["PENDING", "APPROVED", "REJECTED", "EXPIRED"]),
   })
   .strict();
-
 
 export type Terms = z.infer<typeof TermsSchema>;
 export type OwnerApproval = z.infer<typeof OwnerApprovalSchema>;

@@ -76,14 +76,26 @@ export interface ServiceReferences {
   walletId: string | null;
   tasks: ServiceTaskReference[];
   pending: Record<string, string>;
-  pendingTask?: { walletId: string; runbookId: "browser-check"; goal: string; input: Record<string, unknown> };
+  pendingTask?: {
+    walletId: string;
+    runbookId: "browser-check";
+    goal: string;
+    input: Record<string, unknown>;
+  };
 }
 const serviceKey = (owner: Address) => `mandate.service.${owner.toLowerCase()}`;
 export const readServiceReferences = (owner: Address) =>
-  read<ServiceReferences>(serviceKey(owner), { walletId: null, tasks: [], pending: {} });
+  read<ServiceReferences>(serviceKey(owner), {
+    walletId: null,
+    tasks: [],
+    pending: {},
+  });
 // Serializes reference edits so simultaneous mutations do not lose retry IDs.
 let serviceWrites: Promise<unknown> = Promise.resolve();
-export function updateServiceReferences(owner: Address, change: (value: ServiceReferences) => ServiceReferences) {
+export function updateServiceReferences(
+  owner: Address,
+  change: (value: ServiceReferences) => ServiceReferences,
+) {
   const result = serviceWrites.then(async () => {
     const value = change(await readServiceReferences(owner));
     await write(serviceKey(owner), value);

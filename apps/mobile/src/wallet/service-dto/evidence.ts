@@ -20,4 +20,3 @@ export const FindingSchema = z
     ),
   })
   .strict();
-

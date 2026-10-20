@@ -55,7 +55,15 @@ export function TxDetailScreen({ navigation, route }: Props) {
     >
       <Steps
         items={[
-          { state: "done", title: origin === "phone" ? "Signed on this phone" : origin === "agent" ? "Agent transaction reported by service" : "Transaction reported by service" },
+          {
+            state: "done",
+            title:
+              origin === "phone"
+                ? "Signed on this phone"
+                : origin === "agent"
+                  ? "Agent transaction reported by service"
+                  : "Transaction reported by service",
+          },
           { state: tx.data ? "done" : "now", title: "Sent to the network" },
           {
             state: done ? "done" : "now",
@@ -83,7 +91,12 @@ export function TxDetailScreen({ navigation, route }: Props) {
         ) : null}
       </Rows>
       {tx.error ? <Note>{tx.error}</Note> : null}
-      {taskId ? <GhostButton label="View task" onPress={() => navigation.navigate("TaskDetail", { taskId })} /> : null}
+      {taskId ? (
+        <GhostButton
+          label="View task"
+          onPress={() => navigation.navigate("TaskDetail", { taskId })}
+        />
+      ) : null}
     </Page>
   );
 }

@@ -3,6 +3,7 @@ import {
   ASSET_CAP_COMPONENTS,
   CALL_TEMPLATE_COMPONENTS,
   OWNER_TRANSFER_TYPES,
+  PERMIT_TYPES,
   WALLET_POLICY_TYPES,
 } from "./typed";
 
@@ -101,3 +102,30 @@ export const walletEvents = parseAbi([
   "event WalletPolicyUpdated(uint64 version, bytes32 policyDigest)",
   "event PermitActivated(bytes32 indexed permitId, bytes32 indexed taskId, address executor, uint64 epoch)",
 ]);
+
+// Read the activated asset from the Permit: Action itself carries no asset.
+export const permitStateAbi = [
+  {
+    type: "function",
+    name: "getPermit",
+    stateMutability: "view",
+    inputs: [{ name: "permitId", type: "bytes32" }],
+    outputs: [
+      {
+        name: "",
+        type: "tuple",
+        components: [
+          { name: "permit", type: "tuple", components: PERMIT_TYPES.Permit },
+          { name: "activated", type: "bool" },
+          { name: "closed", type: "bool" },
+          { name: "revoked", type: "bool" },
+          { name: "grossSpend", type: "uint256" },
+          { name: "paymentCount", type: "uint32" },
+          { name: "actionCount", type: "uint32" },
+          { name: "depositedAssets", type: "uint256" },
+          { name: "withdrawnAssets", type: "uint256" },
+        ],
+      },
+    ],
+  },
+] as const;

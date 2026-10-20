@@ -166,4 +166,3 @@ export const InvoiceSchema = z
     (i) => big(i.expiresAt) - big(i.issuedAt) <= MAX_ACTION_SECONDS,
     "Invoice lifetime exceeds 15 minutes",
   );
-
