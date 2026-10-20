@@ -12,6 +12,10 @@
     "0003_business.sql": {
       "kind": "expand",
       "transaction": "required"
+    },
+    "0004_history.sql": {
+      "kind": "expand",
+      "transaction": "required"
     }
   }
 }

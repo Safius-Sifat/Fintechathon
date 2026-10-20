@@ -112,6 +112,26 @@ export async function registerBusiness(
         )
         .send(zip);
     });
+    routes.get("/v1/accounts/:ownerAddress/activity", async (request) => {
+      const { cursor } = parse(
+        z.object({ cursor: z.string().max(512).optional() }).strict(),
+        request.query,
+      );
+      const { ownerAddress } = request.params as { ownerAddress: string };
+      return active().activity(await principal(request), ownerAddress, cursor);
+    });
+    routes.post(
+      "/v1/accounts/:ownerAddress/transactions",
+      { bodyLimit: 1024 },
+      async (request) => {
+        const { ownerAddress } = request.params as { ownerAddress: string };
+        return active().registerTransaction(
+          await principal(request),
+          ownerAddress,
+          request.body,
+        );
+      },
+    );
     // Task interpretation belongs to Person4's runbook package, which is not yet
     // implemented; tasks are never created from an uninterpreted goal.
     routes.post("/v1/tasks", { bodyLimit: 65536 }, async (request) => {

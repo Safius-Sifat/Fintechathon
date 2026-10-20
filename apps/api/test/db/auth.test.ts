@@ -67,7 +67,7 @@ async function environment(trustedProxyAddresses?: string[]) {
       (await runMigrations(client, migrations, { schema })).applied.length,
       migrations.length,
     );
-    assert.equal(migrations.length, 3);
+    assert.equal(migrations.length, 4);
     assert.equal(
       (await runMigrations(client, migrations, { schema })).applied.length,
       0,

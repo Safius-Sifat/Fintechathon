@@ -1,8 +1,13 @@
 import { randomBytes, randomUUID } from "node:crypto";
 import type { Pool, PoolClient } from "pg";
-import type { Address, PublicClient } from "viem";
+import { getAddress, type Address, type Hex, type PublicClient } from "viem";
+import { z } from "zod";
 import {
+  ActivityPageSchema,
+  AddressSchema,
   AgentTokenRequestSchema,
+  Hex32Schema,
+  UuidSchema,
   CHAIN_ID,
   TaskViewSchema,
   WalletViewSchema,
@@ -447,5 +452,216 @@ export class BusinessService {
         "EVIDENCE_UNAVAILABLE",
       );
     }
+  }
+
+  private ownerPath(principal: Principal, ownerAddress: string) {
+    const owner = requireOwner(principal);
+    const parsed = AddressSchema.safeParse(ownerAddress);
+    if (!parsed.success || parsed.data.toLowerCase() !== owner.owner)
+      throw scopeDenied();
+    return owner;
+  }
+
+  async activity(
+    principal: Principal,
+    ownerAddress: string,
+    cursor: string | undefined,
+  ) {
+    const owner = this.ownerPath(principal, ownerAddress);
+    let after: { b: string; id: string } | null = null;
+    if (cursor) {
+      let raw: unknown = null;
+      try {
+        raw = JSON.parse(Buffer.from(cursor, "base64url").toString("utf8"));
+      } catch {
+        raw = null;
+      }
+      const decoded = z
+        .object({ b: z.string().regex(/^-?[0-9]+$/), id: z.string().max(128) })
+        .strict()
+        .safeParse(raw);
+      if (!decoded.success)
+        throw new AuthError(
+          422,
+          "Activity cursor is invalid.",
+          "INTENT_INVALID",
+        );
+      after = decoded.data;
+    }
+    const rows = await this.database.query<Record<string, string | null>>(
+      `SELECT *,COALESCE(block_number,-1)::text AS sort_block FROM activity_events WHERE owner_address=$1
+        AND ($2::numeric IS NULL OR (COALESCE(block_number,-1),activity_id) < ($2::numeric,$3::text))
+       ORDER BY COALESCE(block_number,-1) DESC,activity_id DESC LIMIT 51`,
+      [owner.owner, after?.b ?? null, after?.id ?? ""],
+    );
+    const page = rows.rows.slice(0, 50);
+    const last = page.at(-1);
+    const coverage = (
+      await this.database.query<{
+        from_block: string;
+        to_block: string;
+        indexed_through: string | null;
+        backfill_state: string;
+        gaps: { fromBlock: string; toBlock: string }[];
+      }>(
+        "SELECT from_block::text,to_block::text,indexed_through::text,backfill_state,gaps FROM history_coverage WHERE owner_address=$1",
+        [owner.owner],
+      )
+    ).rows;
+    const states = coverage.map((c) => c.backfill_state);
+    return ActivityPageSchema.parse({
+      items: page.map((r) => ({
+        activityId: r.activity_id,
+        ownerAddress: r.owner_address,
+        source: r.source,
+        category: r.category,
+        chainId: CHAIN_ID,
+        txHash: r.tx_hash,
+        blockHash: r.block_hash,
+        blockNumber: r.block_number,
+        nonce: r.nonce,
+        asset: r.asset,
+        from: r.from_address,
+        to: r.to_address,
+        amount: r.amount,
+        feeWei: r.fee_wei,
+        feePayer: r.fee_payer,
+        state: r.state,
+        operationId: null,
+        taskId: r.task_id,
+        transferId: r.transfer_id,
+        replacementOf: null,
+        provenance: r.provenance,
+        observedAt: r.observed_at,
+      })),
+      nextCursor:
+        rows.rows.length > 50 && last
+          ? Buffer.from(
+              JSON.stringify({ b: last.sort_block, id: last.activity_id }),
+            ).toString("base64url")
+          : null,
+      // Unknown or failed coverage is reported as such, never as a complete empty history.
+      coverage: coverage.length
+        ? {
+            fromBlock: coverage
+              .map((c) => BigInt(c.from_block))
+              .reduce((a, b) => (a < b ? a : b))
+              .toString(),
+            toBlock: coverage
+              .map((c) => BigInt(c.to_block))
+              .reduce((a, b) => (a > b ? a : b))
+              .toString(),
+            indexedThrough: coverage.some((c) => c.indexed_through === null)
+              ? null
+              : coverage
+                  .map((c) => BigInt(c.indexed_through!))
+                  .reduce((a, b) => (a < b ? a : b))
+                  .toString(),
+            backfillState: states.includes("FAILED")
+              ? "FAILED"
+              : states.includes("RUNNING")
+                ? "RUNNING"
+                : states.every((s) => s === "COMPLETE")
+                  ? "COMPLETE"
+                  : "NOT_STARTED",
+            gaps: coverage.flatMap((c) => c.gaps),
+          }
+        : {
+            fromBlock: "0",
+            toBlock: "0",
+            indexedThrough: null,
+            backfillState: "NOT_STARTED",
+            gaps: [],
+          },
+    });
+  }
+
+  // A registered hash is a tracking reference only. It is accepted when the
+  // receipt shows the owner's personal or managed account took part.
+  async registerTransaction(
+    principal: Principal,
+    ownerAddress: string,
+    input: unknown,
+  ) {
+    const owner = this.ownerPath(principal, ownerAddress);
+    const body = z
+      .object({ txHash: Hex32Schema, clientRequestId: UuidSchema })
+      .strict()
+      .parse(input);
+    const chain = this.deps.chain;
+    if (!chain)
+      throw new AuthError(
+        503,
+        "Chain state is unavailable.",
+        "SETTLEMENT_UNKNOWN",
+      );
+    const wallet = (
+      await this.database.query<{ wallet_address: string | null }>(
+        "SELECT wallet_address FROM wallets WHERE owner_address=$1",
+        [owner.owner],
+      )
+    ).rows[0];
+    const accounts = [owner.owner, wallet?.wallet_address].filter(
+      (a): a is string => !!a,
+    );
+    const [tx, receipt] = await Promise.all([
+      chain.client
+        .getTransaction({ hash: body.txHash as Hex })
+        .catch(() => null),
+      chain.client
+        .getTransactionReceipt({ hash: body.txHash as Hex })
+        .catch(() => null),
+    ]);
+    const padded = accounts.map((a) => "0x" + a.slice(2).padStart(64, "0"));
+    const involved =
+      !!tx &&
+      !!receipt &&
+      (accounts.includes(tx.from.toLowerCase()) ||
+        accounts.includes((tx.to ?? "").toLowerCase()) ||
+        receipt.logs.some(
+          (l) =>
+            accounts.includes(l.address.toLowerCase()) ||
+            l.topics.some((t) => padded.includes(t.toLowerCase())),
+        ));
+    if (!involved)
+      throw new AuthError(
+        422,
+        "Transaction does not involve this owner's accounts.",
+        "INTENT_INVALID",
+      );
+    const source =
+      tx!.from.toLowerCase() === owner.owner ? "personal" : "managed";
+    const activityId = `${source}:${body.txHash}:tx`;
+    const now = this.clock();
+    await this.database.query(
+      "INSERT INTO registered_transactions(owner_address,client_request_id,tx_hash,activity_id,created_at) VALUES($1,$2,$3,$4,$5) ON CONFLICT DO NOTHING",
+      [owner.owner, body.clientRequestId, body.txHash, activityId, now],
+    );
+    const stored = (
+      await this.database.query<{ tx_hash: string; activity_id: string }>(
+        "SELECT tx_hash,activity_id FROM registered_transactions WHERE owner_address=$1 AND client_request_id=$2",
+        [owner.owner, body.clientRequestId],
+      )
+    ).rows[0]!;
+    if (stored.tx_hash !== body.txHash) throw conflict();
+    const known = (
+      await this.database.query<{ state: string }>(
+        "SELECT state FROM activity_events WHERE owner_address=$1 AND tx_hash=$2 LIMIT 1",
+        [owner.owner, body.txHash],
+      )
+    ).rows[0];
+    await this.database.query(
+      "INSERT INTO jobs(id,kind,dedupe_key,payload,state,run_at,max_attempts,created_at,updated_at) VALUES($1,'history.register',$2,$3,'READY',$4,10,$4,$4) ON CONFLICT DO NOTHING",
+      [
+        crypto.randomUUID(),
+        `${owner.owner}:${body.txHash}`,
+        { owner: getAddress(owner.owner), txHash: body.txHash },
+        now,
+      ],
+    );
+    return {
+      activityId: stored.activity_id,
+      state: known?.state ?? "SUBMITTED",
+    };
   }
 }
