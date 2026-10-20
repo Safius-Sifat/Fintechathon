@@ -7,7 +7,8 @@ import {
   type ActionIntent,
   hashCanonical,
 } from "@mandate/schema";
-import { type Hex } from "viem";
+import { type Address, type Hex } from "viem";
+import { checkDelivery, checkQuote } from "./validators.js";
 
 export type RunbookDeps = {
   quote?: (providerId: "a" | "b", input: unknown) => Promise<QuoteEnvelope>;
@@ -38,7 +39,14 @@ export async function advanceBrowserCheck(
   snapshot: RunbookSnapshot,
   deps: RunbookDeps = {},
 ): Promise<RunbookDecision> {
-  const { chainTaskId, conditions, permit, walletAddress, actions, runbookState } = snapshot;
+  const {
+    chainTaskId,
+    conditions,
+    permit,
+    walletAddress,
+    actions,
+    runbookState,
+  } = snapshot;
   const browserCond = conditions.browser;
   if (!browserCond) {
     return {
@@ -85,36 +93,32 @@ export async function advanceBrowserCheck(
       };
     }
 
-    // Get quote (either from deps or construct valid default quote)
-    let quote: QuoteEnvelope;
-    if (deps.quote) {
-      quote = await deps.quote(selectedProviderId as "a" | "b", {
-        targetId: browserCond.targetId,
-        checks: browserCond.checks,
-      });
-    } else {
-      // Mock quote fallback
-      const price = selectedProviderId === "a" ? "200000" : "350000";
-      const recipient =
-        selectedProviderId === "a"
-          ? "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC"
-          : "0x6666666666666666666666666666666666666666";
-      const nowNum = Number(snapshot.now);
-      quote = {
-        providerId: selectedProviderId as "a" | "b",
-        invoice: {
-          invoiceId: ("0x" + "1".padStart(64, "0")) as Hex,
-          taskId: chainTaskId as Hex,
-          wallet: walletAddress as any,
-          recipient: recipient as any,
-          asset: permit.asset as any,
-          amount: price,
-          inputHash: hashCanonical(browserCond) as Hex,
-          issuedAt: String(nowNum),
-          expiresAt: String(nowNum + 600),
-        },
-        providerSignature: ("0x" + "aa".repeat(65)) as any,
-        x402: null,
+    // A real, signed quote is required. There is no built-in fallback.
+    if (!deps.quote) {
+      return {
+        type: "FAILED",
+        reason:
+          "The provider quote service is not connected; no quote was invented",
+        evidence: [],
+        nextState: runbookState,
+      };
+    }
+    const quote = await deps.quote(selectedProviderId as "a" | "b", {
+      targetId: browserCond.targetId,
+      checks: browserCond.checks,
+    });
+    const quoteProblem = await checkQuote(quote, {
+      chainTaskId: chainTaskId as Hex,
+      wallet: walletAddress as Address,
+      nowSeconds: BigInt(snapshot.now),
+      maxPayment: BigInt(permit.maxPayment),
+    });
+    if (quoteProblem) {
+      return {
+        type: "FAILED",
+        reason: `Quote rejected: ${quoteProblem}`,
+        evidence: [],
+        nextState: runbookState,
       };
     }
 
@@ -165,7 +169,10 @@ export async function advanceBrowserCheck(
   }
 
   // 2. Action exists: inspect its state
-  if (currentAction.state === "SUBMITTED" || currentAction.state === "SIGNING") {
+  if (
+    currentAction.state === "SUBMITTED" ||
+    currentAction.state === "SIGNING"
+  ) {
     // Payment in flight; wait
     return {
       type: "WAIT",
@@ -175,7 +182,10 @@ export async function advanceBrowserCheck(
     };
   }
 
-  if (currentAction.state === "REVERTED" || currentAction.state === "REJECTED") {
+  if (
+    currentAction.state === "REVERTED" ||
+    currentAction.state === "REJECTED"
+  ) {
     // Action failed on-chain
     return {
       type: "FAILED",
@@ -188,10 +198,12 @@ export async function advanceBrowserCheck(
     };
   }
 
-  // 3. Action is INCLUDED or FINALIZED: retrieve delivery
-  if (currentAction.state === "INCLUDED" || currentAction.state === "FINALIZED") {
+  // 3. Action is INCLUDED or FINALIZED: retrieve and check the delivery.
+  if (
+    currentAction.state === "INCLUDED" ||
+    currentAction.state === "FINALIZED"
+  ) {
     if (runbookState.delivery) {
-      // Already delivered!
       return {
         type: "COMPLETE",
         result: runbookState.delivery.result as any,
@@ -199,75 +211,78 @@ export async function advanceBrowserCheck(
         nextState: runbookState,
       };
     }
-
-    // Try retrieving delivery
-    if (deps.retrieve) {
-      const retrieval = await deps.retrieve(
-        (runbookState.selectedProvider ?? "a") as "a" | "b",
-        currentAction.action.invoiceId as Hex,
-        currentAction.action.requestId as Hex,
-        (currentAction.txHash ?? ("0x" + "00".repeat(32))) as Hex,
-      );
-
-      if ("state" in retrieval && retrieval.state === "PENDING") {
-        const retrievalsCount = runbookState.retrievals + 1;
-        if (retrievalsCount <= 3) {
-          return {
-            type: "WAIT",
-            dueAt: String(Number(snapshot.now) + 10),
-            reason: `Waiting for provider result delivery (attempt ${retrievalsCount}/3)`,
-            nextState: { ...runbookState, retrievals: retrievalsCount },
-          };
-        } else {
-          // Provider failed to deliver after 3 attempts. Fallback!
-          return {
-            type: "PROPOSE",
-            decisionKey: `${chainTaskId}:browser:pay:${attemptIndex + 1}`,
-            intent: null as any, // next advance call will propose fallback
-            evidence: [],
-            nextState: {
-              ...runbookState,
-              attempt: attemptIndex + 1,
-              retrievals: 0,
-              selectedProvider: null,
-            },
-          };
-        }
-      } else {
-        // Delivery received!
-        const delivery = retrieval as DeliveryEnvelope;
+    if (!deps.retrieve) {
+      return {
+        type: "FAILED",
+        reason:
+          "The provider result service is not connected; no result was invented",
+        evidence: [],
+        nextState: runbookState,
+      };
+    }
+    if (!currentAction.txHash) {
+      return {
+        type: "WAIT",
+        dueAt: String(Number(snapshot.now) + 10),
+        reason: "The included payment has no recorded transaction hash yet",
+        nextState: runbookState,
+      };
+    }
+    const providerId = (runbookState.selectedProvider ?? "a") as "a" | "b";
+    const retrieval = await deps.retrieve(
+      providerId,
+      currentAction.action.invoiceId as Hex,
+      currentAction.action.requestId as Hex,
+      currentAction.txHash as Hex,
+    );
+    const nextAttempt = {
+      ...runbookState,
+      attempt: attemptIndex + 1,
+      retrievals: 0,
+      selectedProvider: null,
+    };
+    if ("state" in retrieval && retrieval.state === "PENDING") {
+      const retrievals = runbookState.retrievals + 1;
+      if (retrievals <= 3) {
         return {
-          type: "COMPLETE",
-          result: delivery.result as any,
-          evidence: [delivery as any],
-          nextState: {
-            ...runbookState,
-            delivery,
-          },
+          type: "WAIT",
+          dueAt: String(Number(snapshot.now) + 10),
+          reason: `Waiting for provider result delivery (attempt ${retrievals}/3)`,
+          nextState: { ...runbookState, retrievals },
         };
       }
+      // The paid provider did not deliver. The next advance proposes the
+      // fallback provider under the next attempt's decision key.
+      return {
+        type: "WAIT",
+        dueAt: snapshot.now,
+        reason:
+          "Paid provider did not deliver after 3 retrievals; trying the next provider",
+        nextState: nextAttempt,
+      };
     }
-
-    // Default mock delivery completion if no retrieval dep supplied
-    const mockResult = {
-      schemaVersion: 4,
-      targetId: browserCond.targetId,
-      inputHash: currentAction.action.inputHash,
-      checkedAt: snapshot.now,
-      checks: {
-        pageLoad: true,
-        title: { actual: "Checkout", expected: "Checkout", pass: true },
-        ...(browserCond.checks.includes("formSubmit") ? { formSubmit: browserCond.targetId === "checkout-healthy" } : {}),
-      },
-      screenshotHash: ("0x" + "11".repeat(32)) as Hex,
-      logHash: ("0x" + "22".repeat(32)) as Hex,
-    };
-
+    const delivery = retrieval as DeliveryEnvelope;
+    const deliveryProblem = await checkDelivery(delivery, {
+      wallet: walletAddress as Address,
+      invoiceId: currentAction.action.invoiceId as Hex,
+      requestId: currentAction.action.requestId as Hex,
+      inputHash: currentAction.action.inputHash as Hex,
+      paymentTxHash: currentAction.txHash as Hex,
+      provider: currentAction.action.target as Address,
+    });
+    if (deliveryProblem) {
+      return {
+        type: "WAIT",
+        dueAt: snapshot.now,
+        reason: `Delivery rejected: ${deliveryProblem}`,
+        nextState: nextAttempt,
+      };
+    }
     return {
       type: "COMPLETE",
-      result: mockResult,
-      evidence: [],
-      nextState: runbookState,
+      result: delivery.result as any,
+      evidence: [delivery as any],
+      nextState: { ...runbookState, delivery },
     };
   }
 

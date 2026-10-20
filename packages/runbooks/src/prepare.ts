@@ -27,12 +27,22 @@ export type PrepareTaskResult = {
 };
 
 const DEFAULT_PROVIDER_BINDINGS = [
-  { providerId: "a" as const, recipient: "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC" as Address },
-  { providerId: "b" as const, recipient: "0x6666666666666666666666666666666666666666" as Address },
+  {
+    providerId: "a" as const,
+    recipient: "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC" as Address,
+  },
+  {
+    providerId: "b" as const,
+    recipient: "0x6666666666666666666666666666666666666666" as Address,
+  },
 ];
 
-export function createRunbookManifest(runbookId: RunbookId, version = "1.0.0"): RunbookManifest {
-  const dummyHash: Hex = "0x0000000000000000000000000000000000000000000000000000000000000001";
+export function createRunbookManifest(
+  runbookId: RunbookId,
+  version = "1.0.0",
+): RunbookManifest {
+  const dummyHash: Hex =
+    "0x0000000000000000000000000000000000000000000000000000000000000001";
   return {
     schemaVersion: 4,
     runbookId,
@@ -61,7 +71,8 @@ export function prepareTask(params: PrepareTaskParams): PrepareTaskResult {
       };
     }
 
-    const { targetId, checks, maxPaidAttempts, maxSteps, taskDeadline } = parsed.data;
+    const { targetId, checks, maxPaidAttempts, maxSteps, taskDeadline } =
+      parsed.data;
     const needsForm = checks.includes("formSubmit");
     const providerIds = needsForm ? (["b"] as const) : (["a", "b"] as const);
 
