@@ -132,6 +132,32 @@ export async function registerBusiness(
         );
       },
     );
+    routes.post(
+      "/v1/wallets/:walletId/owner-transfers/draft",
+      { bodyLimit: 2048 },
+      async (request) => {
+        const { walletId } = parse(idParam, request.params);
+        idempotencyKey(request);
+        return active().ownerTransferDraft(
+          await principal(request),
+          walletId!,
+          request.body,
+        );
+      },
+    );
+    routes.post(
+      "/v1/wallets/:walletId/owner-transfers/submit",
+      { bodyLimit: 2048 },
+      async (request) => {
+        const { walletId } = parse(idParam, request.params);
+        idempotencyKey(request);
+        return active().ownerTransferSubmit(
+          await principal(request),
+          walletId!,
+          request.body,
+        );
+      },
+    );
     // Task interpretation belongs to Person4's runbook package, which is not yet
     // implemented; tasks are never created from an uninterpreted goal.
     routes.post("/v1/tasks", { bodyLimit: 65536 }, async (request) => {

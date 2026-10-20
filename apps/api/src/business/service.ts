@@ -4,6 +4,12 @@ import { getAddress, type Address, type Hex, type PublicClient } from "viem";
 import { z } from "zod";
 import {
   ActivityPageSchema,
+  hashDigest,
+  mandateWalletAbi,
+  recoverSigner,
+  SignatureSchema,
+  typedDataJson,
+  walletDomain,
   AddressSchema,
   AgentTokenRequestSchema,
   Hex32Schema,
@@ -662,6 +668,212 @@ export class BusinessService {
     return {
       activityId: stored.activity_id,
       state: known?.state ?? "SUBMITTED",
+    };
+  }
+
+  private async managedWallet(owner: { owner: string }, walletId: string) {
+    const wallet = (
+      await this.database.query<WalletRow & { owner_address: string }>(
+        "SELECT * FROM wallets WHERE id=$1",
+        [walletId],
+      )
+    ).rows[0];
+    if (!wallet || wallet.owner_address !== owner.owner) throw scopeDenied();
+    if (wallet.provisioning_state !== "READY" || !wallet.wallet_address)
+      throw new AuthError(
+        409,
+        "Managed wallet is not ready.",
+        "PERMIT_INACTIVE",
+      );
+    const chain = this.deps.chain;
+    if (!chain)
+      throw new AuthError(
+        503,
+        "Chain state is unavailable.",
+        "SETTLEMENT_UNKNOWN",
+      );
+    return {
+      wallet,
+      address: getAddress(wallet.wallet_address),
+      client: chain.client,
+    };
+  }
+
+  private async ownerLane(client: PublicClient, wallet: Address) {
+    const [epoch, nonce] = await Promise.all([
+      client.readContract({
+        address: wallet,
+        abi: mandateWalletAbi,
+        functionName: "authorityEpoch",
+      }),
+      client.readContract({
+        address: wallet,
+        abi: mandateWalletAbi,
+        functionName: "ownerTransferNonce",
+      }),
+    ]);
+    return { epoch: epoch.toString(), nonce: nonce.toString() };
+  }
+
+  // Preparing a manual transfer inhibits new agent work at once; on chain the
+  // transfer pauses the wallet and advances the epoch.
+  async ownerTransferDraft(
+    principal: Principal,
+    walletId: string,
+    input: unknown,
+  ) {
+    const owner = requireOwner(principal);
+    const body = z
+      .object({
+        asset: AddressSchema,
+        recipient: AddressSchema,
+        amount: z.string().regex(/^[1-9][0-9]*$/),
+      })
+      .strict()
+      .parse(input);
+    const { wallet, address, client } = await this.managedWallet(
+      owner,
+      walletId,
+    );
+    const now = this.clock();
+    const lane = await this.ownerLane(client, address);
+    // Chain time, so the contract never sees an issuedAt ahead of its block.
+    const chainNow = Number(
+      (await client.getBlock({ blockTag: "latest" })).timestamp,
+    );
+    const issuedAt = Math.min(now, chainNow);
+    const transfer = {
+      transferId: ("0x" + randomBytes(32).toString("hex")) as Hex,
+      asset: body.asset,
+      recipient: body.recipient,
+      amount: body.amount,
+      epoch: lane.epoch,
+      nonce: lane.nonce,
+      issuedAt: String(issuedAt),
+      deadline: String(issuedAt + 600),
+    };
+    const domain = walletDomain(address);
+    const typedData = typedDataJson("OwnerTransfer", transfer, domain);
+    const digest = hashDigest("OwnerTransfer", transfer, domain);
+    const draftId = randomUUID();
+    await this.database.query(
+      "UPDATE wallets SET inhibited=true,updated_at=$2 WHERE id=$1",
+      [wallet.id, now],
+    );
+    await this.database.query(
+      "INSERT INTO owner_transfer_drafts(id,wallet_id,owner_address,transfer_id,transfer,typed_data,digest,state,expires_at,created_at) VALUES($1,$2,$3,$4,$5,$6,$7,'DRAFT',$8,$9)",
+      [
+        draftId,
+        wallet.id,
+        owner.owner,
+        transfer.transferId,
+        transfer,
+        typedData,
+        digest,
+        issuedAt + 600,
+        now,
+      ],
+    );
+    return {
+      draftId,
+      typedData,
+      digest,
+      assetMetadata: {
+        asset: body.asset,
+        native: /^0x0{40}$/i.test(body.asset),
+      },
+      feeQuote: {
+        sponsor: "MANDATE_EMERGENCY_LANE",
+        independentRoute:
+          "Relay the signed command from any funded account; no server consent is needed.",
+      },
+      effects: [
+        "Agent work is inhibited now.",
+        "On inclusion the wallet pauses and its authority epoch advances, so earlier Permits stop working.",
+      ],
+    };
+  }
+
+  async ownerTransferSubmit(
+    principal: Principal,
+    walletId: string,
+    input: unknown,
+  ): Promise<{ transferId: string; txHash: string | null; state: string }> {
+    const owner = requireOwner(principal);
+    const body = z
+      .object({ draftId: UuidSchema, ownerSignature: SignatureSchema })
+      .strict()
+      .parse(input);
+    const { address, client } = await this.managedWallet(owner, walletId);
+    const draft = (
+      await this.database.query<{
+        transfer: Record<string, string>;
+        owner_signature: string | null;
+        state: string;
+        expires_at: string;
+        tx_hash: string | null;
+      }>(
+        "SELECT d.transfer,d.owner_signature,d.state,d.expires_at,t.tx_hash FROM owner_transfer_drafts d LEFT JOIN transactions t ON t.id=d.tx_id WHERE d.id=$1 AND d.wallet_id=$2",
+        [body.draftId, walletId],
+      )
+    ).rows[0];
+    if (!draft) throw scopeDenied();
+    if (draft.owner_signature !== null) {
+      if (draft.owner_signature !== body.ownerSignature) throw conflict();
+      return {
+        transferId: draft.transfer.transferId!,
+        txHash: draft.tx_hash,
+        state: draft.state,
+      };
+    }
+    let signer: string;
+    try {
+      signer = await recoverSigner(
+        "OwnerTransfer",
+        draft.transfer,
+        walletDomain(address),
+        body.ownerSignature as Hex,
+      );
+    } catch {
+      throw new AuthError(422, "Owner signature is invalid.", "INTENT_INVALID");
+    }
+    if (signer.toLowerCase() !== owner.owner)
+      throw new AuthError(
+        422,
+        "Signature is not the wallet owner's.",
+        "INTENT_INVALID",
+      );
+    const now = this.clock();
+    if (now >= Number(draft.expires_at))
+      throw new AuthError(
+        409,
+        "Draft expired; prepare a new transfer.",
+        "PERMIT_INACTIVE",
+      );
+    const lane = await this.ownerLane(client, address);
+    if (
+      lane.epoch !== draft.transfer.epoch ||
+      lane.nonce !== draft.transfer.nonce
+    )
+      throw new AuthError(
+        409,
+        "Wallet epoch or owner nonce changed; prepare a new transfer.",
+        "PERMIT_INACTIVE",
+      );
+    const updated = await this.database.query(
+      "UPDATE owner_transfer_drafts SET owner_signature=$2,state='SUBMITTED' WHERE id=$1 AND state='DRAFT'",
+      [body.draftId, body.ownerSignature],
+    );
+    if (updated.rowCount !== 1)
+      return this.ownerTransferSubmit(principal, walletId, input);
+    await this.database.query(
+      "INSERT INTO jobs(id,kind,dedupe_key,payload,state,run_at,max_attempts,created_at,updated_at) VALUES($1,'owner_transfer.relay',$2,$3,'READY',$4,20,$4,$4) ON CONFLICT DO NOTHING",
+      [randomUUID(), body.draftId, { draftId: body.draftId }, now],
+    );
+    return {
+      transferId: draft.transfer.transferId!,
+      txHash: null,
+      state: "SUBMITTED",
     };
   }
 }

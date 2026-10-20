@@ -49,3 +49,20 @@ CREATE TABLE registered_transactions (
   created_at bigint NOT NULL,
   PRIMARY KEY (owner_address, client_request_id)
 );
+
+-- Owner-signed managed transfers (P2-W03): immutable draft, then the native signature.
+CREATE TABLE owner_transfer_drafts (
+  id uuid PRIMARY KEY,
+  wallet_id uuid NOT NULL REFERENCES wallets(id),
+  owner_address text NOT NULL REFERENCES owner_identities(owner_address),
+  transfer_id text NOT NULL UNIQUE CHECK (transfer_id ~ '^0x[0-9a-f]{64}$'),
+  transfer jsonb NOT NULL,
+  typed_data jsonb NOT NULL,
+  digest text NOT NULL CHECK (digest ~ '^0x[0-9a-f]{64}$'),
+  owner_signature text CHECK (owner_signature ~ '^0x[0-9a-f]{130}$'),
+  state text NOT NULL CHECK (state IN ('DRAFT','SUBMITTED','INCLUDED','REVERTED','EXPIRED')),
+  tx_id uuid REFERENCES transactions(id),
+  expires_at bigint NOT NULL,
+  created_at bigint NOT NULL,
+  CHECK ((state = 'DRAFT') = (owner_signature IS NULL))
+);
