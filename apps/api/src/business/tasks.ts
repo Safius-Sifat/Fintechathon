@@ -112,6 +112,20 @@ export class TaskService {
         prepared.needsOwnerReason ?? "Task input is invalid.",
         "INTENT_INVALID",
       );
+    // Provider recipients come from the trusted manifest, never the preparer's defaults.
+    const scope = this.manifest
+      ? {
+          ...prepared.scope,
+          providerBindings: prepared.scope.providerBindings.flatMap((b) => {
+            const trusted = this.manifest!.providers.find(
+              (p) => p.providerId === b.providerId,
+            );
+            return trusted
+              ? [{ providerId: b.providerId, recipient: trusted.recipient }]
+              : [];
+          }),
+        }
+      : prepared.scope;
     try {
       const result = await idempotentMutation(
         this.database,
@@ -131,7 +145,7 @@ export class TaskService {
               body.input,
               INITIAL_RUNBOOK_STATE,
               prepared.conditions,
-              prepared.scope,
+              scope,
               prepared.needsOwnerReason,
               now,
             ],
