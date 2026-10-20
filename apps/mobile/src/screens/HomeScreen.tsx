@@ -139,7 +139,7 @@ export function HomeScreen() {
                   ? `${agent.data.frozen ? "Frozen" : agent.data.paused ? "Paused" : "Active"} · ${formatAmount(agent.data.balances[0]!, TOKENS[0]!.decimals)} DUSD`
                   : agent.loading
                     ? "Checking the chain…"
-                    : "Creating one needs the Mandate service."
+                    : "Create on chain, then register with the service to run tasks."
             }
             onPress={() => navigation.navigate("Tabs", { screen: "Agents" })}
           />

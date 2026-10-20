@@ -1,5 +1,5 @@
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Banner } from "../components/Banner";
 import {
   GhostButton,
@@ -11,90 +11,139 @@ import {
 } from "../components/blocks";
 import { Page } from "../components/Page";
 import type { RootStackParamList } from "../navigation/RootNavigator";
+import { useServicePoll } from "../state/useServicePoll";
 import {
   decideApproval,
+  getServiceWallet,
   listApprovals,
+  registeredServiceWallet,
   useApiSession,
   type PaymentApproval,
 } from "../wallet/api";
 import { TOKENS } from "../wallet/config";
-import { formatAmount, shortAddress } from "../wallet/format";
-import { errorText, useAsync } from "../wallet/useAsync";
+import { shortAddress } from "../wallet/format";
+import { formatUnitsExact } from "../wallet/service-validation";
+import { errorText } from "../wallet/useAsync";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Approvals">;
-
 const amountText = (a: PaymentApproval) => {
   const token = TOKENS.find(
     (t) => t.address?.toLowerCase() === a.invoice?.asset.toLowerCase(),
   );
   return token
-    ? `${formatAmount(BigInt(a.action.amount), token.decimals)} ${token.symbol}`
+    ? `${formatUnitsExact(a.action.amount, token.decimals)} ${token.symbol}`
     : `${a.action.amount} base units`;
 };
-
-// Payments the agent wants to make above your approval limit. Each needs
-// your signature on this phone; doing nothing lets it expire unpaid.
 export function ApprovalsScreen({ navigation, route }: Props) {
-  const { wallet } = route.params;
+  const { wallet, walletId, taskId } = route.params;
   const api = useApiSession();
-  const list = useAsync(
-    () => (api ? listApprovals() : Promise.resolve([])),
-    [api?.sessionId],
+  const list = useServicePoll(
+    async () => {
+      const registered = walletId
+        ? await getServiceWallet(walletId)
+        : await registeredServiceWallet();
+      if (
+        !registered ||
+        registered.address?.toLowerCase() !== wallet.toLowerCase()
+      )
+        throw new Error(
+          "This approval inbox does not belong to the current service wallet.",
+        );
+      return (await listApprovals()).filter(
+        (a) =>
+          a.walletId === registered.walletId &&
+          (!taskId || a.taskId === taskId),
+      );
+    },
+    `inbox:${wallet}:${walletId ?? ""}:${taskId ?? ""}`,
   );
-  const [open, setOpen] = useState<PaymentApproval | null>(null);
+  const [openId, setOpenId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [key, setKey] = useState(0);
-
+  const [busy, setBusy] = useState(false);
+  const inFlight = useRef(false);
+  const pending = (list.data ?? []).filter(
+    (a) =>
+      a.state === "PENDING" &&
+      BigInt(a.expiresAt) > BigInt(Math.floor(Date.now() / 1000)),
+  );
+  const open = pending.find((a) => a.approvalId === openId);
+  useEffect(() => {
+    setOpenId(null);
+    setError(null);
+  }, [api?.sessionId, wallet, taskId]);
   const decide = async (a: PaymentApproval, approve: boolean) => {
+    if (inFlight.current || list.error) return;
+    inFlight.current = true;
+    setBusy(true);
     setError(null);
     try {
       await decideApproval(a, wallet, approve);
-      setOpen(null);
+      setOpenId(null);
       list.reload();
     } catch (e) {
       setError(errorText(e));
       setKey((k) => k + 1);
+      list.reload();
+    } finally {
+      inFlight.current = false;
+      setBusy(false);
     }
   };
-
   if (open)
     return (
       <Page
         title="Approve a payment"
-        subtitle={`The agent wants to pay ${amountText(open)} to ${shortAddress(open.action.target)}.`}
-        onBack={() => setOpen(null)}
+        subtitle={`The agent wants to pay ${amountText(open)}.`}
+        onBack={() => {
+          if (!busy) setOpenId(null);
+        }}
         footer={
-          <GhostButton label="Decline" onPress={() => decide(open, false)} />
+          <GhostButton
+            label={busy ? "Submitting…" : "Decline"}
+            disabled={busy || !!list.error}
+            onPress={() => decide(open, false)}
+          />
         }
       >
         <Rows>
-          <Row label="To" value={shortAddress(open.action.target)} mono />
+          <Row label="Recipient" detail={open.action.target} mono />
           <Row label="Amount" value={amountText(open)} />
+          <Row label="Asset" detail={open.invoice!.asset} mono />
+          <Row label="Task" detail={open.taskId} mono />
+          <Row
+            label="Action digest"
+            detail={open.typedData.message.actionDigest}
+            mono
+          />
           <Row
             label="Expires"
-            value={new Date(Number(open.expiresAt) * 1000).toLocaleTimeString()}
+            detail={new Date(Number(open.expiresAt) * 1000).toLocaleString()}
           />
         </Rows>
         {open.rationale ? (
-          <Note>
-            Agent's reason (written by the agent, not checked): {open.rationale}
-          </Note>
+          <Note>Agent's reason (written by the agent): {open.rationale}</Note>
         ) : null}
         <Note>
-          If you do nothing, the payment is not made and the agent is told.
+          These recipient and amount fields are bound to the validated Action
+          and invoice. If you do nothing, this approval expires and does not
+          authorize payment.
         </Note>
-        {error ? (
-          <Banner icon="alert-outline" title="Not done" body={error} />
+        {error || list.error ? (
+          <Banner
+            icon="alert-outline"
+            title="Decision not confirmed"
+            body={error ?? list.error!}
+          />
         ) : null}
         <HoldToSeal
-          key={key}
-          label="Press and hold to approve"
+          key={`${open.approvalId}:${key}`}
+          label={busy ? "Submitting…" : "Press and hold to approve"}
+          disabled={busy || !!list.error}
           onSealed={() => decide(open, true)}
         />
       </Page>
     );
-
-  const pending = (list.data ?? []).filter((a) => a.state === "PENDING");
   return (
     <Page title="Approvals" onBack={() => navigation.goBack()}>
       {!api ? (
@@ -107,7 +156,7 @@ export function ApprovalsScreen({ navigation, route }: Props) {
           title="Could not load approvals"
           body={list.error}
         />
-      ) : pending.length === 0 ? (
+      ) : !pending.length ? (
         <Voice>{list.loading ? "Loading…" : "Nothing waiting for you."}</Voice>
       ) : (
         <Rows>
@@ -116,11 +165,24 @@ export function ApprovalsScreen({ navigation, route }: Props) {
               key={a.approvalId}
               label={`Pay ${amountText(a)}`}
               detail={`To ${shortAddress(a.action.target)}`}
-              onPress={() => setOpen(a)}
+              onPress={() => {
+                setError(null);
+                setOpenId(a.approvalId);
+              }}
             />
           ))}
         </Rows>
       )}
+      {openId && !open ? (
+        <Note>The selected request is no longer pending or has expired.</Note>
+      ) : null}
+      {error ? (
+        <Banner
+          icon="alert-outline"
+          title="Decision not confirmed"
+          body={error}
+        />
+      ) : null}
       <GhostButton label="Refresh" onPress={list.reload} />
     </Page>
   );

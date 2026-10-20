@@ -25,6 +25,7 @@ import { TOKENS } from "../wallet/config";
 import { formatAmount, shortAddress } from "../wallet/format";
 import { currentAccount, useWallet } from "../wallet/session";
 import { errorText, useAsync } from "../wallet/useAsync";
+import { ServiceAgent } from "./ServiceAgent";
 
 const EVENT_LABELS: Record<string, string> = {
   ActionExecuted: "Agent payment",
@@ -88,8 +89,8 @@ export function AgentsScreen() {
           <Voice>No agent wallet for this account.</Voice>
           <Note>
             An agent wallet is a separate contract you own. Creating it costs a
-            small network fee in ETH. Running tasks in it also needs the Mandate
-            service, which is not connected yet.
+            small network fee in ETH. Register with the Mandate service below to
+            run tasks.
           </Note>
           <PrimaryButton
             label={busy ? "Creating…" : "Create agent wallet"}
@@ -202,7 +203,10 @@ export function AgentsScreen() {
                   label={EVENT_LABELS[e.name] ?? e.name}
                   detail={`Block ${e.block.toString()}`}
                   onPress={() =>
-                    navigation.navigate("TxDetail", { hash: e.hash })
+                    navigation.navigate("TxDetail", {
+                      hash: e.hash,
+                      origin: "service",
+                    })
                   }
                 />
               ))}
@@ -215,6 +219,7 @@ export function AgentsScreen() {
           </Note>
         </>
       ) : null}
+      <ServiceAgent />
       <GhostButton
         label="Refresh"
         onPress={() => {
