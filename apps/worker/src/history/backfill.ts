@@ -241,7 +241,9 @@ export class HistoryIndexer {
       return assertion(null, null, zeroAddress);
     const c = await this.classify(account, receipt, from, to);
     const paidByAccount = lower(tx.from) === lower(account.address);
-    const l1 = (receipt as TransactionReceipt & { l1Fee?: bigint }).l1Fee ?? 0n;
+    const l1 = BigInt(
+      (receipt as TransactionReceipt & { l1Fee?: bigint | Hex }).l1Fee ?? 0n,
+    );
     return {
       ...base,
       ...c,

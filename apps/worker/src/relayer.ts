@@ -479,8 +479,10 @@ export class Relayer {
           state = "FINALIZED";
       }
     }
-    const l1Fee =
-      (receipt as TransactionReceipt & { l1Fee?: bigint }).l1Fee ?? 0n;
+    // The client has no chain formatter, so Base returns l1Fee as an unformatted hex string.
+    const l1Fee = BigInt(
+      (receipt as TransactionReceipt & { l1Fee?: bigint | Hex }).l1Fee ?? 0n,
+    );
     const actual = receipt.gasUsed * receipt.effectiveGasPrice + l1Fee;
     const updated = (
       await this.database.query<TxRow>(
