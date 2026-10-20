@@ -38,11 +38,11 @@ if (!url || !caPath)
 const ca = await readFile(caPath, "utf8");
 export const poolConfig = {
   connectionString: url,
-  max: 12,
+  max: 3,
   connectionTimeoutMillis: 3000,
   ssl: { ca, rejectUnauthorized: true },
 };
-export const admin = new Pool(poolConfig);
+export const admin = new Pool({ ...poolConfig, max: 1 });
 
 export async function isolatedSchema(prefix: string) {
   const schema = prefix + "_" + randomBytes(8).toString("hex");

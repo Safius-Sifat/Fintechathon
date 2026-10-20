@@ -86,6 +86,15 @@ async function freePort() {
     });
   });
 }
+// Explicit globs (for example the MPC end-to-end suite) replace the default DB suites.
+const suites = process.argv.length > 2
+  ? process.argv.slice(2)
+  : [
+      "packages/platform/test/db/*.test.ts",
+      "apps/api/test/db/*.test.ts",
+      "apps/worker/test/db/*.test.ts",
+      "services/policy/test/db/*.test.ts",
+    ];
 const port = await freePort();
 try {
   await writeFile(passwordFile, password, { mode: 0o600 });
@@ -132,7 +141,7 @@ try {
     "-l",
     join(temp, "server.log"),
     "-o",
-    `-h 127.0.0.1 -p ${port} -k ${temp} -c shared_buffers=32MB -c max_connections=20 -c ssl=on -c ssl_cert_file=${ca} -c ssl_key_file=${key}`,
+    `-h 127.0.0.1 -p ${port} -k ${temp} -c shared_buffers=32MB -c max_connections=100 -c ssl=on -c ssl_cert_file=${ca} -c ssl_key_file=${key}`,
     "-w",
     "start",
   ]);
@@ -153,10 +162,7 @@ try {
         "--import",
         "tsx",
         "--test",
-        "packages/platform/test/db/*.test.ts",
-        "apps/api/test/db/*.test.ts",
-        "apps/worker/test/db/*.test.ts",
-        "services/policy/test/db/*.test.ts",
+        ...suites,
       ],
       {
         cwd: root,

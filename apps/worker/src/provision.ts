@@ -245,3 +245,38 @@ export class Provisioner {
     return { state: "READY", waiting: null };
   }
 }
+
+// Worker-only client for the MPC adapter's keygen ceremony.
+export function adapterKeygen(url: string, token: string): Keygen {
+  const headers = {
+    authorization: "Bearer " + token,
+    "content-type": "application/json",
+  };
+  return {
+    async generate(mpcWalletId) {
+      const status = await fetch(`${url}/internal/keygen/${mpcWalletId}`, {
+        headers,
+        signal: AbortSignal.timeout(15_000),
+      });
+      let body: { state: string; publicKey?: Hex; reason?: string };
+      if (status.status === 404) {
+        const started = await fetch(`${url}/internal/keygen`, {
+          method: "POST",
+          headers,
+          body: JSON.stringify({ mpcWalletId }),
+          signal: AbortSignal.timeout(15_000),
+        });
+        if (started.status === 409) return { state: "PENDING" };
+        if (started.status !== 202)
+          throw new Error(`MPC keygen refused (${started.status})`);
+        body = await started.json();
+      } else if (status.status === 200) body = await status.json();
+      else throw new Error(`MPC keygen status unavailable (${status.status})`);
+      if (body.state === "DONE" && body.publicKey)
+        return { state: "DONE", publicKey: body.publicKey };
+      if (body.state === "FAILED")
+        return { state: "FAILED", reason: body.reason ?? "keygen failed" };
+      return { state: "PENDING" };
+    },
+  };
+}

@@ -21,11 +21,11 @@ if (!url || !caPath)
 const ca = await readFile(caPath, "utf8");
 const poolConfig = {
   connectionString: url,
-  max: 10,
+  max: 3,
   connectionTimeoutMillis: 3000,
   ssl: { ca, rejectUnauthorized: true },
 };
-export const admin = new Pool(poolConfig);
+export const admin = new Pool({ ...poolConfig, max: 1 });
 
 export async function isolatedSchema(prefix: string) {
   const schema = prefix + "_" + randomBytes(8).toString("hex");
@@ -71,7 +71,7 @@ async function freePort(): Promise<number> {
 
 // Local fork of Base Sepolia: the deployed Person1 contracts keep their real
 // addresses and code hashes. Results are LOCAL fork evidence, never public PASS.
-export async function forkChain() {
+export async function forkChain(options: { blockTime?: number } = {}) {
   const port = await freePort();
   const anvil = process.env.ANVIL_BIN ?? join(homedir(), ".foundry/bin/anvil");
   const forkUrl = process.env.ANVIL_FORK_URL ?? "https://sepolia.base.org";
@@ -87,6 +87,7 @@ export async function forkChain() {
       "--silent",
       "--no-storage-caching",
       "--no-priority-fee",
+      ...(options.blockTime ? ["--block-time", String(options.blockTime)] : []),
     ],
     { stdio: "ignore" },
   );

@@ -149,7 +149,7 @@ export async function seedSignedAction(
     amount,
     inputHash,
     issuedAt: String(now - 5),
-    expiresAt: String(now + 300),
+    expiresAt: String(now + 55),
   };
   const providerSignature = await provider.signTypedData(
     buildTypedData("Invoice", invoice, invoiceDomain(wallet)) as never,

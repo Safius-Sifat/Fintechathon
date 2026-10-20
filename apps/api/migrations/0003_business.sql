@@ -300,3 +300,14 @@ CREATE TABLE financial_alerts (
   created_at bigint NOT NULL,
   UNIQUE (wallet_id, kind, tx_hash, log_index)
 );
+
+-- MPC adapter keygen journal: one ceremony per planned MPC wallet ID.
+CREATE TABLE mpc_keygen (
+  mpc_wallet_id uuid PRIMARY KEY REFERENCES wallets(mpc_wallet_id),
+  state text NOT NULL CHECK (state IN ('PENDING','DONE','FAILED')),
+  public_key text CHECK (public_key ~ '^0x04[0-9a-f]{128}$'),
+  failure_reason text CHECK (length(failure_reason) <= 500),
+  created_at bigint NOT NULL,
+  updated_at bigint NOT NULL,
+  CHECK ((state = 'DONE') = (public_key IS NOT NULL))
+);

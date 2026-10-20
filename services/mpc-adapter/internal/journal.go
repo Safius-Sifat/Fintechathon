@@ -17,4 +17,6 @@ type Attempt struct {
 type Store interface {
 	Begin(context.Context, string) (attempt Attempt, newlyCreated bool, err error)
 	Save(context.Context, Attempt) error
+	// Unresolved returns an attempt still UNKNOWN after its session ended.
+	Unresolved(context.Context, string) (Attempt, bool, error)
 }

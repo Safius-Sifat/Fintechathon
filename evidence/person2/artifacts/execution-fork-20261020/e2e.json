@@ -1,0 +1,29 @@
+{
+  "forkBlock": "48362675",
+  "walletAddress": "0xA92f63c867B22fCa1BC0FB28EBd0DDCbCbB4E7f1",
+  "executor": "0x02E9957Be4D5eB934C30817909bd881C3837A099",
+  "mpcWalletId": "efdf2626-37af-4be9-aa38-151b2d4402ae",
+  "dkgMs": 18926,
+  "signToInclusionMs": 3811,
+  "payTxHash": "0x732c9752f3439bfd77a58f8773e0d63a4706f081931e017766c30aa89a777bac",
+  "payRequestId": "0x9e4c564e7b8497cd4020005f62925cf4518d9e9dfc795bea5bd5348ad86673ae",
+  "deniedActionRuleCode": "POLICY_VIOLATION",
+  "result": "LOCAL_PASS",
+  "chain": "anvil fork of Base Sepolia (chainId 84532), deployed Person1 contracts at manifest addresses/code hashes; not a public transaction",
+  "command": "MPC_PRIVATE_DIR=/private/tmp/mandate-mpc-qualification-20261020 node scripts/ops/with-test-postgres.mjs 'apps/worker/test/e2e/*.test.ts'",
+  "components": [
+    "disposable TLS Postgres 16.10",
+    "policy service (in process)",
+    "mandate-authorizer (Go)",
+    "mandate-adapter (Go)",
+    "3-node MPCium 90e3ee3 local cluster",
+    "worker Provisioner/Executor/Relayer"
+  ],
+  "assertions": [
+    "per-wallet DKG via adapter keygen authorized only for KEYGEN wallet",
+    "owner-signed WalletPolicy and Permit applied on fork",
+    "PAY threshold-signed, executor recovered on recomputed digest, simulated, journaled, relayed once; ActionExecuted with requestId; provider +200000 units; reservation INCLUDED",
+    "Action edited after digest commit: policy DIGEST_MISMATCH, attempt DENIED, reservation RELEASED DENIED_UNSIGNED, no transaction"
+  ],
+  "recordedAt": "2026-10-20T11:05:52.971226+00:00"
+}

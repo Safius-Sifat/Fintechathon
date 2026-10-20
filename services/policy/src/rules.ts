@@ -8,7 +8,6 @@ import {
   InvoiceSchema,
   invoiceDomain,
   Kind,
-  MAX_ACTION_SECONDS,
   Operation,
   PermitSchema,
   recoverSigner,
@@ -142,7 +141,8 @@ export async function evaluate(input: RuleInput): Promise<string[]> {
       )
         deny("INVOICE_MISMATCH");
       if (
-        BigInt(i.expiresAt) - BigInt(i.issuedAt) > MAX_ACTION_SECONDS ||
+        BigInt(i.expiresAt) - BigInt(i.issuedAt) >
+          MAX_UNAPPROVED_ACTION_SECONDS ||
         now < BigInt(i.issuedAt) ||
         now > BigInt(i.expiresAt)
       )
