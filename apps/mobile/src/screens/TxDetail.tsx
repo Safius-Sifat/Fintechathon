@@ -5,7 +5,7 @@ import { GhostButton, Note, Row, Rows, Steps } from "../components/blocks";
 import { Page } from "../components/Page";
 import type { RootStackParamList } from "../navigation/RootNavigator";
 import { explorerTx, receipt, transaction } from "../wallet/chain";
-import { formatAmount, shortAddress } from "../wallet/format";
+import { formatSmall, shortAddress } from "../wallet/format";
 import { useAsync } from "../wallet/useAsync";
 
 type Props = NativeStackScreenProps<RootStackParamList, "TxDetail">;
@@ -78,7 +78,7 @@ export function TxDetailScreen({ navigation, route }: Props) {
         {rcpt.data ? (
           <Row
             label="Network fee"
-            value={`${formatAmount(rcpt.data.gasUsed * rcpt.data.effectiveGasPrice, 18)} ETH`}
+            value={`${formatSmall(rcpt.data.gasUsed * rcpt.data.effectiveGasPrice, 18)} ETH`}
           />
         ) : null}
       </Rows>

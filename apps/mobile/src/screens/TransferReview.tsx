@@ -12,7 +12,7 @@ import { useDraftContext, useSendDraft } from "../state/useSendDraft";
 import { fonts, makeStyles, space, type } from "../theme";
 import { prepareSend, send } from "../wallet/chain";
 import { checkAddress, checkAmount } from "../wallet/core";
-import { formatAmount, shortAddress, tokenByName } from "../wallet/format";
+import { formatSmall, shortAddress, tokenByName } from "../wallet/format";
 import { readContacts } from "../wallet/local";
 import { currentAccount } from "../wallet/session";
 import { errorText, useAsync } from "../wallet/useAsync";
@@ -104,7 +104,7 @@ export function TransferReviewScreen({ navigation }: Props) {
           label="Network fee"
           value={
             quote.data
-              ? `${formatAmount(quote.data.prepared.fee, 18)} ETH`
+              ? `${formatSmall(quote.data.prepared.fee, 18)} ETH`
               : quote.loading
                 ? "Quoting…"
                 : "Unavailable"

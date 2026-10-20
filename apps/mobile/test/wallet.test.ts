@@ -172,3 +172,11 @@ test("wallet: ABI fragments match the generated contract ABI", async () => {
   for (const f of factoryAbi)
     assert.equal(strip(f), strip(find(walletFactoryAbi, f.name)), f.name);
 });
+
+test("wallet: small fees keep their digits", async () => {
+  const { formatSmall, formatAmount } = await import("../src/wallet/format");
+  assert.equal(formatSmall(310_000_000_000n, 18), "0.00000031");
+  assert.equal(formatSmall(0n, 18), "0");
+  assert.equal(formatAmount(17_824_929n, 6), "17.824929");
+  assert.equal(formatAmount(1_500_000_000_000_000_000n, 18), "1.50");
+});
