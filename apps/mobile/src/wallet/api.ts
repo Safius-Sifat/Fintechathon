@@ -46,7 +46,13 @@ import {
   type WalletView,
 } from "./service-dto/api";
 import { ActivityPageSchema } from "./service-dto/activity";
-import { Hex32Schema, UuidSchema, Uint64 } from "./service-dto/primitives";
+import {
+  AddressSchema,
+  Hex32Schema,
+  Uint256,
+  UuidSchema,
+  Uint64,
+} from "./service-dto/primitives";
 import { readProofBytes } from "./service-proof";
 import { permitStateAbi } from "./chain-abi";
 import { LoginDomainSchema } from "./service-dto/domains";
@@ -477,6 +483,37 @@ export async function serviceTaskReferences() {
   const refs = await readServiceReferences(auth.session.owner);
   gate.assert(auth.ticket);
   return refs.tasks;
+}
+const providersSchema = z
+  .array(
+    z
+      .object({
+        providerId: z.string().max(32),
+        recipient: AddressSchema.nullable(),
+        capabilities: z.array(z.string().max(32)).max(8),
+        price: Uint256,
+        available: z.boolean(),
+      })
+      .strict(),
+  )
+  .max(16);
+export type Provider = z.infer<typeof providersSchema>[number];
+// The providers the service publishes. It only fills in the task form: the
+// service still refuses any recipient its trusted manifest does not bind.
+export async function listProviders(): Promise<Provider[]> {
+  let res: Response;
+  try {
+    res = await fetch(`${origin()}/providers`);
+  } catch {
+    throw new Error(
+      "Could not reach the Mandate service. Check your connection and try again.",
+    );
+  }
+  if (!res.ok) throw new ServiceError(res.status, null);
+  const parsed = providersSchema.safeParse(await res.json());
+  if (!parsed.success)
+    throw new Error("The Mandate service returned an invalid provider list.");
+  return parsed.data;
 }
 export async function draftPermit(taskId: string, terms: Terms) {
   return post(
