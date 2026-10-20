@@ -54,7 +54,7 @@ export function AgentsScreen() {
       {w ? (
         <>
           <BigAmount
-            value={formatAmount(w.balances[0]!, 18)}
+            value={formatAmount(w.balances[0]!, TOKENS[0]!.decimals)}
             unit="DUSD in the agent wallet"
           />
           <Rows>

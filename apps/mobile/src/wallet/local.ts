@@ -38,7 +38,7 @@ export interface SentTx {
   to: Address;
   symbol: string;
   amount: string;
-  kind: "send" | "admin";
+  kind: "send" | "admin" | "owner";
   label: string;
   createdAt: number;
 }
@@ -48,6 +48,19 @@ export async function addSent(tx: SentTx) {
   const all = await readSent();
   await write(SENT, [tx, ...all].slice(0, 200));
 }
+
+// The allow and block lists this phone last signed for an agent wallet. The
+// chain stores them as lookups only, so this is how the editor shows them.
+export interface SignedLists {
+  version: string;
+  allowlist: Address[];
+  blocklist: Address[];
+}
+const listsKey = (wallet: Address) => `mandate.policy.${wallet.toLowerCase()}`;
+export const readSignedLists = (wallet: Address) =>
+  read<SignedLists | null>(listsKey(wallet), null);
+export const writeSignedLists = (wallet: Address, l: SignedLists) =>
+  write(listsKey(wallet), l);
 
 export async function clearLocal() {
   await AsyncStorage.multiRemove([PROFILE, CONTACTS, SENT]);

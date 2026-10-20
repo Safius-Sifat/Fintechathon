@@ -45,7 +45,9 @@ export function HomeScreen() {
     () => (account ? agentWallet(account.address) : Promise.resolve(null)),
     [account?.address],
   );
-  const dusd = bal.data ? formatAmount(bal.data.values[0]!, 18) : "—";
+  const dusd = bal.data
+    ? formatAmount(bal.data.values[0]!, TOKENS[0]!.decimals)
+    : "—";
   return (
     <View style={[styles.root, { paddingTop: insets.top }]}>
       <ScrollView
@@ -134,7 +136,7 @@ export function HomeScreen() {
               agent.error
                 ? agent.error
                 : agent.data
-                  ? `${agent.data.frozen ? "Frozen" : agent.data.paused ? "Paused" : "Active"} · ${formatAmount(agent.data.balances[0]!, 18)} DUSD`
+                  ? `${agent.data.frozen ? "Frozen" : agent.data.paused ? "Paused" : "Active"} · ${formatAmount(agent.data.balances[0]!, TOKENS[0]!.decimals)} DUSD`
                   : agent.loading
                     ? "Checking the chain…"
                     : "Creating one needs the Mandate service."
