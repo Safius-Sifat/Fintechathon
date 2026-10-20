@@ -56,6 +56,9 @@ importers:
       pg:
         specifier: 8.16.3
         version: 8.16.3
+      viem:
+        specifier: 2.38.5
+        version: 2.38.5(typescript@5.9.3)(zod@3.25.76)
       zod:
         specifier: 3.25.76
         version: 3.25.76
@@ -63,9 +66,6 @@ importers:
       '@types/pg':
         specifier: 8.15.5
         version: 8.15.5
-      viem:
-        specifier: 2.38.5
-        version: 2.38.5(typescript@5.9.3)(zod@3.25.76)
 
   apps/mcp:
     dependencies:
@@ -218,6 +218,9 @@ importers:
       tsx:
         specifier: 4.20.6
         version: 4.20.6
+      viem:
+        specifier: 2.38.5
+        version: 2.38.5(typescript@5.9.3)(zod@3.25.76)
     devDependencies:
       '@types/pg':
         specifier: 8.15.5

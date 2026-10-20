@@ -8,6 +8,10 @@
     "0002_auth_sessions.sql": {
       "kind": "expand",
       "transaction": "required"
+    },
+    "0003_business.sql": {
+      "kind": "expand",
+      "transaction": "required"
     }
   }
 }

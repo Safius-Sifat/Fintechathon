@@ -81,6 +81,10 @@ test("unconfigured auth fails closed while foundation health stays available", a
     assert.equal(
       (await app.inject({ method: "POST", url: "/v1/wallets", payload: {} }))
         .statusCode,
+      503,
+    );
+    assert.equal(
+      (await app.inject({ url: "/v1/not-a-route" })).statusCode,
       501,
     );
   } finally {
