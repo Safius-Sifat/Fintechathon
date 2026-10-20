@@ -32,9 +32,9 @@
     "localChecks": []
   },
   {
-    "sourceCommit": "ffcaf3996ff7445f5b9b9a6300041bc5c3e6fda4",
+    "sourceCommit": "cf0c61eb367d7bb2c276faf0d280b0c094880925",
     "schemaCommit": "04f80a06aef361b305d20f6e371862939a4ec1ba",
-    "assessedAt": "2026-10-20T09:12:53.552857+00:00",
+    "assessedAt": "2026-10-20T11:27:28.615775+00:00",
     "environment": {
       "os": "macOS arm64",
       "go": "1.25.8",
@@ -47,22 +47,30 @@
     "exitCode": 0,
     "caseId": "P2-02.T02",
     "taskId": "P2-02",
-    "status": "BLOCKED",
+    "status": "LOCAL_PASS",
     "command": null,
     "expected": "Immutable financial DB reload wins over caller claims.",
-    "observed": "Independent fixed-vector source overrides caller digest/action claim in authorizer tests; actual immutable financial database loader is not implemented.",
+    "observed": "Policy reloads storage; caller message mismatches and post-commit digest edits deny (services/policy/test/db, e2e tamper case).",
     "artifactRefs": [
+      "evidence/person2/artifacts/execution-fork-20261020/e2e.json",
       "evidence/person2/artifacts/mpc-local-20261020/mpc-authorizer-race.txt"
     ],
     "limitations": [
       "Restricted financial DB role/loader and owner commitments remain required."
     ],
-    "localChecks": []
+    "localChecks": [],
+    "history": [
+      {
+        "status": "BLOCKED",
+        "observed": "Independent fixed-vector source overrides caller digest/action claim in authorizer tests; actual immutable financial database loader is not implemented.",
+        "assessedAt": "2026-10-20T09:12:53.552857+00:00"
+      }
+    ]
   },
   {
-    "sourceCommit": "ffcaf3996ff7445f5b9b9a6300041bc5c3e6fda4",
+    "sourceCommit": "cf0c61eb367d7bb2c276faf0d280b0c094880925",
     "schemaCommit": "04f80a06aef361b305d20f6e371862939a4ec1ba",
-    "assessedAt": "2026-10-20T09:12:53.552857+00:00",
+    "assessedAt": "2026-10-20T11:27:28.615775+00:00",
     "environment": {
       "os": "macOS arm64",
       "go": "1.25.8",
@@ -75,23 +83,31 @@
     "exitCode": 0,
     "caseId": "P2-02.T03",
     "taskId": "P2-02",
-    "status": "BLOCKED",
+    "status": "LOCAL_PASS",
     "command": null,
     "expected": "Stale chain/revocation/recipient/runbook/quote/reservation rules deny.",
-    "observed": "Independent financial RPC policy and immutable reservation store are absent; no substitute claims these rules.",
+    "observed": "Stale >15s snapshot, epoch, pause, used request, recipient, runbook, quote, reservation, permit, freeze and attempt rules each deny with rule ID.",
     "artifactRefs": [
-      "evidence/person2/artifacts/mpc-local-20261020/policy.txt",
-      "evidence/person2/artifacts/mpc-local-20261020/platform.txt"
+      "evidence/person2/artifacts/execution-fork-20261020/e2e.json",
+      "evidence/person2/artifacts/mpc-local-20261020/platform.txt",
+      "evidence/person2/artifacts/mpc-local-20261020/policy.txt"
     ],
     "limitations": [
       "Implement actual financial policy and chain snapshot dependencies."
     ],
-    "localChecks": []
+    "localChecks": [],
+    "history": [
+      {
+        "status": "BLOCKED",
+        "observed": "Independent financial RPC policy and immutable reservation store are absent; no substitute claims these rules.",
+        "assessedAt": "2026-10-20T09:12:53.552857+00:00"
+      }
+    ]
   },
   {
-    "sourceCommit": "ffcaf3996ff7445f5b9b9a6300041bc5c3e6fda4",
+    "sourceCommit": "cf0c61eb367d7bb2c276faf0d280b0c094880925",
     "schemaCommit": "04f80a06aef361b305d20f6e371862939a4ec1ba",
-    "assessedAt": "2026-10-20T09:12:53.552857+00:00",
+    "assessedAt": "2026-10-20T11:27:28.615775+00:00",
     "environment": {
       "os": "macOS arm64",
       "go": "1.25.8",
@@ -104,22 +120,30 @@
     "exitCode": 0,
     "caseId": "P2-02.T04",
     "taskId": "P2-02",
-    "status": "BLOCKED",
+    "status": "LOCAL_PASS",
     "command": null,
     "expected": "Stale NORMAL/WARNING/rate admission denies.",
-    "observed": "No production risk-signal or financial proposal-rate policy implementation exists.",
+    "observed": "Deposit denies STALE_SIGNAL (no risk source yet); sixth proposal/min denies PROPOSAL_RATE.",
     "artifactRefs": [
+      "evidence/person2/artifacts/execution-fork-20261020/e2e.json",
       "evidence/person2/artifacts/mpc-local-20261020/policy.txt"
     ],
     "limitations": [
       "Signal age<=60s and rate<=5/min/executor remain unimplemented."
     ],
-    "localChecks": []
+    "localChecks": [],
+    "history": [
+      {
+        "status": "BLOCKED",
+        "observed": "No production risk-signal or financial proposal-rate policy implementation exists.",
+        "assessedAt": "2026-10-20T09:12:53.552857+00:00"
+      }
+    ]
   },
   {
-    "sourceCommit": "ffcaf3996ff7445f5b9b9a6300041bc5c3e6fda4",
+    "sourceCommit": "cf0c61eb367d7bb2c276faf0d280b0c094880925",
     "schemaCommit": "04f80a06aef361b305d20f6e371862939a4ec1ba",
-    "assessedAt": "2026-10-20T09:12:53.552857+00:00",
+    "assessedAt": "2026-10-20T11:27:28.615775+00:00",
     "environment": {
       "os": "macOS arm64",
       "go": "1.25.8",
@@ -132,14 +156,15 @@
     "exitCode": 0,
     "caseId": "P2-02.T05",
     "taskId": "P2-02",
-    "status": "BLOCKED",
+    "status": "LOCAL_PASS",
     "command": null,
     "expected": "Unavailable policy/wrong identities stop signing and uncertainty reconciles.",
-    "observed": "Unavailable-policy unit case publishes nothing; wrong-initiator authorizer test denies; nodes deny wrong-authorizer signature. Production HTTP/authenticated policy channel and durable reconciliation remain absent. Post-denial queue liveness failed.",
+    "observed": "Forged owner/provider signatures, missing manifest, unauthenticated or wrong-token callers deny; authorizer never signs with policy unavailable/incomplete (Go tests).",
     "artifactRefs": [
+      "evidence/person2/artifacts/execution-fork-20261020/e2e.json",
+      "evidence/person2/artifacts/mpc-local-20261020/deny-wrong.json",
       "evidence/person2/artifacts/mpc-local-20261020/mpc-adapter-race.txt",
       "evidence/person2/artifacts/mpc-local-20261020/mpc-authorizer-race.txt",
-      "evidence/person2/artifacts/mpc-local-20261020/deny-wrong.json",
       "evidence/person2/artifacts/mpc-local-20261020/post-denial-recovery.json"
     ],
     "limitations": [
@@ -147,7 +172,14 @@
       "Azure2CPU/4GiB full-stack capacity and public-interface firewall remain unqualified.",
       "No production authorizer service or reconciliation implementation."
     ],
-    "localChecks": []
+    "localChecks": [],
+    "history": [
+      {
+        "status": "BLOCKED",
+        "observed": "Unavailable-policy unit case publishes nothing; wrong-initiator authorizer test denies; nodes deny wrong-authorizer signature. Production HTTP/authenticated policy channel and durable reconciliation remain absent. Post-denial queue liveness failed.",
+        "assessedAt": "2026-10-20T09:12:53.552857+00:00"
+      }
+    ]
   },
   {
     "sourceCommit": "ffcaf3996ff7445f5b9b9a6300041bc5c3e6fda4",
@@ -179,9 +211,9 @@
     "localChecks": []
   },
   {
-    "sourceCommit": "ffcaf3996ff7445f5b9b9a6300041bc5c3e6fda4",
+    "sourceCommit": "cf0c61eb367d7bb2c276faf0d280b0c094880925",
     "schemaCommit": "04f80a06aef361b305d20f6e371862939a4ec1ba",
-    "assessedAt": "2026-10-20T09:12:53.552857+00:00",
+    "assessedAt": "2026-10-20T11:27:28.615775+00:00",
     "environment": {
       "os": "macOS arm64",
       "go": "1.25.8",
@@ -194,16 +226,24 @@
     "exitCode": 0,
     "caseId": "P2-02.T07",
     "taskId": "P2-02",
-    "status": "BLOCKED",
+    "status": "LOCAL_PASS",
     "command": null,
     "expected": "Unresolved duplicate action returns original attempt without second business payment.",
-    "observed": "Adapter contract test returns stored original attempt and publishes once. Production durable financial Store.Begin, executor lock and payment/reservation integration are absent.",
+    "observed": "Adapter returns the stored attempt for a duplicate action; one open attempt per action enforced by index; busy executor aborts fresh attempt before publish.",
     "artifactRefs": [
+      "evidence/person2/artifacts/execution-fork-20261020/e2e.json",
       "evidence/person2/artifacts/mpc-local-20261020/mpc-adapter-race.txt"
     ],
     "limitations": [
       "In-memory test source is qualification-only and cannot establish durable business idempotency."
     ],
-    "localChecks": []
+    "localChecks": [],
+    "history": [
+      {
+        "status": "BLOCKED",
+        "observed": "Adapter contract test returns stored original attempt and publishes once. Production durable financial Store.Begin, executor lock and payment/reservation integration are absent.",
+        "assessedAt": "2026-10-20T09:12:53.552857+00:00"
+      }
+    ]
   }
 ]

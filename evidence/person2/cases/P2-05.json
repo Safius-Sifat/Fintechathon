@@ -1,0 +1,146 @@
+[
+  {
+    "caseId": "P2-05.T01",
+    "taskId": "P2-05",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "cf0c61eb367d7bb2c276faf0d280b0c094880925",
+    "assessedAt": "2026-10-20T11:27:28.615775+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "node": "22.23.3 (pinned)",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia 84532 at latest block (local, no public transaction)",
+      "qualificationOnly": true
+    },
+    "command": "./scripts/pnpm.sh test:db",
+    "exitCode": 0,
+    "expected": "Concurrent appenders: contiguous chain, no duplicate",
+    "observed": "20 concurrent appends 0..20 contiguous, links verified, dedupe returns original, rolled-back write leaves no gap.",
+    "artifactRefs": [],
+    "limitations": []
+  },
+  {
+    "caseId": "P2-05.T02",
+    "taskId": "P2-05",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "cf0c61eb367d7bb2c276faf0d280b0c094880925",
+    "assessedAt": "2026-10-20T11:27:28.615775+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "node": "22.23.3 (pinned)",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia 84532 at latest block (local, no public transaction)",
+      "qualificationOnly": true
+    },
+    "command": "./scripts/pnpm.sh test:db",
+    "exitCode": 0,
+    "expected": "Tampered artifact/salt/AAD/event/checkpoint fails",
+    "observed": "Ciphertext byte, salt, task AAD and key changes fail; edited/missing event detected; checkpoint verify fails on edit; store unchanged.",
+    "artifactRefs": [],
+    "limitations": []
+  },
+  {
+    "caseId": "P2-05.T03",
+    "taskId": "P2-05",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "cf0c61eb367d7bb2c276faf0d280b0c094880925",
+    "assessedAt": "2026-10-20T11:27:28.615775+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "node": "22.23.3 (pinned)",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia 84532 at latest block (local, no public transaction)",
+      "qualificationOnly": true
+    },
+    "command": "./scripts/pnpm.sh test:db",
+    "exitCode": 0,
+    "expected": "read/run/other-tenant denied; evidence scope required",
+    "observed": "read and run/prepare tokens and other owner 403; evidence token and owner 200 ZIP.",
+    "artifactRefs": [],
+    "limitations": []
+  },
+  {
+    "caseId": "P2-05.T04",
+    "taskId": "P2-05",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "cf0c61eb367d7bb2c276faf0d280b0c094880925",
+    "assessedAt": "2026-10-20T11:27:28.615775+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "node": "22.23.3 (pinned)",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia 84532 at latest block (local, no public transaction)",
+      "qualificationOnly": true
+    },
+    "command": "./scripts/pnpm.sh test:db",
+    "exitCode": 0,
+    "expected": "Provisional export before anchor; no self-inclusion",
+    "observed": "Export anchorTxHash null before anchor; checkpoint excludes its anchor; non-publisher lane refused; local anchor-code copy reaches INCLUDED on Anchored.",
+    "artifactRefs": [],
+    "limitations": [
+      "Real EvidenceAnchor publisher 0x5cCE...6a95 keystore password not provided: public anchoring BLOCKED."
+    ]
+  },
+  {
+    "caseId": "P2-05.T05",
+    "taskId": "P2-05",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "cf0c61eb367d7bb2c276faf0d280b0c094880925",
+    "assessedAt": "2026-10-20T11:27:28.615775+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "node": "22.23.3 (pinned)",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia 84532 at latest block (local, no public transaction)",
+      "qualificationOnly": true
+    },
+    "command": "./scripts/pnpm.sh test:db",
+    "exitCode": 0,
+    "expected": "Retention deletes bytes, deletion recorded",
+    "observed": "Nothing deleted at 29 days; at 30 days bytes nulled, ARTIFACT_DELETED appended, index retained=false, no artifact file exported.",
+    "artifactRefs": [],
+    "limitations": []
+  },
+  {
+    "caseId": "P2-05.T06",
+    "taskId": "P2-05",
+    "status": "BLOCKED",
+    "sourceCommit": "cf0c61eb367d7bb2c276faf0d280b0c094880925",
+    "assessedAt": "2026-10-20T11:27:28.615775+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "node": "22.23.3 (pinned)",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia 84532 at latest block (local, no public transaction)",
+      "qualificationOnly": true
+    },
+    "command": "./scripts/pnpm.sh test:db",
+    "exitCode": null,
+    "expected": "Person4 verifier consumes export independently",
+    "observed": "Export bundle produced; @mandate/verifier not implemented by Person4.",
+    "artifactRefs": [],
+    "limitations": [
+      "Joint verification pending Person4."
+    ]
+  },
+  {
+    "caseId": "P2-05.T07",
+    "taskId": "P2-05",
+    "status": "LOCAL_PASS",
+    "sourceCommit": "cf0c61eb367d7bb2c276faf0d280b0c094880925",
+    "assessedAt": "2026-10-20T11:27:28.615775+00:00",
+    "environment": {
+      "os": "macOS arm64",
+      "node": "22.23.3 (pinned)",
+      "postgres": "16.10 disposable TLS",
+      "chain": "anvil fork of Base Sepolia 84532 at latest block (local, no public transaction)",
+      "qualificationOnly": true
+    },
+    "command": "./scripts/pnpm.sh test:db",
+    "exitCode": 0,
+    "expected": "Unmatched supported outflow alerts and inhibits",
+    "observed": "Fork: verified wallet DemoUSD outflow with no Action -> UNMATCHED_OUTFLOW alert, wallet inhibited, no Action inserted.",
+    "artifactRefs": [],
+    "limitations": []
+  }
+]
