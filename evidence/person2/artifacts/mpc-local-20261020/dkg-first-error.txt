@@ -1,0 +1,1 @@
+DKG failed: EdDSA keygen session error: Failed to save key info: Unexpected response code: 500 (invalid key name, keys should respect the "^[a-zA-Z0-9,_./\\-?&=]+$" format)

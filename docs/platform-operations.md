@@ -162,10 +162,27 @@ The compose check needs valid `MPC_PRIVATE_DIR` and immutable `MPC_NODE_IMAGE`
 values but starts nothing. Real DKG is the separate explicit qualification script;
 fast unit CI cannot establish financial or public-chain readiness.
 
-Post-denial queue recovery is currently BLOCKED: after the authorization denials,
-a fresh valid request following transport/signers restart timed out90s. Pinned
-`sign_consumer.go` waits45s for a reply then NAKs, while the event consumer rejects
-invalid authorizations without replying. This can retain/retry invalid requests
-with concurrency1. The final qualification script also requires a successful
-post-denial fresh session, so earlier quorum results cannot hide this blocker.
+Post-denial queue recovery (resolved 2026-10-20, LOCAL_PASS). The earlier BLOCKED
+result was head-of-line blocking, not a stuck node. Source: pinned
+`event_consumer.go` returns without a reply when initiator or authorizer
+verification fails; `sign_consumer.go` then holds the JetStream message for its 45s
+reply window, NAKs, and the shared durable consumer redelivers it (MaxDeliver 4,
+30s backoff) with `MaxAckPending = max_concurrent_signing = 1`. Each unauthorized
+request therefore occupies the only signing slot for about 181s before the
+max-delivery advisory produces an error result. Measured with
+`qualify post-denial-recovery` (three denials then one valid request in one adapter
+session): denials resolved DENIED at 181s/362s/543s and the valid request signed
+and recovered the executor 0.6s after the slot freed. An idle-cluster valid request
+signed in about 1s. The 90s qualifier timeout was shorter than the queue.
+
+Operational consequences:
+- Availability, not safety: no denied request produced a signature. A holder of the
+  shared NATS credential can stall signing about 181s per unauthorized message.
+  The qualification NATS config uses one user with publish `>`; per-identity users
+  with adapter-only publish on `mpc.signing_request.*` are an open hardening item.
+- The adapter only publishes requests the authorizer already signed, so denials
+  come from compromise or misconfiguration, not routine policy rejections.
+- An adapter timeout is SIGNING_UNKNOWN: a queued valid request can still sign after
+  the adapter stops waiting, so the reservation stays and no fresh attempt starts
+  until the late result or reconciliation resolves it.
 No stream purge, custom nonce/session restoration or cryptographic patch was used.

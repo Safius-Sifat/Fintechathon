@@ -1,0 +1,51 @@
+[
+  {
+    "command": "GOTOOLCHAIN=go1.25.8 go -C /private/tmp/fintechathon-person2-continue/services/mpc-boundary test -race -count=1 -json ./...",
+    "exitCode": 0
+  },
+  {
+    "command": "GOTOOLCHAIN=go1.25.8 go -C /private/tmp/fintechathon-person2-continue/services/mpc-boundary vet ./...",
+    "exitCode": 0
+  },
+  {
+    "command": "GOTOOLCHAIN=go1.25.8 go -C /private/tmp/fintechathon-person2-continue/services/mpc-adapter test -race -count=1 -json ./...",
+    "exitCode": 0
+  },
+  {
+    "command": "GOTOOLCHAIN=go1.25.8 go -C /private/tmp/fintechathon-person2-continue/services/mpc-adapter vet ./...",
+    "exitCode": 0
+  },
+  {
+    "command": "GOTOOLCHAIN=go1.25.8 go -C /private/tmp/fintechathon-person2-continue/services/mpc-authorizer test -race -count=1 -json ./...",
+    "exitCode": 0
+  },
+  {
+    "command": "GOTOOLCHAIN=go1.25.8 go -C /private/tmp/fintechathon-person2-continue/services/mpc-authorizer vet ./...",
+    "exitCode": 0
+  },
+  {
+    "command": "./scripts/pnpm.sh --filter @mandate/schema exec tsc --noEmit -p ../../services/mpc-adapter/internal/qualification/tsconfig.json",
+    "exitCode": 0,
+    "qualification": true
+  },
+  {
+    "command": "./scripts/pnpm.sh --filter @mandate/schema exec tsx ../../services/mpc-adapter/internal/qualification/verify.ts ../../evidence/person2/artifacts/mpc-local-20261020/twenty-signatures.json",
+    "exitCode": 0,
+    "qualification": true
+  },
+  {
+    "command": "./scripts/pnpm.sh --filter @mandate/policy check",
+    "exitCode": 0,
+    "qualification": false
+  },
+  {
+    "command": "./scripts/pnpm.sh --filter @mandate/worker check",
+    "exitCode": 0,
+    "qualification": false
+  },
+  {
+    "command": "make check-platform",
+    "exitCode": 2,
+    "qualification": false
+  }
+]

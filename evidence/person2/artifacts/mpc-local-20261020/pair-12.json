@@ -1,0 +1,14 @@
+{
+  "walletId": "9c89954a-7e52-4c07-9bcd-3fd9e89bebd6",
+  "executor": "0x443ff3ca757f8d774acee949dab6661676ee1ef8",
+  "publicKey": "98877291ce67f1b812e4a94776139eec89271eeac03a30ba7d76116d7e691b5c2cbe94b04ed9336a3c192c9b2ac8c77571efd19eae24990bd343b8e84470b4c4",
+  "cases": [
+    {
+      "name": "sign",
+      "result": "LOCAL_PASS",
+      "durationMs": 171,
+      "digest": "0xe58e0d97a74208502124fb04e58416f6dad21bccb944ba29f1184f1a58786c6a",
+      "signature": "0xd3e4c97e376aa0df672fbbe589c5d6c4465af88e3e0ab13e805e2c937465caac37bb0f331e2be7a84a86477d0a2cd6951e5f7e5de5632a7099af6e5ded1eb36b00"
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "walletId": "9c89954a-7e52-4c07-9bcd-3fd9e89bebd6",
+  "executor": "0x443ff3ca757f8d774acee949dab6661676ee1ef8",
+  "publicKey": "98877291ce67f1b812e4a94776139eec89271eeac03a30ba7d76116d7e691b5c2cbe94b04ed9336a3c192c9b2ac8c77571efd19eae24990bd343b8e84470b4c4",
+  "cases": [
+    {
+      "name": "deny-missing",
+      "result": "DENIED",
+      "durationMs": 180995,
+      "digest": "0xe58e0d97a74208502124fb04e58416f6dad21bccb944ba29f1184f1a58786c6a",
+      "error": "Signing failed: maximum delivery attempts exceeded"
+    },
+    {
+      "name": "deny-wrong",
+      "result": "DENIED",
+      "durationMs": 362039,
+      "digest": "0xe58e0d97a74208502124fb04e58416f6dad21bccb944ba29f1184f1a58786c6a",
+      "error": "Signing failed: maximum delivery attempts exceeded"
+    },
+    {
+      "name": "deny-mutated",
+      "result": "DENIED",
+      "durationMs": 542525,
+      "digest": "0xe58e0d97a74208502124fb04e58416f6dad21bccb944ba29f1184f1a58786c6a",
+      "error": "Signing failed: maximum delivery attempts exceeded"
+    },
+    {
+      "name": "sign",
+      "result": "LOCAL_PASS",
+      "durationMs": 543152,
+      "digest": "0xe58e0d97a74208502124fb04e58416f6dad21bccb944ba29f1184f1a58786c6a",
+      "signature": "0xeea009df1a1759e2c31e8328b3010fbe64c5eafb1f66c4581f5db192467ddadb3ae6e0513960923a9087a8647905297d2c8777b1c6099a870dc7152f041f4dcb01"
+    }
+  ]
+}

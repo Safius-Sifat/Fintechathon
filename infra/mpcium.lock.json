@@ -6,7 +6,7 @@
   "nodeCount": 3,
   "requiredParticipants": 2,
   "deploymentMode": "competition-poc-single-vm-three-containers",
-  "qualificationStatus": "local-qualification-in-progress",
+  "qualificationStatus": "local-qualified-public-gates-pending",
   "requiredAuthorizers": [
     "mandate-policy-v1"
   ],

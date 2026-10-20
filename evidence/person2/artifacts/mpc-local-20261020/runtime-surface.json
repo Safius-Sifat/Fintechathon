@@ -1,0 +1,126 @@
+[
+  {
+    "name": "/mandate-mpc-qualification-nats-1",
+    "imageId": "sha256:71092f77d707a4a81b12aca5096d6b2d2e07ad16aa57c84066940a17af74f61a",
+    "status": "running",
+    "portBindings": {
+      "4222/tcp": [
+        {
+          "HostIp": "127.0.0.1",
+          "HostPort": "14222"
+        }
+      ]
+    },
+    "mounts": [
+      {
+        "target": "/private/nats.conf",
+        "writable": false,
+        "type": "bind"
+      },
+      {
+        "target": "/tls",
+        "writable": false,
+        "type": "bind"
+      },
+      {
+        "target": "/data",
+        "writable": true,
+        "type": "volume"
+      }
+    ]
+  },
+  {
+    "name": "/mandate-mpc-qualification-consul-1",
+    "imageId": "sha256:a230dcea0bb107bd7958a912d1429fb7f9d399637de7ffb814b34412b9e8c543",
+    "status": "running",
+    "portBindings": {
+      "8500/tcp": [
+        {
+          "HostIp": "127.0.0.1",
+          "HostPort": "18500"
+        }
+      ]
+    },
+    "mounts": [
+      {
+        "target": "/private/consul.hcl",
+        "writable": false,
+        "type": "bind"
+      },
+      {
+        "target": "/consul/data",
+        "writable": true,
+        "type": "volume"
+      }
+    ]
+  },
+  {
+    "name": "/mandate-mpc-qualification-node0-1",
+    "imageId": "sha256:64c1e1242f39a24217efe8fc232c8afd2e56e1d1ad6b51d1708f87011817925e",
+    "status": "running",
+    "portBindings": {},
+    "mounts": [
+      {
+        "target": "/app",
+        "writable": false,
+        "type": "bind"
+      },
+      {
+        "target": "/tls",
+        "writable": false,
+        "type": "bind"
+      },
+      {
+        "target": "/shares",
+        "writable": true,
+        "type": "volume"
+      }
+    ]
+  },
+  {
+    "name": "/mandate-mpc-qualification-node1-1",
+    "imageId": "sha256:64c1e1242f39a24217efe8fc232c8afd2e56e1d1ad6b51d1708f87011817925e",
+    "status": "running",
+    "portBindings": {},
+    "mounts": [
+      {
+        "target": "/app",
+        "writable": false,
+        "type": "bind"
+      },
+      {
+        "target": "/tls",
+        "writable": false,
+        "type": "bind"
+      },
+      {
+        "target": "/shares",
+        "writable": true,
+        "type": "volume"
+      }
+    ]
+  },
+  {
+    "name": "/mandate-mpc-qualification-node2-1",
+    "imageId": "sha256:64c1e1242f39a24217efe8fc232c8afd2e56e1d1ad6b51d1708f87011817925e",
+    "status": "running",
+    "portBindings": {},
+    "mounts": [
+      {
+        "target": "/app",
+        "writable": false,
+        "type": "bind"
+      },
+      {
+        "target": "/tls",
+        "writable": false,
+        "type": "bind"
+      },
+      {
+        "target": "/shares",
+        "writable": true,
+        "type": "volume"
+      }
+    ]
+  }
+]

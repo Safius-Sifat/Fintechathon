@@ -60,10 +60,10 @@ type caseResult struct {
 
 func main() {
 	if len(os.Args) != 2 {
-		must(errors.New("usage: qualify dkg|sign|sign20|deny-missing|deny-wrong|deny-mutated|transport-denial"))
+		must(errors.New("usage: qualify dkg|sign|sign20|deny-missing|deny-wrong|deny-initiator|deny-mutated|post-denial-recovery|transport-denial"))
 	}
 	switch os.Args[1] {
-	case "dkg", "sign", "sign20", "deny-missing", "deny-wrong", "deny-mutated", "transport-denial":
+	case "dkg", "sign", "sign20", "deny-missing", "deny-wrong", "deny-initiator", "deny-mutated", "post-denial-recovery", "transport-denial":
 	default:
 		must(errors.New("unsupported qualification operation"))
 	}
@@ -172,11 +172,13 @@ func main() {
 		ExpectedDigest string `json:"expectedDigest"`
 	}
 	readJSON(filepath.Join(dir, "digests.json"), &vectors)
-	count := 1
-	if mode == "sign20" {
-		count = 20
-	}
-	for i := 0; i < count; i++ {
+	pubHex, e := init.PublicKey()
+	must(e)
+	pub, e := hex.DecodeString(pubHex)
+	must(e)
+	// prepare authorizes a committed record, then applies the denial mutation so
+	// the nodes, not the local authorizer, must reject it.
+	prepare := func(name string, i int) pending {
 		v := vectors[i%len(vectors)]
 		if v.Digest != v.ExpectedDigest {
 			must(errors.New("shared helper digest mismatch"))
@@ -195,10 +197,6 @@ func main() {
 		r := boundary.Record{ActionID: "qualification-" + uuid.NewString(), AttemptID: uuid.NewString(), WalletID: wallet, KeyVersion: "qualification-1", Executor: out.Executor, Digest: digest}
 		records := qualification.NewRecords()
 		must(records.Commit(r))
-		pubHex, e := init.PublicKey()
-		must(e)
-		pub, e := hex.DecodeString(pubHex)
-		must(e)
 		a, e := boundary.NewAuthorizer(records, records, ed25519.PublicKey(pub), author)
 		must(e)
 		m, e := boundary.Message(r, init)
@@ -206,65 +204,108 @@ func main() {
 		auth, e := a.Authorize(context.Background(), r.ActionID, r.AttemptID, m)
 		must(e)
 		m.AuthorizerSignatures = []types.AuthorizerSignature{auth}
-		switch mode {
+		switch name {
 		case "deny-missing":
 			m.AuthorizerSignatures = nil
 		case "deny-wrong":
 			m.AuthorizerSignatures[0].Signature = make([]byte, 64)
-		case "deny-mutated":
+		case "deny-initiator":
 			m.Tx[0] ^= 1
+		case "deny-mutated":
+			// A valid initiator signature over the mutated request leaves only the
+			// authorizer binding to reject it.
+			m.Tx[0] ^= 1
+			raw, e := m.Raw()
+			must(e)
+			m.Signature, e = init.Sign(raw)
+			must(e)
 		}
+		return pending{name: name, attempt: r.AttemptID, digest: digest, msg: m, expectFail: strings.HasPrefix(name, "deny-") || os.Getenv("MPC_EXPECT_FAILURE") == "1"}
+	}
+	// await publishes the batch and collects one terminal result per attempt;
+	// results for another wallet, attempt or network never satisfy a request.
+	await := func(batch []pending, timeout time.Duration) {
 		start := time.Now()
-		must(c.SignTransaction(m))
-		timeout := 90 * time.Second
-		if strings.HasPrefix(mode, "deny-") {
-			timeout = 20 * time.Second
+		results := map[string]*caseResult{}
+		for _, p := range batch {
+			results[p.attempt] = &caseResult{Name: p.name, Digest: "0x" + hex.EncodeToString(p.digest[:])}
+			must(c.SignTransaction(p.msg))
 		}
-		if os.Getenv("MPC_EXPECT_FAILURE") == "1" {
-			timeout = 20 * time.Second
-		}
-		var result caseResult
-		result.Name = mode
-		result.Digest = "0x" + hex.EncodeToString(digest[:])
 		timer := time.NewTimer(timeout)
+		defer timer.Stop()
 	wait:
-		for {
+		for open := len(batch); open > 0; {
 			select {
 			case e := <-ch:
-				if e.WalletID != wallet || e.TxID != r.AttemptID || e.NetworkInternalCode != boundary.Network {
+				res, ok := results[e.TxID]
+				if !ok || res.Result != "" || e.WalletID != wallet || e.NetworkInternalCode != boundary.Network {
 					continue
 				}
+				open--
+				res.DurationMS = time.Since(start).Milliseconds()
 				if e.ResultType != event.ResultTypeSuccess {
-					result.Result = "DENIED"
-					result.Error = e.ErrorReason
-					break wait
+					res.Result = "DENIED"
+					res.Error = e.ErrorReason
+					continue
 				}
-				sig, err := boundary.Normalize(digest, e.R, e.S, e.SignatureRecovery, out.Executor)
-				if err != nil {
-					must(err)
-				}
-				result.Result = "LOCAL_PASS"
-				result.Signature = "0x" + hex.EncodeToString(sig)
-				break wait
+				digest, err := hex.DecodeString(strings.TrimPrefix(res.Digest, "0x"))
+				must(err)
+				sig, err := boundary.Normalize([32]byte(digest), e.R, e.S, e.SignatureRecovery, out.Executor)
+				must(err)
+				res.Result = "LOCAL_PASS"
+				res.Signature = "0x" + hex.EncodeToString(sig)
 			case <-timer.C:
-				result.Result = "TIMEOUT_NO_SIGNATURE"
 				break wait
 			}
 		}
-		timer.Stop()
-		result.DurationMS = time.Since(start).Milliseconds()
-		out.Cases = append(out.Cases, result)
-		expectFail := strings.HasPrefix(mode, "deny-") || os.Getenv("MPC_EXPECT_FAILURE") == "1"
-		if expectFail && result.Signature != "" {
-			must(errors.New("unexpected valid signature in denial case"))
+		for _, p := range batch {
+			res := results[p.attempt]
+			if res.Result == "" {
+				res.Result = "TIMEOUT_NO_SIGNATURE"
+				res.DurationMS = time.Since(start).Milliseconds()
+			}
+			out.Cases = append(out.Cases, *res)
+			if p.expectFail && res.Signature != "" {
+				must(errors.New("unexpected valid signature in denial case"))
+			}
+			if !p.expectFail && res.Signature == "" {
+				b, _ := json.Marshal(out)
+				fmt.Println(string(b))
+				must(errors.New("MPC_TOPOLOGY_BLOCKED: signing failed"))
+			}
 		}
-		if !expectFail && result.Signature == "" {
-			b, _ := json.Marshal(out)
-			fmt.Println(string(b))
-			must(errors.New("MPC_TOPOLOGY_BLOCKED: signing failed"))
+	}
+	timeout := 90 * time.Second
+	if strings.HasPrefix(mode, "deny-") || os.Getenv("MPC_EXPECT_FAILURE") == "1" {
+		timeout = 20 * time.Second
+	}
+	if mode == "post-denial-recovery" {
+		// Nodes drop unauthorized requests without replying, so each one holds the
+		// single signing slot until JetStream exhausts redelivery.
+		timeout = 20 * time.Minute
+	}
+	if v := os.Getenv("MPC_SIGN_TIMEOUT"); v != "" {
+		timeout, e = time.ParseDuration(v)
+		must(e)
+	}
+	switch mode {
+	case "sign20":
+		for i := 0; i < 20; i++ {
+			await([]pending{prepare(mode, i)}, timeout)
 		}
+	case "post-denial-recovery":
+		await([]pending{prepare("deny-missing", 0), prepare("deny-wrong", 0), prepare("deny-mutated", 0), prepare("sign", 0)}, timeout)
+	default:
+		await([]pending{prepare(mode, 0)}, timeout)
 	}
 	b, e := json.MarshalIndent(out, "", "  ")
 	must(e)
 	fmt.Println(string(b))
+}
+
+type pending struct {
+	name, attempt string
+	digest        [32]byte
+	msg           *types.SignTxMessage
+	expectFail    bool
 }

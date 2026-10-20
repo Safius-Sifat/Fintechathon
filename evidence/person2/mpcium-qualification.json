@@ -1,0 +1,92 @@
+{
+  "status": "LOCAL_PASS",
+  "scope": "LOCAL qualification only; financial/public-chain release remains unavailable",
+  "sourceCommit": "ffcaf3996ff7445f5b9b9a6300041bc5c3e6fda4",
+  "upstreamCommit": "90e3ee3c15e6698ade5626ff6c6b49d2453d8ce2",
+  "upstreamModified": false,
+  "threshold": 1,
+  "requiredParticipantsObserved": 2,
+  "nodeCount": 3,
+  "qualificationOnly": true,
+  "wallet": {
+    "walletId": "9c89954a-7e52-4c07-9bcd-3fd9e89bebd6",
+    "executor": "0x443ff3ca757f8d774acee949dab6661676ee1ef8",
+    "publicKey": "98877291ce67f1b812e4a94776139eec89271eeac03a30ba7d76116d7e691b5c2cbe94b04ed9336a3c192c9b2ac8c77571efd19eae24990bd343b8e84470b4c4",
+    "cases": [
+      {
+        "name": "dkg-three-nodes",
+        "result": "LOCAL_PASS",
+        "durationMs": 2191
+      }
+    ]
+  },
+  "publicIdentities": {
+    "qualificationOnly": true,
+    "initiator": "4e0dd28fada66c877acf2d6c39b682281d8cd3093734ed8ecc0bfed3a82bd885",
+    "authorizer": "c4e3bdf2def7911cfed0f9964e7b568a974f50d1e4e0f29e94f3d6f8ee4d38fb"
+  },
+  "images": {
+    "node": "sha256:64c1e1242f39a24217efe8fc232c8afd2e56e1d1ad6b51d1708f87011817925e",
+    "golang": "golang:1.25.8-bookworm@sha256:4557cf171e3cdf5053a298d5171b1a5f5734d920260c25f22c79e94760eb2084",
+    "nats": "nats:2.11.8-alpine@sha256:71092f77d707a4a81b12aca5096d6b2d2e07ad16aa57c84066940a17af74f61a",
+    "consul": "hashicorp/consul:1.22.7@sha256:a230dcea0bb107bd7958a912d1429fb7f9d399637de7ffb814b34412b9e8c543"
+  },
+  "results": {
+    "DKG": "LOCAL_PASS",
+    "twentySequential": "LOCAL_PASS",
+    "allPairs": "LOCAL_PASS",
+    "allSinglesDenied": "LOCAL_PASS",
+    "oneAndTwoOutages": "LOCAL_PASS",
+    "restartBeforeDenials": "LOCAL_PASS",
+    "authorizationDenials": "LOCAL_PASS",
+    "postDenialQueueRecovery": "LOCAL_PASS",
+    "realValidSignaturesRecorded": 47,
+    "viemIndependentPrimaryBatch": 20
+  },
+  "blockers": [
+    "Shared NATS credential allows availability stalls (~181s per unauthorized message); per-identity NATS subject ACLs not implemented.",
+    "Production financial store/independent RPC policy/durable worker and reservation integration missing.",
+    "Public Base Sepolia payment drill, Solidity actual-MPC acceptance, Azure4GiB full-stack load and external firewall checks not run."
+  ],
+  "consulCompatibility": {
+    "failedImage": "1.21.5",
+    "resolvedImage": "1.22.7",
+    "disable_kv_key_validation": false,
+    "documentation": "https://github.com/hashicorp/consul/blob/v1.22.7/agent/kvs_endpoint.go"
+  },
+  "thresholdReferences": [
+    "vendor/mpcium/pkg/eventconsumer/sign_consumer.go:68 threshold+1",
+    "vendor/mpcium/pkg/eventconsumer/event_consumer.go:206 configured threshold to TSS",
+    "vendor/mpcium/config.prod.yaml.template:17 threshold1",
+    "current Fystack installation snapshot line132 threshold2; security snapshot line17 t+1"
+  ],
+  "evidenceDirectory": "evidence/person2/artifacts/mpc-local-20261020",
+  "privateMaterialLocation": "/private/tmp/mandate-mpc-qualification-20261020",
+  "privateMaterialTracked": false,
+  "transactionsBroadcast": 0,
+  "finalNodes": "all3running",
+  "reportedAt": "2026-10-20T09:43:07.863043+00:00",
+  "postDenialRecovery": {
+    "rootCause": "Head-of-line blocking: unauthorized requests get no reply; sign_consumer waits 45s, NAKs, MaxDeliver 4 with 30s backoff and MaxAckPending=max_concurrent_signing=1.",
+    "sourceRefs": [
+      "vendor/mpcium/pkg/eventconsumer/event_consumer.go:416-426 returns without reply on verify/authorize failure",
+      "vendor/mpcium/pkg/eventconsumer/sign_consumer.go:25 signingResponseTimeout 45s, :227 NAK",
+      "vendor/mpcium/pkg/messaging/jetstream_broker.go:28,32,250 DefaultMaxDeliveryAttempts 3 (+1), backoff 30s",
+      "vendor/mpcium/cmd/mpcium/main.go:216-219 MaxAckPending=max_concurrent_signing",
+      "vendor/mpcium/pkg/eventconsumer/timeout_consumer.go max-delivery advisory error result"
+    ],
+    "measured": {
+      "denyMissingMs": 180995,
+      "denyWrongMs": 362039,
+      "denyMutatedReSignedInitiatorMs": 542525,
+      "validAfterDenialsMs": 543152,
+      "idleValidMs": 1015
+    },
+    "artifacts": [
+      "evidence/person2/artifacts/mpc-local-20261020/post-denial-recovery.json",
+      "evidence/person2/artifacts/mpc-local-20261020/idle-recovery-sign.json",
+      "evidence/person2/artifacts/mpc-local-20261020/post-denial-recovery-timeout-90s.json"
+    ],
+    "limitation": "Availability: a holder of the shared NATS credential can stall signing ~181s per unauthorized message; single NATS user with publish > in qualification config. Per-identity subject ACLs not implemented."
+  }
+}
