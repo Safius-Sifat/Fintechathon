@@ -1,10 +1,9 @@
-import {
-  EvidenceBundleSchema,
-  type EvidenceBundle,
-} from "@mandate/schema";
+import { EvidenceBundleSchema, type EvidenceBundle } from "@mandate/schema";
 import { readFile } from "node:fs/promises";
 
-export async function loadBundle(input: string | object): Promise<EvidenceBundle> {
+export async function loadBundle(
+  input: string | object,
+): Promise<EvidenceBundle> {
   let data: unknown;
   if (typeof input === "string") {
     // If it's a JSON string or file path

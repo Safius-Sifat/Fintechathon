@@ -36,7 +36,9 @@ export function verifyBundleSync(
     findings,
     unmatchedOutflows: [],
     limitations: [
-      "Offline verification checks supplied bundle proofs and local constraints.",
+      "Checks only the bundle's internal consistency and schemas.",
+      "Not implemented: chain reads (--rpc), the trusted deployment manifest (--trusted), event hash recomputation, checkpoint signature, anchor, and signature recovery.",
+      "Findings that need those checks are UNVERIFIABLE, never PASS.",
     ],
   };
 

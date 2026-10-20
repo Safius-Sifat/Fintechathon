@@ -1,117 +1,119 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import Fastify from "fastify";
+import { recoverTypedDataAddress, type Hex } from "viem";
+import { privateKeyToAccount } from "viem/accounts";
+import { buildTypedData, hashCanonical, invoiceDomain } from "@mandate/schema";
 import { registerProviderRoutes } from "../src/routes.js";
-import { ZERO_HASH } from "@mandate/schema";
-import { type Hex } from "viem";
 
-async function buildTestApp() {
-  const app = Fastify();
-  await registerProviderRoutes(app);
-  return app;
+// Public Anvil test keys #2 and #3. Never real keys.
+const KEY_A =
+  "0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a" as Hex;
+const KEY_B =
+  "0x7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6" as Hex;
+
+async function app(keys: { a?: Hex; b?: Hex }) {
+  const server = Fastify();
+  await registerProviderRoutes(server, { keys });
+  return server;
 }
 
-test("provider: GET /providers lists both providers with correct capabilities", async () => {
-  const app = await buildTestApp();
-  const res = await app.inject({
-    method: "GET",
-    url: "/providers",
-  });
-
-  assert.equal(res.statusCode, 200);
-  const json = res.json();
-  assert.equal(json.length, 2);
-  assert.equal(json[0].providerId, "a");
-  assert.deepEqual(json[0].capabilities, ["pageLoad", "title"]);
-  assert.equal(json[0].price, "200000");
-
-  assert.equal(json[1].providerId, "b");
-  assert.deepEqual(json[1].capabilities, ["pageLoad", "title", "formSubmit"]);
-  assert.equal(json[1].price, "350000");
+const body = (checks: string[]) => ({
+  taskId: ("0x" + "aa".repeat(32)) as Hex,
+  wallet: "0x7777777777777777777777777777777777777777",
+  asset: "0x2222222222222222222222222222222222222222",
+  targetId: "checkout-healthy",
+  checks,
 });
 
-test("provider: POST /providers/a/check accepts pageLoad and rejects formSubmit", async () => {
-  const app = await buildTestApp();
+test("provider: lists providers and marks those without a key unavailable", async () => {
+  const server = await app({ a: KEY_A });
+  const json = (
+    await server.inject({ method: "GET", url: "/providers" })
+  ).json();
+  assert.equal(json[0].available, true);
+  assert.equal(json[0].recipient, privateKeyToAccount(KEY_A).address);
+  assert.equal(json[1].available, false);
+  assert.equal(json[1].recipient, null);
+});
 
-  const validBody = {
-    taskId: ("0x" + "aa".repeat(32)) as Hex,
-    wallet: "0x7777777777777777777777777777777777777777",
-    asset: "0x2222222222222222222222222222222222222222",
-    targetId: "checkout-healthy",
-    checks: ["pageLoad", "title"],
-  };
-
-  const validRes = await app.inject({
+test("provider: without a signing key no quote is issued", async () => {
+  const server = await app({});
+  const res = await server.inject({
     method: "POST",
     url: "/providers/a/check",
-    payload: validBody,
+    payload: body(["pageLoad"]),
   });
+  assert.equal(res.statusCode, 503);
+});
 
-  assert.equal(validRes.statusCode, 200);
-  const quote = validRes.json();
-  assert.equal(quote.providerId, "a");
+test("provider: quotes are signed by the paid provider, short-lived and unique", async () => {
+  const server = await app({ a: KEY_A, b: KEY_B });
+  const res = await server.inject({
+    method: "POST",
+    url: "/providers/a/check",
+    payload: body(["pageLoad", "title"]),
+  });
+  assert.equal(res.statusCode, 402);
+  const quote = res.json();
+  assert.equal(quote.invoice.recipient, privateKeyToAccount(KEY_A).address);
   assert.equal(quote.invoice.amount, "200000");
-  assert.equal(quote.invoice.recipient, "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC");
-
-  // Invalid: asking provider 'a' for formSubmit
-  const invalidBody = {
-    ...validBody,
-    checks: ["pageLoad", "title", "formSubmit"],
-  };
-
-  const invalidRes = await app.inject({
-    method: "POST",
-    url: "/providers/a/check",
-    payload: invalidBody,
+  assert.equal(
+    quote.invoice.inputHash,
+    hashCanonical({
+      targetId: "checkout-healthy",
+      checks: ["pageLoad", "title"],
+    }),
+  );
+  assert.ok(
+    Number(quote.invoice.expiresAt) - Number(quote.invoice.issuedAt) <= 60,
+  );
+  const signer = await recoverTypedDataAddress({
+    ...(buildTypedData(
+      "Invoice",
+      quote.invoice,
+      invoiceDomain(quote.invoice.wallet),
+    ) as never),
+    signature: quote.providerSignature,
   });
-
-  assert.equal(invalidRes.statusCode, 400);
-  assert.ok(invalidRes.json().error.includes("does not support requested check"));
+  assert.equal(signer, quote.invoice.recipient);
+  const again = (
+    await server.inject({
+      method: "POST",
+      url: "/providers/a/check",
+      payload: body(["pageLoad", "title"]),
+    })
+  ).json();
+  assert.notEqual(again.invoice.invoiceId, quote.invoice.invoiceId);
 });
 
-test("provider: POST /providers/b/check accepts formSubmit at 350000", async () => {
-  const app = await buildTestApp();
-
-  const body = {
-    taskId: ("0x" + "aa".repeat(32)) as Hex,
-    wallet: "0x7777777777777777777777777777777777777777",
-    asset: "0x2222222222222222222222222222222222222222",
-    targetId: "checkout-healthy",
-    checks: ["pageLoad", "title", "formSubmit"],
-  };
-
-  const res = await app.inject({
+test("provider: A refuses formSubmit and B quotes it at 350000", async () => {
+  const server = await app({ a: KEY_A, b: KEY_B });
+  const a = await server.inject({
+    method: "POST",
+    url: "/providers/a/check",
+    payload: body(["formSubmit"]),
+  });
+  assert.equal(a.statusCode, 400);
+  const b = await server.inject({
     method: "POST",
     url: "/providers/b/check",
-    payload: body,
+    payload: body(["formSubmit"]),
   });
-
-  assert.equal(res.statusCode, 200);
-  const quote = res.json();
-  assert.equal(quote.providerId, "b");
-  assert.equal(quote.invoice.amount, "350000");
-  assert.equal(quote.invoice.recipient, "0x6666666666666666666666666666666666666666");
+  assert.equal(b.statusCode, 402);
+  assert.equal(b.json().invoice.amount, "350000");
 });
 
-test("provider: POST /providers/a/result returns DeliveryEnvelope", async () => {
-  const app = await buildTestApp();
-
-  const body = {
-    invoiceId: ("0x" + "11".repeat(32)) as Hex,
-    requestId: ("0x" + "22".repeat(32)) as Hex,
-    paymentTxHash: ("0x" + "33".repeat(32)) as Hex,
-  };
-
-  const res = await app.inject({
+test("provider: results are refused until payment checks and the browser runner exist", async () => {
+  const server = await app({ a: KEY_A });
+  const res = await server.inject({
     method: "POST",
     url: "/providers/a/result",
-    payload: body,
+    payload: {
+      invoiceId: ("0x" + "12".repeat(32)) as Hex,
+      requestId: ("0x" + "34".repeat(32)) as Hex,
+      paymentTxHash: ("0x" + "56".repeat(32)) as Hex,
+    },
   });
-
-  assert.equal(res.statusCode, 200);
-  const delivery = res.json();
-  assert.equal(delivery.receipt.invoiceId, body.invoiceId);
-  assert.equal(delivery.receipt.paymentTxHash, body.paymentTxHash);
-  assert.equal(delivery.result.targetId, "checkout-healthy");
-  assert.equal(delivery.result.checks.pageLoad, true);
+  assert.equal(res.statusCode, 501);
 });

@@ -1,7 +1,4 @@
-import {
-  type EvidenceBundle,
-  type Finding,
-} from "@mandate/schema";
+import { type EvidenceBundle, type Finding } from "@mandate/schema";
 
 export function checkSettlement(bundle: EvidenceBundle): Finding {
   const { transactions, events } = bundle;
@@ -10,11 +7,12 @@ export function checkSettlement(bundle: EvidenceBundle): Finding {
   if (transactions.length === 0) {
     return {
       name: "settlement",
-      state: "PASS",
+      state: "UNVERIFIABLE",
       ruleId: "SETTLEMENT_NO_TRANSACTIONS",
-      reason: "No on-chain settlements required or performed for this task",
+      reason:
+        "The bundle records no transactions, and the wallet history was not scanned on the chain",
       evidenceIds,
-      basis: ["chain"],
+      basis: ["recorder_assertion"],
     };
   }
 
@@ -26,28 +24,33 @@ export function checkSettlement(bundle: EvidenceBundle): Finding {
         ruleId: "SETTLEMENT_TRANSACTION_REVERTED",
         reason: `On-chain transaction ${tx.txHash ?? "unknown"} reverted on chain`,
         evidenceIds,
-        basis: ["chain"],
+        basis: ["recorder_assertion"],
       };
     }
 
-    if (tx.status === "PENDING" || (typeof tx.confirmations === "number" && tx.confirmations < 3)) {
+    if (
+      tx.status === "PENDING" ||
+      (typeof tx.confirmations === "number" && tx.confirmations < 3)
+    ) {
       return {
         name: "settlement",
         state: "PENDING",
         ruleId: "SETTLEMENT_CONFIRMATIONS_PENDING",
         reason: `Transaction ${tx.txHash} has fewer than 3 canonical confirmations (${tx.confirmations ?? 0})`,
         evidenceIds,
-        basis: ["chain"],
+        basis: ["recorder_assertion"],
       };
     }
   }
 
+  // Recorded statuses look settled, but receipts were not read from the
+  // chain, so settlement is not proven.
   return {
     name: "settlement",
-    state: "PASS",
-    ruleId: "SETTLEMENT_VERIFIED",
-    reason: `All ${transactions.length} transactions settled with required confirmations on Base Sepolia`,
+    state: "UNVERIFIABLE",
+    ruleId: "SETTLEMENT_NOT_READ_FROM_CHAIN",
+    reason: `${transactions.length} transactions are recorded as settled; receipts and transfers were not read from the chain`,
     evidenceIds,
-    basis: ["chain"],
+    basis: ["recorder_assertion"],
   };
 }

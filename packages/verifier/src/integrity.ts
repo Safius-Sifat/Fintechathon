@@ -1,8 +1,5 @@
-import {
-  type EvidenceBundle,
-  type Finding,
-  ZERO_HASH,
-} from "@mandate/schema";
+import { createHash } from "node:crypto";
+import { type EvidenceBundle, type Finding, ZERO_HASH } from "@mandate/schema";
 
 export function checkIntegrity(bundle: EvidenceBundle): Finding {
   const { events, checkpoint, artifactIndex, artifacts } = bundle;
@@ -39,7 +36,9 @@ export function checkIntegrity(bundle: EvidenceBundle): Finding {
   // 2. Check checkpoint head hash
   if (events.length > 0) {
     const lastEvent = events[events.length - 1]!;
-    if (checkpoint.headHash.toLowerCase() !== lastEvent.eventHash.toLowerCase()) {
+    if (
+      checkpoint.headHash.toLowerCase() !== lastEvent.eventHash.toLowerCase()
+    ) {
       return {
         name: "integrity",
         state: "FAIL",
@@ -65,14 +64,30 @@ export function checkIntegrity(bundle: EvidenceBundle): Finding {
           basis: ["artifact"],
         };
       }
+      const digest = `0x${createHash("sha256")
+        .update(Buffer.from(String(artData).replace(/^0x/, ""), "hex"))
+        .digest("hex")}`;
+      if (digest.toLowerCase() !== entry.sha256.toLowerCase()) {
+        return {
+          name: "integrity",
+          state: "FAIL",
+          ruleId: "INTEGRITY_ARTIFACT_HASH_MISMATCH",
+          reason: `Artifact ${entry.artifactId} does not match its recorded sha256`,
+          evidenceIds,
+          basis: ["artifact"],
+        };
+      }
     }
   }
 
+  // Links, sequence and artifact hashes are consistent. Event hashes are not
+  // recomputed, and the checkpoint signature and anchor are not checked, so
+  // this does not prove the record is untampered.
   return {
     name: "integrity",
-    state: "PASS",
-    ruleId: "INTEGRITY_VALID",
-    reason: `Integrity verified across ${events.length} sequential hash-chained events and checkpoint`,
+    state: "UNVERIFIABLE",
+    ruleId: "INTEGRITY_PARTIAL",
+    reason: `Sequence, hash links and artifact hashes are consistent across ${events.length} events; event hashes, the checkpoint signature and the anchor were not checked`,
     evidenceIds,
     basis: ["artifact"],
   };

@@ -26,7 +26,10 @@ export async function advanceLiquidityKeeper(
   const existingAction = actions.find((a) => a.decisionKey === decisionKey);
 
   if (existingAction) {
-    if (existingAction.state === "INCLUDED" || existingAction.state === "FINALIZED") {
+    if (
+      existingAction.state === "INCLUDED" ||
+      existingAction.state === "FINALIZED"
+    ) {
       return {
         type: "COMPLETE",
         result: {
@@ -47,14 +50,27 @@ export async function advanceLiquidityKeeper(
     };
   }
 
-  // Check risk signal if depositing
-  if (liqCond.command === "deposit" && deps.readRisk) {
-    const risk = await deps.readRisk();
-    if (risk.state === "WARNING") {
+  // A deposit needs a fresh NORMAL signal from the risk source. Without one
+  // the runbook waits; it never assumes the market is calm.
+  if (liqCond.command === "deposit") {
+    if (!deps.readRisk) {
       return {
         type: "WAIT",
         dueAt: String(Number(snapshot.now) + 60),
-        reason: "Risk source reports WARNING; halting deposit",
+        reason: "Risk source not connected; deposit held",
+        nextState: runbookState,
+      };
+    }
+    const risk = await deps.readRisk();
+    const age = BigInt(snapshot.now) - BigInt(risk.observedAt);
+    if (risk.state !== "NORMAL" || age > 60n || age < 0n) {
+      return {
+        type: "WAIT",
+        dueAt: String(Number(snapshot.now) + 60),
+        reason:
+          risk.state !== "NORMAL"
+            ? "Risk source reports WARNING; deposit held"
+            : "Risk signal is stale; deposit held",
         nextState: runbookState,
       };
     }

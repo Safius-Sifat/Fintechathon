@@ -1,7 +1,4 @@
-import {
-  type EvidenceBundle,
-  type Finding,
-} from "@mandate/schema";
+import { type EvidenceBundle, type Finding } from "@mandate/schema";
 
 export function checkPolicy(bundle: EvidenceBundle): Finding {
   const { authority, transactions, events } = bundle;
@@ -32,7 +29,7 @@ export function checkPolicy(bundle: EvidenceBundle): Finding {
         ruleId: "POLICY_MAX_PAYMENT_EXCEEDED",
         reason: `Transaction amount ${amount} exceeds permit maxPayment limit ${maxPayment}`,
         evidenceIds,
-        basis: ["chain"],
+        basis: ["recorder_assertion"],
       };
     }
     totalSpent += amount;
@@ -45,16 +42,18 @@ export function checkPolicy(bundle: EvidenceBundle): Finding {
       ruleId: "POLICY_SPEND_CAP_EXCEEDED",
       reason: `Total spent ${totalSpent} exceeds permit spendCap ${spendCap}`,
       evidenceIds,
-      basis: ["chain"],
+      basis: ["recorder_assertion"],
     };
   }
 
+  // Recorded amounts fit the permit, but nothing was replayed against the
+  // chain, so the policy is not proven.
   return {
     name: "policy",
-    state: "PASS",
-    ruleId: "POLICY_LIMITS_SATISFIED",
-    reason: `All ${transactions.length} transactions strictly adhere to spendCap (${spendCap}) and maxPayment (${maxPayment})`,
+    state: "UNVERIFIABLE",
+    ruleId: "POLICY_NOT_REPLAYED",
+    reason: `Recorded amounts of ${transactions.length} transactions fit spendCap ${spendCap} and maxPayment ${maxPayment}; limits were not replayed against the chain`,
     evidenceIds,
-    basis: ["chain"],
+    basis: ["recorder_assertion"],
   };
 }

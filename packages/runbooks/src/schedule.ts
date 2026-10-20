@@ -57,7 +57,10 @@ export async function advanceScheduledPay(
   const existingAction = actions.find((a) => a.decisionKey === decisionKey);
 
   if (existingAction) {
-    if (existingAction.state === "INCLUDED" || existingAction.state === "FINALIZED") {
+    if (
+      existingAction.state === "INCLUDED" ||
+      existingAction.state === "FINALIZED"
+    ) {
       // Current period completed; wait for next period start
       const nextPeriodStart = startSec + (currentPeriod + 1) * sched.interval;
       return {

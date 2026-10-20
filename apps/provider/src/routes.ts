@@ -1,125 +1,134 @@
+import { randomBytes } from "node:crypto";
 import { type FastifyInstance } from "fastify";
 import {
   CheckRequestSchema,
-  ResultRequestSchema,
   QuoteEnvelopeSchema,
-  DeliveryEnvelopeSchema,
-  type QuoteEnvelope,
-  type DeliveryEnvelope,
+  ResultRequestSchema,
+  buildTypedData,
   hashCanonical,
+  invoiceDomain,
+  type QuoteEnvelope,
 } from "@mandate/schema";
-import { type Hex } from "viem";
+import { bytesToHex, type Hex } from "viem";
+import { privateKeyToAccount, type PrivateKeyAccount } from "viem/accounts";
 
-const PROVIDERS = {
-  a: {
-    providerId: "a" as const,
-    recipient: "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC" as const,
-    capabilities: ["pageLoad", "title"] as const,
-    price: "200000",
-  },
-  b: {
-    providerId: "b" as const,
-    recipient: "0x6666666666666666666666666666666666666666" as const,
-    capabilities: ["pageLoad", "title", "formSubmit"] as const,
-    price: "350000",
-  },
+type ProviderId = "a" | "b";
+
+// Prices and capabilities are fixed by the plan (P4-01). Each provider's
+// payment recipient is the address of its own signing key.
+const CATALOG: Record<
+  ProviderId,
+  {
+    capabilities: readonly ("pageLoad" | "title" | "formSubmit")[];
+    price: string;
+  }
+> = {
+  a: { capabilities: ["pageLoad", "title"], price: "200000" },
+  b: { capabilities: ["pageLoad", "title", "formSubmit"], price: "350000" },
 };
 
-export async function registerProviderRoutes(app: FastifyInstance) {
-  app.get("/providers", async () => {
-    return Object.values(PROVIDERS);
-  });
+// Quotes live at most 60 seconds.
+const QUOTE_SECONDS = 60;
 
-  app.post<{ Params: { id: string } }>("/providers/:id/check", async (request, reply) => {
-    const providerId = request.params.id as "a" | "b";
-    const provider = PROVIDERS[providerId];
-    if (!provider) {
-      return reply.code(404).send({ error: `Provider ${providerId} not found` });
-    }
+export interface ProviderConfig {
+  // Provider signing keys, from the environment. A provider without a key is
+  // listed as unavailable and refuses to quote.
+  keys: { [K in ProviderId]?: Hex | undefined };
+}
 
-    const parseResult = CheckRequestSchema.safeParse(request.body);
-    if (!parseResult.success) {
-      return reply.code(400).send({ error: parseResult.error.message });
-    }
-    const checkReq = parseResult.data;
+export async function registerProviderRoutes(
+  app: FastifyInstance,
+  config: ProviderConfig,
+) {
+  const signers: Partial<Record<ProviderId, PrivateKeyAccount>> = {};
+  for (const id of ["a", "b"] as const) {
+    const key = config.keys[id];
+    if (key) signers[id] = privateKeyToAccount(key);
+  }
 
-    // Capability check
-    for (const chk of checkReq.checks) {
-      if (!provider.capabilities.includes(chk as any)) {
-        return reply.code(400).send({
-          error: `Provider '${providerId}' does not support requested check '${chk}'`,
-        });
-      }
-    }
-
-    const now = Math.floor(Date.now() / 1000);
-    const windowSec = checkReq.reviewWindowSeconds ?? 600;
-    const inputHash = hashCanonical({ targetId: checkReq.targetId, checks: checkReq.checks }) as Hex;
-    const invoiceId = hashCanonical({ taskId: checkReq.taskId, now, providerId }) as Hex;
-
-    const quote: QuoteEnvelope = {
+  app.get("/providers", async () =>
+    (["a", "b"] as const).map((providerId) => ({
       providerId,
-      invoice: {
-        invoiceId,
-        taskId: checkReq.taskId,
-        wallet: checkReq.wallet,
-        asset: checkReq.asset,
-        recipient: provider.recipient,
-        amount: provider.price,
-        inputHash,
+      recipient: signers[providerId]?.address ?? null,
+      capabilities: CATALOG[providerId].capabilities,
+      price: CATALOG[providerId].price,
+      available: signers[providerId] !== undefined,
+    })),
+  );
+
+  app.post<{ Params: { id: string } }>(
+    "/providers/:id/check",
+    async (request, reply) => {
+      const providerId = request.params.id as ProviderId;
+      const catalog = CATALOG[providerId];
+      if (!catalog)
+        return reply
+          .code(404)
+          .send({ error: `Provider ${request.params.id} not found` });
+      const signer = signers[providerId];
+      if (!signer)
+        return reply
+          .code(503)
+          .send({
+            error: `Provider ${providerId} has no signing key configured; no quote is issued`,
+          });
+
+      const parsed = CheckRequestSchema.safeParse(request.body);
+      if (!parsed.success)
+        return reply.code(400).send({ error: parsed.error.message });
+      const req = parsed.data;
+      for (const check of req.checks) {
+        if (!catalog.capabilities.includes(check))
+          return reply.code(400).send({
+            error: `Provider '${providerId}' does not support requested check '${check}'`,
+          });
+      }
+
+      const now = Math.floor(Date.now() / 1000);
+      const invoice = {
+        invoiceId: bytesToHex(randomBytes(32)),
+        taskId: req.taskId,
+        wallet: req.wallet,
+        asset: req.asset,
+        recipient: signer.address,
+        amount: catalog.price,
+        inputHash: hashCanonical({
+          targetId: req.targetId,
+          checks: req.checks,
+        }),
         issuedAt: String(now),
-        expiresAt: String(now + windowSec),
-      },
-      providerSignature: ("0x" + "aa".repeat(65)) as Hex,
-      x402: null,
-    };
+        expiresAt: String(now + QUOTE_SECONDS),
+      };
+      const providerSignature = await signer.signTypedData(
+        buildTypedData("Invoice", invoice, invoiceDomain(req.wallet)) as never,
+      );
+      const quote: QuoteEnvelope = {
+        providerId,
+        invoice,
+        providerSignature,
+        x402: null,
+      };
+      // 402: payment is required before any work is done.
+      return reply.code(402).send(QuoteEnvelopeSchema.parse(quote));
+    },
+  );
 
-    return reply.code(200).send(QuoteEnvelopeSchema.parse(quote));
-  });
-
-  app.post<{ Params: { id: string } }>("/providers/:id/result", async (request, reply) => {
-    const providerId = request.params.id as "a" | "b";
-    const provider = PROVIDERS[providerId];
-    if (!provider) {
-      return reply.code(404).send({ error: `Provider ${providerId} not found` });
-    }
-
-    const parseResult = ResultRequestSchema.safeParse(request.body);
-    if (!parseResult.success) {
-      return reply.code(400).send({ error: parseResult.error.message });
-    }
-    const req = parseResult.data;
-
-    const now = Math.floor(Date.now() / 1000);
-    const inputHash = hashCanonical({ targetId: "checkout-healthy", checks: ["pageLoad", "title"] }) as Hex;
-    const resultHash = hashCanonical({ pageLoad: true, title: "Checkout" }) as Hex;
-
-    const delivery: DeliveryEnvelope = {
-      result: {
-        schemaVersion: 4,
-        targetId: "checkout-healthy",
-        inputHash,
-        checkedAt: String(now),
-        checks: {
-          pageLoad: true,
-          title: { actual: "Checkout", expected: "Checkout", pass: true },
-          ...(providerId === "b" ? { formSubmit: true } : {}),
-        },
-        screenshotHash: ("0x" + "11".repeat(32)) as Hex,
-        logHash: ("0x" + "22".repeat(32)) as Hex,
-      },
-      receipt: {
-        invoiceId: req.invoiceId,
-        requestId: req.requestId,
-        inputHash,
-        resultHash,
-        paymentTxHash: req.paymentTxHash,
-        completedAt: String(now),
-      },
-      providerSignature: ("0x" + "bb".repeat(65)) as Hex,
-      artifacts: [],
-    };
-
-    return reply.code(200).send(DeliveryEnvelopeSchema.parse(delivery));
-  });
+  app.post<{ Params: { id: string } }>(
+    "/providers/:id/result",
+    async (request, reply) => {
+      if (!CATALOG[request.params.id as ProviderId])
+        return reply
+          .code(404)
+          .send({ error: `Provider ${request.params.id} not found` });
+      const parsed = ResultRequestSchema.safeParse(request.body);
+      if (!parsed.success)
+        return reply.code(400).send({ error: parsed.error.message });
+      // Paid delivery needs on-chain payment verification and the browser
+      // runner. Neither is built, so no result is returned or invented.
+      return reply.code(501).send({
+        error:
+          "Paid result delivery is not available: payment verification and the browser runner are not built",
+      });
+    },
+  );
 }
