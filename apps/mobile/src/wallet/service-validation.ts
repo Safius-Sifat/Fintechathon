@@ -208,6 +208,7 @@ export function validatePermitDraft(value: unknown, context: PermitContext) {
           "liquidity-keeper": 1,
           "scheduled-pay": 2,
           "service-allowance": 3,
+          "commerce-buy": 0,
         } as const
       )[task.runbookId],
     "Runbook kind differs.",

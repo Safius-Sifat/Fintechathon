@@ -44,7 +44,7 @@ export const DeploymentManifestSchema = z
         walletImplementation: z.null(),
       })
       .strict(),
-    providers: z.array(ProviderSchema).min(1).max(2),
+    providers: z.array(ProviderSchema).min(1).max(3),
     targets: z
       .array(
         z
