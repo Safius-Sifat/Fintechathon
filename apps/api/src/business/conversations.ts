@@ -95,6 +95,35 @@ export function httpAgentClient(url: string, token: string): AgentClient {
   };
 }
 
+const usdc = (v: unknown) => {
+  const n = BigInt(String(v));
+  return `${n / 1_000_000n}.${(n % 1_000_000n)
+    .toString()
+    .padStart(6, "0")
+    .replace(/0{1,4}$/, "")}`;
+};
+
+// What the agent sees of earlier turns: the words, plus a note of the cards
+// it showed, so a later "I'll take it" refers to real products and tasks.
+function historyText(type: string, p: Record<string, unknown>) {
+  if (type === "user" || type === "agent")
+    return typeof p.text === "string" && p.text ? p.text : null;
+  if (type === "products" && Array.isArray(p.products))
+    return `[Shown to the user: ${(p.products as Record<string, unknown>[])
+      .map(
+        (x) =>
+          `${String(x.productId)} (${String(x.name)}, ${usdc(x.price)} USDC, sizes ${(x.sizes as string[]).join(" ") || "one size"})`,
+      )
+      .join("; ")}]`;
+  if (type === "purchase") {
+    const product = p.product as Record<string, unknown>;
+    return `[Order prepared for the user to approve: ${String(product.name)}${p.size ? `, size ${String(p.size)}` : ""}, ${usdc(p.amount)} USDC, task ${String(p.taskId)}]`;
+  }
+  if (type === "task")
+    return `[Prepared for the user to approve: ${String(p.label)}, task ${String(p.taskId)}]`;
+  return null;
+}
+
 export const MessageRequestSchema = z
   .object({
     text: z.string().trim().min(1).max(2000),
@@ -357,19 +386,24 @@ export class ConversationService {
       const history = (
         await this.database.query<{
           type: string;
-          payload: { text?: string };
+          payload: Record<string, unknown>;
         }>(
-          "SELECT type,payload FROM (SELECT seq,type,payload FROM conversation_events WHERE conversation_id=$1 AND type IN ('user','agent') ORDER BY seq DESC LIMIT $2) h ORDER BY seq",
+          "SELECT type,payload FROM (SELECT seq,type,payload FROM conversation_events WHERE conversation_id=$1 AND type IN ('user','agent','products','purchase','task') ORDER BY seq DESC LIMIT $2) h ORDER BY seq",
           [id, HISTORY_EVENTS],
         )
-      ).rows
-        .filter((e) => e.payload.text)
-        .map((e) => ({
-          role: (e.type === "user" ? "user" : "assistant") as
-            | "user"
-            | "assistant",
-          text: e.payload.text!,
-        }));
+      ).rows.flatMap((e) => {
+        const text = historyText(e.type, e.payload);
+        return text
+          ? [
+              {
+                role: (e.type === "user" ? "user" : "assistant") as
+                  | "user"
+                  | "assistant",
+                text,
+              },
+            ]
+          : [];
+      });
       // Appended one at a time, in the order the agent produced them.
       let queue: Promise<unknown> = Promise.resolve();
       await this.agent!.reply(

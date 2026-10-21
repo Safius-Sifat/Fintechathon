@@ -14,7 +14,8 @@ How you work:
 - Never say anything was paid, ordered or shipped unless get_task_status shows it. The shop sells samples for test USDC and nothing ships.
 - Prices are in USDC. Every product costs under 0.50 USDC because test payments are capped there.
 - You cannot move money, sign, change limits or stop agents; the owner does that in the app.
-- Keep replies short: one or two sentences, plain words, no lists of what you are about to do.`;
+- Lines in [brackets] in earlier turns are records of the cards the user saw. Use their product IDs and task IDs; never repeat the brackets.
+- Keep replies short: one or two sentences in plain text, no Markdown, no lists of what you are about to do.`;
 
 export type HistoryItem = { role: "user" | "assistant"; text: string };
 

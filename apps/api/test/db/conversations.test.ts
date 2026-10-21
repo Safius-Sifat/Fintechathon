@@ -48,7 +48,14 @@ function fakeAgent(taskId: () => string) {
       onEvent({
         type: "products",
         note: "One pick",
-        products: [{ productId: "aero-runner" }],
+        products: [
+          {
+            productId: "aero-runner",
+            name: "Aero Runner",
+            price: "450000",
+            sizes: ["42"],
+          },
+        ],
       });
       onEvent({ type: "text_delta", text: "Ready " });
       onEvent({
@@ -178,6 +185,22 @@ test("conversations: a reply is stored in order, links its task and uses a scope
       `Bearer ${agent.seen[0]!.token}`,
     );
     assert.equal(replay.statusCode, 401);
+
+    // A later reply sees notes of the cards shown, not only the words.
+    await s.e.call("POST", `/v1/conversations/${id}/messages`, s.owner, {
+      text: "Thanks",
+      deliveryHash: DELIVERY,
+    });
+    await s.idle(id);
+    const later = agent.seen[1]!.history as { role: string; text: string }[];
+    assert.match(
+      later.find((h) => h.text.startsWith("[Shown"))!.text,
+      /aero-runner \(Aero Runner, 0\.45 USDC, sizes 42\)/,
+    );
+    assert.match(
+      later.find((h) => h.text.startsWith("[Order"))!.text,
+      new RegExp(`Aero Runner, size 42, 0\\.45 USDC, task ${taskId}`),
+    );
 
     const list = (await s.e.call("GET", "/v1/conversations", s.owner)).json()
       .conversations;
