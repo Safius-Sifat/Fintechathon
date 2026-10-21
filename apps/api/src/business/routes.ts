@@ -6,6 +6,7 @@ import type { BusinessService } from "./service.js";
 import type { AgenticService } from "./agentic.js";
 import type { ControlService } from "./controls.js";
 import type { TaskService } from "./tasks.js";
+import type { ConversationService } from "./conversations.js";
 
 const emptyBody = z.object({}).strict();
 const idParam = z.object({}).catchall(UuidSchema);
@@ -32,6 +33,7 @@ export async function registerBusiness(
   agentic: AgenticService | null,
   controls: ControlService | null,
   tasks: TaskService | null,
+  conversations: ConversationService | null = null,
 ) {
   await app.register(async (routes) => {
     routes.addHook("onRequest", async (_request, reply) => {
@@ -300,6 +302,113 @@ export async function registerBusiness(
       async (request) => {
         idempotencyKey(request);
         return t().activate(await principal(request), request.body);
+      },
+    );
+
+    // Agent conversations (plan 05). Owner sessions only.
+    const chats = () => {
+      if (!conversations)
+        throw new AuthError(
+          503,
+          "Conversations are not configured.",
+          "NOT_IMPLEMENTED",
+        );
+      return conversations;
+    };
+    const chatParam = z.object({ conversationId: UuidSchema }).strict();
+    const afterQuery = z
+      .object({
+        after: z
+          .string()
+          .regex(/^[0-9]{1,12}$/)
+          .optional(),
+      })
+      .strict();
+    routes.get("/v1/conversations", async (request) =>
+      chats().list(await principal(request)),
+    );
+    routes.post("/v1/conversations", { bodyLimit: 1024 }, async (request) =>
+      chats().create(await principal(request), request.body),
+    );
+    routes.patch(
+      "/v1/conversations/:conversationId",
+      { bodyLimit: 1024 },
+      async (request) => {
+        const { conversationId } = parse(chatParam, request.params);
+        return chats().patch(
+          await principal(request),
+          conversationId,
+          request.body,
+        );
+      },
+    );
+    routes.delete("/v1/conversations/:conversationId", async (request) => {
+      const { conversationId } = parse(chatParam, request.params);
+      return chats().hide(await principal(request), conversationId);
+    });
+    routes.get("/v1/conversations/:conversationId/events", async (request) => {
+      const { conversationId } = parse(chatParam, request.params);
+      const { after } = parse(afterQuery, request.query);
+      return {
+        events: await chats().events(
+          await principal(request),
+          conversationId,
+          Number(after ?? 0),
+        ),
+      };
+    });
+    routes.post(
+      "/v1/conversations/:conversationId/messages",
+      { bodyLimit: 8192 },
+      async (request) => {
+        const { conversationId } = parse(chatParam, request.params);
+        return chats().post(
+          await principal(request),
+          conversationId,
+          request.body,
+        );
+      },
+    );
+    // Server-Sent Events: stored events after `after`, then live ones
+    // (including text as the agent writes it) until the client leaves.
+    routes.get(
+      "/v1/conversations/:conversationId/stream",
+      async (request, reply) => {
+        const { conversationId } = parse(chatParam, request.params);
+        const { after } = parse(afterQuery, request.query);
+        const who = await principal(request);
+        const backlog = await chats().events(
+          who,
+          conversationId,
+          Number(after ?? 0),
+        );
+        reply.hijack();
+        const out = reply.raw;
+        out.writeHead(200, {
+          "content-type": "text/event-stream",
+          "cache-control": "no-store",
+          connection: "keep-alive",
+        });
+        const send = (event: unknown, id?: number) =>
+          out.write(
+            `${id !== undefined && id > 0 ? `id: ${id}\n` : ""}data: ${JSON.stringify(event)}\n\n`,
+          );
+        let last = Number(after ?? 0);
+        for (const e of backlog) {
+          send(e, e.seq);
+          last = e.seq;
+        }
+        const unsubscribe = chats().subscribe(conversationId, (event) => {
+          if ("live" in event) return send({ live: event.live });
+          if (event.seq > 0 && event.seq <= last) return;
+          if (event.seq > 0) last = event.seq;
+          send(event, event.seq);
+        });
+        const heartbeat = setInterval(() => out.write(": ping\n\n"), 15_000);
+        request.raw.on("close", () => {
+          clearInterval(heartbeat);
+          unsubscribe();
+        });
       },
     );
   });
