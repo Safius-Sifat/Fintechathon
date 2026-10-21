@@ -16,6 +16,7 @@ import {
   useColors,
 } from "../theme";
 import { Icon } from "./Icon";
+import { MandateMark } from "./MandateMark";
 
 // Building blocks of the agent thread: your messages on the right in the
 // primary colour, the agent's on the left in a raised bubble beside its mark.
@@ -48,8 +49,8 @@ export function AgentMessage({
     <View style={[styles.agent, continued && styles.agentContinued]}>
       <View style={styles.markColumn}>
         {continued ? null : (
-          <View style={styles.mark} accessibilityLabel="Agent">
-            <Icon name="robot-outline" size={16} color={colors.primary} />
+          <View accessible accessibilityLabel="Agent">
+            <MandateMark size={28} />
           </View>
         )}
       </View>
@@ -324,14 +325,6 @@ const useStyles = makeStyles((colors) => ({
   nowText: { ...type.small, color: colors.ink, flex: 1, fontWeight: "600" },
   link: { minHeight: 32, justifyContent: "center" },
   linkText: { ...type.bodyStrong, color: colors.primary },
-  mark: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: colors.primaryTint,
-  },
   agentText: { ...type.body, fontSize: 16, lineHeight: 22, color: colors.ink },
   card: {
     gap: space.md,

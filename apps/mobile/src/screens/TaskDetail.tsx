@@ -1,6 +1,13 @@
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useRef, useState } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import {
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  Text,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { PrimaryButton } from "../components/Button";
 import { GhostButton, Row, Rows } from "../components/blocks";
@@ -43,7 +50,7 @@ import { TOKENS } from "../wallet/config";
 import { shortAddress } from "../wallet/format";
 import { formatUnitsExact } from "../wallet/service-validation";
 import { errorText } from "../wallet/useAsync";
-import { ApproveCard } from "./agent/ApproveCard";
+import { ApproveSheet } from "./agent/ApproveSheet";
 
 type Props = NativeStackScreenProps<RootStackParamList, "TaskDetail">;
 
@@ -101,7 +108,10 @@ export function TaskDetailScreen({ navigation, route }: Props) {
   const result = task?.delivery.result;
 
   return (
-    <View style={[styles.root, { paddingTop: insets.top }]}>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      style={[styles.root, { paddingTop: insets.top }]}
+    >
       <View style={styles.header}>
         <Pressable
           accessibilityRole="button"
@@ -138,20 +148,6 @@ export function TaskDetailScreen({ navigation, route }: Props) {
             <AgentMessage text={agentLine(task, pending.length, signed)}>
               <ThreadSteps items={threadSteps(task, signed)} />
             </AgentMessage>
-
-            {task.outcomeState === "AWAITING_OWNER" && !signed ? (
-              <ApproveCard
-                continued
-                taskId={taskId}
-                input={reference?.input}
-                onEdit={() => navigation.navigate("TaskTerms", { taskId })}
-                onSigned={() => {
-                  signedTasks.add(taskId);
-                  setSigned(true);
-                  view.reload();
-                }}
-              />
-            ) : null}
 
             {pending.map((a) => {
               const token = TOKENS.find(
@@ -274,7 +270,18 @@ export function TaskDetailScreen({ navigation, route }: Props) {
           </>
         )}
       </ScrollView>
-      {task && (canStop(task) || nowDoing(task, signed)) ? (
+      {task?.outcomeState === "AWAITING_OWNER" && !signed ? (
+        <ApproveSheet
+          bottomInset={insets.bottom}
+          taskId={taskId}
+          input={reference?.input}
+          onSigned={() => {
+            signedTasks.add(taskId);
+            setSigned(true);
+            view.reload();
+          }}
+        />
+      ) : task && (canStop(task) || nowDoing(task, signed)) ? (
         <View
           style={[
             styles.composerWrap,
@@ -294,7 +301,7 @@ export function TaskDetailScreen({ navigation, route }: Props) {
       ) : (
         <View style={{ height: insets.bottom }} />
       )}
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
