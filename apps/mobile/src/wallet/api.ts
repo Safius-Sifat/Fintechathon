@@ -279,7 +279,9 @@ async function login() {
       nowSeconds: BigInt(Math.floor(Date.now() / 1000)),
     });
     if (!checked.ok) throw new Error(checked.error);
-    const signer = await signerForCurrent("Sign in to Mandate");
+    const signer = await signerForCurrent("Sign in to Mandate", {
+      reuseRecentUnlock: true,
+    });
     gate.assert(ticket);
     if (signer.address.toLowerCase() !== ticket.owner)
       throw new Error("The account changed. Nothing was signed.");
@@ -583,9 +585,13 @@ export async function activatePermit(
   draft: OwnerApproval,
   taskId: string,
   terms?: Terms,
+  // For a shop order: the order shown, which the Permit must commit to.
+  order?: PermitContext["order"],
 ) {
   const auth = authorized();
-  const context = await permitContext(taskId, terms);
+  const withOrder = (c: PermitContext): PermitContext =>
+    order ? { ...c, order } : c;
+  const context = withOrder(await permitContext(taskId, terms));
   gate.assert(auth.ticket);
   const checked = validatePermitDraft(draft, context);
   const cacheKey = `${auth.ticket.owner}:${checked.draftId}:${checked.digest}`;
@@ -595,7 +601,7 @@ export async function activatePermit(
     gate.assert(auth.ticket);
     if (signer.address.toLowerCase() !== auth.ticket.owner)
       throw new Error("The account changed. Nothing was signed.");
-    const refreshed = await permitContext(taskId, terms);
+    const refreshed = withOrder(await permitContext(taskId, terms));
     gate.assert(auth.ticket);
     validatePermitDraft(checked, refreshed);
     ownerSignature = await signer.signTypedData({

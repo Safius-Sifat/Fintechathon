@@ -90,10 +90,7 @@ export function OrderSheet({
   const check = () =>
     run(async () => {
       if (!address) return;
-      const terms = taskTerms(
-        orderTerms(await listProviders(), order),
-        USDC,
-      );
+      const terms = taskTerms(orderTerms(await listProviders(), order), USDC);
       const draft = await draftPermit(order.taskId, terms);
       const context = {
         ...(await permitContext(order.taskId, terms)),
@@ -104,14 +101,11 @@ export function OrderSheet({
   const approve = () =>
     run(async () => {
       if (!review || !address) return;
-      const context = {
-        ...(await permitContext(order.taskId, review.terms)),
-        order: expected(address),
-      };
       await activatePermit(
-        validatePermitDraft(review.draft, context),
+        review.draft,
         order.taskId,
         review.terms,
+        expected(address),
       );
       onSigned();
     });
