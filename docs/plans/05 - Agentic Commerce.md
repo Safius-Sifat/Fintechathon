@@ -61,6 +61,13 @@ Not real: the shop. It is our own demo merchant with sample products, and no goo
   - [Base, agents in a wallet](https://mobbin.com/screens/a3fd65a5-dbe5-4033-9fd8-a69ea8e40b5e).
   - [World App, Explore](https://mobbin.com/screens/f762c8b4-2f3b-480e-b471-d2f688f68d89).
   - [Alexa, example prompts with Launch](https://mobbin.com/screens/4996c78e-9e18-487c-9626-e223e59efd18).
+- **Chat history and new chat:**
+  - [Claude, side menu with Chats and a New chat button](https://mobbin.com/screens/9931f156-6697-4542-87dc-dfb04695c5cf).
+  - [ChatGPT, menu with Recents, pinned chats and a Chat button](https://mobbin.com/screens/ab1d0c55-4180-4ad4-b9b6-5a21242092f1).
+  - [Google Gemini, search chats, New chat, unread dot on a chat](https://mobbin.com/screens/7838c98a-2cc1-4fea-824c-c2a32bbf01ad).
+  - [Meta AI, search and compose at the top, pinned chats](https://mobbin.com/screens/fbd4427a-94db-4ed8-908c-6d015b246ac1).
+  - [Bevel, empty history with "No conversations yet" and New chat](https://mobbin.com/screens/797718c1-8b72-469a-af22-4f47d5eb6095).
+  - [Raycast, history grouped by day with search and +](https://mobbin.com/screens/8be9b529-838c-4f14-ab03-77d0c3dee245).
 
 ## Decisions taken (2026-10-21)
 
@@ -68,6 +75,12 @@ Not real: the shop. It is our own demo merchant with sample products, and no goo
 2. **Facilitator:** the public x402.org facilitator first. Our worker settles instead if the facilitator rejects contract-wallet authorizations, which Task 1 proves either way.
 3. **Agent model:** OpenAI Agents SDK with the owner's OpenAI key. This replaces "Claude Agent SDK" in architecture S9, so Task 9 updates the docs and AGENTS.md.
 4. **Checkout:** one saved test delivery address on the phone. It is shown on the confirmation sheet and sent to the shop only after you sign.
+5. **One token in the demo:** everything the video shows is paid in Circle test USDC: personal send, agent funding and shop purchases. DemoUSD stays in the code for the page-check providers but is not in the video.
+6. **Chat-first agent:** the Agent tab works like a typical AI assistant: conversations with history, a new chat button, and tasks that run inside a conversation.
+
+**Funding (checked on chain 2026-10-21, block 48408044):**
+- the personal account `0xC623…D64B` holds 0.0183 ETH;
+- the agent wallet `0x20a3…C151` holds 20 USDC.
 
 ## How it works
 
@@ -102,6 +115,52 @@ Phone (chat)  ──message──▶  API /v1/conversations  ──▶  Agent se
 **Two ways to authorise a purchase**, both already supported by the contract:
 - **One purchase:** a per-order Permit, kind BROWSER, recipient = the shop, max payment = the quoted price. You approve each order with hold to sign. This is the default.
 - **Shopping allowance:** an ALLOWANCE Permit ("up to 30 USDC a week at Mandate Shop"). Orders under the review threshold go through without asking; orders above it raise the approval sheet. This is the Cobo "Pact" model, and it is optional in this plan (Task 8).
+
+## The agent experience
+
+The agent should feel like a capable assistant that happens to hold a wallet, not like a form with a chat skin. These rules apply to every screen in Tasks 5, 6 and 8.
+
+### Screens
+
+1. **Agent home (new chat)**, the Agent tab's first screen:
+   - a header with the history button (left), the agent wallet balance pill and New chat (right);
+   - an empty state: the Mandate mark, one line on what the agent can do, and 3–4 example prompts from the Discover list ("Find running shoes under 25 USDC");
+   - the message box at the bottom with + (attach a product link or open the manual form) and send.
+2. **Chat thread:** your messages on the right, the agent's on the left, as built on `feat/mobile-agent-chat`. Additions:
+   - replies stream in word by word;
+   - a collapsible "Working…" step list above each reply shows the agent's real tool calls (searching the shop, getting a quote), as in Bevel;
+   - the cards and sheets below appear inline.
+3. **History drawer**, sliding in from the left as in Claude, ChatGPT and Gemini:
+   - search chats at the top, then New chat;
+   - chats grouped Today / Yesterday / Earlier, each titled automatically from its first request;
+   - a small status on chats with live work: a spinner while the agent works, a dot when it needs you, a check when an order completed;
+   - long-press to rename, pin or delete. Deleting a chat never cancels a payment or order; the receipt stays in Activity.
+   - Empty state: "No chats yet" with New chat, as in Bevel.
+4. **Agent wallet** (built): balance, Fund / Move out / Limits / Approvals, safety controls and activity. Opened from the balance pill.
+5. **Discover** (Task 6): the services the agent can pay, each with price per use and "Try" prompts.
+
+### Cards and sheets inside a chat
+
+| Moment | What appears | Who decides |
+| --- | --- | --- |
+| Agent found options | Product cards in a horizontal row: image, name, price, "Choose" | You pick, or ask for more |
+| Agent needs detail | A question with chips ("Size 41", "42", "43") | You tap or type |
+| Ready to buy | Purchase sheet from the bottom: item, size, price, shop, address, the limit it uses, then hold to sign | You, every time (or the allowance in Task 8) |
+| Price above "ask me first" | Approval sheet for that payment | You |
+| Paying | Live steps: quote, authorised, paid on chain (tx link), receipt | The service; Stop is always visible |
+| Done | Receipt card: order number, item, amount, tx link, "Test shop – no goods ship" | — |
+| Refused | A plain reason from the wallet or service, and what to change | You |
+
+### Behaviour rules
+
+- **Never invent money facts.** Prices, balances, statuses and tx hashes come from service and chain data. The model's words can explain them but can't state them.
+- **Ask before assuming.** If size, budget or colour is missing, the agent asks one short question with chips instead of guessing.
+- **Show work as it happens.** Every tool call appears as a step: what it is doing now, then a check or a cross. Nothing appears done before it is.
+- **Stop is always one tap away** while any task in the chat can spend. It pauses the wallet on chain, and the chat says what was stopped and what had already settled.
+- **Leaving is safe.** Closing the app or switching chats doesn't stop approved work. When you return, the chat shows what happened meanwhile, and the history marks chats that need you.
+- **Context per chat.** Each chat remembers its own conversation; a new chat starts clean. Wallet limits and the saved address are shared across chats.
+- **Errors are plain and recoverable.** Not enough USDC, over a limit, shop unavailable or model unavailable: each says what happened, nothing was paid, and offers the next step (Fund, Change limits, Try again).
+- **Accessible.** Streaming text is announced politely, every card works with VoiceOver, and hold to sign has an accessible alternative label.
 
 ## Tasks
 
@@ -171,24 +230,52 @@ New app `apps/shop` (Fastify, like `apps/provider`):
 - Add API routes:
   - `POST /v1/conversations` and `POST /v1/conversations/:id/messages`;
   - `GET /v1/conversations/:id/events` (SSE). Events are typed `text`, `products`, `approval_needed`, `status`, `receipt` and `error`.
-- Store conversations in the DB, scoped to the owner session.
+- Add conversation management routes:
+  - `GET /v1/conversations` returns the owner's chats: title, updated time, pinned flag, and live status (`working`, `needs_you`, `done`, `idle`) derived from that chat's tasks and approvals;
+  - `PATCH /v1/conversations/:id` renames or pins;
+  - `DELETE /v1/conversations/:id` hides the chat. It refuses while a task in it can still spend, and never removes receipts or evidence;
+  - `GET /v1/conversations/:id/messages` pages through history for reopening a chat.
+- Title each chat automatically after the first reply (a short model call, capped tokens), editable by the owner.
+- Stream reply text and tool steps as SSE events (`text_delta`, `step_started`, `step_done`, `step_failed`), so the phone can show work as it happens. A reconnect resumes from the last event id.
+- Store conversations and messages in the DB, scoped to the owner session. Each chat keeps its own model context; nothing is shared between chats except wallet limits and the saved address.
 - The model's text is shown as the agent's words. Every money fact (price, status, tx hash) comes from service data, never from model text.
 - Rate-limit requests and cap tokens per conversation. Without a key the route returns 503 and says why; it never sends a fake reply.
-- **Done when:** a scripted conversation ("running shoes under 25, size 42" → pick → purchase) produces the right event sequence against the testnet shop.
+- **Done when:**
+  - a scripted conversation ("running shoes under 25, size 42" → pick → purchase) produces the right event sequence against the testnet shop;
+  - the chat list shows that chat as `working`, then `done`, with an automatic title;
+  - a dropped connection resumes without losing or repeating events.
 
-### Task 6: Phone chat for shopping (2–3 days, Person 3 / you)
+### Task 6a: Phone chat shell, history and new chat (2 days, Person 3 / you)
 
-On top of `feat/mobile-agent-chat`:
-- **Agent tab sends messages to the conversation API.** Remove the keyword reader (`readRequest`) for shopping; keep page checks as one more thing the agent can do.
-- **Product cards:** a horizontal row of cards with image, name, price and "Choose", from the Grok and SHEIN references. Choosing sends the pick back to the agent.
+On top of `feat/mobile-agent-chat`, following "The agent experience" above:
+- **New chat screen** as the Agent tab's root: the empty state with the Mandate mark and example prompts, the header with history, balance pill and New chat.
+- **History drawer** from the left (Claude, ChatGPT and Gemini references):
+  - search;
+  - New chat;
+  - chats grouped by day with live status marks;
+  - long-press rename, pin and delete;
+  - the "No chats yet" empty state.
+- **Chat thread** reads from `/v1/conversations/:id/messages` and the SSE stream:
+  - replies stream in;
+  - tool steps appear as the collapsible "Working…" list;
+  - the scroll position is kept when new events arrive.
+- **The message box sends to the conversation API.** Remove the keyword reader (`readRequest`); page checks become one more thing the agent can do through its tools.
+- **Offline and no-key states:** if the service or model is unavailable, the box is disabled with the reason, and old chats still open read-only.
+- **Done when:** on the simulator you can start a chat, leave it, start another, find the first in history by search, rename and pin it, and reopen it with its full history.
+
+### Task 6b: Shopping in the chat (2 days, Person 3 / you)
+
+- **Product cards:** a horizontal row with image, name, price and "Choose" (Grok and SHEIN references). Choosing sends the pick back to the agent.
+- **Question chips** when the agent needs a size, budget or colour.
 - **Purchase sheet:** product, size, price in USDC, shop, delivery address and the per-payment limit it falls under, then hold to sign. This reuses `ApproveSheet` with an order layout and signs the per-order Permit.
 - **Payment approval sheet** for orders above "ask me first" (the existing Approval flow).
 - **Status steps:** quote received, payment authorised, paid on chain (tx link), receipt received. The now line and Stop stay as built.
-- **Receipt card:** order number, item, amount, tx hash and "Test shop – no goods ship".
-- **Discover section** on the Agent tab, from the Base, World App and Alexa references:
+- **Receipt card:** order number, item, amount, tx hash and "Test shop – no goods ship". It is also listed in Activity.
+- **Discover section** on the new chat screen (Base, World App and Alexa references):
   - published services (the shop and the page-check providers) with price per use;
   - example prompts with "Try", which fills the message box.
 - **Settings:** a saved test delivery address.
+- **USDC limits:** the Limits screen defaults to USDC caps, so a fresh account can allow shop payments in one signature.
 - **Done when:** on the simulator, a fresh account with test USDC can buy a shoe through chat, and the receipt and tx hash match BaseScan.
 
 ### Task 7: Evidence and verifier (1 day, Person 4)
@@ -209,13 +296,13 @@ On top of `feat/mobile-agent-chat`:
 ### Task 9: Docs, deploy and demo (1 day)
 
 - Update architecture S9, AGENTS.md ("Claude Agent SDK" → OpenAI Agents SDK), README and the demo script.
-- Deploy `apps/shop` and the updated API, worker and agent service to the demo VM. Rehearse the recording: fresh install → fund → chat purchase → stop.
+- Deploy `apps/shop` and the updated API, worker and agent service to the demo VM. Rehearse the recording: fresh install → fund with USDC → set USDC limits → new chat → buy a shoe → receipt on BaseScan → open history → stop.
 - **Done when:** the dry run passes from a fresh install with only testnet funds.
 
 ## What I need from you
 
 1. **OpenAI API key**, stored by you in the server's Key Vault (I'll name the secret). Please don't paste it in chat.
-2. **Test funds.** Base Sepolia ETH for the personal account, about 0.01, and test USDC from [faucet.circle.com](https://faucet.circle.com) for funding the agent wallet. Both faucets need a human.
+2. **Test funds:** done. The personal account holds 0.0183 ETH and the agent wallet 20 USDC (block 48408044). More USDC may be needed after several rehearsals.
 3. **Deploy authorization** for the new `apps/shop` service and the updated API, worker and agent on the demo VM. AGENTS.md requires this.
 4. **Contract redeploy authorization, only if Task 1 shows the facilitator path needs a contract change.** I don't expect it to.
 5. **Ownership sign-off.** This touches Person 1 (schema), Person 2 (API, worker), Person 3 (phone) and Person 4 (shop, runbook, verifier). Tell me whether I build it all on one branch with separate commits, or split it per owner.
