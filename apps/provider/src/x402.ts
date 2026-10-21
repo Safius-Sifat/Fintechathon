@@ -98,6 +98,12 @@ export const checkSettlement = (
   requestId: Hex,
   txHash: Hash,
 ) =>
-  checkX402Settlement(chain, invoice, requestId, txHash, REQUIRED_CONFIRMATIONS);
+  checkX402Settlement(
+    chain,
+    invoice,
+    requestId,
+    txHash,
+    REQUIRED_CONFIRMATIONS,
+  );
 
 export type { FacilitatorClient };

@@ -132,7 +132,12 @@ const sameAddress = (a: string, b: string) =>
  */
 export async function checkX402Settlement(
   chain: SettlementReader,
-  expected: { wallet: string; asset: string; recipient: string; amount: string },
+  expected: {
+    wallet: string;
+    asset: string;
+    recipient: string;
+    amount: string;
+  },
   requestId: Hex,
   txHash: Hash,
   confirmations: bigint,
