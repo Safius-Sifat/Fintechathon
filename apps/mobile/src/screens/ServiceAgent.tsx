@@ -207,6 +207,30 @@ export function ServiceAgent() {
               ) : (
                 <Note>No tasks recorded for this wallet on this phone.</Note>
               )}
+              {(refs.data ?? []).some((t) => t.walletId === w.walletId) ? (
+                <>
+                  <SectionHeading>Run from a laptop</SectionHeading>
+                  <Note>
+                    Give the agent on your laptop a token for one approved task.
+                    It can only act within that task's limits.
+                  </Note>
+                  <Rows>
+                    {refs
+                      .data!.filter((t) => t.walletId === w.walletId)
+                      .map((t) => (
+                        <Row
+                          key={t.taskId}
+                          label={t.goal}
+                          onPress={() =>
+                            navigation.navigate("AgentToken", {
+                              taskId: t.taskId,
+                            })
+                          }
+                        />
+                      ))}
+                  </Rows>
+                </>
+              ) : null}
             </>
           )}
           <GhostButton

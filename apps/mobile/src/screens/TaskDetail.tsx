@@ -1,5 +1,5 @@
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   KeyboardAvoidingView,
   Platform,
@@ -17,6 +17,7 @@ import {
   Composer,
   NowLine,
   ThreadSteps,
+  TextLink,
   ThreadCard,
   UserBubble,
 } from "../components/chat";
@@ -27,6 +28,7 @@ import {
   canStop,
   nowDoing,
   signedTasks,
+  startedTasks,
   threadSteps,
 } from "../state/agentThread";
 import { useServicePoll } from "../state/useServicePoll";
@@ -99,6 +101,19 @@ export function TaskDetailScreen({ navigation, route }: Props) {
       setBusy(false);
     }
   };
+  // The agent starts on its own once the approval is active on chain.
+  useEffect(() => {
+    if (
+      task?.authorityState === "ACTIVE" &&
+      task.outcomeState === "READY" &&
+      !startedTasks.has(taskId)
+    ) {
+      startedTasks.add(taskId);
+      void start();
+    }
+    // start reads the latest task; this runs when its state changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [task?.authorityState, task?.outcomeState, taskId]);
   const stop = () =>
     wallet?.address &&
     navigation.navigate("AgentControl", {
@@ -191,21 +206,15 @@ export function TaskDetailScreen({ navigation, route }: Props) {
               );
             })}
 
-            {task.authorityState === "ACTIVE" &&
-            ["READY", "AWAITING_AGENT", "NEEDS_OWNER"].includes(
-              task.outcomeState,
-            ) ? (
+            {error ||
+            (task.authorityState === "ACTIVE" &&
+              task.outcomeState === "NEEDS_OWNER") ? (
               <AgentMessage continued>
-                <PrimaryButton
-                  label={busy ? "Starting…" : "Start the check"}
-                  disabled={busy || !!view.error}
+                {error ? <Text style={styles.error}>{error}</Text> : null}
+                <TextLink
+                  label={busy ? "Starting…" : "Try again"}
                   onPress={start}
                 />
-                <GhostButton
-                  label="Run me from a laptop instead"
-                  onPress={() => navigation.navigate("AgentToken", { taskId })}
-                />
-                {error ? <Text style={styles.error}>{error}</Text> : null}
               </AgentMessage>
             ) : null}
 

@@ -100,6 +100,8 @@ const stopped = ["REVOKED", "EXPIRED", "INVALIDATED", "FROZEN"];
 // Tasks whose permission was signed on this phone in this session. The service
 // keeps such a task in AWAITING_OWNER until the chain receipt arrives.
 export const signedTasks = new Set<string>();
+// Tasks whose run this phone has already requested in this session.
+export const startedTasks = new Set<string>();
 
 // One plain sentence for where the task stands, from the service's states.
 export function agentLine(
@@ -131,7 +133,7 @@ export function agentLine(
     return progress.payment === "FAILED"
       ? "A payment didn't go through. Check the agent wallet holds enough DemoUSD above what I must keep."
       : "Working on it.";
-  return "Ready. Start me when you want.";
+  return "Approved. Starting now.";
 }
 
 const PAYMENT_DONE = ["INCLUDED", "FINALIZED"];
