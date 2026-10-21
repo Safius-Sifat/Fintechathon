@@ -418,8 +418,9 @@ export class ConversationService {
             this.publish(id, { live: e });
             return;
           }
+          // An empty final message keeps the text already written.
           if (e.type === "agent") {
-            text = e.text;
+            if (e.text.trim()) text = e.text;
             return;
           }
           const { type, ...payload } = e;
