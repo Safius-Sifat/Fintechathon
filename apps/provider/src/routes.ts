@@ -1,10 +1,11 @@
 import { randomBytes } from "node:crypto";
-import { type FastifyInstance } from "fastify";
+import { type FastifyInstance, type FastifyReply } from "fastify";
 import {
   CheckRequestSchema,
   DeliveryEnvelopeSchema,
   QuoteEnvelopeSchema,
   ResultRequestSchema,
+  X402ResultRequestSchema,
   buildTypedData,
   deliveryDomain,
   hashCanonical,
@@ -12,11 +13,24 @@ import {
   type DeliveryEnvelope,
   type QuoteEnvelope,
 } from "@mandate/schema";
-import { bytesToHex, type Hex } from "viem";
+import {
+  decodePaymentSignatureHeader,
+  encodePaymentRequiredHeader,
+  encodePaymentResponseHeader,
+} from "@x402/core/http";
+import type { PaymentPayload } from "@x402/core/types";
+import { bytesToHex, type Hash, type Hex } from "viem";
 import { privateKeyToAccount, type PrivateKeyAccount } from "viem/accounts";
 import { runChecks, type BrowserConfig } from "./browser.js";
 import { checkPayment, type ChainReader } from "./payment.js";
-import type { InvoiceStore } from "./store.js";
+import type { InvoiceRecord, InvoiceStore } from "./store.js";
+import {
+  asRequirements,
+  checkPayload,
+  checkSettlement,
+  x402Accepts,
+  type FacilitatorClient,
+} from "./x402.js";
 
 type ProviderId = "a" | "b";
 
@@ -47,6 +61,11 @@ export interface ProviderConfig {
   browser?: BrowserConfig | undefined;
   // Bearer token the Mandate worker uses to fetch results.
   workerToken?: string | undefined;
+  // x402 facilitator that verifies and settles USDC payments (S9.10). Without
+  // it an x402 payment is refused; invoices still advertise x402 terms.
+  facilitator?: FacilitatorClient | undefined;
+  // Public URL of this service, named in the x402 PAYMENT-REQUIRED resource.
+  publicUrl?: string | undefined;
 }
 
 export async function registerProviderRoutes(
@@ -117,7 +136,7 @@ export async function registerProviderRoutes(
         providerId,
         invoice,
         providerSignature,
-        x402: null,
+        x402: x402Accepts(invoice, providerSignature, QUOTE_SECONDS),
       };
       await config.store.put({
         quote,
@@ -125,7 +144,21 @@ export async function registerProviderRoutes(
         checks: req.checks,
         delivery: null,
       });
-      // 402: payment is required before any work is done.
+      // 402: payment is required before any work is done. A USDC invoice is
+      // also offered in the official x402 PAYMENT-REQUIRED header.
+      if (quote.x402)
+        reply.header(
+          "PAYMENT-REQUIRED",
+          encodePaymentRequiredHeader({
+            x402Version: 2,
+            resource: {
+              url: `${config.publicUrl ?? ""}/providers/${providerId}/result`,
+              description: `Browser check by provider ${providerId}`,
+              mimeType: "application/json",
+            },
+            accepts: [asRequirements(quote.x402)],
+          }),
+        );
       return reply.code(402).send(QuoteEnvelopeSchema.parse(quote));
     },
   );
@@ -153,6 +186,9 @@ export async function registerProviderRoutes(
         });
       if (request.headers.authorization !== `Bearer ${config.workerToken}`)
         return reply.code(401).send({ error: "Worker credential required" });
+      const header = request.headers["payment-signature"];
+      if (typeof header === "string")
+        return payWithX402(providerId, header, request.body, reply);
       const parsed = ResultRequestSchema.safeParse(request.body);
       if (!parsed.success)
         return reply.code(400).send({ error: parsed.error.message });
@@ -174,7 +210,7 @@ export async function registerProviderRoutes(
       }
 
       const payment = await checkPayment(
-        config.chain,
+        config.chain!,
         record.quote.invoice,
         req.requestId,
         req.paymentTxHash,
@@ -185,25 +221,120 @@ export async function registerProviderRoutes(
           .send({ state: "PENDING", reason: payment.reason });
       if (payment.state === "INVALID")
         return reply.code(402).send({ error: payment.reason });
-
-      let job = running.get(req.invoiceId);
-      if (!job) {
-        job = fulfil(
-          record.quote,
-          record.targetId,
-          record.checks,
-          req.requestId,
-          req.paymentTxHash,
-        );
-        running.set(req.invoiceId, job);
-      }
-      try {
-        return reply.code(200).send(await job);
-      } finally {
-        running.delete(req.invoiceId);
-      }
+      return reply
+        .code(200)
+        .send(await deliverOnce(record, req.requestId, req.paymentTxHash));
     },
   );
+
+  // One fulfillment per paid invoice, shared by concurrent retrievals.
+  async function deliverOnce(
+    record: InvoiceRecord,
+    requestId: Hex,
+    paymentTxHash: Hex,
+  ) {
+    const invoiceId = record.quote.invoice.invoiceId;
+    let job = running.get(invoiceId);
+    if (!job) {
+      job = fulfil(
+        record.quote,
+        record.targetId,
+        record.checks,
+        requestId,
+        paymentTxHash,
+      ).finally(() => running.delete(invoiceId));
+      running.set(invoiceId, job);
+    }
+    return job;
+  }
+
+  // x402 (S9.10): verify the wallet's authorization, have the facilitator
+  // settle it once, confirm the settlement on chain, then deliver once.
+  async function payWithX402(
+    providerId: ProviderId,
+    header: string,
+    body: unknown,
+    reply: FastifyReply,
+  ) {
+    if (!config.facilitator)
+      return reply.code(503).send({
+        error: "x402 settlement is not configured; no payment was taken",
+      });
+    const parsed = X402ResultRequestSchema.safeParse(body);
+    if (!parsed.success)
+      return reply.code(400).send({ error: parsed.error.message });
+    const { invoiceId, requestId } = parsed.data;
+    const record = await config.store.get(invoiceId);
+    if (!record || record.quote.providerId !== providerId)
+      return reply.code(404).send({ error: "Unknown invoice" });
+    if (!record.quote.x402)
+      return reply
+        .code(400)
+        .send({ error: "This invoice is not payable with x402" });
+    if (record.delivery) {
+      if (
+        record.delivery.receipt.requestId.toLowerCase() !==
+        requestId.toLowerCase()
+      )
+        return reply
+          .code(409)
+          .send({ error: "This invoice was fulfilled for another request" });
+      return reply.code(200).send(record.delivery);
+    }
+    let txHash = record.settlementTxHash ?? null;
+    if (!txHash) {
+      let payload: PaymentPayload;
+      try {
+        payload = decodePaymentSignatureHeader(header);
+      } catch {
+        return reply.code(400).send({ error: "Malformed PAYMENT-SIGNATURE" });
+      }
+      const problem = checkPayload(
+        payload,
+        record.quote.x402,
+        record.quote.invoice,
+        requestId,
+      );
+      if (problem) return reply.code(402).send({ error: problem });
+      const requirements = asRequirements(record.quote.x402);
+      const verified = await config.facilitator.verify(payload, requirements);
+      if (!verified.isValid)
+        return reply.code(402).send({
+          error: `The facilitator refused the payment: ${verified.invalidReason ?? "invalid"}`,
+        });
+      const settled = await config.facilitator.settle(payload, requirements);
+      if (!settled.success || !/^0x[0-9a-fA-F]{64}$/.test(settled.transaction))
+        return reply.code(402).send({
+          error: `Settlement failed: ${settled.errorReason ?? "unknown"}`,
+        });
+      txHash = settled.transaction as Hash;
+      await config.store.put({ ...record, settlementTxHash: txHash });
+    }
+    const settlement = await checkSettlement(
+      config.chain!,
+      record.quote.invoice,
+      requestId,
+      txHash,
+    );
+    if (settlement.state === "PENDING")
+      return reply.code(202).send({
+        state: "PENDING",
+        reason: settlement.reason,
+        settlementTxHash: txHash,
+      });
+    if (settlement.state === "INVALID")
+      return reply.code(402).send({ error: settlement.reason });
+    reply.header(
+      "PAYMENT-RESPONSE",
+      encodePaymentResponseHeader({
+        success: true,
+        transaction: txHash,
+        network: record.quote.x402.network,
+        payer: record.quote.invoice.wallet,
+      }),
+    );
+    return reply.code(200).send(await deliverOnce(record, requestId, txHash));
+  }
 
   async function fulfil(
     quote: QuoteEnvelope,

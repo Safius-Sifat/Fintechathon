@@ -181,6 +181,9 @@ importers:
       '@mandate/schema':
         specifier: workspace:*
         version: link:../../packages/schema
+      '@x402/core':
+        specifier: 2.28.0
+        version: 2.28.0
       fastify:
         specifier: 5.6.2
         version: 5.6.2
@@ -202,6 +205,9 @@ importers:
       '@mandate/schema':
         specifier: workspace:*
         version: link:../../packages/schema
+      '@x402/core':
+        specifier: 2.28.0
+        version: 2.28.0
       pg:
         specifier: 8.16.3
         version: 8.16.3
@@ -1471,6 +1477,9 @@ packages:
     resolution: {integrity: sha512-TQMCz2pFJMfpNxmSfX1VSfTjwUIFx/mL+p1bnfM1xjjdla7Z+KnGMW/EhFbpckp3LyWAH4PgOsMwOMnIN+MBFg==}
     peerDependencies:
       '@urql/core': ^5.0.0
+
+  '@x402/core@2.28.0':
+    resolution: {integrity: sha512-Da/7zKxCKqpBoB4Msc9tFgkAv7tJTD8nG+DSSm+QdXAyJS4PQsmgVSKe17rDJTtlu0pwNbLcOje6MyQ6kaDkig==}
 
   '@xmldom/xmldom@0.8.15':
     resolution: {integrity: sha512-/5NV/vDALVFDXgLmfsy9TRCBlKwO2LNBFzpzvb9iIj+jR+eSc6DLYYvVOdivT/jm7MtU6TebYuRmzEOI7w40UA==}
@@ -5421,6 +5430,10 @@ snapshots:
     dependencies:
       '@urql/core': 5.2.0
       wonka: 6.3.6
+
+  '@x402/core@2.28.0':
+    dependencies:
+      zod: 3.25.76
 
   '@xmldom/xmldom@0.8.15': {}
 

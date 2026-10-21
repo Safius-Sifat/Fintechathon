@@ -1,4 +1,5 @@
 import { startFoundationService } from "@mandate/platform";
+import { HTTPFacilitatorClient } from "@x402/core/http";
 import { createPublicClient, http, type Hex } from "viem";
 import { baseSepolia } from "viem/chains";
 import { registerProviderRoutes } from "./routes.js";
@@ -13,6 +14,7 @@ const key = (name: string) => {
 };
 const rpc = env("PROVIDER_RPC_URL");
 const targets = env("PROVIDER_TARGET_ORIGIN");
+const facilitator = env("PROVIDER_X402_FACILITATOR_URL");
 
 await startFoundationService("provider", 3001, async (app) => {
   await registerProviderRoutes(app, {
@@ -32,5 +34,9 @@ await startFoundationService("provider", 3001, async (app) => {
         }
       : undefined,
     workerToken: env("PROVIDER_WORKER_TOKEN"),
+    facilitator: facilitator
+      ? new HTTPFacilitatorClient({ url: facilitator })
+      : undefined,
+    publicUrl: env("PROVIDER_PUBLIC_URL"),
   });
 });

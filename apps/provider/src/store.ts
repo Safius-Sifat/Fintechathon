@@ -9,6 +9,9 @@ export interface InvoiceRecord {
   targetId: "checkout-healthy" | "checkout-broken";
   checks: ("pageLoad" | "title" | "formSubmit")[];
   delivery: DeliveryEnvelope | null;
+  // x402 only: the facilitator's settlement transaction, kept so a retry
+  // checks it instead of settling a second time.
+  settlementTxHash?: `0x${string}` | null;
 }
 
 export class InvoiceStore {

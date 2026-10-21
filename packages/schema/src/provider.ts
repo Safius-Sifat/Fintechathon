@@ -109,6 +109,15 @@ export const ResultRequestSchema = z
   })
   .strict();
 
+// x402 retrieval (S9.10): the payment travels in the PAYMENT-SIGNATURE header
+// and the provider settles it, so there is no payment hash yet.
+export const X402ResultRequestSchema = z
+  .object({
+    invoiceId: Hex32Schema,
+    requestId: Hex32Schema,
+  })
+  .strict();
+
 export const DeliveryEnvelopeSchema = z
   .object({
     result: BrowserResultSchema,

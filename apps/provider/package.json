@@ -12,6 +12,7 @@
   "dependencies": {
     "@mandate/platform": "workspace:*",
     "@mandate/schema": "workspace:*",
+    "@x402/core": "2.28.0",
     "fastify": "5.6.2",
     "playwright-core": "1.55.1",
     "viem": "2.38.5"
