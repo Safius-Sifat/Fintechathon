@@ -1,4 +1,6 @@
 import { randomBytes } from "node:crypto";
+import { encodePaymentSignatureHeader } from "@x402/core/http";
+import type { PaymentPayload } from "@x402/core/types";
 import type { Pool } from "pg";
 import {
   decodeEventLog,
@@ -11,13 +13,17 @@ import {
   ActionSchema,
   authorityTypes,
   CHAIN_ID,
+  checkX402Settlement,
   DeliveryEnvelopeSchema,
   hashAction,
   mandateWalletAbi,
   QuoteEnvelopeSchema,
   RunbookSnapshotSchema,
   walletDomain,
+  x402Authorization,
+  x402Signature,
   ZERO_HASH,
+  type SettlementReader,
   type RunbookDecision,
   type RunbookSnapshot,
 } from "@mandate/schema";
@@ -29,7 +35,7 @@ import {
   type Clock,
 } from "@mandate/platform";
 import { answersFor, recordQuestion } from "./agent-questions.js";
-import type { Relayer } from "./relayer.js";
+import { CONFIRMATIONS, type Relayer } from "./relayer.js";
 
 export type Advance = (
   snapshot: RunbookSnapshot,
@@ -39,24 +45,100 @@ export type Advance = (
 const ACTION_SECONDS = 50;
 
 // Provider quote/retrieve over the provider service's HTTP routes (S6).
+// With `x402`, USDC quotes are paid by x402 (S9.10): the worker sends the
+// wallet's registered authorization and checks the settlement on chain itself.
 export function providerDeps(
   baseUrl: string,
   workerToken: string,
   context: () => { taskId: Hex; wallet: Hex; asset: Hex },
+  x402?: { chain: SettlementReader },
 ): RunbookDeps {
-  const post = async (path: string, body: unknown) => {
+  const post = async (
+    path: string,
+    body: unknown,
+    headers: Record<string, string> = {},
+  ) => {
     const r = await fetch(baseUrl + path, {
       method: "POST",
       headers: {
         "content-type": "application/json",
         authorization: "Bearer " + workerToken,
+        ...headers,
       },
       body: JSON.stringify(body),
-      signal: AbortSignal.timeout(20_000),
+      // A first x402 retrieval waits for the facilitator's settlement.
+      signal: AbortSignal.timeout(45_000),
     });
     return { status: r.status, body: await r.json().catch(() => null) };
   };
   return {
+    ...(x402
+      ? {
+          x402: {
+            async pay(providerId, quote, action) {
+              const wallet = context().wallet;
+              const accepts = quote.x402!;
+              const payload: PaymentPayload = {
+                x402Version: 2,
+                accepted: {
+                  scheme: accepts.scheme,
+                  network: accepts.network,
+                  asset: accepts.asset,
+                  amount: accepts.amount,
+                  payTo: accepts.payTo,
+                  maxTimeoutSeconds: accepts.maxTimeoutSeconds,
+                  extra: { ...accepts.extra },
+                },
+                payload: {
+                  authorization: x402Authorization(action, wallet),
+                  signature: x402Signature(action.requestId, action.permitId),
+                },
+              };
+              const r = await post(
+                `/providers/${providerId}/result`,
+                { invoiceId: action.invoiceId, requestId: action.requestId },
+                { "payment-signature": encodePaymentSignatureHeader(payload) },
+              );
+              if (r.status === 202 || r.status === 402)
+                return {
+                  state: "PENDING" as const,
+                  reason: String(
+                    (r.body as { reason?: string; error?: string } | null)
+                      ?.reason ??
+                      (r.body as { error?: string } | null)?.error ??
+                      "Waiting for settlement",
+                  ),
+                };
+              if (r.status !== 200)
+                throw new Error(
+                  `Provider ${providerId} x402 payment failed (${r.status})`,
+                );
+              const delivery = DeliveryEnvelopeSchema.parse(r.body);
+              const settlementTxHash = delivery.receipt.paymentTxHash;
+              // Independent of the provider: the settlement must be on chain.
+              const settled = await checkX402Settlement(
+                x402.chain,
+                {
+                  wallet,
+                  asset: quote.invoice.asset,
+                  recipient: quote.invoice.recipient,
+                  amount: quote.invoice.amount,
+                },
+                action.requestId,
+                settlementTxHash,
+                CONFIRMATIONS,
+              );
+              if (settled.state !== "PAID")
+                return { state: "PENDING" as const, reason: settled.reason };
+              return {
+                state: "DELIVERED" as const,
+                delivery,
+                settlementTxHash,
+              };
+            },
+          },
+        }
+      : {}),
     async quote(providerId, input) {
       const r = await post(`/providers/${providerId}/check`, {
         ...context(),

@@ -1,9 +1,13 @@
 import {
   concat,
+  decodeEventLog,
   domainSeparator,
+  erc20Abi,
   hashStruct,
   hashTypedData,
+  parseAbi,
   type Address,
+  type Hash,
   type Hex,
 } from "viem";
 import { ActionSchema, Operation } from "./authority.js";
@@ -99,3 +103,93 @@ export const usdcDomainSeparator = (token: Address = BASE_SEPOLIA_USDC): Hex =>
 /** 65-byte payload signature the wallet's isValidSignature requires: requestId ‖ permitId ‖ 0x01. */
 export const x402Signature = (requestId: string, permitId: string): Hex =>
   concat([Hex32Schema.parse(requestId), Hex32Schema.parse(permitId), "0x01"]);
+
+// The parts of a public client a settlement check needs, so tests can fake it.
+export interface SettlementReader {
+  getTransactionReceipt(args: { hash: Hash }): Promise<{
+    status: "success" | "reverted";
+    blockNumber: bigint;
+    logs: readonly { address: Address; topics: readonly Hex[]; data: Hex }[];
+  }>;
+  getBlockNumber(): Promise<bigint>;
+}
+
+export type X402SettlementCheck =
+  | { state: "PAID"; blockNumber: bigint }
+  | { state: "PENDING"; reason: string }
+  | { state: "INVALID"; reason: string };
+
+const authorizationUsedEvent = parseAbi([
+  "event AuthorizationUsed(address indexed authorizer, bytes32 indexed nonce)",
+]);
+const sameAddress = (a: string, b: string) =>
+  a.toLowerCase() === b.toLowerCase();
+
+/**
+ * A settlement counts only when its transaction moved exactly `amount` of the
+ * asset from the wallet to the recipient and consumed the request's EIP-3009
+ * nonce, with the required confirmations.
+ */
+export async function checkX402Settlement(
+  chain: SettlementReader,
+  expected: { wallet: string; asset: string; recipient: string; amount: string },
+  requestId: Hex,
+  txHash: Hash,
+  confirmations: bigint,
+): Promise<X402SettlementCheck> {
+  const receipt = await chain
+    .getTransactionReceipt({ hash: txHash })
+    .catch(() => null);
+  if (!receipt)
+    return { state: "PENDING", reason: "The settlement is not in a block yet" };
+  if (receipt.status !== "success")
+    return { state: "INVALID", reason: "The settlement reverted" };
+  let transferred = false;
+  let used = false;
+  for (const log of receipt.logs) {
+    if (!sameAddress(log.address, expected.asset)) continue;
+    try {
+      const ev = decodeEventLog({
+        abi: erc20Abi,
+        data: log.data,
+        topics: log.topics as never,
+      });
+      if (
+        ev.eventName === "Transfer" &&
+        sameAddress(ev.args.from, expected.wallet) &&
+        sameAddress(ev.args.to, expected.recipient) &&
+        ev.args.value === BigInt(expected.amount)
+      )
+        transferred = true;
+      continue;
+    } catch {
+      // Not a Transfer log.
+    }
+    try {
+      const ev = decodeEventLog({
+        abi: authorizationUsedEvent,
+        data: log.data,
+        topics: log.topics as never,
+      });
+      if (
+        sameAddress(ev.args.authorizer, expected.wallet) &&
+        ev.args.nonce.toLowerCase() === requestId.toLowerCase()
+      )
+        used = true;
+    } catch {
+      // Not an AuthorizationUsed log.
+    }
+  }
+  if (!transferred || !used)
+    return {
+      state: "INVALID",
+      reason: "The settlement does not pay this invoice",
+    };
+  const depth = (await chain.getBlockNumber()) - receipt.blockNumber + 1n;
+  if (depth < confirmations)
+    return {
+      state: "PENDING",
+      reason: `${depth} of ${confirmations} confirmations`,
+    };
+  return { state: "PAID", blockNumber: receipt.blockNumber };
+}

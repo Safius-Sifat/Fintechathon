@@ -2,19 +2,13 @@ import type { FacilitatorClient } from "@x402/core/http";
 import type { PaymentPayload, PaymentRequirements } from "@x402/core/types";
 import {
   BASE_SEPOLIA_USDC,
+  checkX402Settlement,
   X402_NETWORK,
   X402AcceptsSchema,
   type Invoice,
   type X402Accepts,
 } from "@mandate/schema";
-import {
-  decodeEventLog,
-  erc20Abi,
-  parseAbi,
-  type Address,
-  type Hash,
-  type Hex,
-} from "viem";
+import type { Hash, Hex } from "viem";
 import { REQUIRED_CONFIRMATIONS, type ChainReader } from "./payment.js";
 
 const same = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();
@@ -97,79 +91,13 @@ export function checkPayload(
   return null;
 }
 
-const authorizationUsed = parseAbi([
-  "event AuthorizationUsed(address indexed authorizer, bytes32 indexed nonce)",
-]);
-
-export type SettlementCheck =
-  | { state: "PAID"; blockNumber: bigint }
-  | { state: "PENDING"; reason: string }
-  | { state: "INVALID"; reason: string };
-
-// A settlement counts only when its transaction moved exactly the invoice
-// amount from the wallet to the provider in USDC and consumed this request's
-// authorization nonce, with three confirmations.
-export async function checkSettlement(
+// Settlement on chain: the shared check, with this provider's confirmations.
+export const checkSettlement = (
   chain: ChainReader,
   invoice: Invoice,
   requestId: Hex,
   txHash: Hash,
-): Promise<SettlementCheck> {
-  const receipt = await chain
-    .getTransactionReceipt({ hash: txHash })
-    .catch(() => null);
-  if (!receipt)
-    return { state: "PENDING", reason: "The settlement is not in a block yet" };
-  if (receipt.status !== "success")
-    return { state: "INVALID", reason: "The settlement reverted" };
-  let transferred = false;
-  let used = false;
-  for (const log of receipt.logs) {
-    if (!same(log.address, invoice.asset)) continue;
-    try {
-      const ev = decodeEventLog({
-        abi: erc20Abi,
-        data: log.data,
-        topics: log.topics as never,
-      });
-      if (
-        ev.eventName === "Transfer" &&
-        same(ev.args.from, invoice.wallet) &&
-        same(ev.args.to, invoice.recipient) &&
-        ev.args.value === BigInt(invoice.amount)
-      )
-        transferred = true;
-      continue;
-    } catch {
-      // Not a Transfer log.
-    }
-    try {
-      const ev = decodeEventLog({
-        abi: authorizationUsed,
-        data: log.data,
-        topics: log.topics as never,
-      });
-      if (
-        same(ev.args.authorizer, invoice.wallet as Address) &&
-        same(ev.args.nonce, requestId)
-      )
-        used = true;
-    } catch {
-      // Not an AuthorizationUsed log.
-    }
-  }
-  if (!transferred || !used)
-    return {
-      state: "INVALID",
-      reason: "The settlement does not pay this invoice",
-    };
-  const depth = (await chain.getBlockNumber()) - receipt.blockNumber + 1n;
-  if (depth < REQUIRED_CONFIRMATIONS)
-    return {
-      state: "PENDING",
-      reason: `${depth} of ${REQUIRED_CONFIRMATIONS} confirmations`,
-    };
-  return { state: "PAID", blockNumber: receipt.blockNumber };
-}
+) =>
+  checkX402Settlement(chain, invoice, requestId, txHash, REQUIRED_CONFIRMATIONS);
 
 export type { FacilitatorClient };

@@ -54,6 +54,15 @@ const database = new Pool({
 const manifest = DeploymentManifestSchema.parse(
   JSON.parse(await readFile(required("TRUSTED_MANIFEST_FILE"), "utf8")),
 );
+// x402 settlement (S9.10) is used once gate X402-G has passed, or for the
+// explicit qualification run that tries to pass it.
+const payWithX402 =
+  manifest.x402.mode === "ERC1271" ||
+  process.env.WORKER_X402_QUALIFICATION === "1";
+if (payWithX402 && manifest.x402.mode !== "ERC1271")
+  console.warn(
+    "x402 qualification run: USDC quotes are paid by x402 before gate X402-G passed",
+  );
 const client = await connectChain(required("WORKER_RPC_URL"), 84532);
 
 // Each lane is optional; an unconfigured lane makes its operations fail explicitly.
@@ -169,11 +178,16 @@ const handlers: Record<string, (job: Job) => Promise<boolean>> = {
       client,
       advanceRunbook,
       (task) =>
-        providerDeps(required("PROVIDER_URL"), providerToken, () => ({
-          taskId: task.chainTaskId,
-          wallet: task.wallet,
-          asset: task.asset,
-        })),
+        providerDeps(
+          required("PROVIDER_URL"),
+          providerToken,
+          () => ({
+            taskId: task.chainTaskId,
+            wallet: task.wallet,
+            asset: task.asset,
+          }),
+          payWithX402 ? { chain: client } : undefined,
+        ),
       clock,
       String(job.payload.taskId),
     );
