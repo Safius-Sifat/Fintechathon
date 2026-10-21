@@ -44,7 +44,6 @@ export function AgentMessage({
   continued?: boolean;
 }) {
   const styles = useStyles();
-  const colors = useColors();
   return (
     <View style={[styles.agent, continued && styles.agentContinued]}>
       <View style={styles.markColumn}>

@@ -3,14 +3,8 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useRef, useState } from "react";
 import { Banner } from "../components/Banner";
 import { PrimaryButton } from "../components/Button";
-import {
-  GhostButton,
-  Note,
-  Row,
-  Rows,
-  SectionHeading,
-  Steps,
-} from "../components/blocks";
+import { Note, SectionHeading, Steps } from "../components/blocks";
+import { Group, IconRow } from "../components/Group";
 import type { RootStackParamList } from "../navigation/RootNavigator";
 import { useServicePoll } from "../state/useServicePoll";
 import {
@@ -21,7 +15,9 @@ import {
   useApiConnection,
   useApiSession,
 } from "../wallet/api";
-import { formatUnitsExact } from "../wallet/service-validation";
+import { formatAmount } from "../wallet/format";
+
+const dusd = (units: string) => formatAmount(BigInt(units), 6);
 import { errorText } from "../wallet/useAsync";
 
 export function ServiceAgent() {
@@ -93,78 +89,33 @@ export function ServiceAgent() {
             </>
           ) : (
             <>
-              <Steps
-                items={[
-                  {
-                    title: "Wallet deployment",
-                    state:
-                      w.provisioningState === "DEPLOYING"
-                        ? "now"
-                        : w.address
-                          ? "done"
-                          : "todo",
-                  },
-                  {
-                    title: "Executor provisioning",
-                    state:
-                      w.provisioningState === "KEYGEN"
-                        ? "now"
-                        : w.provisioningState === "READY"
-                          ? "done"
-                          : "todo",
-                  },
-                  {
-                    title:
-                      w.provisioningState === "FAILED"
-                        ? "Provisioning failed"
-                        : "Ready for tasks",
-                    state:
-                      w.provisioningState === "READY"
-                        ? "done"
-                        : w.provisioningState === "FAILED"
+              {w.provisioningState !== "READY" ? (
+                <Steps
+                  items={[
+                    {
+                      title: "Wallet deployment",
+                      state:
+                        w.provisioningState === "DEPLOYING"
                           ? "now"
-                          : "todo",
-                  },
-                ]}
-              />
-              <Rows>
-                <Row label="Service state" value={w.provisioningState} />
-                <Row
-                  label="Spendable"
-                  value={`${formatUnitsExact(w.spendableUnits)} DemoUSD`}
+                          : w.address
+                            ? "done"
+                            : "todo",
+                    },
+                    {
+                      title: "Executor provisioning",
+                      state: w.provisioningState === "KEYGEN" ? "now" : "todo",
+                    },
+                    {
+                      title:
+                        w.provisioningState === "FAILED"
+                          ? "Provisioning failed"
+                          : "Ready for tasks",
+                      state:
+                        w.provisioningState === "FAILED" ? "failed" : "todo",
+                    },
+                  ]}
                 />
-                <Row
-                  label="Liquid / reserved"
-                  value={`${formatUnitsExact(w.liquidUnits)} / ${formatUnitsExact(w.reservedUnits)}`}
-                />
-                <Row label="Floor" value={formatUnitsExact(w.floorUnits)} />
-                <Row
-                  label="Wallet budget left today"
-                  value={formatUnitsExact(w.budgets.walletRemainingUnits)}
-                />
-                <Row
-                  label="Executor budget left today"
-                  value={formatUnitsExact(w.budgets.executorRemainingUnits)}
-                />
-                <Row label="Block" value={w.asOfBlock} />
-                <Row
-                  label="Control state"
-                  detail={`${w.paused ? "Paused" : "Unpaused"} · ${w.frozen ? "Frozen" : "Unfrozen"} · ${w.inhibited ? "Inhibited" : "Not inhibited"}`}
-                />
-              </Rows>
-              {w.provisioningState === "READY" ? (
-                <PrimaryButton
-                  label="New page check"
-                  onPress={() =>
-                    navigation.navigate("TaskCreate", { walletId: w.walletId })
-                  }
-                />
-              ) : (
-                <Note>
-                  Leave this screen and return later to check provisioning.
-                  Notifications are not enabled.
-                </Note>
-              )}
+              ) : null}
               {approvals.error ? (
                 <Banner
                   icon="alert-outline"
@@ -172,55 +123,60 @@ export function ServiceAgent() {
                   body={approvals.error}
                 />
               ) : null}
-              {w.address ? (
-                <GhostButton
-                  label={`Payment approvals${approvals.error ? "" : ` (${pending.length})`}`}
-                  onPress={() =>
-                    navigation.navigate("Approvals", {
-                      wallet: w.address!,
-                      walletId: w.walletId,
-                    })
+              <Group>
+                <IconRow
+                  icon={
+                    w.provisioningState === "READY"
+                      ? "cloud-check-outline"
+                      : "cloud-sync-outline"
+                  }
+                  tint={w.provisioningState === "READY" ? "good" : "warn"}
+                  title={
+                    w.provisioningState === "READY" ? "Connected" : "Setting up"
+                  }
+                  detail={
+                    w.inhibited
+                      ? "New agent work is held"
+                      : `Block ${w.asOfBlock}`
                   }
                 />
-              ) : null}
-              <SectionHeading>Tasks known on this phone</SectionHeading>
-              {refs.error ? (
-                <Note>{refs.error}</Note>
-              ) : (refs.data ?? []).filter((t) => t.walletId === w.walletId)
-                  .length ? (
-                <Rows>
-                  {refs
-                    .data!.filter((t) => t.walletId === w.walletId)
-                    .map((t) => (
-                      <Row
-                        key={t.taskId}
-                        label={t.goal}
-                        detail={t.taskId}
-                        onPress={() =>
-                          navigation.navigate("TaskDetail", {
-                            taskId: t.taskId,
-                          })
-                        }
-                      />
-                    ))}
-                </Rows>
-              ) : (
-                <Note>No tasks recorded for this wallet on this phone.</Note>
-              )}
-              {(refs.data ?? []).some((t) => t.walletId === w.walletId) ? (
+                <IconRow
+                  icon="wallet-outline"
+                  title="Agents can spend now"
+                  detail={`Keeps ${dusd(w.floorUnits)} · ${dusd(w.reservedUnits)} reserved`}
+                  value={`${dusd(w.spendableUnits)}`}
+                />
+                <IconRow
+                  icon="calendar-today"
+                  title="Budget left today"
+                  value={dusd(w.budgets.walletRemainingUnits)}
+                />
+                {w.address ? (
+                  <IconRow
+                    icon="check-decagram-outline"
+                    title="Payment approvals"
+                    value={approvals.error ? undefined : String(pending.length)}
+                    onPress={() =>
+                      navigation.navigate("Approvals", {
+                        wallet: w.address!,
+                        walletId: w.walletId,
+                      })
+                    }
+                  />
+                ) : null}
+              </Group>
+              {(refs.data ?? []).filter((t) => t.walletId === w.walletId)
+                .length ? (
                 <>
                   <SectionHeading>Run from a laptop</SectionHeading>
-                  <Note>
-                    Give the agent on your laptop a token for one approved task.
-                    It can only act within that task's limits.
-                  </Note>
-                  <Rows>
-                    {refs
-                      .data!.filter((t) => t.walletId === w.walletId)
+                  <Group>
+                    {(refs.data ?? [])
+                      .filter((t) => t.walletId === w.walletId)
                       .map((t) => (
-                        <Row
+                        <IconRow
                           key={t.taskId}
-                          label={t.goal}
+                          icon="laptop"
+                          title={t.goal}
                           onPress={() =>
                             navigation.navigate("AgentToken", {
                               taskId: t.taskId,
@@ -228,19 +184,11 @@ export function ServiceAgent() {
                           }
                         />
                       ))}
-                  </Rows>
+                  </Group>
                 </>
               ) : null}
             </>
           )}
-          <GhostButton
-            label="Refresh service"
-            onPress={() => {
-              wallet.reload();
-              refs.reload();
-              approvals.reload();
-            }}
-          />
         </>
       )}
     </>

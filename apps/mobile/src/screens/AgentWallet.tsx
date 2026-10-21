@@ -1,21 +1,20 @@
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import * as Clipboard from "expo-clipboard";
 import { useState } from "react";
+import { Pressable, Text, View } from "react-native";
 import { Banner } from "../components/Banner";
 import { PrimaryButton } from "../components/Button";
-import {
-  BigAmount,
-  GhostButton,
-  Note,
-  Row,
-  Rows,
-  SectionHeading,
-  Voice,
-} from "../components/blocks";
+import { ActionTile, Note, SectionHeading, Voice } from "../components/blocks";
+import { TextLink } from "../components/chat";
+import { Group, IconRow } from "../components/Group";
+import { Icon, type IconName } from "../components/Icon";
+import { MandateMark } from "../components/MandateMark";
 import { Screen } from "../components/Screen";
 import type { RootStackParamList } from "../navigation/RootNavigator";
 import { updateDraft } from "../state/sendDraft";
 import { useDraftContext } from "../state/useSendDraft";
+import { fonts, radius, space, type, makeStyles, useColors } from "../theme";
 import {
   agentWallet,
   createAgentWallet,
@@ -26,6 +25,15 @@ import { formatAmount, shortAddress } from "../wallet/format";
 import { currentAccount, useWallet } from "../wallet/session";
 import { errorText, useAsync } from "../wallet/useAsync";
 import { ServiceAgent } from "./ServiceAgent";
+
+const EVENT_ICONS: Record<string, IconName> = {
+  ActionExecuted: "robot-outline",
+  OwnerTransferExecuted: "arrow-up",
+  WalletPaused: "pause-circle-outline",
+  WalletFrozen: "snowflake",
+  WalletPolicyUpdated: "tune-variant",
+  PermitActivated: "check-decagram-outline",
+};
 
 const EVENT_LABELS: Record<string, string> = {
   ActionExecuted: "Agent payment",
@@ -41,6 +49,8 @@ const EVENT_LABELS: Record<string, string> = {
 export function AgentWalletScreen() {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const styles = useStyles();
+  const colors = useColors();
   useWallet();
   const account = currentAccount();
   const context = useDraftContext();
@@ -70,8 +80,51 @@ export function AgentWalletScreen() {
     }
   };
 
+  const hero = w ? (
+    <View style={styles.hero}>
+      <MandateMark size={56} />
+      <Text style={styles.name} accessibilityRole="header">
+        Agent wallet
+      </Text>
+      <View style={styles.status}>
+        <View
+          style={[
+            styles.dot,
+            {
+              backgroundColor: w.frozen
+                ? colors.bad
+                : w.paused
+                  ? colors.warn
+                  : colors.good,
+            },
+          ]}
+        />
+        <Text style={styles.statusText}>
+          {w.frozen ? "Frozen" : w.paused ? "Paused" : "Active"}
+        </Text>
+      </View>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Copy the agent wallet address"
+        onPress={() => void Clipboard.setStringAsync(w.address)}
+        style={({ pressed }) => [styles.address, pressed && styles.pressed]}
+      >
+        <Text style={styles.addressText}>{shortAddress(w.address)}</Text>
+        <Icon name="content-copy" size={14} color={colors.ink2} />
+      </Pressable>
+      <Text style={styles.balance}>
+        {formatAmount(w.balances[0]!, TOKENS[0]!.decimals)}
+        <Text style={styles.unit}> DUSD</Text>
+      </Text>
+    </View>
+  ) : undefined;
+
   return (
-    <Screen title="Agent wallet" onBack={() => navigation.goBack()}>
+    <Screen
+      title="Agent wallet"
+      header={hero}
+      onBack={() => navigation.goBack()}
+    >
       {agent.error ? (
         <Banner
           icon="cloud-off-outline"
@@ -100,37 +153,10 @@ export function AgentWalletScreen() {
       ) : null}
       {w ? (
         <>
-          <BigAmount
-            value={formatAmount(w.balances[0]!, TOKENS[0]!.decimals)}
-            unit="DUSD in the agent wallet"
-          />
-          <Rows>
-            <Row label="Address" value={shortAddress(w.address)} mono />
-            <Row
-              label="State"
-              value={w.frozen ? "Frozen" : w.paused ? "Paused" : "Active"}
-            />
-            {TOKENS.slice(1).map((t, i) => (
-              <Row
-                key={t.name}
-                label={t.name}
-                value={formatAmount(w.balances[i + 1]!, t.decimals)}
-              />
-            ))}
-          </Rows>
-
-          <SectionHeading>Money</SectionHeading>
-          <Rows>
-            <Row
-              label="Approvals"
-              detail="Payments the agent wants to make above your limit."
-              onPress={() =>
-                navigation.navigate("Approvals", { wallet: w.address })
-              }
-            />
-            <Row
-              label="Fund the agent wallet"
-              detail="A normal send from your account. Funding is not spending."
+          <View style={styles.tiles}>
+            <ActionTile
+              icon="arrow-down"
+              label="Fund"
               onPress={() => {
                 updateDraft(context, {
                   recipient: w.address,
@@ -139,29 +165,58 @@ export function AgentWalletScreen() {
                 navigation.navigate("Send");
               }}
             />
-            <Row
-              label="Move funds out"
-              detail="Back to you or another address. This pauses all agents."
+            <ActionTile
+              icon="arrow-up"
+              label="Move out"
               onPress={() =>
                 navigation.navigate("OwnerMoveOut", { wallet: w.address })
               }
             />
-            <Row
-              label="Wallet limits"
-              detail="Per payment, each day, each week, and who agents may pay."
+            <ActionTile
+              icon="tune-variant"
+              label="Limits"
               onPress={() =>
                 navigation.navigate("WalletLimits", { wallet: w.address })
               }
             />
-          </Rows>
+            <ActionTile
+              icon="check-decagram-outline"
+              label="Approvals"
+              onPress={() =>
+                navigation.navigate("Approvals", { wallet: w.address })
+              }
+            />
+          </View>
 
-          <SectionHeading>Stop</SectionHeading>
-          <Rows>
-            <Row
-              label={w.paused ? "Resume" : "Pause all agents"}
+          <SectionHeading>Tokens</SectionHeading>
+          <Group>
+            {TOKENS.map((t, i) => (
+              <IconRow
+                key={t.name}
+                icon={
+                  t.symbol === "ETH"
+                    ? "ethereum"
+                    : t.symbol === "USDC"
+                      ? "currency-usd"
+                      : "alpha-m-circle-outline"
+                }
+                tint="plain"
+                title={t.name}
+                detail={t.symbol}
+                value={formatAmount(w.balances[i]!, t.decimals)}
+              />
+            ))}
+          </Group>
+
+          <SectionHeading>Safety</SectionHeading>
+          <Group>
+            <IconRow
+              icon={w.paused ? "play-circle-outline" : "pause-circle-outline"}
+              tint="warn"
+              title={w.paused ? "Resume agents" : "Pause all agents"}
               detail={
                 w.paused
-                  ? "Lifts the pause. Old approvals stay ended."
+                  ? "Old approvals stay ended."
                   : "Nothing new is paid. Resuming needs new approvals."
               }
               onPress={() =>
@@ -171,8 +226,10 @@ export function AgentWalletScreen() {
                 })
               }
             />
-            <Row
-              label={w.frozen ? "Unfreeze the wallet" : "Freeze the wallet"}
+            <IconRow
+              icon="snowflake"
+              tint="bad"
+              title={w.frozen ? "Unfreeze the wallet" : "Freeze the wallet"}
               detail={
                 w.frozen
                   ? "Agents can pay again within their approvals."
@@ -185,9 +242,9 @@ export function AgentWalletScreen() {
                 })
               }
             />
-          </Rows>
+          </Group>
 
-          <SectionHeading>Last hour</SectionHeading>
+          <SectionHeading>Activity</SectionHeading>
           {events.loading ? (
             <Note>Reading recent events…</Note>
           ) : events.error ? (
@@ -195,11 +252,12 @@ export function AgentWalletScreen() {
           ) : (events.data ?? []).length === 0 ? (
             <Note>Nothing happened in this wallet in about the last hour.</Note>
           ) : (
-            <Rows>
+            <Group>
               {events.data!.map((e) => (
-                <Row
+                <IconRow
                   key={`${e.hash}${e.name}`}
-                  label={EVENT_LABELS[e.name] ?? e.name}
+                  icon={EVENT_ICONS[e.name] ?? "history"}
+                  title={EVENT_LABELS[e.name] ?? e.name}
                   detail={`Block ${e.block.toString()}`}
                   onPress={() =>
                     navigation.navigate("TxDetail", {
@@ -209,17 +267,12 @@ export function AgentWalletScreen() {
                   }
                 />
               ))}
-            </Rows>
+            </Group>
           )}
-          <Note>
-            The public network only answers short history queries, so older
-            events need the Mandate history service. Tasks and approvals need
-            the Mandate service too.
-          </Note>
         </>
       ) : null}
       <ServiceAgent />
-      <GhostButton
+      <TextLink
         label="Refresh"
         onPress={() => {
           agent.reload();
@@ -229,3 +282,31 @@ export function AgentWalletScreen() {
     </Screen>
   );
 }
+
+const useStyles = makeStyles((colors) => ({
+  hero: { alignItems: "center", gap: space.sm, paddingVertical: space.sm },
+  status: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: space.xs,
+    paddingHorizontal: space.md,
+    paddingVertical: space.xs,
+    borderRadius: radius.pill,
+    backgroundColor: colors.tile,
+  },
+  dot: { width: 8, height: 8, borderRadius: 4 },
+  statusText: { ...type.label, color: colors.ink },
+  address: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: space.xs,
+    minHeight: 32,
+  },
+  addressText: { ...type.small, fontFamily: fonts.mono, color: colors.ink2 },
+  name: { ...type.heading, color: colors.ink },
+  balanceRow: { flexDirection: "row", alignItems: "baseline", gap: space.sm },
+  balance: { ...type.display, color: colors.ink },
+  unit: { ...type.heading, color: colors.ink2, marginLeft: space.xs },
+  tiles: { flexDirection: "row", gap: space.sm },
+  pressed: { opacity: 0.7 },
+}));

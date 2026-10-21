@@ -141,7 +141,7 @@ export function HomeScreen() {
                     ? "Checking the chain…"
                     : "Create on chain, then register with the service to run tasks."
             }
-            onPress={() => navigation.navigate("Tabs", { screen: "Agents" })}
+            onPress={() => navigation.navigate("AgentWallet")}
           />
         </Rows>
 
