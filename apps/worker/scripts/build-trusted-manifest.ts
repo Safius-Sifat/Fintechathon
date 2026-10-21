@@ -174,10 +174,10 @@ const manifest = DeploymentManifestSchema.parse({
   },
   x402: { mode: "MANDATE_NATIVE", facilitator: null, gatePassed: false },
   agent: {
-    runtime: "claude-agent-sdk",
+    runtime: "openai-agents-sdk",
     sdkVersion: (await json(join(root, "apps/agent/package.json")))
-      .dependencies["@anthropic-ai/claude-agent-sdk"],
-    model: "claude-opus-5-5",
+      .dependencies["@openai/agents"],
+    model: "gpt-5.6-luna",
     mcpToolsetHash: hashCanonical(MCP_TOOLS),
   },
   dependencyPins: {

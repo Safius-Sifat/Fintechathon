@@ -860,9 +860,9 @@ export async function buildVectors(): Promise<Record<string, unknown>> {
     riskRules: { version: "risk-rules-v1", hash: h(0xe5) },
     x402: { mode: "MANDATE_NATIVE", facilitator: null, gatePassed: false },
     agent: {
-      runtime: "claude-agent-sdk",
+      runtime: "openai-agents-sdk",
       sdkVersion: "0.0.0",
-      model: "claude-opus-5-5",
+      model: "gpt-5.6-luna",
       mcpToolsetHash: h(0xe6),
     },
     dependencyPins: { mpcium: "90e3ee3c15e6698ade5626ff6c6b49d2453d8ce2" },

@@ -19,9 +19,9 @@ import { admin, apiEnvironment, insertTask, ownerA } from "./support.js";
 after(() => admin.end());
 
 const identity = JSON.stringify({
-  runtime: "claude-agent-sdk",
+  runtime: "openai-agents-sdk",
   sdkVersion: "1.0.0",
-  model: "claude-opus-5-5",
+  model: "gpt-5.6-luna",
   toolCallId: "call-1",
   mcpToolsetHash: "0x" + "ab".repeat(32),
 });
