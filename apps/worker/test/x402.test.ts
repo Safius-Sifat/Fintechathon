@@ -213,3 +213,47 @@ test("x402: a pending or refused settlement keeps the task waiting with the reas
     p.close();
   }
 });
+
+test("x402: the shop's signed order is paid the same way and parsed as an order", async () => {
+  const order = {
+    order: {
+      schemaVersion: 4,
+      orderId: INVOICE,
+      inputHash: invoice.inputHash,
+      productId: "aero-runner",
+      name: "Aero Runner",
+      size: "42",
+      amount: invoice.amount,
+      deliveryHash: ("0x" + "ab".repeat(32)) as Hex,
+      testShop: true,
+      placedAt: "1700000040",
+    },
+    receipt: delivery.receipt,
+    providerSignature: signature,
+  };
+  const p = await provider((req) => [
+    req.url === "/providers/shop/check" ? 402 : 200,
+    req.url === "/providers/shop/check"
+      ? { ...quote, providerId: "shop" }
+      : order,
+  ]);
+  try {
+    const deps = providerDeps(p.url, "t", ctx, { chain: chain(true) });
+    const q = await deps.shop!.quote({
+      productId: "aero-runner",
+      size: "42",
+      deliveryHash: ("0x" + "ab".repeat(32)) as Hex,
+    });
+    assert.equal(q.providerId, "shop");
+    const paid = await deps.shop!.payX402!(q, action);
+    assert.equal(paid.state, "DELIVERED");
+    assert.equal(
+      (paid as { delivery: { order: { productId: string } } }).delivery.order
+        .productId,
+      "aero-runner",
+    );
+    assert.equal(providerDeps(p.url, "t", ctx).shop!.payX402, undefined);
+  } finally {
+    p.close();
+  }
+});

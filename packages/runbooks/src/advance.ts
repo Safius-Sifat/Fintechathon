@@ -4,6 +4,7 @@ import {
   RunbookDecisionSchema,
 } from "@mandate/schema";
 import { advanceBrowserCheck, type RunbookDeps } from "./browser.js";
+import { advanceCommerce } from "./commerce.js";
 import { advanceLiquidityKeeper } from "./liquidity.js";
 import { advanceScheduledPay } from "./schedule.js";
 
@@ -25,6 +26,9 @@ export async function advanceRunbook(
       break;
     case "scheduled-pay":
       decision = await advanceScheduledPay(snapshot, deps);
+      break;
+    case "commerce-buy":
+      decision = await advanceCommerce(snapshot, deps);
       break;
     case "service-allowance":
       decision = {

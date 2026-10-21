@@ -9,9 +9,10 @@ import {
   hashCanonical,
 } from "@mandate/schema";
 import { type Address, type Hex } from "viem";
+import type { CommerceDeps } from "./commerce.js";
 import { checkDelivery, checkQuote } from "./validators.js";
 
-export type RunbookDeps = {
+export type RunbookDeps = CommerceDeps & {
   quote?: (providerId: "a" | "b", input: unknown) => Promise<QuoteEnvelope>;
   retrieve?: (
     providerId: "a" | "b",

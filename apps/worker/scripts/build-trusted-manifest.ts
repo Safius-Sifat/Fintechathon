@@ -61,6 +61,7 @@ const entries: Record<
   "liquidity-keeper": { path: "packages/runbooks/src/liquidity.ts", kind: 1 },
   "scheduled-pay": { path: "packages/runbooks/src/schedule.ts", kind: 2 },
   "service-allowance": { path: "packages/runbooks/src/advance.ts", kind: 3 },
+  "commerce-buy": { path: "packages/runbooks/src/commerce.ts", kind: 0 },
 };
 const runbooks = await Promise.all(
   RUNBOOK_IDS.map(async (runbookId) => ({
@@ -119,6 +120,11 @@ const manifest = DeploymentManifestSchema.parse({
       providerId: "b",
       recipient: getAddress(env("PROVIDER_B_ADDRESS")),
       capabilities: ["pageLoad", "title", "formSubmit"],
+    },
+    {
+      providerId: "shop",
+      recipient: getAddress(env("SHOP_ADDRESS")),
+      capabilities: ["order"],
     },
   ],
   targets: ["checkout-healthy", "checkout-broken"].map((targetId) => ({

@@ -15,6 +15,7 @@ import {
   CHAIN_ID,
   checkX402Settlement,
   DeliveryEnvelopeSchema,
+  OrderDeliverySchema,
   hashAction,
   mandateWalletAbi,
   QuoteEnvelopeSchema,
@@ -24,6 +25,8 @@ import {
   x402Signature,
   ZERO_HASH,
   type SettlementReader,
+  type Action,
+  type QuoteEnvelope,
   type RunbookDecision,
   type RunbookSnapshot,
 } from "@mandate/schema";
@@ -44,9 +47,39 @@ export type Advance = (
 // Unapproved Actions live at most 60s on chain (MAX_ACTION_SECONDS).
 const ACTION_SECONDS = 50;
 
-// Provider quote/retrieve over the provider service's HTTP routes (S6).
-// With `x402`, USDC quotes are paid by x402 (S9.10): the worker sends the
-// wallet's registered authorization and checks the settlement on chain itself.
+// The wallet's x402 payment for a registered X402 Action (S9.10): the
+// EIP-3009 authorization derived from the Action, and the 65-byte
+// requestId ‖ permitId ‖ 0x01 signature the wallet's isValidSignature accepts.
+function paymentHeader(quote: QuoteEnvelope, action: Action, wallet: Hex) {
+  const accepts = quote.x402!;
+  const payload: PaymentPayload = {
+    x402Version: 2,
+    accepted: {
+      scheme: accepts.scheme,
+      network: accepts.network,
+      asset: accepts.asset,
+      amount: accepts.amount,
+      payTo: accepts.payTo,
+      maxTimeoutSeconds: accepts.maxTimeoutSeconds,
+      extra: { ...accepts.extra },
+    },
+    payload: {
+      authorization: x402Authorization(action, wallet),
+      signature: x402Signature(action.requestId, action.permitId),
+    },
+  };
+  return encodePaymentSignatureHeader(payload);
+}
+
+const pendingReason = (body: unknown) => {
+  const b = body as { reason?: string; error?: string } | null;
+  return String(b?.reason ?? b?.error ?? "Waiting for settlement");
+};
+
+// Provider and shop quote/retrieve over the provider service's HTTP routes
+// (S6). With `x402`, USDC quotes are paid by x402 (S9.10): the worker sends
+// the wallet's registered authorization and checks the settlement on chain
+// itself before accepting what was delivered.
 export function providerDeps(
   baseUrl: string,
   workerToken: string,
@@ -71,74 +104,86 @@ export function providerDeps(
     });
     return { status: r.status, body: await r.json().catch(() => null) };
   };
+  // Pays an included X402 Action; returns the delivery once its settlement
+  // is confirmed on chain by this worker.
+  const payX402 = async <T extends { receipt: { paymentTxHash: Hex } }>(
+    providerId: string,
+    quote: QuoteEnvelope,
+    action: Action,
+    parse: (body: unknown) => T,
+  ) => {
+    const wallet = context().wallet;
+    const r = await post(
+      `/providers/${providerId}/result`,
+      { invoiceId: action.invoiceId, requestId: action.requestId },
+      { "payment-signature": paymentHeader(quote, action, wallet) },
+    );
+    if (r.status === 202 || r.status === 402)
+      return { state: "PENDING" as const, reason: pendingReason(r.body) };
+    if (r.status !== 200)
+      throw new Error(
+        `Provider ${providerId} x402 payment failed (${r.status})`,
+      );
+    const delivery = parse(r.body);
+    const settlementTxHash = delivery.receipt.paymentTxHash;
+    const settled = await checkX402Settlement(
+      x402!.chain,
+      {
+        wallet,
+        asset: quote.invoice.asset,
+        recipient: quote.invoice.recipient,
+        amount: quote.invoice.amount,
+      },
+      action.requestId,
+      settlementTxHash,
+      CONFIRMATIONS,
+    );
+    if (settled.state !== "PAID")
+      return { state: "PENDING" as const, reason: settled.reason };
+    return { state: "DELIVERED" as const, delivery, settlementTxHash };
+  };
   return {
     ...(x402
       ? {
           x402: {
-            async pay(providerId, quote, action) {
-              const wallet = context().wallet;
-              const accepts = quote.x402!;
-              const payload: PaymentPayload = {
-                x402Version: 2,
-                accepted: {
-                  scheme: accepts.scheme,
-                  network: accepts.network,
-                  asset: accepts.asset,
-                  amount: accepts.amount,
-                  payTo: accepts.payTo,
-                  maxTimeoutSeconds: accepts.maxTimeoutSeconds,
-                  extra: { ...accepts.extra },
-                },
-                payload: {
-                  authorization: x402Authorization(action, wallet),
-                  signature: x402Signature(action.requestId, action.permitId),
-                },
-              };
-              const r = await post(
-                `/providers/${providerId}/result`,
-                { invoiceId: action.invoiceId, requestId: action.requestId },
-                { "payment-signature": encodePaymentSignatureHeader(payload) },
-              );
-              if (r.status === 202 || r.status === 402)
-                return {
-                  state: "PENDING" as const,
-                  reason: String(
-                    (r.body as { reason?: string; error?: string } | null)
-                      ?.reason ??
-                      (r.body as { error?: string } | null)?.error ??
-                      "Waiting for settlement",
-                  ),
-                };
-              if (r.status !== 200)
-                throw new Error(
-                  `Provider ${providerId} x402 payment failed (${r.status})`,
-                );
-              const delivery = DeliveryEnvelopeSchema.parse(r.body);
-              const settlementTxHash = delivery.receipt.paymentTxHash;
-              // Independent of the provider: the settlement must be on chain.
-              const settled = await checkX402Settlement(
-                x402.chain,
-                {
-                  wallet,
-                  asset: quote.invoice.asset,
-                  recipient: quote.invoice.recipient,
-                  amount: quote.invoice.amount,
-                },
-                action.requestId,
-                settlementTxHash,
-                CONFIRMATIONS,
-              );
-              if (settled.state !== "PAID")
-                return { state: "PENDING" as const, reason: settled.reason };
-              return {
-                state: "DELIVERED" as const,
-                delivery,
-                settlementTxHash,
-              };
-            },
+            pay: (providerId, quote, action) =>
+              payX402(providerId, quote, action, (b) =>
+                DeliveryEnvelopeSchema.parse(b),
+              ),
           },
         }
       : {}),
+    shop: {
+      async quote(input) {
+        const r = await post("/providers/shop/check", {
+          ...context(),
+          ...input,
+        });
+        if (r.status !== 402)
+          throw new Error(`The shop did not quote (${r.status})`);
+        return QuoteEnvelopeSchema.parse(r.body);
+      },
+      async retrieve(invoiceId, requestId, paymentTxHash) {
+        const r = await post("/providers/shop/result", {
+          invoiceId,
+          requestId,
+          paymentTxHash,
+        });
+        if (r.status === 202)
+          return { state: "PENDING", reason: pendingReason(r.body) };
+        if (r.status !== 200)
+          throw new Error(`The shop order is unavailable (${r.status})`);
+        return OrderDeliverySchema.parse(r.body);
+      },
+      ...(x402
+        ? {
+            payX402: (quote: QuoteEnvelope, action: Action) =>
+              payX402("shop", quote, action, (b) =>
+                OrderDeliverySchema.parse(b),
+              ),
+          }
+        : {}),
+    },
     async quote(providerId, input) {
       const r = await post(`/providers/${providerId}/check`, {
         ...context(),
