@@ -56,7 +56,12 @@ export default function App() {
     let leftAt = 0;
     const sub = AppState.addEventListener("change", (next) => {
       if (next === "background") leftAt = Date.now();
-      if (next === "active" && leftAt && Date.now() - leftAt > LOCK_AFTER_MS) {
+      if (next !== "active" || !leftAt) return;
+      // Cleared on return, so a later Face ID sheet (which only makes the app
+      // inactive) does not count as time away.
+      const away = Date.now() - leftAt;
+      leftAt = 0;
+      if (away > LOCK_AFTER_MS) {
         clearAllDrafts();
         lock();
       }
