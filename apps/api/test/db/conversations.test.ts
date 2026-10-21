@@ -70,6 +70,7 @@ function fakeAgent(taskId: () => string) {
         taskId: taskId(),
         runbookId: "browser-check",
         label: "Check the checkout page",
+        input: { targetId: "checkout-healthy" },
       });
       onEvent({ type: "invented", text: "dropped" });
       onEvent({ type: "agent", text: "Ready to approve." });

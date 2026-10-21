@@ -32,7 +32,14 @@ export type ChatEvent =
       size: string | null;
       amount: string;
     }
-  | { type: "task"; taskId: string; runbookId: string; label: string }
+  | {
+      type: "task";
+      taskId: string;
+      runbookId: string;
+      label: string;
+      // The task's input, which the owner's phone needs to propose limits.
+      input: Record<string, unknown>;
+    }
   | { type: "agent"; text: string }
   | { type: "error"; message: string };
 

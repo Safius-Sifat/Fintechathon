@@ -209,29 +209,32 @@ export function chatTools(ctx: ChatContext) {
     }),
     execute: (input) =>
       step(ctx, "Preparing the page check", async () => {
+        const checkInput = {
+          targetId: `checkout-${input.page}`,
+          checks: input.formSubmit
+            ? ["pageLoad", "title", "formSubmit"]
+            : ["pageLoad", "title"],
+          maxPaidAttempts: 3,
+          maxSteps: 8,
+          taskDeadline: String(Math.floor(Date.now() / 1000) + 3600),
+        };
+        const label = `Check the ${input.page} checkout page`;
         const task = (await api(ctx, "/v1/tasks", {
           method: "POST",
           headers: { "idempotency-key": randomUUID() },
           body: JSON.stringify({
             walletId: ctx.walletId,
             runbookId: "browser-check",
-            goal: `Check the ${input.page} checkout page`,
-            input: {
-              targetId: `checkout-${input.page}`,
-              checks: input.formSubmit
-                ? ["pageLoad", "title", "formSubmit"]
-                : ["pageLoad", "title"],
-              maxPaidAttempts: 3,
-              maxSteps: 8,
-              taskDeadline: String(Math.floor(Date.now() / 1000) + 3600),
-            },
+            goal: label,
+            input: checkInput,
           }),
         })) as { taskId: string };
         ctx.emit({
           type: "task",
           taskId: task.taskId,
           runbookId: "browser-check",
-          label: `Check the ${input.page} checkout page`,
+          label,
+          input: checkInput,
         });
         return {
           value:

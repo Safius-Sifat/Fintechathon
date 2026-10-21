@@ -45,6 +45,7 @@ const AgentEventSchema = z.discriminatedUnion("type", [
     taskId: UuidSchema,
     runbookId: z.string().max(40),
     label: z.string().max(200),
+    input: z.record(z.unknown()),
   }),
   z.object({ type: z.literal("agent"), text: z.string().max(8000) }),
   z.object({ type: z.literal("error"), message: z.string().max(400) }),
