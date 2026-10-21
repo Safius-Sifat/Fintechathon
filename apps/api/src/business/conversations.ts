@@ -235,6 +235,11 @@ export class ConversationService {
     }));
   }
 
+  // Whether the agent is writing a reply in this chat now.
+  async replying(principal: Principal, id: string) {
+    return (await this.owned(principal, id)).row.replying;
+  }
+
   async patch(principal: Principal, id: string, input: unknown) {
     await this.owned(principal, id);
     const body = PatchRequestSchema.parse(input);

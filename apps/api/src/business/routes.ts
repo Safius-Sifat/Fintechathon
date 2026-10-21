@@ -353,12 +353,10 @@ export async function registerBusiness(
     routes.get("/v1/conversations/:conversationId/events", async (request) => {
       const { conversationId } = parse(chatParam, request.params);
       const { after } = parse(afterQuery, request.query);
+      const who = await principal(request);
       return {
-        events: await chats().events(
-          await principal(request),
-          conversationId,
-          Number(after ?? 0),
-        ),
+        events: await chats().events(who, conversationId, Number(after ?? 0)),
+        replying: await chats().replying(who, conversationId),
       };
     });
     routes.post(
@@ -373,8 +371,9 @@ export async function registerBusiness(
         );
       },
     );
-    // Server-Sent Events: stored events after `after`, then live ones
-    // (including text as the agent writes it) until the client leaves.
+    // Server-Sent Events: stored events after `after`, whether the agent is
+    // replying, then live events (including text as the agent writes it and
+    // an idle mark when the reply ends) until the client leaves.
     routes.get(
       "/v1/conversations/:conversationId/stream",
       async (request, reply) => {
@@ -389,12 +388,14 @@ export async function registerBusiness(
           deliver(event),
         );
         let backlog: StoredEvent[];
+        let replying: boolean;
         try {
           backlog = await chats().events(
             who,
             conversationId,
             Number(after ?? 0),
           );
+          replying = await chats().replying(who, conversationId);
         } catch (error) {
           unsubscribe();
           throw error;
@@ -415,6 +416,7 @@ export async function registerBusiness(
           send(e, e.seq);
           last = e.seq;
         }
+        send({ type: "state", replying });
         deliver = (event) => {
           if ("live" in event) return send({ live: event.live });
           if (event.seq > 0 && event.seq <= last) return;

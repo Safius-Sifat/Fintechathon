@@ -140,9 +140,11 @@ test("conversations: a reply is stored in order, links its task and uses a scope
     assert.equal(posted.statusCode, 200, posted.body);
     await s.idle(id);
 
-    const events = (
+    const thread = (
       await s.e.call("GET", `/v1/conversations/${id}/events`, s.owner)
-    ).json().events as {
+    ).json();
+    assert.equal(thread.replying, false);
+    const events = thread.events as {
       seq: number;
       type: string;
       payload: Record<string, unknown>;
@@ -298,6 +300,7 @@ test("conversations: the stream sends stored events, then live text", async () =
       req.end();
     });
     assert.match(received, /id: 1\ndata: .*"type":"user"/);
+    assert.match(received, /data: \{"type":"state","replying":true\}/);
     assert.match(received, /"live":\{"type":"text_delta","text":"Hel"\}/);
     assert.match(received, /"type":"agent".*"Hello"/);
     await s.idle(id);
