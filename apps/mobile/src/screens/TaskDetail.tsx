@@ -3,11 +3,13 @@ import { useRef, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { PrimaryButton } from "../components/Button";
-import { GhostButton, Row, Rows, Steps } from "../components/blocks";
+import { GhostButton, Row, Rows } from "../components/blocks";
 import {
   AgentMessage,
   CardLine,
   Composer,
+  NowLine,
+  ThreadSteps,
   ThreadCard,
   UserBubble,
 } from "../components/chat";
@@ -16,6 +18,7 @@ import type { RootStackParamList } from "../navigation/RootNavigator";
 import {
   agentLine,
   canStop,
+  nowDoing,
   signedTasks,
   threadSteps,
 } from "../state/agentThread";
@@ -133,11 +136,12 @@ export function TaskDetailScreen({ navigation, route }: Props) {
         ) : (
           <>
             <AgentMessage text={agentLine(task, pending.length, signed)}>
-              <Steps items={threadSteps(task, signed)} />
+              <ThreadSteps items={threadSteps(task, signed)} />
             </AgentMessage>
 
             {task.outcomeState === "AWAITING_OWNER" && !signed ? (
               <ApproveCard
+                continued
                 taskId={taskId}
                 input={reference?.input}
                 onEdit={() => navigation.navigate("TaskTerms", { taskId })}
@@ -156,6 +160,7 @@ export function TaskDetailScreen({ navigation, route }: Props) {
               );
               return (
                 <AgentMessage
+                  continued
                   key={a.approvalId}
                   text="This payment is above your limit, so I need your OK."
                 >
@@ -194,7 +199,7 @@ export function TaskDetailScreen({ navigation, route }: Props) {
             ["READY", "AWAITING_AGENT", "NEEDS_OWNER"].includes(
               task.outcomeState,
             ) ? (
-              <AgentMessage>
+              <AgentMessage continued>
                 <PrimaryButton
                   label={busy ? "Starting…" : "Start the check"}
                   disabled={busy || !!view.error}
@@ -209,7 +214,7 @@ export function TaskDetailScreen({ navigation, route }: Props) {
             ) : null}
 
             {result ? (
-              <AgentMessage>
+              <AgentMessage continued>
                 <ThreadCard>
                   {result.checks.pageLoad !== undefined ? (
                     <CheckLine
@@ -269,21 +274,22 @@ export function TaskDetailScreen({ navigation, route }: Props) {
           </>
         )}
       </ScrollView>
-      {task && canStop(task) ? (
+      {task && (canStop(task) || nowDoing(task, signed)) ? (
         <View
           style={[
             styles.composerWrap,
             { paddingBottom: insets.bottom + space.sm },
           ]}
         >
-          <Composer
-            placeholder={
-              ["RUNNING", "AWAITING_AGENT"].includes(task.outcomeState)
-                ? "Working…"
-                : "Approved to spend within your limits"
-            }
-            onStop={stop}
-          />
+          {nowDoing(task, signed) ? (
+            <NowLine text={nowDoing(task, signed)!} />
+          ) : null}
+          {canStop(task) ? (
+            <Composer
+              placeholder="Agent can spend within your limits"
+              onStop={stop}
+            />
+          ) : null}
         </View>
       ) : (
         <View style={{ height: insets.bottom }} />

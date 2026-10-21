@@ -5,6 +5,7 @@ import {
   canStop,
   defaultTerms,
   describeRequest,
+  nowDoing,
   readRequest,
   threadSteps,
 } from "../src/state/agentThread";
@@ -121,6 +122,17 @@ test("status lines follow the service states, and Stop shows only while the agen
   });
   assert.equal(threadSteps(failed)[2]!.state, "failed");
   assert.match(agentLine(failed), /didn't go through/);
+  assert.equal(threadSteps(failed)[1]!.state, "todo");
+  assert.equal(nowDoing(failed), null);
+  assert.equal(nowDoing(running), "Asking providers for a quote");
+  assert.match(
+    nowDoing(TaskViewSchema.parse({ ...paid, outcomeState: "RUNNING" }))!,
+    /provider A to confirm/,
+  );
+  assert.equal(
+    nowDoing(base, true),
+    "Waiting for your approval to land on chain",
+  );
   assert.match(
     agentLine({ ...running, authorityState: "REVOKED" as const }),
     /ended/,

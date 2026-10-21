@@ -1,8 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { Text } from "react-native";
 import { PrimaryButton } from "../../components/Button";
-import { GhostButton, HoldToSeal } from "../../components/blocks";
-import { AgentMessage, CardLine, ThreadCard } from "../../components/chat";
+import { HoldToSeal } from "../../components/blocks";
+import {
+  AgentMessage,
+  CardLine,
+  TextLink,
+  ThreadCard,
+} from "../../components/chat";
 import { defaultTerms } from "../../state/agentThread";
 import {
   decimalUnits,
@@ -32,7 +37,9 @@ export function ApproveCard({
   input,
   onEdit,
   onSigned,
+  continued,
 }: {
+  continued?: boolean;
   taskId: string;
   input: Record<string, unknown> | undefined;
   onEdit: () => void;
@@ -50,6 +57,7 @@ export function ApproveCard({
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [holdKey, setHoldKey] = useState(0);
+  const [details, setDetails] = useState(false);
   const inFlight = useRef(false);
 
   useEffect(() => {
@@ -104,6 +112,7 @@ export function ApproveCard({
     `${formatAmount(BigInt(decimalUnits(v)), 6)} DUSD`;
   return (
     <AgentMessage
+      continued={continued}
       text={
         review
           ? "Your wallet checked the service's draft against these limits. Hold to approve."
@@ -112,24 +121,39 @@ export function ApproveCard({
     >
       {f ? (
         <ThreadCard>
-          {plan!.providers.map((p) => (
-            <CardLine
-              key={p.providerId}
-              label={`Provider ${p.providerId.toUpperCase()}`}
-              value={`${formatAmount(BigInt(p.price), 6)} DUSD a check`}
-            />
-          ))}
           <CardLine label="Most per payment" value={dusd(f.maxPayment)} />
           <CardLine label="Most for this task" value={dusd(f.spendCap)} />
-          <CardLine label="Keep in the wallet" value={dusd(f.liquidFloor)} />
           <CardLine
             label="Ask me first above"
             value={dusd(f.reviewThreshold)}
           />
-          <CardLine label="Paid attempts" value={`Up to ${f.maxPayments}`} />
+          {details ? (
+            <>
+              {plan!.providers.map((p) => (
+                <CardLine
+                  key={p.providerId}
+                  label={`Provider ${p.providerId.toUpperCase()}`}
+                  value={`${formatAmount(BigInt(p.price), 6)} DUSD a check`}
+                />
+              ))}
+              <CardLine
+                label="Keep in the wallet"
+                value={dusd(f.liquidFloor)}
+              />
+              <CardLine
+                label="Paid attempts"
+                value={`Up to ${f.maxPayments}`}
+              />
+            </>
+          ) : null}
+          <TextLink
+            label={details ? "Fewer details" : "More details"}
+            onPress={() => setDetails((d) => !d)}
+          />
           {review ? (
             <HoldToSeal
               key={holdKey}
+              sealSize={88}
               label={busy ? "Approving…" : "Hold to approve"}
               disabled={busy}
               onSealed={approve}
@@ -141,7 +165,7 @@ export function ApproveCard({
               onPress={check}
             />
           )}
-          <GhostButton label="Change the limits" onPress={onEdit} />
+          <TextLink label="Change the limits" onPress={onEdit} />
         </ThreadCard>
       ) : !error ? (
         <Text style={styles.muted}>Looking up providers…</Text>

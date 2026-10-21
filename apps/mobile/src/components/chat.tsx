@@ -1,5 +1,12 @@
 import { useState, type ReactNode } from "react";
-import { Pressable, Text, TextInput, View } from "react-native";
+import {
+  ActivityIndicator,
+  Pressable,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
+import type { StepItem } from "./blocks";
 import {
   radius,
   space,
@@ -11,7 +18,8 @@ import {
 import { Icon } from "./Icon";
 
 // Building blocks of the agent thread: your messages on the right in the
-// primary colour, the agent's text unboxed on the left under its mark.
+// primary colour, the agent's on the left in a raised bubble beside its mark.
+// Back-to-back agent messages share one mark.
 
 export function UserBubble({ children }: { children: string }) {
   const styles = useStyles();
@@ -27,23 +35,109 @@ export function UserBubble({ children }: { children: string }) {
 export function AgentMessage({
   text,
   children,
+  continued,
 }: {
   text?: string;
   children?: ReactNode;
+  // Follows another agent message, so the mark is not repeated.
+  continued?: boolean;
 }) {
   const styles = useStyles();
   const colors = useColors();
   return (
-    <View style={styles.agent}>
-      <View style={styles.agentHead}>
-        <View style={styles.mark}>
-          <Icon name="robot-outline" size={16} color={colors.primary} />
-        </View>
-        <Text style={styles.agentName}>Agent</Text>
+    <View style={[styles.agent, continued && styles.agentContinued]}>
+      <View style={styles.markColumn}>
+        {continued ? null : (
+          <View style={styles.mark} accessibilityLabel="Agent">
+            <Icon name="robot-outline" size={16} color={colors.primary} />
+          </View>
+        )}
       </View>
-      {text ? <Text style={styles.agentText}>{text}</Text> : null}
-      {children}
+      <View style={styles.agentBody}>
+        {text ? (
+          <View
+            style={[styles.agentBubble, continued && styles.bubbleContinued]}
+          >
+            <Text style={styles.agentText}>{text}</Text>
+          </View>
+        ) : null}
+        {children}
+      </View>
     </View>
+  );
+}
+
+// The agent's progress: small marks and quiet lines, so its sentence leads.
+export function ThreadSteps({ items }: { items: readonly StepItem[] }) {
+  const styles = useStyles();
+  const colors = useColors();
+  return (
+    <View style={styles.steps}>
+      {items.map((s) => (
+        <View
+          key={s.title}
+          style={styles.stepRow}
+          accessible
+          accessibilityLabel={`${s.state === "done" ? "Done" : s.state === "failed" ? "Failed" : s.state === "now" ? "In progress" : "Not started"}. ${s.title}`}
+        >
+          <View style={styles.stepMark}>
+            {s.state === "done" ? (
+              <Icon name="check-circle" size={16} color={colors.good} />
+            ) : s.state === "failed" ? (
+              <Icon name="close-circle" size={16} color={colors.bad} />
+            ) : s.state === "now" ? (
+              <ActivityIndicator size="small" color={colors.primary} />
+            ) : (
+              <Icon name="circle-outline" size={16} color={colors.ink4} />
+            )}
+          </View>
+          <View style={styles.stepText}>
+            <Text
+              style={[styles.stepTitle, s.state === "now" && styles.stepNow]}
+            >
+              {s.title}
+            </Text>
+            {s.detail ? (
+              <Text style={styles.stepDetail}>{s.detail}</Text>
+            ) : null}
+          </View>
+        </View>
+      ))}
+    </View>
+  );
+}
+
+// What the agent is doing this moment, pinned above the message box.
+export function NowLine({ text }: { text: string }) {
+  const styles = useStyles();
+  const colors = useColors();
+  return (
+    <View style={styles.now} accessibilityLiveRegion="polite">
+      <ActivityIndicator size="small" color={colors.primary} />
+      <Text style={styles.nowText} numberOfLines={2}>
+        {text}
+      </Text>
+    </View>
+  );
+}
+
+export function TextLink({
+  label,
+  onPress,
+}: {
+  label: string;
+  onPress: () => void;
+}) {
+  const styles = useStyles();
+  return (
+    <Pressable
+      accessibilityRole="link"
+      onPress={onPress}
+      hitSlop={8}
+      style={({ pressed }) => [styles.link, pressed && styles.pressed]}
+    >
+      <Text style={styles.linkText}>{label}</Text>
+    </Pressable>
   );
 }
 
@@ -148,8 +242,7 @@ export function Composer({
           onPress={onStop}
           style={({ pressed }) => [styles.stop, pressed && styles.pressed]}
         >
-          <Icon name="stop" size={18} color={colors.onPrimary} />
-          <Text style={styles.stopLabel}>Stop</Text>
+          <Icon name="stop" size={20} color={colors.onPrimary} />
         </Pressable>
       ) : onSend ? (
         <Pressable
@@ -191,8 +284,46 @@ const useStyles = makeStyles((colors) => ({
     borderBottomRightRadius: radius.sm,
     overflow: "hidden",
   },
-  agent: { gap: space.sm },
-  agentHead: { flexDirection: "row", alignItems: "center", gap: space.sm },
+  agent: { flexDirection: "row", gap: space.sm, paddingRight: space.xl },
+  agentContinued: { marginTop: -space.md },
+  markColumn: { width: 28 },
+  agentBody: { flex: 1, gap: space.sm },
+  agentBubble: {
+    alignSelf: "flex-start",
+    backgroundColor: colors.raised,
+    paddingHorizontal: space.lg,
+    paddingVertical: space.md,
+    borderRadius: radius.lg,
+    borderTopLeftRadius: radius.sm,
+    borderWidth: 1,
+    borderColor: colors.outline,
+  },
+  bubbleContinued: { borderTopLeftRadius: radius.lg },
+  steps: { gap: space.sm, paddingLeft: space.xs, alignSelf: "stretch" },
+  stepRow: { flexDirection: "row", gap: space.sm, alignItems: "flex-start" },
+  stepMark: {
+    width: 20,
+    height: 20,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  stepText: { flex: 1 },
+  stepTitle: { ...type.small, color: colors.ink2 },
+  stepNow: { color: colors.ink, fontWeight: "600" },
+  stepDetail: { ...type.small, color: colors.ink3 },
+  now: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: space.sm,
+    paddingHorizontal: space.lg,
+    paddingVertical: space.sm,
+    marginBottom: space.sm,
+    borderRadius: radius.md,
+    backgroundColor: colors.primaryTint,
+  },
+  nowText: { ...type.small, color: colors.ink, flex: 1, fontWeight: "600" },
+  link: { minHeight: 32, justifyContent: "center" },
+  linkText: { ...type.bodyStrong, color: colors.primary },
   mark: {
     width: 28,
     height: 28,
@@ -201,8 +332,7 @@ const useStyles = makeStyles((colors) => ({
     justifyContent: "center",
     backgroundColor: colors.primaryTint,
   },
-  agentName: { ...type.label, color: colors.ink2 },
-  agentText: { ...type.body, fontSize: 16, lineHeight: 23, color: colors.ink },
+  agentText: { ...type.body, fontSize: 16, lineHeight: 22, color: colors.ink },
   card: {
     gap: space.md,
     padding: space.lg,
@@ -273,14 +403,12 @@ const useStyles = makeStyles((colors) => ({
   },
   sendOff: { backgroundColor: colors.tile },
   stop: {
-    minHeight: 40,
-    flexDirection: "row",
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     alignItems: "center",
-    gap: space.xs,
-    paddingHorizontal: space.lg,
-    borderRadius: 20,
+    justifyContent: "center",
     backgroundColor: colors.primary,
   },
-  stopLabel: { ...type.bodyStrong, color: colors.onPrimary },
   pressed: { opacity: 0.8 },
 }));

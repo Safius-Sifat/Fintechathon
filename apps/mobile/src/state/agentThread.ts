@@ -154,7 +154,9 @@ export function threadSteps(
     },
   ];
   if (!active) return steps;
-  const working = ["RUNNING", "AWAITING_AGENT"].includes(task.outcomeState);
+  const working =
+    ["RUNNING", "AWAITING_AGENT"].includes(task.outcomeState) &&
+    taskProgress(task).payment !== "FAILED";
   steps.push({
     title: "Checking the page",
     state:
@@ -193,6 +195,29 @@ export function threadSteps(
       state: task.delivery.state === "PENDING" ? "now" : "done",
     });
   return steps;
+}
+
+// What the agent is waiting on right now, or null when nothing is in motion.
+export function nowDoing(
+  task: TaskView,
+  signed = signedTasks.has(task.taskId),
+): string | null {
+  if (task.authorityState === "PENDING" && signed)
+    return "Waiting for your approval to land on chain";
+  if (!["RUNNING", "AWAITING_AGENT"].includes(task.outcomeState)) return null;
+  const paying = task.payments.find(
+    (p) =>
+      !PAYMENT_DONE.includes(p.chainState) &&
+      !PAYMENT_FAILED.includes(p.chainState),
+  );
+  if (paying)
+    return `Waiting for the payment to ${paying.providerId ? `provider ${paying.providerId.toUpperCase()}` : "the provider"} to confirm`;
+  if (task.delivery.state === "PENDING")
+    return "Waiting for the provider's result";
+  if (taskProgress(task).payment === "FAILED") return null;
+  return task.payments.length
+    ? "Checking the page"
+    : "Asking providers for a quote";
 }
 
 // Stop is offered while the agent could still spend.

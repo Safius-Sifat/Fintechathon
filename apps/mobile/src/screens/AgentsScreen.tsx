@@ -17,6 +17,7 @@ import {
   CardLine,
   Composer,
   Suggestions,
+  TextLink,
   ThreadCard,
   UserBubble,
 } from "../components/chat";
@@ -212,7 +213,7 @@ export function AgentsScreen() {
                     disabled={busy}
                     onPress={start}
                   />
-                  <GhostButton
+                  <TextLink
                     label="Change the details"
                     onPress={() =>
                       w &&
@@ -252,25 +253,18 @@ export function AgentsScreen() {
 
 // The agent's one-line status under an earlier request, from the service.
 function TaskLine({ taskId, onOpen }: { taskId: string; onOpen: () => void }) {
-  const styles = useStyles();
-  const colors = useColors();
   const task = useServicePoll(() => getTask(taskId), `line:${taskId}`, 10000);
   return (
-    <AgentMessage>
-      <Pressable
-        accessibilityRole="button"
-        onPress={onOpen}
-        style={({ pressed }) => [styles.lineRow, pressed && styles.pressed]}
-      >
-        <Text style={styles.lineText}>
-          {task.data
-            ? agentLine(task.data)
-            : task.error
-              ? "I can't read this task right now."
-              : "Loading…"}
-        </Text>
-        <Icon name="chevron-right" size={20} color={colors.primary} />
-      </Pressable>
+    <AgentMessage
+      text={
+        task.data
+          ? agentLine(task.data)
+          : task.error
+            ? "I can't read this task right now."
+            : "Loading…"
+      }
+    >
+      <TextLink label="Open task" onPress={onOpen} />
     </AgentMessage>
   );
 }
@@ -306,18 +300,6 @@ const useStyles = makeStyles((colors) => ({
   turn: { gap: space.md },
   cardTitle: { ...type.heading, color: colors.ink },
   error: { ...type.body, color: colors.bad },
-  lineRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: space.sm,
-    minHeight: 44,
-    paddingHorizontal: space.md,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.rule,
-    backgroundColor: colors.raised,
-  },
-  lineText: { ...type.body, color: colors.ink, flex: 1 },
   composerWrap: { paddingHorizontal: space.lg, paddingBottom: space.sm },
   pressed: { opacity: 0.8 },
 }));

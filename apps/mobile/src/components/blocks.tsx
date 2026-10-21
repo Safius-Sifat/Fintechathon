@@ -319,10 +319,12 @@ export function HoldToSeal({
   label,
   onSealed,
   disabled,
+  sealSize = 150,
 }: {
   label: string;
   onSealed?: () => void;
   disabled?: boolean;
+  sealSize?: number;
 }) {
   const styles = useStyles();
   const colors = useColors();
@@ -352,7 +354,7 @@ export function HoldToSeal({
   };
   return (
     <View style={styles.hold}>
-      <Seal size={150} filled={hold.filled} sealed={hold.sealed} />
+      <Seal size={sealSize} filled={hold.filled} sealed={hold.sealed} />
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={label}
