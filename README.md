@@ -62,7 +62,7 @@ Built for the PBCSF Fintechathon, Topic F. It runs on the Base Sepolia test netw
 |     | Feature                  | In simple words                                                                                          |
 | --- | ------------------------ | -------------------------------------------------------------------------------------------------------- |
 | 👛  | **Personal wallet**      | Create or restore a wallet, send and receive tokens, scan QR codes. Keys stay on the phone.              |
-| 🤖  | **AI agent**             | A real agent built on the Claude Agent SDK picks a provider, pays for a task and collects the result.    |
+| 🤖  | **AI agent**             | A real agent built on the OpenAI Agents SDK picks a provider, pays for a task and collects the result.    |
 | 📜  | **On-chain rules**       | Spending limits, allowed recipients, time windows and call templates are enforced by the smart contract. |
 | ✋  | **Owner approval**       | Bigger or unusual payments wait for you to approve them on your phone (co-signature).                    |
 | 🧊  | **Freeze and stop**      | One tap freezes or stops an agent on-chain.                                                              |
@@ -100,7 +100,7 @@ flowchart LR
 
 | Area                    | Third-party packages                                                                                                                                                                                                                                |
 | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| AI agent                | [Claude Agent SDK](https://www.npmjs.com/package/@anthropic-ai/claude-agent-sdk) 0.3.304                                                                                                                                                            |
+| AI agent                | [OpenAI Agents SDK](https://www.npmjs.com/package/@openai/agents) 0.20.0                                                                                                                                                            |
 | Backend                 | [Fastify](https://fastify.dev) 5.6.2, [viem](https://viem.sh) 2.38.5, [zod](https://zod.dev) 3.25.76, [jose](https://github.com/panva/jose) 6.1.0, [pg](https://node-postgres.com) 8.16.3, [playwright-core](https://playwright.dev) 1.55.1, dotenv |
 | Shared schema           | viem, zod, [@scure/bip39](https://github.com/paulmillr/scure-bip39) 1.6.0, [json-canonicalize](https://www.npmjs.com/package/json-canonicalize) 1.2.0                                                                                               |
 | Mobile app              | [Expo](https://expo.dev) SDK 54, React Native 0.81.5, React 19.1.0, React Navigation, expo-secure-store, expo-local-authentication, expo-camera, react-native-svg, react-native-qrcode-svg                                                           |
@@ -118,7 +118,7 @@ Mandate-Agentic-Wallet/
 ├── apps/
 │   ├── api/            Main backend: login, wallets, tasks, approvals, permits, evidence
 │   ├── worker/         Sends signed agent payments and records receipts
-│   ├── agent/          Example AI agent (Claude Agent SDK)
+│   ├── agent/          Task and chat agents (OpenAI Agents SDK)
 │   ├── mcp/            MCP server so other AI tools can use Mandate
 │   ├── provider/       Paid services the agent buys from
 │   └── mobile/         The phone wallet (Android and iOS)

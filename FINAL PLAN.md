@@ -12,7 +12,7 @@ status: specified-not-built
 
 **Give one handoff document to each person.** Each contains that person's complete deliverables, files, tasks, dependencies, acceptance cases and an identical shared interface appendix. They can work in parallel against that contract; the system must also pass shared integration gates. Finishing four isolated components is not sufficient.
 
-This version replaces the five-person/cb-mpc plan. Use **MPCium**, three nodes on the existing Azure VM with `mpc_threshold:1` (intended two-participant signing quorum in the pinned code), mandatory policy authorizer on every node and a local owner key on Android. This is a single-host competition PoC; it demonstrates threshold behavior but does not resist VM compromise. No Circle or custom cryptographic protocol. Documentation 7.0 keeps wallet domain 5 and Login 2, moves Invoice to domain 2 and keeps agent evidence schema 4 with additive event types. It adds a real LLM agent (Claude Agent SDK) and Cobo/Circle-class policy controls; see section 9 and architecture S9. W0 migrates existing bootstrap interfaces before new signing.
+This version replaces the five-person/cb-mpc plan. Use **MPCium**, three nodes on the existing Azure VM with `mpc_threshold:1` (intended two-participant signing quorum in the pinned code), mandatory policy authorizer on every node and a local owner key on Android. This is a single-host competition PoC; it demonstrates threshold behavior but does not resist VM compromise. No Circle or custom cryptographic protocol. Documentation 7.0 keeps wallet domain 5 and Login 2, moves Invoice to domain 2 and keeps agent evidence schema 4 with additive event types. It adds a real LLM agent (OpenAI Agents SDK) and Cobo/Circle-class policy controls; see section 9 and architecture S9. W0 migrates existing bootstrap interfaces before new signing.
 
 **Release decision:** WalletConnect/external dApp connections are deferred. Complete personal-wallet and agent-wallet flows remain required.
 
@@ -23,7 +23,7 @@ This version replaces the five-person/cb-mpc plan. Use **MPCium**, three nodes o
 | [01 - Contracts and Shared Interfaces](docs/plans/01%20-%20Contracts%20and%20Shared%20Interfaces.md) | Wallet/factory/token/vault/anchor; v7 WalletPolicy, co-signature, freeze, allowance, call templates, multi-asset and x402 authorization; shared schemas, fixtures, ABI, deployment manifest | Same typed hashes/signatures across Solidity/TS/native/Go | On-chain financial authority and contract acceptance |
 | [02 - Platform Policy and MPCium](docs/plans/02%20-%20Platform%20Policy%20and%20MPCium.md) | API, sessions/history, DB, worker/reservations/policy, agent question service, owner approvals/push, risk sentinel, MPCium/Go integration, owner/agent relayers, evidence export and infrastructure | Three nodes complete DKG; any two sign; a single node cannot | Durable controlled execution and operable deployment |
 | [03 - Android Owner Wallet](docs/plans/03%20-%20Android%20Owner%20Wallet.md) | Complete personal/managed Android and iOS wallet, native transactions/accounts/backup/sessions/security; approval, freeze, wallet-policy, allowance and intent-review screens; independent recovery and APK/iOS build | Physical-phone owner signature and successful word restore | User experience and owner independence |
-| [04 - Agents Services Inspection and Demo](docs/plans/04%20-%20Agents%20Services%20Inspection%20and%20Demo.md) | Reference LLM agent on the Claude Agent SDK; four runbooks with agent questions; intent compiler; x402-formatted paid providers; SDK/MCP/CLI; independent inspector; payment-request fixtures/full-app acceptance/demo/submission | Actual browser checks, signed invoice/receipt and verifier fixtures | Useful agent work, independent inspection and demonstrated release |
+| [04 - Agents Services Inspection and Demo](docs/plans/04%20-%20Agents%20Services%20Inspection%20and%20Demo.md) | Reference LLM agent on the OpenAI Agents SDK; four runbooks with agent questions; intent compiler; x402-formatted paid providers; SDK/MCP/CLI; independent inspector; payment-request fixtures/full-app acceptance/demo/submission | Actual browser checks, signed invoice/receipt and verifier fixtures | Useful agent work, independent inspection and demonstrated release |
 
 Person2 owns worker process; Person4 owns imported runbook library. Person2 writes ledger; Person4 independently verifies exports. Person1 owns shared interface changes; consumers do not silently fork types. Every owner supplies their own tests, security notes and deployment instructions. Required everyday-wallet W tasks now extend all four handoffs; the app is not limited to agent approval screens. Person4 assembles them; no fifth owner is implied.
 
@@ -40,7 +40,7 @@ Person2 owns worker process; Person4 owns imported runbook library. Person2 writ
 | Shared Budget | Transactional reservations plus on-chain gross counters/floor | Concurrent tasks/retries do not consume the same remaining allowance twice |
 | Delivery Check | Provider invoice/payment/output binding, original retrieval, bounded fallback | A paid timeout remains recorded; B can complete within gross budget |
 | Mandate Receipt | Hash-linked events/checkpoint/anchor + independent six-finding inspector | Altered export detected; settlement/delivery/finality/gaps remain distinguishable |
-| AI Agent | Claude Agent SDK agent using only Mandate MCP tools; answers bounded questions (offer, retry/fallback, amount, completion, escalation) | Agent buys and judges real services with the phone offline; injected instructions cannot add recipients, amounts or tools |
+| AI Agent | OpenAI Agents SDK agent using only Mandate MCP tools; answers bounded questions (offer, retry/fallback, amount, completion, escalation) | Agent buys and judges real services with the phone offline; injected instructions cannot add recipients, amounts or tools |
 | Intent Compiler | Goal text → structured draft terms validated by shared schemas; native review shows goal next to signed terms | Owner approves a task in plain language without signing anything the screen did not show |
 | Wallet Policy | Owner-signed on-chain caps per asset/day/week, allowlist, blocklist, call templates, review threshold; most restrictive rule wins | Policy tightening stops over-limit agent spending immediately, even for active Permits |
 | Owner Review | Owner co-signs the exact Action digest above a threshold; contract verifies | Large payment waits for a phone tap; direct call without approval reverts |
@@ -58,7 +58,7 @@ Four runbooks: Browser Check (PAY, agent chooses offer and fallback), Liquidity 
 flowchart LR
   Phone[Owner mobile app (Android, iOS)\npersonal and managed wallet] --> API[API + PostgreSQL]
   Phone -->|Native personal signing and broadcast| DirectRPC[Trusted Base Sepolia RPC]
-  Agent[LLM agent\nClaude Agent SDK or any MCP client] -->|MCP tools, scoped token| API
+  Agent[LLM agent\nOpenAI Agents SDK or any MCP client] -->|MCP tools, scoped token| API
   API -->|Approval push| Phone
   API --> Worker[Durable worker\nimports runbook library]
   Worker --> Provider[Providers a/b\nreal Playwright checks]
@@ -117,7 +117,7 @@ If G1 fails, fix the signing/native/contract blocker before claiming whole-syste
 | Full use cases | 4 /1,2,3 | Asset deposit/redeem; due schedule once; failed delivery retrieval/fallback |
 | Owner escape | 3 /1,2 | Confirmed pause invalidates prior grants; API-offline independent recovery |
 | Portable inspection | 4 /1,2 | Authentic/tampered/missing/provisional cases independently classified |
-| Agent decisions | 4 and 2 /1 | Claude Agent SDK agent answers bounded questions through MCP; injection and out-of-bounds answers rejected; defaults on timeout |
+| Agent decisions | 4 and 2 /1 | OpenAI Agents SDK agent answers bounded questions through MCP; injection and out-of-bounds answers rejected; defaults on timeout |
 | Owner policy controls | 1 and 3 /2 | WalletPolicy, co-signed Actions, Freeze and Allowance enforced by contract and driven from the phone |
 | Risk and payments | 2 and 4 /1 | Screening/simulation/velocity denials; USDC payments; x402-formatted quotes; gate X402-G recorded |
 | Release | 4 coordinates /all | Reproducible source/APK/iOS build, known risks, transaction index, measured evaluation |
@@ -134,7 +134,7 @@ Security cases Q01–Q14 are listed in every handoff.18 normal-category variants
 - Real paid browser output, genuine controlled vault operation and fixed schedule work through same runtime.
 - Evidence retains permission/payment/output/stop linkage; standalone CLI independently checks supported facts and labels assertion gaps.
 - Original agent Q01–Q14, wallet WQ01–WQ14 and agentic/policy AQ01–AQ14 have actual acceptance evidence; no mock core capability is advertised.
-- A real LLM agent on the Claude Agent SDK completes tasks through MCP alone; it can only choose allowed options, and every choice is recorded as an assertion in evidence.
+- A real LLM agent on the OpenAI Agents SDK completes tasks through MCP alone; it can only choose allowed options, and every choice is recorded as an assertion in evidence.
 - Owner WalletPolicy, co-signed Actions above the review threshold, Freeze/Unfreeze, Allowance, call templates and per-asset (DemoUSD/USDC) limits are enforced by the contract and controllable from the phone.
 - Tagged source/README/deployment/tests/security self-assessment/actual on-chain hashes, APK/iOS build, deck≤10min and demo≤5min are assembled without secrets.
 
@@ -167,7 +167,7 @@ Architecture [A8/A9 and S9](architecture.md) define the agent runtime, decision 
 | --- | --- | --- |
 | v7 interface | Permit/Action/Invoice/Approval/WalletPolicy/CallTemplate types and vectors frozen with W0 | P1-A01, consumed by all |
 | Contract controls | Policy, co-signature, freeze, allowance, multi-asset, call templates, x402 authorization | P1-A02, P1-A03 |
-| Agent runtime | Claude Agent SDK agent, MCP-only tools, built-in tools disabled, bounded questions with defaults | P4-A01, P4-A02, P2-A01 |
+| Agent runtime | OpenAI Agents SDK agent, MCP-only tools, built-in tools disabled, bounded questions with defaults | P4-A01, P4-A02, P2-A01 |
 | Owner controls | Approval push and co-sign, policy editor, freeze, allowance and intent review on the phone | P3-A01, P3-A02, P2-A02 |
 | Risk and payments | Pre-sign policy/screening/velocity; one post-sign simulation (advanced effects for vault/CALL/X402); USDC providers and gate X402-G | P2-A03, P4-A03, P1-A03 |
 | Inspection | Verifier checks co-signatures, freeze intervals, policy versions and call outflows | P4-A03 |

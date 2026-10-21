@@ -73,7 +73,7 @@ Not real: the shop. It is our own demo merchant with sample products, and no goo
 
 1. **Merchant:** our own test shop, a real x402 seller on Base Sepolia.
 2. **Facilitator:** the public x402.org facilitator first. Our worker settles instead if the facilitator rejects contract-wallet authorizations, which Task 1 proves either way.
-3. **Agent model:** OpenAI Agents SDK with the owner's OpenAI key. This replaces "Claude Agent SDK" in architecture S9, so Task 9 updates the docs and AGENTS.md.
+3. **Agent model:** OpenAI Agents SDK with the owner's OpenAI key. This replaces "OpenAI Agents SDK" in architecture S9, so Task 9 updates the docs and AGENTS.md.
 4. **Checkout:** one saved test delivery address on the phone. It is shown on the confirmation sheet and sent to the shop only after you sign.
 5. **One token in the demo:** everything the video shows is paid in Circle test USDC: personal send, agent funding and shop purchases. DemoUSD stays in the code for the page-check providers but is not in the video.
 6. **Chat-first agent:** the Agent tab works like a typical AI assistant: conversations with history, a new chat button, and tasks that run inside a conversation.
@@ -295,7 +295,7 @@ On top of `feat/mobile-agent-chat`, following "The agent experience" above:
 
 ### Task 9: Docs, deploy and demo (1 day)
 
-- Update architecture S9, AGENTS.md ("Claude Agent SDK" → OpenAI Agents SDK), README and the demo script.
+- Update architecture S9, AGENTS.md ("OpenAI Agents SDK" → OpenAI Agents SDK), README and the demo script.
 - Deploy `apps/shop` and the updated API, worker and agent service to the demo VM. Rehearse the recording: fresh install → fund with USDC → set USDC limits → new chat → buy a shoe → receipt on BaseScan → open history → stop.
 - **Done when:** the dry run passes from a fresh install with only testnet funds.
 
