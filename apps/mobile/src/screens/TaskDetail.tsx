@@ -266,7 +266,6 @@ export function TaskDetailScreen({ navigation, route }: Props) {
                 onPress={() => navigation.navigate("TaskProof", { taskId })}
               />
             ) : null}
-            <Text style={styles.taskId}>Task {task.taskId}</Text>
           </>
         )}
       </ScrollView>
@@ -356,7 +355,6 @@ const useStyles = makeStyles((colors) => ({
   error: { ...type.body, color: colors.bad },
   check: { flexDirection: "row", alignItems: "center", gap: space.sm },
   checkText: { ...type.body, color: colors.ink, flex: 1 },
-  taskId: { ...type.small, color: colors.ink3, textAlign: "center" },
   composerWrap: {
     paddingHorizontal: space.lg,
     paddingTop: space.sm,
