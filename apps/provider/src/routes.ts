@@ -13,26 +13,22 @@ import {
   type DeliveryEnvelope,
   type QuoteEnvelope,
 } from "@mandate/schema";
-import {
-  decodePaymentSignatureHeader,
-  encodePaymentRequiredHeader,
-  encodePaymentResponseHeader,
-} from "@x402/core/http";
-import type { PaymentPayload } from "@x402/core/types";
-import { bytesToHex, type Hash, type Hex } from "viem";
+import { encodePaymentRequiredHeader } from "@x402/core/http";
+import { bytesToHex, type Hex } from "viem";
 import { privateKeyToAccount, type PrivateKeyAccount } from "viem/accounts";
 import { runChecks, type BrowserConfig } from "./browser.js";
 import { checkPayment, type ChainReader } from "./payment.js";
 import type { InvoiceRecord, InvoiceStore } from "./store.js";
 import {
   asRequirements,
-  checkPayload,
-  checkSettlement,
+  settleOnce,
   x402Accepts,
   type FacilitatorClient,
 } from "./x402.js";
 
 type ProviderId = "a" | "b";
+const isBrowserProvider = (id: string): id is ProviderId =>
+  id === "a" || id === "b";
 
 // Prices and capabilities are fixed by the plan (P4-01). Each provider's
 // payment recipient is the address of its own signing key.
@@ -281,58 +277,27 @@ export async function registerProviderRoutes(
           .send({ error: "This invoice was fulfilled for another request" });
       return reply.code(200).send(record.delivery);
     }
-    let txHash = record.settlementTxHash ?? null;
-    if (!txHash) {
-      let payload: PaymentPayload;
-      try {
-        payload = decodePaymentSignatureHeader(header);
-      } catch {
-        return reply.code(400).send({ error: "Malformed PAYMENT-SIGNATURE" });
-      }
-      const problem = checkPayload(
-        payload,
-        record.quote.x402,
-        record.quote.invoice,
-        requestId,
-      );
-      if (problem) return reply.code(402).send({ error: problem });
-      const requirements = asRequirements(record.quote.x402);
-      const verified = await config.facilitator.verify(payload, requirements);
-      if (!verified.isValid)
-        return reply.code(402).send({
-          error: `The facilitator refused the payment: ${verified.invalidReason ?? "invalid"}`,
-        });
-      const settled = await config.facilitator.settle(payload, requirements);
-      if (!settled.success || !/^0x[0-9a-fA-F]{64}$/.test(settled.transaction))
-        return reply.code(402).send({
-          error: `Settlement failed: ${settled.errorReason ?? "unknown"}`,
-        });
-      txHash = settled.transaction as Hash;
-      await config.store.put({ ...record, settlementTxHash: txHash });
-    }
-    const settlement = await checkSettlement(
-      config.chain!,
-      record.quote.invoice,
+    const outcome = await settleOnce({
+      facilitator: config.facilitator,
+      chain: config.chain!,
+      accepts: record.quote.x402,
+      invoice: record.quote.invoice,
       requestId,
-      txHash,
-    );
-    if (settlement.state === "PENDING")
+      header,
+      recorded: record.settlementTxHash ?? null,
+      record: (txHash) =>
+        config.store.put({ ...record, settlementTxHash: txHash }),
+    });
+    if (outcome.state === "REFUSED")
+      return reply.code(outcome.status).send({ error: outcome.error });
+    if (outcome.state === "PENDING")
       return reply.code(202).send({
         state: "PENDING",
-        reason: settlement.reason,
-        settlementTxHash: txHash,
+        reason: outcome.reason,
+        settlementTxHash: outcome.txHash,
       });
-    if (settlement.state === "INVALID")
-      return reply.code(402).send({ error: settlement.reason });
-    reply.header(
-      "PAYMENT-RESPONSE",
-      encodePaymentResponseHeader({
-        success: true,
-        transaction: txHash,
-        network: record.quote.x402.network,
-        payer: record.quote.invoice.wallet,
-      }),
-    );
+    reply.header("PAYMENT-RESPONSE", outcome.responseHeader);
+    const txHash = outcome.txHash;
     return reply.code(200).send(await deliverOnce(record, requestId, txHash));
   }
 
@@ -343,6 +308,8 @@ export async function registerProviderRoutes(
     requestId: Hex,
     paymentTxHash: Hex,
   ): Promise<DeliveryEnvelope> {
+    if (!isBrowserProvider(quote.providerId))
+      throw new Error("Only browser providers run checks");
     const signer = signers[quote.providerId]!;
     const run = await runChecks(targetId, checks, config.browser!);
     const now = String(Math.floor(Date.now() / 1000));

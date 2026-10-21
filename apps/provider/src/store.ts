@@ -14,7 +14,8 @@ export interface InvoiceRecord {
   settlementTxHash?: `0x${string}` | null;
 }
 
-export class InvoiceStore {
+// One JSON file per invoice, written atomically.
+export class RecordStore<T extends { quote: QuoteEnvelope }> {
   constructor(private readonly dir: string) {}
 
   private path(invoiceId: string) {
@@ -22,20 +23,20 @@ export class InvoiceStore {
     return join(this.dir, `${invoiceId.toLowerCase()}.json`);
   }
 
-  async get(invoiceId: string): Promise<InvoiceRecord | null> {
+  async get(invoiceId: string): Promise<T | null> {
     try {
-      return JSON.parse(
-        await readFile(this.path(invoiceId), "utf8"),
-      ) as InvoiceRecord;
+      return JSON.parse(await readFile(this.path(invoiceId), "utf8")) as T;
     } catch {
       return null;
     }
   }
 
-  async put(record: InvoiceRecord): Promise<void> {
+  async put(record: T): Promise<void> {
     await mkdir(this.dir, { recursive: true });
     const path = this.path(record.quote.invoice.invoiceId);
     await writeFile(`${path}.tmp`, JSON.stringify(record));
     await rename(`${path}.tmp`, path);
   }
 }
+
+export class InvoiceStore extends RecordStore<InvoiceRecord> {}

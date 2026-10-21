@@ -1,4 +1,8 @@
-import type { FacilitatorClient } from "@x402/core/http";
+import {
+  decodePaymentSignatureHeader,
+  encodePaymentResponseHeader,
+  type FacilitatorClient,
+} from "@x402/core/http";
 import type { PaymentPayload, PaymentRequirements } from "@x402/core/types";
 import {
   BASE_SEPOLIA_USDC,
@@ -105,5 +109,83 @@ export const checkSettlement = (
     txHash,
     REQUIRED_CONFIRMATIONS,
   );
+
+export type SettleOutcome =
+  | { state: "PAID"; txHash: Hash; responseHeader: string }
+  | { state: "PENDING"; reason: string; txHash: Hash }
+  | { state: "REFUSED"; status: 400 | 402; error: string };
+
+// One x402 settlement per invoice (S9.10): check the payment against the
+// invoice, verify and settle it once through the facilitator (recording the
+// settlement before anything else), then require the settlement on chain.
+// A retry with a recorded settlement only re-checks the chain.
+export async function settleOnce(input: {
+  facilitator: FacilitatorClient;
+  chain: ChainReader;
+  accepts: X402Accepts;
+  invoice: Invoice;
+  requestId: Hex;
+  header: string;
+  recorded: Hash | null;
+  record: (txHash: Hash) => Promise<void>;
+}): Promise<SettleOutcome> {
+  let txHash = input.recorded;
+  if (!txHash) {
+    let payload: PaymentPayload;
+    try {
+      payload = decodePaymentSignatureHeader(input.header);
+    } catch {
+      return {
+        state: "REFUSED",
+        status: 400,
+        error: "Malformed PAYMENT-SIGNATURE",
+      };
+    }
+    const problem = checkPayload(
+      payload,
+      input.accepts,
+      input.invoice,
+      input.requestId,
+    );
+    if (problem) return { state: "REFUSED", status: 402, error: problem };
+    const requirements = asRequirements(input.accepts);
+    const verified = await input.facilitator.verify(payload, requirements);
+    if (!verified.isValid)
+      return {
+        state: "REFUSED",
+        status: 402,
+        error: `The facilitator refused the payment: ${verified.invalidReason ?? "invalid"}`,
+      };
+    const settled = await input.facilitator.settle(payload, requirements);
+    if (!settled.success || !/^0x[0-9a-fA-F]{64}$/.test(settled.transaction))
+      return {
+        state: "REFUSED",
+        status: 402,
+        error: `Settlement failed: ${settled.errorReason ?? "unknown"}`,
+      };
+    txHash = settled.transaction as Hash;
+    await input.record(txHash);
+  }
+  const settlement = await checkSettlement(
+    input.chain,
+    input.invoice,
+    input.requestId,
+    txHash,
+  );
+  if (settlement.state === "PENDING")
+    return { state: "PENDING", reason: settlement.reason, txHash };
+  if (settlement.state === "INVALID")
+    return { state: "REFUSED", status: 402, error: settlement.reason };
+  return {
+    state: "PAID",
+    txHash,
+    responseHeader: encodePaymentResponseHeader({
+      success: true,
+      transaction: txHash,
+      network: input.accepts.network,
+      payer: input.invoice.wallet,
+    }),
+  };
+}
 
 export type { FacilitatorClient };
