@@ -46,6 +46,7 @@ import {
   type WalletView,
 } from "./service-dto/api";
 import { ActivityPageSchema } from "./service-dto/activity";
+import { ShopProductSchema } from "./service-dto/provider";
 import {
   AddressSchema,
   Hex32Schema,
@@ -153,6 +154,17 @@ function origin() {
     throw new Error("The Mandate service needs a configured HTTPS origin.");
   return API_ORIGIN;
 }
+function sessionEnded() {
+  gate.invalidate();
+  session = null;
+  loginPending = null;
+  signedSubmissions.clear();
+  connection = {
+    status: "error",
+    error: "Your service session ended. Sign in again in Settings.",
+  };
+  emit();
+}
 async function response(
   path: string,
   init: RequestInit,
@@ -174,17 +186,7 @@ async function response(
       await res.json().catch(() => null),
     );
     gate.assert(ticket);
-    if (res.status === 401) {
-      gate.invalidate();
-      session = null;
-      loginPending = null;
-      signedSubmissions.clear();
-      connection = {
-        status: "error",
-        error: "Your service session ended. Sign in again in Settings.",
-      };
-      emit();
-    }
+    if (res.status === 401) sessionEnded();
     throw new ServiceError(res.status, refusal.success ? refusal.data : null);
   }
   return res;
@@ -802,4 +804,270 @@ export async function decideApproval(
     { ownerSignature },
     z.object({ state: z.literal("APPROVED") }).strict(),
   );
+}
+
+// Agent conversations (plan 05). A message is not retried with an idempotency
+// key: the service refuses a second one while the agent is still replying.
+async function chatCall<T>(
+  method: "GET" | "POST" | "PATCH" | "DELETE",
+  path: string,
+  body: unknown,
+  schema: z.ZodType<T, z.ZodTypeDef, unknown>,
+): Promise<T> {
+  const auth = authorized();
+  const res = await response(
+    path,
+    {
+      method,
+      headers: {
+        authorization: `Bearer ${auth.session.accessToken}`,
+        ...(body === undefined ? {} : { "content-type": "application/json" }),
+      },
+      ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+    },
+    auth.ticket,
+  );
+  return jsonResponse(res, schema, auth.ticket);
+}
+
+const ConversationSchema = z
+  .object({
+    conversationId: UuidSchema,
+    title: z.string().max(80).nullable(),
+    pinned: z.boolean(),
+    updatedAt: z.number().int().nonnegative(),
+    status: z.enum(["needs_you", "working", "done", "idle"]),
+  })
+  .strict();
+export type Conversation = z.infer<typeof ConversationSchema>;
+
+const ChatPayloadSchema = z.discriminatedUnion("type", [
+  z.object({ type: z.literal("user"), text: z.string().max(2000) }),
+  z.object({ type: z.literal("agent"), text: z.string().max(8000) }),
+  z.object({
+    type: z.literal("step"),
+    id: z.string().max(64),
+    label: z.string().max(120),
+    state: z.enum(["started", "done", "failed"]),
+    detail: z.string().max(400).optional(),
+  }),
+  z.object({
+    type: z.literal("products"),
+    note: z.string().max(400),
+    products: z.array(ShopProductSchema).min(1).max(6),
+  }),
+  z.object({
+    type: z.literal("question"),
+    question: z.string().max(400),
+    options: z.array(z.string().max(40)).max(6),
+  }),
+  z.object({
+    type: z.literal("purchase"),
+    taskId: UuidSchema,
+    product: ShopProductSchema,
+    size: z.string().max(8).nullable(),
+    amount: Uint256,
+  }),
+  z.object({
+    type: z.literal("task"),
+    taskId: UuidSchema,
+    runbookId: z.string().max(40),
+    label: z.string().max(200),
+  }),
+  z.object({ type: z.literal("error"), message: z.string().max(400) }),
+]);
+export type ChatEvent = z.infer<typeof ChatPayloadSchema> & {
+  seq: number;
+  createdAt: number;
+};
+const StoredEventSchema = z
+  .object({
+    seq: z.number().int().positive(),
+    type: z.string().max(16),
+    payload: z.record(z.unknown()),
+    createdAt: z.number().int().nonnegative(),
+  })
+  .strict();
+
+// A stored event the phone can show, or null for one it does not know (it is
+// skipped rather than guessed at).
+function chatEvent(raw: unknown): ChatEvent | null {
+  const stored = StoredEventSchema.safeParse(raw);
+  if (!stored.success) return null;
+  const payload = ChatPayloadSchema.safeParse({
+    ...stored.data.payload,
+    type: stored.data.type,
+  });
+  return payload.success
+    ? {
+        ...payload.data,
+        seq: stored.data.seq,
+        createdAt: stored.data.createdAt,
+      }
+    : null;
+}
+
+export async function listConversations(): Promise<Conversation[]> {
+  return (
+    await chatCall(
+      "GET",
+      "/v1/conversations",
+      undefined,
+      z.object({ conversations: z.array(ConversationSchema) }).strict(),
+    )
+  ).conversations;
+}
+export async function createConversation(walletId: string) {
+  return chatCall(
+    "POST",
+    "/v1/conversations",
+    { walletId: UuidSchema.parse(walletId) },
+    ConversationSchema.omit({ updatedAt: true }),
+  );
+}
+export async function updateConversation(
+  id: string,
+  change: { title?: string; pinned?: boolean },
+) {
+  await chatCall(
+    "PATCH",
+    `/v1/conversations/${UuidSchema.parse(id)}`,
+    change,
+    z.unknown(),
+  );
+}
+export async function deleteConversation(id: string) {
+  await chatCall(
+    "DELETE",
+    `/v1/conversations/${UuidSchema.parse(id)}`,
+    undefined,
+    z.unknown(),
+  );
+}
+export async function conversationEvents(id: string, after = 0) {
+  const page = await chatCall(
+    "GET",
+    `/v1/conversations/${UuidSchema.parse(id)}/events?after=${after}`,
+    undefined,
+    z
+      .object({ events: z.array(z.unknown()).max(500), replying: z.boolean() })
+      .strict(),
+  );
+  return {
+    events: page.events
+      .map(chatEvent)
+      .filter((e): e is ChatEvent => e !== null),
+    // Unknown events still move the cursor, so they are not fetched again.
+    last: page.events.reduce<number>(
+      (m, e) => Math.max(m, StoredEventSchema.safeParse(e).data?.seq ?? 0),
+      after,
+    ),
+    full: page.events.length === 500,
+    replying: page.replying,
+  };
+}
+export async function sendMessage(
+  id: string,
+  text: string,
+  deliveryHash: Hex | null,
+) {
+  return chatCall(
+    "POST",
+    `/v1/conversations/${UuidSchema.parse(id)}/messages`,
+    { text, deliveryHash },
+    z.object({ seq: z.number().int().positive() }).strict(),
+  );
+}
+
+export type StreamUpdate =
+  | { kind: "event"; event: ChatEvent }
+  | { kind: "text"; text: string }
+  | { kind: "replying"; replying: boolean };
+
+// Follows a chat over Server-Sent Events. React Native's fetch cannot read a
+// body as it arrives, so this uses XMLHttpRequest progress. `onClose` runs
+// once, with an error unless the caller closed the stream.
+export function streamConversation(
+  id: string,
+  after: number,
+  onUpdate: (update: StreamUpdate) => void,
+  onClose: (error: Error | null) => void,
+): () => void {
+  const auth = authorized();
+  const xhr = new XMLHttpRequest();
+  let read = 0;
+  let closed = false;
+  const finish = (error: Error | null) => {
+    if (closed) return;
+    closed = true;
+    xhr.abort();
+    onClose(error);
+  };
+  const frame = (block: string) => {
+    const data = block
+      .split("\n")
+      .filter((l) => l.startsWith("data: "))
+      .map((l) => l.slice(6))
+      .join("\n");
+    if (!data) return;
+    const value = JSON.parse(data) as {
+      live?: { type?: string; text?: unknown };
+      type?: string;
+      replying?: unknown;
+    };
+    if (value.live) {
+      if (
+        value.live.type === "text_delta" &&
+        typeof value.live.text === "string"
+      )
+        onUpdate({ kind: "text", text: value.live.text });
+    } else if (value.type === "idle")
+      onUpdate({ kind: "replying", replying: false });
+    else if (value.type === "state")
+      onUpdate({ kind: "replying", replying: value.replying === true });
+    else {
+      const event = chatEvent(value);
+      if (event) onUpdate({ kind: "event", event });
+    }
+  };
+  xhr.onprogress = () => {
+    if (closed) return;
+    try {
+      gate.assert(auth.ticket);
+    } catch (error) {
+      return finish(error as Error);
+    }
+    if (xhr.status !== 200) return;
+    const text = xhr.responseText;
+    let end: number;
+    while ((end = text.indexOf("\n\n", read)) >= 0) {
+      frame(text.slice(read, end));
+      read = end + 2;
+    }
+    // Long streams are reopened from the last event so the buffer stays small.
+    if (read > 1_000_000) finish(new Error("Stream restarted"));
+  };
+  xhr.onload = () => {
+    if (xhr.status === 401) sessionEnded();
+    finish(
+      new Error(
+        xhr.status === 200
+          ? "The chat stream ended."
+          : new ServiceError(xhr.status, null).message,
+      ),
+    );
+  };
+  xhr.onerror = () => finish(new Error("Could not reach the Mandate service."));
+  xhr.open(
+    "GET",
+    `${origin()}/v1/conversations/${UuidSchema.parse(id)}/stream?after=${after}`,
+  );
+  xhr.setRequestHeader("authorization", `Bearer ${auth.session.accessToken}`);
+  xhr.setRequestHeader("accept", "text/event-stream");
+  xhr.send();
+  return () => {
+    if (closed) return;
+    closed = true;
+    xhr.abort();
+  };
 }

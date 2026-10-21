@@ -8,6 +8,9 @@ export const RPC_URL: string = appJson.expo.extra.rpcUrl;
 // Mandate service origin for signed login. Not configured in this build.
 export const API_ORIGIN: string | null = appJson.expo.extra.apiOrigin;
 export const EXPLORER = "https://sepolia.basescan.org";
+// Where the Mandate Test Shop serves its product images; null shows a plain
+// placeholder instead.
+export const SHOP_ORIGIN: string | null = appJson.expo.extra.shopOrigin;
 
 export const WALLET_FACTORY: Address =
   "0x094875D5656726980016E8712a8A02C96aD382ce";

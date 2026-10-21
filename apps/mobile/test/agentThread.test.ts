@@ -4,9 +4,7 @@ import {
   agentLine,
   canStop,
   defaultTerms,
-  describeRequest,
   nowDoing,
-  readRequest,
   threadSteps,
 } from "../src/state/agentThread";
 import type { Provider } from "../src/wallet/api";
@@ -28,19 +26,6 @@ const base = TaskViewSchema.parse({
   result: null,
   findings: [],
   nextPollMs: 2000,
-});
-
-test("a plain request becomes a browser check, and anything else is refused", () => {
-  const form = readRequest("Check the checkout form submits", 1000);
-  assert.equal(form.targetId, "checkout-healthy");
-  assert.deepEqual(form.checks, ["pageLoad", "title", "formSubmit"]);
-  assert.equal(form.taskDeadline, "4600");
-  assert.equal(
-    readRequest("test the broken checkout", 1000).targetId,
-    "checkout-broken",
-  );
-  assert.match(describeRequest(form), /checkout page: the page loads/);
-  assert.throws(() => readRequest("send 5 dollars to Bob", 1000));
 });
 
 test("limits come from the providers that support every requested check", () => {

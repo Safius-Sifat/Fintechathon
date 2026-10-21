@@ -1,58 +1,11 @@
-// Turns a typed request and the service's task state into the agent thread.
-// Nothing here invents agent output: the request is read by fixed rules and
-// shown back for confirmation, and every status line comes from the task view.
+// Turns the service's task state into the agent's status lines. Nothing here
+// invents agent output: every line comes from the task view.
 import type { StepItem } from "../components/blocks";
 import type { Provider } from "../wallet/api";
 import type { TaskView } from "../wallet/service-dto/api";
 import { formatAmount } from "../wallet/format";
 import { formatUnitsExact, taskProgress } from "../wallet/service-validation";
-import {
-  browserInput,
-  type BrowserCheck,
-  type BrowserForm,
-  type TermsForm,
-} from "./taskModels";
-
-const CHECK_WORDS: Record<BrowserCheck, string> = {
-  pageLoad: "the page loads",
-  title: "the title shows",
-  formSubmit: "the form submits",
-};
-
-// Reads a plain request as a browser check. The page check runbook is the only
-// one the service runs today, so anything else is refused rather than guessed.
-export function readRequest(
-  text: string,
-  now = Math.floor(Date.now() / 1000),
-): BrowserForm {
-  const t = text.toLowerCase();
-  if (!/\b(check|test|verify|load|page|checkout|site|form)\b/.test(t))
-    throw new Error(
-      "I can only run page checks for now. Try “Check that the checkout page loads”.",
-    );
-  const checks: BrowserCheck[] = ["pageLoad", "title"];
-  if (/\b(form|submit|checkout flow|pay)\b/.test(t)) checks.push("formSubmit");
-  return browserInput(
-    {
-      targetId: /\b(broken|failing|fail|bug)\b/.test(t)
-        ? "checkout-broken"
-        : "checkout-healthy",
-      checks,
-      maxPaidAttempts: 3,
-      maxSteps: 8,
-      taskDeadline: String(now + 3600),
-    },
-    now,
-  );
-}
-
-export function describeRequest(form: BrowserForm) {
-  const page =
-    form.targetId === "checkout-broken"
-      ? "the broken checkout page"
-      : "the checkout page";
-  return `Check ${page}: ${form.checks.map((c) => CHECK_WORDS[c]).join(", ")}.`;
-}
+import type { TermsForm } from "./taskModels";
 
 // Fills the limits from the providers the service publishes for these checks.
 // The service still refuses any recipient not bound to the task.
