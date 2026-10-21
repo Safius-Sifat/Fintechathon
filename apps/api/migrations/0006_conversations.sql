@@ -19,7 +19,7 @@ CREATE INDEX conversations_owner_recent ON conversations(owner_address, updated_
 CREATE TABLE conversation_events (
   conversation_id uuid NOT NULL REFERENCES conversations(id),
   seq bigint NOT NULL,
-  type text NOT NULL CHECK (type IN ('user','agent','products','question','purchase','step','error')),
+  type text NOT NULL CHECK (type IN ('user','agent','products','question','purchase','task','step','error')),
   payload jsonb NOT NULL,
   created_at bigint NOT NULL,
   PRIMARY KEY (conversation_id, seq)

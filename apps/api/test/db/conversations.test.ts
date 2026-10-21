@@ -58,6 +58,12 @@ function fakeAgent(taskId: () => string) {
         size: "42",
         amount: "450000",
       });
+      onEvent({
+        type: "task",
+        taskId: taskId(),
+        runbookId: "browser-check",
+        label: "Check the checkout page",
+      });
       onEvent({ type: "invented", text: "dropped" });
       onEvent({ type: "agent", text: "Ready to approve." });
     },
@@ -143,11 +149,11 @@ test("conversations: a reply is stored in order, links its task and uses a scope
     }[];
     assert.deepEqual(
       events.map((e) => e.type),
-      ["user", "step", "step", "products", "purchase", "agent"],
+      ["user", "step", "step", "products", "purchase", "task", "agent"],
     );
     assert.deepEqual(
       events.map((e) => e.seq),
-      [1, 2, 3, 4, 5, 6],
+      [1, 2, 3, 4, 5, 6, 7],
     );
     assert.equal(events.at(-1)!.payload.text, "Ready to approve.");
 

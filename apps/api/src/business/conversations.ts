@@ -203,7 +203,7 @@ export class ConversationService {
         conversationId: r.id,
         title: r.title,
         pinned: r.pinned,
-        updatedAt: r.updated_at,
+        updatedAt: Number(r.updated_at),
         status:
           Number(r.awaiting) + Number(r.approvals) > 0
             ? "needs_you"
