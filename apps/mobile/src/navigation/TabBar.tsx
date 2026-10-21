@@ -39,7 +39,7 @@ export function TabBar({
         {state.routes.map((route, index) => {
           const selected = state.index === index;
           const tab = meta[route.name];
-          const color = selected ? colors.ink : colors.ink3;
+          const color = selected ? colors.primary : colors.ink3;
           const onPress = () => {
             const event = navigation.emit({
               type: "tabPress",
@@ -102,7 +102,7 @@ const useStyles = makeStyles((colors) => ({
     gap: 2,
     borderRadius: radius.hero,
   },
-  itemSelected: { backgroundColor: colors.tile },
+  itemSelected: { backgroundColor: colors.primaryTint },
   label: { ...type.label },
   labelSelected: { fontWeight: "700" },
 }));

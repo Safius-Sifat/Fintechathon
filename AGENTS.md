@@ -1,6 +1,6 @@
 # Mandate repository instructions
 
-Read README.md, FINAL PLAN.md and your assigned file in docs/plans before editing. Current documentation 7; wallet EIP712 domain 5, Login 2, Invoice 2; Base Sepolia 84532; evidence schema 4 with v7 additive events. v7 adds the agentic layer and policy controls in architecture S9 (Claude Agent SDK agent, WalletPolicy, co-signature, freeze, allowance, call templates, USDC, x402, risk sentinel). Repository root is the monorepo root; do not create implementation/mandate inside it.
+Read README.md, FINAL PLAN.md and your assigned file in docs/plans before editing. Current documentation 7; wallet EIP712 domain 5, Login 2, Invoice 2; Base Sepolia 84532; evidence schema 4 with v7 additive events. v7 adds the agentic layer and policy controls in architecture S9 (OpenAI Agents SDK agent, WalletPolicy, co-signature, freeze, allowance, call templates, USDC, x402, risk sentinel). Repository root is the monorepo root; do not create implementation/mandate inside it.
 
 Ownership: Person1 contracts/schema/root workspace/deployments; Person2 API/sessions/history/owner relay/worker/platform/policy/MPCium/infra; Person3 complete personal/managed mobile wallet/native signing/sessions/security/recovery; Person4 runbooks/providers/payment-request fixtures/SDK/MCP/verifier/demo/release assembly. Coordinate shared interface changes through Person1 and update all consumers.
 

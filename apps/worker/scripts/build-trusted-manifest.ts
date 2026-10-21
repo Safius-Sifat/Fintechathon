@@ -61,6 +61,7 @@ const entries: Record<
   "liquidity-keeper": { path: "packages/runbooks/src/liquidity.ts", kind: 1 },
   "scheduled-pay": { path: "packages/runbooks/src/schedule.ts", kind: 2 },
   "service-allowance": { path: "packages/runbooks/src/advance.ts", kind: 3 },
+  "commerce-buy": { path: "packages/runbooks/src/commerce.ts", kind: 0 },
 };
 const runbooks = await Promise.all(
   RUNBOOK_IDS.map(async (runbookId) => ({
@@ -120,6 +121,11 @@ const manifest = DeploymentManifestSchema.parse({
       recipient: getAddress(env("PROVIDER_B_ADDRESS")),
       capabilities: ["pageLoad", "title", "formSubmit"],
     },
+    {
+      providerId: "shop",
+      recipient: getAddress(env("SHOP_ADDRESS")),
+      capabilities: ["order"],
+    },
   ],
   targets: ["checkout-healthy", "checkout-broken"].map((targetId) => ({
     targetId,
@@ -168,10 +174,10 @@ const manifest = DeploymentManifestSchema.parse({
   },
   x402: { mode: "MANDATE_NATIVE", facilitator: null, gatePassed: false },
   agent: {
-    runtime: "claude-agent-sdk",
+    runtime: "openai-agents-sdk",
     sdkVersion: (await json(join(root, "apps/agent/package.json")))
-      .dependencies["@anthropic-ai/claude-agent-sdk"],
-    model: "claude-opus-5-5",
+      .dependencies["@openai/agents"],
+    model: "gpt-5.6-luna",
     mcpToolsetHash: hashCanonical(MCP_TOOLS),
   },
   dependencyPins: {

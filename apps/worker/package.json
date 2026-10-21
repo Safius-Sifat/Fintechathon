@@ -12,6 +12,7 @@
     "@mandate/platform": "workspace:*",
     "@mandate/runbooks": "workspace:*",
     "@mandate/schema": "workspace:*",
+    "@x402/core": "2.28.0",
     "pg": "8.16.3",
     "viem": "2.38.5",
     "zod": "3.25.76"

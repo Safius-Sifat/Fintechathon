@@ -44,7 +44,7 @@ export const DeploymentManifestSchema = z
         walletImplementation: z.null(),
       })
       .strict(),
-    providers: z.array(ProviderSchema).min(1).max(2),
+    providers: z.array(ProviderSchema).min(1).max(3),
     targets: z
       .array(
         z
@@ -97,7 +97,7 @@ export const DeploymentManifestSchema = z
       ),
     agent: z
       .object({
-        runtime: z.literal("claude-agent-sdk"),
+        runtime: z.literal("openai-agents-sdk"),
         sdkVersion: z.string().regex(/^[0-9]+\.[0-9]+\.[0-9]+$/),
         model: z.string().min(1).max(64),
         mcpToolsetHash: Hex32Schema,

@@ -1,5 +1,6 @@
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { useIsFocused } from "@react-navigation/native";
 import { useState } from "react";
 import { Alert } from "react-native";
 import { Banner } from "../components/Banner";
@@ -15,8 +16,10 @@ import {
   useApiConnection,
 } from "../wallet/api";
 import { API_ORIGIN } from "../wallet/config";
+import { readDelivery } from "../wallet/local";
+import { deliveryLine } from "../state/delivery";
 import * as session from "../wallet/session";
-import { errorText } from "../wallet/useAsync";
+import { errorText, useAsync } from "../wallet/useAsync";
 
 export function SettingsScreen() {
   const navigation =
@@ -25,6 +28,8 @@ export function SettingsScreen() {
   const api = useApiSession();
   const connection = useApiConnection();
   const [error, setError] = useState<string | null>(null);
+  const focused = useIsFocused();
+  const delivery = useAsync(readDelivery, [focused]);
   const run = (f: () => Promise<void>) => () => {
     setError(null);
     f().catch((e) => setError(errorText(e)));
@@ -114,6 +119,16 @@ export function SettingsScreen() {
           onPress={() => navigation.navigate("Contacts", {})}
         />
         <Row label="Accounts" onPress={() => navigation.navigate("Accounts")} />
+        <Row
+          label="Delivery address"
+          detail={
+            delivery.data
+              ? deliveryLine(delivery.data)
+              : "Needed for Mandate Test Shop orders. Nothing ships."
+          }
+          value={delivery.data ? undefined : "Add"}
+          onPress={() => navigation.navigate("DeliveryAddress")}
+        />
         <Row
           label={network.name}
           detail={`Chain ${network.chainId}. Test network only.`}

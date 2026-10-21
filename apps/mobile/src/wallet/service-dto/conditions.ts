@@ -12,12 +12,13 @@ import { ScheduleSchema } from "./authority";
 
 export const TARGET_IDS = ["checkout-healthy", "checkout-broken"] as const;
 export const CHECK_ORDER = ["pageLoad", "title", "formSubmit"] as const;
-export const PROVIDER_IDS = ["a", "b"] as const;
+export const PROVIDER_IDS = ["a", "b", "shop"] as const;
 export const RUNBOOK_IDS = [
   "browser-check",
   "liquidity-keeper",
   "scheduled-pay",
   "service-allowance",
+  "commerce-buy",
 ] as const;
 
 export const TargetIdSchema = z.enum(TARGET_IDS);
@@ -79,6 +80,21 @@ export const AllowanceConditionsSchema = z
     maxPaymentsPerPeriod: uintNumber(200).min(1),
   })
   .strict();
+// One order from the trusted demo shop (plan 05). The owner approves the
+// exact product, size and delivery details (as a hash) and the most it may cost.
+export const CommerceConditionsSchema = z
+  .object({
+    providerId: z.literal("shop"),
+    productId: z.string().regex(/^[a-z0-9-]{1,48}$/),
+    size: z
+      .string()
+      .regex(/^[0-9A-Z.]{1,8}$/)
+      .nullable(),
+    maxAmount: Uint256.refine((v) => big(v) > 0n, "maxAmount must be positive"),
+    deliveryHash: Hex32Schema,
+    taskDeadline: Uint64,
+  })
+  .strict();
 export const CallConditionsSchema = z
   .object({
     templateIds: z
@@ -95,12 +111,13 @@ export const CallConditionsSchema = z
 
 const BRANCH_FOR: Record<
   (typeof RUNBOOK_IDS)[number],
-  "browser" | "liquidity" | "schedule" | "allowance"
+  "browser" | "liquidity" | "schedule" | "allowance" | "commerce"
 > = {
   "browser-check": "browser",
   "liquidity-keeper": "liquidity",
   "scheduled-pay": "schedule",
   "service-allowance": "allowance",
+  "commerce-buy": "commerce",
 };
 
 export const ConditionsSchema = z
@@ -112,12 +129,15 @@ export const ConditionsSchema = z
     schedule: ScheduleSchema.nullable(),
     allowance: AllowanceConditionsSchema.nullable(),
     calls: CallConditionsSchema.nullable(),
+    // Optional rather than nullable, so conditions of the other runbooks keep
+    // their canonical hashes.
+    commerce: CommerceConditionsSchema.optional(),
   })
   .strict()
   .superRefine((c, ctx) => {
     const branches = (
-      ["browser", "liquidity", "schedule", "allowance"] as const
-    ).filter((b) => c[b] !== null);
+      ["browser", "liquidity", "schedule", "allowance", "commerce"] as const
+    ).filter((b) => c[b] !== null && c[b] !== undefined);
     if (branches.length !== 1 || branches[0] !== BRANCH_FOR[c.runbookId])
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
@@ -163,6 +183,7 @@ export const ScopeSchema = z
   .strict();
 
 export type Conditions = z.infer<typeof ConditionsSchema>;
+export type CommerceConditions = z.infer<typeof CommerceConditionsSchema>;
 export type RunbookManifest = z.infer<typeof RunbookManifestSchema>;
 export type Scope = z.infer<typeof ScopeSchema>;
 export type ProviderBinding = z.infer<typeof ProviderBindingSchema>;

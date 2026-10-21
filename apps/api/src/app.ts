@@ -10,6 +10,7 @@ import { registerBusiness } from "./business/routes.js";
 import { AgenticService } from "./business/agentic.js";
 import { ControlService } from "./business/controls.js";
 import { TaskService } from "./business/tasks.js";
+import { ConversationService } from "./business/conversations.js";
 import {
   BusinessService,
   type BusinessDependencies,
@@ -52,6 +53,9 @@ export async function createApi(options: ApiOptions) {
           deps.manifest ?? null,
           clock,
         )
+      : null,
+    options.database
+      ? new ConversationService(options.database, clock, deps.agent ?? null)
       : null,
   );
   return app;

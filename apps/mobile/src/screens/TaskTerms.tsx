@@ -18,6 +18,7 @@ import { useServicePoll } from "../state/useServicePoll";
 import {
   activatePermit,
   draftPermit,
+  listProviders,
   permitContext,
   serviceTaskReferences,
   type OwnerApproval,
@@ -43,7 +44,7 @@ export function TaskTermsScreen({ route, navigation }: Props) {
     recipients: "",
     maxPayment: "",
     spendCap: "",
-    liquidFloor: "0",
+    liquidFloor: "3",
     reviewThreshold: "0",
     startsAt: String(Math.floor(Date.now() / 1000) + 60),
     expiresAt: String(Math.floor(Date.now() / 1000) + 3600),
@@ -76,6 +77,57 @@ export function TaskTermsScreen({ route, navigation }: Props) {
       maxActions: Number(input.maxSteps),
       maxPayments: Number(input.maxPaidAttempts),
     }));
+  }, [reference]);
+  const [providerNote, setProviderNote] = useState<string | null>(null);
+  const loadedProviders = useRef(false);
+  useEffect(() => {
+    const checks = reference?.input?.checks;
+    if (loadedProviders.current || !Array.isArray(checks)) return;
+    loadedProviders.current = true;
+    listProviders()
+      .then((all) => {
+        const fit = all.filter(
+          (p) =>
+            p.available &&
+            p.recipient &&
+            checks.every((c) => p.capabilities.includes(String(c))),
+        );
+        if (fit.length === 0)
+          return setProviderNote(
+            "No published provider supports these checks.",
+          );
+        const top = fit.reduce(
+          (m, p) => (BigInt(p.price) > m ? BigInt(p.price) : m),
+          0n,
+        );
+        const cap =
+          top * BigInt(Number(reference?.input?.maxPaidAttempts) || 1);
+        const limit = 2_000_000n;
+        setForm((f) =>
+          f.recipients
+            ? f
+            : {
+                ...f,
+                recipients: fit.map((p) => p.recipient).join(", "),
+                maxPayment: formatUnitsExact(top.toString(), 6),
+                spendCap: formatUnitsExact(
+                  (cap > limit ? limit : cap).toString(),
+                  6,
+                ),
+              },
+        );
+        setProviderNote(
+          `Filled in from the service's published providers: ${fit
+            .map(
+              (p) =>
+                `provider ${p.providerId.toUpperCase()} at ${formatUnitsExact(p.price, 6)} DemoUSD`,
+            )
+            .join(
+              ", ",
+            )}. The service refuses any recipient not bound to this task.`,
+        );
+      })
+      .catch((e) => setProviderNote(errorText(e)));
   }, [reference]);
   let checked: OwnerApproval | null = null;
   let invalid: string | null = context.error;
@@ -271,15 +323,14 @@ export function TaskTermsScreen({ route, navigation }: Props) {
             multiline
           />
           <Note>
-            Ask the runbook operator for its configured provider recipient
-            addresses. The service has no provider discovery endpoint and will
-            refuse addresses that do not match. No provider is selected for you.
+            {providerNote ??
+              "Looking up the providers the service publishes for this task…"}
           </Note>
           {(
             [
               ["maxPayment", "Most per payment (max 0.500000)"],
               ["spendCap", "Total task cap (max 2.000000)"],
-              ["liquidFloor", "Keep liquid in DemoUSD"],
+              ["liquidFloor", "Keep liquid in DemoUSD (at least 3.000000)"],
               [
                 "reviewThreshold",
                 "Ask me above in DemoUSD (0 asks for every payment)",

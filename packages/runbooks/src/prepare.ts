@@ -7,6 +7,7 @@ import {
 import { type Hex, type Address } from "viem";
 import {
   BrowserInputSchema,
+  CommerceInputSchema,
   LiquidityInputSchema,
   ScheduleInputSchema,
 } from "./validators.js";
@@ -24,6 +25,12 @@ export type PrepareTaskResult = {
   scope: Scope | null;
   runbookManifest: RunbookManifest;
   needsOwnerReason: string | null;
+};
+
+// Replaced by the trusted manifest's shop address when a task is created.
+const DEFAULT_SHOP_BINDING = {
+  providerId: "shop" as const,
+  recipient: "0x90F79bf6EB2c4f870365E785982E1f101E93b906" as Address,
 };
 
 const DEFAULT_PROVIDER_BINDINGS = [
@@ -51,6 +58,7 @@ const KIND: Record<RunbookId, number> = {
   "liquidity-keeper": 1,
   "scheduled-pay": 2,
   "service-allowance": 3,
+  "commerce-buy": 0,
 };
 
 export function createRunbookManifest(
@@ -200,6 +208,46 @@ export function prepareTask(params: PrepareTaskParams): PrepareTaskResult {
       providerBindings: [],
     };
 
+    return {
+      conditions,
+      scope,
+      runbookManifest: manifest,
+      needsOwnerReason: UNBUILT_REASON,
+    };
+  }
+
+  if (runbookId === "commerce-buy") {
+    const parsed = CommerceInputSchema.safeParse(input);
+    if (!parsed.success) {
+      return {
+        conditions: null,
+        scope: null,
+        runbookManifest: manifest,
+        needsOwnerReason: `Invalid commerce-buy input: ${parsed.error.message}`,
+      };
+    }
+    const conditions: Conditions = {
+      schemaVersion: 4,
+      runbookId: "commerce-buy",
+      browser: null,
+      liquidity: null,
+      schedule: null,
+      allowance: null,
+      calls: null,
+      commerce: {
+        providerId: "shop",
+        productId: parsed.data.productId,
+        size: parsed.data.size,
+        maxAmount: parsed.data.maxAmount,
+        deliveryHash: parsed.data.deliveryHash as Hex,
+        taskDeadline: parsed.data.taskDeadline,
+      },
+    };
+    const scope: Scope = {
+      conditions,
+      runbookManifest: manifest,
+      providerBindings: [DEFAULT_SHOP_BINDING],
+    };
     return {
       conditions,
       scope,

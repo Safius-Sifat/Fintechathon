@@ -18,7 +18,8 @@
       "chainId": 84532,
       "stage": "bootstrap",
       "rpcUrl": "https://sepolia.base.org",
-      "apiOrigin": "https://mandate-demo-04323111.malaysiawest.cloudapp.azure.com"
+      "apiOrigin": "https://mandate-demo-04323111.malaysiawest.cloudapp.azure.com",
+      "shopOrigin": "https://mandate-demo-04323111.malaysiawest.cloudapp.azure.com"
     },
     "plugins": [
       [

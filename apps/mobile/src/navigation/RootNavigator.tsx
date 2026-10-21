@@ -7,6 +7,7 @@ import { AgentControlScreen } from "../screens/AgentControl";
 import { ApprovalsScreen } from "../screens/Approvals";
 import { OwnerMoveOutScreen, WalletLimitsScreen } from "../screens/AgentMoney";
 import { ContactsScreen } from "../screens/Contacts";
+import { DeliveryAddressScreen } from "../screens/DeliveryAddress";
 import { TxDetailScreen } from "../screens/TxDetail";
 import {
   ConfirmPhraseScreen,
@@ -24,6 +25,7 @@ import { AgentTokenScreen } from "../screens/AgentToken";
 import { TaskProofScreen } from "../screens/TaskProof";
 import { PreviewIndex, PreviewScreen } from "../screens/preview";
 import { AgentsScreen } from "../screens/AgentsScreen";
+import { AgentWalletScreen } from "../screens/AgentWallet";
 import { ActivityScreen } from "../screens/ActivityScreen";
 import { HomeScreen } from "../screens/HomeScreen";
 import { SetupScreen, WelcomeScreen } from "../screens/Onboarding";
@@ -52,11 +54,13 @@ export type RootStackParamList = {
   Lock: undefined;
   ShowPhrase: undefined;
   Contacts: { pick?: boolean };
+  DeliveryAddress: undefined;
   TxDetail: {
     hash: Hash;
     origin?: "phone" | "agent" | "service";
     taskId?: string;
   };
+  AgentWallet: undefined;
   AgentControl: { command: AdminCommandName; wallet: Address };
   OwnerMoveOut: { wallet: Address };
   WalletLimits: { wallet: Address };
@@ -154,7 +158,12 @@ export function RootNavigator() {
           />
           <Stack.Screen name="TxDetail" component={TxDetailScreen} />
           <Stack.Screen name="Contacts" component={ContactsScreen} />
+          <Stack.Screen
+            name="DeliveryAddress"
+            component={DeliveryAddressScreen}
+          />
           <Stack.Screen name="ShowPhrase" component={ShowPhraseScreen} />
+          <Stack.Screen name="AgentWallet" component={AgentWalletScreen} />
           <Stack.Screen name="AgentControl" component={AgentControlScreen} />
           <Stack.Screen name="OwnerMoveOut" component={OwnerMoveOutScreen} />
           <Stack.Screen name="WalletLimits" component={WalletLimitsScreen} />

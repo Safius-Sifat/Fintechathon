@@ -1,4 +1,4 @@
-import type { EvidenceBundle } from "@mandate/schema";
+import { OrderDeliverySchema, type EvidenceBundle } from "@mandate/schema";
 import {
   createPublicClient,
   decodeEventLog,
@@ -57,9 +57,18 @@ export async function readChainFacts(
 ): Promise<ChainFacts> {
   const receipt = (hash: string) =>
     chain.getTransactionReceipt({ hash: hash as Hash }).catch(() => null);
-  const hashes = bundle.transactions
-    .map((t) => (t as { txHash?: string }).txHash)
-    .filter((h): h is string => typeof h === "string");
+  // The wallet's own transactions, plus the x402 settlements that shop
+  // orders name, which a facilitator submits outside the wallet.
+  const hashes = [
+    ...new Set(
+      [
+        ...bundle.transactions.map((t) => (t as { txHash?: string }).txHash),
+        ...orderDeliveries(bundle).map((o) => o.receipt.paymentTxHash),
+      ]
+        .filter((h): h is string => typeof h === "string")
+        .map((h) => h.toLowerCase()),
+    ),
+  ];
   const [latestBlock, walletOwner, anchorReceipt, ...receipts] =
     await Promise.all([
       chain.getBlockNumber(),
@@ -90,6 +99,18 @@ export async function readChainFacts(
 }
 
 export const REQUIRED_CONFIRMATIONS = 3n;
+
+// A recorded delivery sits in its event's payload, or under `delivery`.
+export const deliveryPayloads = (bundle: EvidenceBundle) =>
+  bundle.events.map(
+    (e) => (e.payload as { delivery?: unknown }).delivery ?? e.payload,
+  );
+
+export const orderDeliveries = (bundle: EvidenceBundle) =>
+  deliveryPayloads(bundle).flatMap((p) => {
+    const order = OrderDeliverySchema.safeParse(p);
+    return order.success ? [order.data] : [];
+  });
 
 const actionAbi = parseAbi([
   "event ActionExecuted(bytes32 indexed permitId, bytes32 indexed requestId, uint8 operation, address asset, address target, uint256 assets, uint256 shares, bytes32 invoiceId, bytes32 inputHash, bytes32 actionDigest, bool ownerApproved)",

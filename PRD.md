@@ -47,7 +47,7 @@ Personal EOA and managed contract have different addresses/funds/fee payers; app
 | F10 Specialized Runbooks | Browser Check, explicit Liquidity Keeper and Scheduled Pay with typed inputs/action/validator/stop rules, SDK/MCP | 4;2 durable worker |
 | F11 Delivery Check | Real signed terms/payment/output binding, original retrieval, bounded fallback and honest failures | 4;2 storage |
 | F12 Mandate Receipt | Append-only evidence/checkpoint/anchor and independent integrity/authority/policy/settlement/delivery/completion findings | 2 writer;4 inspector;1 anchor |
-| F14 LLM Agent | Claude Agent SDK agent (`claude-opus-5-5`) with only Mandate MCP tools; built-in tools disabled; answers bounded questions; defaults on timeout | 4;2 question service |
+| F14 LLM Agent | OpenAI Agents SDK agent (`gpt-5.6-luna`) with only Mandate MCP tools; built-in tools disabled; answers bounded questions; defaults on timeout | 4;2 question service |
 | F15 Intent Compiler | Structured-output draft of runbook input and terms from a goal; schema and policy validation; native side-by-side review | 4 library;2 route;3 UI |
 | F16 Wallet Policy | Owner-signed on-chain per-asset caps, allowlist, blocklist, call templates and review threshold; most restrictive rule wins | 1;2 relay;3 editor;4 verifier |
 | F17 Owner Review | Owner co-signature over exact Action digest above threshold, push delivery, contract verification, rejection releases reservation | 1;2;3;4 verifier |
@@ -66,7 +66,7 @@ Android 12+ and iOS 16+, React Native/Expo54, native Kotlin and Swift modules wi
 
 No universal MetaMask parity claim: multi-chain/mainnet, swaps/bridges, NFT support, WalletConnect/external dApp connections, general contract calls/approvals/typed-message signing, hardware wallets and app-store/iOS release are separate future scope. Every advertised required capability above must work on supported chain; a navigation shell is not a complete release. WalletConnect/external dApp connections are explicitly deferred by user choice. Owner signing stays native in Mandate and produces no external-wallet popup.
 
-Backend Node22/Fastify/viem/Postgres16; self-hosted MPCium pinned source. Competition PoC uses three MPCium containers on the current 4 GiB Azure VM, `mpc_threshold:1`, and an intended two-participant signing quorum. All three participate in DKG. This is a functional threshold-signing demonstration, not independent host-compromise protection. Qualification against the pinned source and outage tests is a release gate. No Circle/embedded owner custody, custom MPC protocol or ordinary-key fallback. The agent runtime is the Claude Agent SDK; no LangChain or hand-written agent loop. Any MCP-capable runtime (for example the GitHub Copilot SDK) can use the same tools under the same limits.
+Backend Node22/Fastify/viem/Postgres16; self-hosted MPCium pinned source. Competition PoC uses three MPCium containers on the current 4 GiB Azure VM, `mpc_threshold:1`, and an intended two-participant signing quorum. All three participate in DKG. This is a functional threshold-signing demonstration, not independent host-compromise protection. Qualification against the pinned source and outage tests is a release gate. No Circle/embedded owner custody, custom MPC protocol or ordinary-key fallback. The agent runtime is the OpenAI Agents SDK; no LangChain or hand-written agent loop. Any MCP-capable runtime (for example the GitHub Copilot SDK) can use the same tools under the same limits.
 
 ## 4. Financial and authority rules
 

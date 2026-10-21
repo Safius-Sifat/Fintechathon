@@ -20,6 +20,10 @@
     "0005_agentic.sql": {
       "kind": "expand",
       "transaction": "required"
+    },
+    "0006_conversations.sql": {
+      "kind": "expand",
+      "transaction": "required"
     }
   }
 }

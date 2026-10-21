@@ -1,3 +1,4 @@
+import type { AgentClient } from "./conversations.js";
 import { randomBytes, randomUUID } from "node:crypto";
 import type { Pool, PoolClient } from "pg";
 import { getAddress, type Address, type Hex, type PublicClient } from "viem";
@@ -60,6 +61,7 @@ export type BusinessDependencies = {
   evidence?: EvidenceDependency | null;
   intentCompiler?: IntentCompiler | null;
   manifest?: DeploymentManifest | null;
+  agent?: AgentClient | null;
 };
 
 type WalletRow = {

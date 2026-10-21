@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { readdir, readFile } from "node:fs/promises";
 import { randomBytes, randomUUID } from "node:crypto";
 import { Pool } from "pg";
 import { privateKeyToAccount, type PrivateKeyAccount } from "viem/accounts";
@@ -54,6 +54,12 @@ export async function isolatedSchema(prefix: string) {
       new URL("../../migrations", import.meta.url).pathname,
     );
     await runMigrations(client, migrations, { schema });
+    // Reviewed manual migrations, as an operator applies them in production.
+    const manual = new URL("../../migrations/manual/", import.meta.url);
+    for (const name of (await readdir(manual))
+      .filter((n) => n.endsWith(".sql"))
+      .sort())
+      await client.query(await readFile(new URL(name, manual), "utf8"));
   } finally {
     client.release();
   }

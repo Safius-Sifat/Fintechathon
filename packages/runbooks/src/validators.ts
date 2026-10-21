@@ -1,6 +1,8 @@
 import {
   BrowserResultSchema,
+  OrderSchema,
   type BrowserResult,
+  type OrderDelivery,
   type DeliveryEnvelope,
   type QuoteEnvelope,
   deliveryDomain,
@@ -56,7 +58,23 @@ export const ScheduleInputSchema = z
   })
   .strict();
 
+// One order from the demo shop (plan 05). The phone sends only the hash of
+// the delivery details; maxAmount is the most the owner will pay.
+export const CommerceInputSchema = z
+  .object({
+    productId: z.string().regex(/^[a-z0-9-]{1,48}$/),
+    size: z
+      .string()
+      .regex(/^[0-9A-Z.]{1,8}$/)
+      .nullable(),
+    maxAmount: z.string().regex(/^[1-9][0-9]*$/),
+    deliveryHash: z.string().regex(/^0x[0-9a-fA-F]{64}$/),
+    taskDeadline: z.string().regex(/^[0-9]+$/),
+  })
+  .strict();
+
 export type BrowserInput = z.infer<typeof BrowserInputSchema>;
+export type CommerceInput = z.infer<typeof CommerceInputSchema>;
 export type LiquidityInput = z.infer<typeof LiquidityInputSchema>;
 export type ScheduleInput = z.infer<typeof ScheduleInputSchema>;
 
@@ -143,5 +161,56 @@ export async function checkDelivery(
   );
   if (!signer || !sameAddress(signer, expected.provider))
     return "The result is not signed by the paid provider.";
+  return null;
+}
+
+// An order counts only when the shop that was paid signed a receipt for this
+// invoice, request and settlement, and the order is exactly what the owner
+// approved: product, size, delivery hash and the paid amount.
+export async function checkOrderDelivery(
+  delivery: OrderDelivery,
+  expected: {
+    wallet: Address;
+    invoiceId: Hex;
+    requestId: Hex;
+    inputHash: Hex;
+    paymentTxHash: Hex;
+    shop: Address;
+    productId: string;
+    size: string | null;
+    deliveryHash: Hex;
+    amount: string;
+  },
+): Promise<string | null> {
+  const order = OrderSchema.safeParse(delivery.order);
+  if (!order.success) return "The order is malformed.";
+  const o = order.data;
+  const r = delivery.receipt;
+  if (r.invoiceId.toLowerCase() !== expected.invoiceId.toLowerCase())
+    return "The order is for another invoice.";
+  if (r.requestId.toLowerCase() !== expected.requestId.toLowerCase())
+    return "The order is for another payment request.";
+  if (r.paymentTxHash.toLowerCase() !== expected.paymentTxHash.toLowerCase())
+    return "The order names another payment.";
+  if (
+    r.inputHash.toLowerCase() !== expected.inputHash.toLowerCase() ||
+    o.inputHash.toLowerCase() !== expected.inputHash.toLowerCase()
+  )
+    return "The order is for another request.";
+  if (
+    o.productId !== expected.productId ||
+    o.size !== expected.size ||
+    o.deliveryHash.toLowerCase() !== expected.deliveryHash.toLowerCase() ||
+    o.amount !== expected.amount
+  )
+    return "The order differs from what was approved.";
+  if (r.resultHash.toLowerCase() !== hashCanonical(o).toLowerCase())
+    return "The order does not match its signed hash.";
+  const signer = await signerOf(
+    hashDigest("DeliveryReceipt", r, deliveryDomain(expected.wallet)),
+    delivery.providerSignature,
+  );
+  if (!signer || !sameAddress(signer, expected.shop))
+    return "The order is not signed by the paid shop.";
   return null;
 }

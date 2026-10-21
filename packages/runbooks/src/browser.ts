@@ -1,4 +1,5 @@
 import {
+  type Action,
   type RunbookSnapshot,
   type RunbookDecision,
   type QuoteEnvelope,
@@ -8,9 +9,10 @@ import {
   hashCanonical,
 } from "@mandate/schema";
 import { type Address, type Hex } from "viem";
+import type { CommerceDeps } from "./commerce.js";
 import { checkDelivery, checkQuote } from "./validators.js";
 
-export type RunbookDeps = {
+export type RunbookDeps = CommerceDeps & {
   quote?: (providerId: "a" | "b", input: unknown) => Promise<QuoteEnvelope>;
   retrieve?: (
     providerId: "a" | "b",
@@ -27,6 +29,22 @@ export type RunbookDeps = {
     previewRedeemAssets: string;
     maxRedeemShares: string;
   }>;
+  // x402 payment (S9.10). Present only when the deployment pays with x402;
+  // otherwise a USDC quote is paid with a normal PAY.
+  x402?: {
+    pay: (
+      providerId: "a" | "b",
+      quote: QuoteEnvelope,
+      action: Action,
+    ) => Promise<
+      | { state: "PENDING"; reason: string }
+      | {
+          state: "DELIVERED";
+          delivery: DeliveryEnvelope;
+          settlementTxHash: Hex;
+        }
+    >;
+  };
   readRisk?: () => Promise<{
     sourceId: "demo-risk-v1";
     state: "NORMAL" | "WARNING";
@@ -139,8 +157,11 @@ export async function advanceBrowserCheck(
       };
     }
 
+    // A USDC quote with x402 terms is paid by x402 when the deployment
+    // supports it: the wallet registers an authorization the provider settles.
+    const useX402 = quote.x402 !== null && !!deps.x402;
     const intent: ActionIntent = {
-      operation: 0, // PAY
+      operation: useX402 ? 6 : 0, // X402 or PAY
       target: quote.invoice.recipient,
       amount: quote.invoice.amount,
       minOutput: "0",
@@ -211,6 +232,13 @@ export async function advanceBrowserCheck(
         nextState: runbookState,
       };
     }
+    if (currentAction.action.operation === 6)
+      return payByX402(
+        snapshot,
+        currentAction,
+        (runbookState.selectedProvider ?? "a") as "a" | "b",
+        deps,
+      );
     if (!deps.retrieve) {
       return {
         type: "FAILED",
@@ -291,5 +319,79 @@ export async function advanceBrowserCheck(
     dueAt: String(Number(snapshot.now) + 10),
     reason: `Pending action state: ${currentAction.state}`,
     nextState: runbookState,
+  };
+}
+
+// Registration is on chain; now the provider settles the wallet's x402
+// authorization and delivers. Nothing settles after the Action's deadline, so
+// an unsettled payment then moves to the next attempt.
+async function payByX402(
+  snapshot: RunbookSnapshot,
+  current: RunbookSnapshot["actions"][number],
+  providerId: "a" | "b",
+  deps: RunbookDeps,
+): Promise<RunbookDecision> {
+  const { runbookState, walletAddress } = snapshot;
+  const nextAttempt = {
+    ...runbookState,
+    attempt: runbookState.attempt + 1,
+    retrievals: 0,
+    selectedProvider: null,
+  };
+  if (!deps.x402)
+    return {
+      type: "FAILED",
+      reason: "The x402 payment service is not connected; nothing was paid",
+      evidence: [],
+      nextState: runbookState,
+    };
+  const quote = runbookState.quotes.find(
+    (q) =>
+      q.invoice.invoiceId.toLowerCase() ===
+      current.action.invoiceId.toLowerCase(),
+  );
+  if (!quote?.x402)
+    return {
+      type: "FAILED",
+      reason: "The x402 quote for this payment is missing",
+      evidence: [],
+      nextState: runbookState,
+    };
+  const paid = await deps.x402.pay(providerId, quote, current.action);
+  if (paid.state === "PENDING") {
+    if (BigInt(snapshot.now) > BigInt(current.action.deadline) + 30n)
+      return {
+        type: "WAIT",
+        dueAt: snapshot.now,
+        reason: `The x402 payment did not settle before its deadline: ${paid.reason}`,
+        nextState: nextAttempt,
+      };
+    return {
+      type: "WAIT",
+      dueAt: String(Number(snapshot.now) + 5),
+      reason: `Waiting for x402 settlement: ${paid.reason}`,
+      nextState: { ...runbookState, retrievals: runbookState.retrievals + 1 },
+    };
+  }
+  const problem = await checkDelivery(paid.delivery, {
+    wallet: walletAddress as Address,
+    invoiceId: current.action.invoiceId as Hex,
+    requestId: current.action.requestId as Hex,
+    inputHash: current.action.inputHash as Hex,
+    paymentTxHash: paid.settlementTxHash,
+    provider: current.action.target as Address,
+  });
+  if (problem)
+    return {
+      type: "WAIT",
+      dueAt: snapshot.now,
+      reason: `Delivery rejected: ${problem}`,
+      nextState: nextAttempt,
+    };
+  return {
+    type: "COMPLETE",
+    result: paid.delivery.result as any,
+    evidence: [paid.delivery as any],
+    nextState: { ...runbookState, delivery: paid.delivery },
   };
 }

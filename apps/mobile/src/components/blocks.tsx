@@ -124,9 +124,10 @@ export function BigAmount({ value, unit }: { value: string; unit?: string }) {
   );
 }
 
-export type StepState = "done" | "now" | "todo";
+export type StepState = "done" | "now" | "todo" | "failed";
 const STEP_WORDS: Record<StepState, string> = {
   done: "Done",
+  failed: "Failed",
   now: "In progress",
   todo: "Not started",
 };
@@ -150,9 +151,11 @@ export function Steps({ items }: { items: readonly StepItem[] }) {
         >
           <View style={styles.stepMark}>
             {step.state === "done" ? (
-              <Icon name="check-circle" size={26} color={colors.ink} />
+              <Icon name="check-circle" size={26} color={colors.good} />
+            ) : step.state === "failed" ? (
+              <Icon name="close-circle" size={26} color={colors.bad} />
             ) : step.state === "now" ? (
-              <ActivityIndicator size="small" color={colors.accent} />
+              <ActivityIndicator size="small" color={colors.primary} />
             ) : (
               <Icon name="circle-outline" size={26} color={colors.ink3} />
             )}
@@ -267,7 +270,7 @@ export function Chips<K extends string>({
             onPress={() => onSelect?.(o.key)}
             style={[styles.chip, on && styles.chipOn]}
           >
-            <Text style={[styles.chipText, on && { color: colors.onInk }]}>
+            <Text style={[styles.chipText, on && { color: colors.onPrimary }]}>
               {o.label}
             </Text>
           </Pressable>
@@ -316,10 +319,12 @@ export function HoldToSeal({
   label,
   onSealed,
   disabled,
+  sealSize = 150,
 }: {
   label: string;
   onSealed?: () => void;
   disabled?: boolean;
+  sealSize?: number;
 }) {
   const styles = useStyles();
   const colors = useColors();
@@ -349,7 +354,7 @@ export function HoldToSeal({
   };
   return (
     <View style={styles.hold}>
-      <Seal size={150} filled={hold.filled} sealed={hold.sealed} />
+      <Seal size={sealSize} filled={hold.filled} sealed={hold.sealed} />
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={label}
@@ -359,7 +364,7 @@ export function HoldToSeal({
         onPressOut={release}
         style={[styles.holdButton, disabled && styles.holdDisabled]}
       >
-        <Icon name="fingerprint" size={20} color={colors.onInk} />
+        <Icon name="fingerprint" size={20} color={colors.onPrimary} />
         <Text style={styles.holdLabel}>{hold.sealed ? "Sealed" : label}</Text>
       </Pressable>
     </View>
@@ -419,7 +424,11 @@ export function ActionTile({
       onPress={onPress}
       style={({ pressed }) => [styles.tile, pressed && styles.pressed]}
     >
-      <Icon name={icon} size={26} color={disabled ? colors.ink4 : colors.ink} />
+      <Icon
+        name={icon}
+        size={26}
+        color={disabled ? colors.ink4 : colors.primary}
+      />
       <Text style={[styles.tileLabel, disabled && { color: colors.ink4 }]}>
         {label}
       </Text>
@@ -512,7 +521,7 @@ const useStyles = makeStyles((colors) => ({
     marginTop: space.sm,
   },
   sectionTitle: { ...type.hero, color: colors.ink },
-  sectionAction: { ...type.body, color: colors.ink2 },
+  sectionAction: { ...type.bodyStrong, color: colors.primary },
   tile: {
     flex: 1,
     minHeight: 86,
@@ -592,7 +601,7 @@ const useStyles = makeStyles((colors) => ({
     width: 2,
     backgroundColor: colors.rule,
   },
-  stepLineDone: { backgroundColor: colors.ink },
+  stepLineDone: { backgroundColor: colors.good },
   stepText: { flex: 1, gap: 2 },
   stepTitle: { ...type.heading, color: colors.ink },
   dim: { color: colors.ink3, fontWeight: "500" },
@@ -617,18 +626,18 @@ const useStyles = makeStyles((colors) => ({
     alignItems: "center",
     justifyContent: "center",
   },
-  chipOn: { backgroundColor: colors.ink, borderColor: colors.ink },
+  chipOn: { backgroundColor: colors.primary, borderColor: colors.primary },
   chipText: { ...type.bodyStrong, color: colors.ink },
   ghost: {
     minHeight: 54,
     borderRadius: radius.pill,
     borderWidth: 1.25,
-    borderColor: colors.ink,
+    borderColor: colors.primary,
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: space.xl,
   },
-  ghostLabel: { ...type.bodyStrong, fontSize: 16, color: colors.ink },
+  ghostLabel: { ...type.bodyStrong, fontSize: 16, color: colors.primary },
   ghostDisabled: { borderColor: colors.rule },
   ghostLabelDisabled: { color: colors.ink4 },
   hold: { alignItems: "center", gap: space.lg },
@@ -636,12 +645,12 @@ const useStyles = makeStyles((colors) => ({
     alignSelf: "stretch",
     minHeight: 56,
     borderRadius: radius.pill,
-    backgroundColor: colors.ink,
+    backgroundColor: colors.primary,
     flexDirection: "row",
     gap: space.sm,
     alignItems: "center",
     justifyContent: "center",
   },
   holdDisabled: { backgroundColor: colors.tile },
-  holdLabel: { ...type.bodyStrong, fontSize: 16, color: colors.onInk },
+  holdLabel: { ...type.bodyStrong, fontSize: 16, color: colors.onPrimary },
 }));

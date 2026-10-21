@@ -195,8 +195,9 @@ export class TaskService {
     const bound = t.scope.providerBindings
       .map((b) => b.recipient.toLowerCase())
       .sort();
+    // Runbooks that pay providers may only pay the providers bound to them.
     if (
-      t.runbook_id === "browser-check" &&
+      (t.runbook_id === "browser-check" || t.runbook_id === "commerce-buy") &&
       recipients.some((r) => !bound.includes(r.toLowerCase()))
     )
       throw new AuthError(

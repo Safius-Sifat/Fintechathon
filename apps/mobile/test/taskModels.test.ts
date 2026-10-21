@@ -45,7 +45,7 @@ const termsForm: TermsForm = {
   recipients: `${other}, ${owner}, ${other}`,
   maxPayment: "0.500000",
   spendCap: "1.000001",
-  liquidFloor: "0",
+  liquidFloor: "3",
   reviewThreshold: "0.1",
   startsAt: "1100",
   expiresAt: "2000",
@@ -107,6 +107,7 @@ test("browser terms require explicit recipients and enforce contract ceilings", 
   assert.equal(terms.maxPayment, "500000");
   assert.equal(terms.spendCap, "1000001");
   assert.equal(terms.reviewThreshold, "100000");
+  assert.equal(terms.liquidFloor, "3000000");
   assert.equal(terms.depositCap, "0");
   assert.deepEqual(TermsSchema.parse(terms), SharedTerms.parse(terms));
   for (const change of [
@@ -114,6 +115,7 @@ test("browser terms require explicit recipients and enforce contract ceilings", 
     { recipients: "0x0000000000000000000000000000000000000000" },
     { maxPayment: "0.500001" },
     { spendCap: "2.000001" },
+    { liquidFloor: "2.999999" },
     { maxPayments: 4 },
     { expiresAt: "1000" },
   ])

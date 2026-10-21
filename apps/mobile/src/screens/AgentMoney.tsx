@@ -14,16 +14,12 @@ import {
 import { Page } from "../components/Page";
 import type { RootStackParamList } from "../navigation/RootNavigator";
 import { fonts, makeStyles, radius, space, type, useColors } from "../theme";
-import {
-  applyPolicy,
-  balanceOf,
-  ownerTransfer,
-  readPolicy,
-} from "../wallet/chain";
+import { balanceOf, ownerTransfer, readPolicy } from "../wallet/chain";
 import { AGENT_ASSETS, POLICY_CEILINGS, TOKENS } from "../wallet/config";
 import { checkAddress, checkAmount } from "../wallet/core";
 import { formatAmount, shortAddress, tokenByName } from "../wallet/format";
 import { readSignedLists } from "../wallet/local";
+import { applyPolicy } from "../wallet/relay";
 import { currentAccount } from "../wallet/session";
 import { checkPolicy, type AssetCap } from "../wallet/typed";
 import { errorText, useAsync } from "../wallet/useAsync";
@@ -163,6 +159,13 @@ interface CapText {
 }
 
 const toText = (v: bigint, decimals: number) => formatUnits(v, decimals);
+// Suggested USDC limits for a wallet that has none, so shop orders can be
+// allowed in the same signature. Shown for review before signing.
+const USDC_START: CapText = { perTx: "0.5", daily: "2", weekly: "5" };
+// USDC leads: it is what the agent shops with.
+const LIMIT_ASSETS = [...AGENT_ASSETS].sort(
+  (a, b) => Number(b.symbol === "USDC") - Number(a.symbol === "USDC"),
+);
 
 // Edits the agent wallet's limits and signs a new WalletPolicy. The tightest
 // rule wins; each limit must fit the contract ceilings.
@@ -196,12 +199,21 @@ export function WalletLimitsScreen({ navigation, route }: LimitProps) {
             daily: toText(c.daily, t.decimals),
             weekly: toText(c.weekly, t.decimals),
           }
-        : { perTx: "", daily: "", weekly: "" };
+        : t.symbol === "USDC"
+          ? USDC_START
+          : { perTx: "", daily: "", weekly: "" };
     }
     setCaps(next);
-    setThreshold(toText(current.data.policy.reviewThreshold, 6));
-    setAllow(current.data.lists?.allowlist ?? []);
-    setBlock(current.data.lists?.blocklist ?? []);
+    // No threshold (max uint) asks for nothing; at the per-payment ceiling
+    // that is the same rule, shown as a readable amount.
+    const th = current.data.policy.reviewThreshold;
+    setThreshold(
+      toText(th > POLICY_CEILINGS.perTx ? POLICY_CEILINGS.perTx : th, 6),
+    );
+    // Keep addresses added while the chain read was still loading.
+    const lists = current.data.lists;
+    setAllow((l) => [...(lists?.allowlist ?? []), ...(l ?? [])]);
+    setBlock((l) => [...(lists?.blocklist ?? []), ...(l ?? [])]);
   }
 
   const parsed = (() => {
@@ -276,8 +288,11 @@ export function WalletLimitsScreen({ navigation, route }: LimitProps) {
           body={current.error}
         />
       ) : null}
+      {current.loading && !caps ? (
+        <Note>Reading the current limits from the chain…</Note>
+      ) : null}
       {caps
-        ? AGENT_ASSETS.map((t) => (
+        ? LIMIT_ASSETS.map((t) => (
             <View key={t.name} style={styles.field}>
               <SectionHeading>{t.name}</SectionHeading>
               {(["perTx", "daily", "weekly"] as const).map((k) => (

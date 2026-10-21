@@ -1,3 +1,4 @@
+import { simulateX402 } from "./simulate.js";
 import type { Pool, PoolClient } from "pg";
 import {
   BaseError,
@@ -416,32 +417,56 @@ export class Executor {
       value: 0n,
     };
     const sender = this.relayer.lanes.normal?.account.address;
-    // Exactly one post-sign simulation per attempt, against fresh state.
-    try {
-      await this.client.call({ account: sender, ...call });
-    } catch (error) {
-      const reverted =
-        error instanceof BaseError &&
-        !!error.walk(
-          (e) =>
-            e instanceof ExecutionRevertedError ||
-            e instanceof RawContractError,
-        );
-      if (!reverted) {
-        // RPC unavailable: keep the signed Action and reservation, retry later.
-        await this.database.query(
-          "UPDATE actions SET denial_code='SIMULATION_UNAVAILABLE',updated_at=$2 WHERE id=$1 AND state='SIGNED'",
-          [row.id, this.clock()],
-        );
+    // Exactly one post-sign simulation per attempt, against fresh state. An
+    // x402 Action is simulated with its settlement (S9.11).
+    if (row.action.operation === 6) {
+      if (!sender) throw new Error("The normal relayer lane is not configured");
+      const sim = await simulateX402(this.client, {
+        sender,
+        wallet: call.to,
+        asset: getAddress(row.asset),
+        execute: { to: call.to, data: call.data },
+        action: row.action,
+      });
+      if (!sim.ok) {
+        if (sim.code === "SIMULATION_UNAVAILABLE") {
+          await this.database.query(
+            "UPDATE actions SET denial_code='SIMULATION_UNAVAILABLE',updated_at=$2 WHERE id=$1 AND state='SIGNED'",
+            [row.id, this.clock()],
+          );
+          return;
+        }
+        await this.setState(this.database, row.id, ["SIGNED"], "DENIED", {
+          denial: sim.code,
+        });
         return;
       }
-      // A usable signature exists, so the reservation is kept until chain history
-      // proves the Action can no longer execute.
-      await this.setState(this.database, row.id, ["SIGNED"], "DENIED", {
-        denial: "SIMULATION_REVERT",
-      });
-      return;
-    }
+    } else
+      try {
+        await this.client.call({ account: sender, ...call });
+      } catch (error) {
+        const reverted =
+          error instanceof BaseError &&
+          !!error.walk(
+            (e) =>
+              e instanceof ExecutionRevertedError ||
+              e instanceof RawContractError,
+          );
+        if (!reverted) {
+          // RPC unavailable: keep the signed Action and reservation, retry later.
+          await this.database.query(
+            "UPDATE actions SET denial_code='SIMULATION_UNAVAILABLE',updated_at=$2 WHERE id=$1 AND state='SIGNED'",
+            [row.id, this.clock()],
+          );
+          return;
+        }
+        // A usable signature exists, so the reservation is kept until chain history
+        // proves the Action can no longer execute.
+        await this.setState(this.database, row.id, ["SIGNED"], "DENIED", {
+          denial: "SIMULATION_REVERT",
+        });
+        return;
+      }
     const quote = await this.relayer.quote("normal", call);
     const tx = await transaction(this.database, async (c) => {
       const journaled = await this.relayer.journal(c, "normal", call, quote, {

@@ -1,3 +1,7 @@
+import {
+  ConversationService,
+  httpAgentClient,
+} from "./business/conversations.js";
 import { readFile } from "node:fs/promises";
 import { getAddress } from "viem";
 import {
@@ -70,6 +74,12 @@ await startFoundationService("api", 3000, async (app, database) => {
     evidence,
     manifest,
     intentCompiler: null,
+    // The chat agent service (plan 05); without it, sending a message
+    // answers 503 instead of a made-up reply.
+    agent:
+      env.AGENT_SERVICE_URL && env.AGENT_SERVICE_TOKEN
+        ? httpAgentClient(env.AGENT_SERVICE_URL, env.AGENT_SERVICE_TOKEN)
+        : null,
   };
   await registerBusiness(
     app,
@@ -94,6 +104,13 @@ await startFoundationService("api", 3000, async (app, database) => {
     database
       ? new TaskService(database, chain?.client ?? null, manifest, () =>
           Math.floor(Date.now() / 1000),
+        )
+      : null,
+    database
+      ? new ConversationService(
+          database,
+          () => Math.floor(Date.now() / 1000),
+          deps.agent ?? null,
         )
       : null,
   );

@@ -84,6 +84,12 @@ export function taskTerms(
   const maxPayment = decimalUnits(form.maxPayment, false);
   const spendCap = decimalUnits(form.spendCap, false);
   const reviewThreshold = decimalUnits(form.reviewThreshold);
+  const liquidFloor = decimalUnits(form.liquidFloor);
+  // MandateLimits.sol MIN_LIQUID_FLOOR: the wallet refuses lower floors.
+  if (BigInt(liquidFloor) < 3000000n)
+    throw new Error(
+      "Keep at least 3.000000 of the asset liquid in the agent wallet.",
+    );
   if (
     BigInt(maxPayment) > 500000n ||
     BigInt(spendCap) > 2000000n ||
@@ -121,7 +127,7 @@ export function taskTerms(
     maxPayment,
     spendCap,
     reviewThreshold,
-    liquidFloor: decimalUnits(form.liquidFloor),
+    liquidFloor,
     depositCap: "0",
     withdrawCap: "0",
     periodCap: "0",
