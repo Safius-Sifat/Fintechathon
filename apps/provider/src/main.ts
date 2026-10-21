@@ -31,6 +31,7 @@ await startFoundationService("provider", 3001, async (app) => {
       a: key("PROVIDER_A_PRIVATE_KEY"),
       b: key("PROVIDER_B_PRIVATE_KEY"),
     },
+    shopKey: key("SHOP_PRIVATE_KEY"),
     store: new InvoiceStore(dataDir),
     chain,
     browser: targets
