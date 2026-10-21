@@ -34,3 +34,10 @@ skills-lock.json
 
 # Provider invoice records (local runs)
 .provider-data/
+# Demo video: generated files. The README video is uploaded to GitHub instead.
+demo/out/
+demo/clips/
+demo/*.mp4
+demo/*.webm
+demo/*.mp3
+demo/*.wav
