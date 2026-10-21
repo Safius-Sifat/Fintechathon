@@ -41,4 +41,14 @@ for (const name of ["light", "dark"] as const) {
   test(`palettes: ${name} button label meets 4.5:1 on ink`, () => {
     assert.ok(contrast(c.onInk, c.ink) >= 4.5);
   });
+  test(`palettes: ${name} primary meets 4.5:1 for its label and as text`, () => {
+    assert.ok(contrast(c.onPrimary, c.primary) >= 4.5, "label on primary");
+    assert.ok(contrast(c.primary, c.ground) >= 4.5, "primary on ground");
+    assert.ok(contrast(c.primary, c.primaryTint) >= 4.5, "primary on tint");
+    assert.ok(contrast(c.ink, c.primaryTint) >= 4.5, "ink on tint");
+  });
+  test(`palettes: ${name} status colours meet 4.5:1 on raised`, () => {
+    for (const s of [c.good, c.warn, c.bad])
+      assert.ok(contrast(s, c.raised) >= 4.5, `${s} on raised`);
+  });
 }

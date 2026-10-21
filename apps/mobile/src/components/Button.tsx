@@ -28,7 +28,7 @@ export function PrimaryButton({
 }: PrimaryButtonProps) {
   const colors = useColors();
   const styles = useStyles();
-  const fg = disabled ? colors.ink4 : colors.onInk;
+  const fg = disabled ? colors.ink4 : colors.onPrimary;
   return (
     <Pressable
       accessibilityRole="button"
@@ -147,14 +147,14 @@ const useStyles = makeStyles((colors) => ({
     paddingHorizontal: space.xl,
     paddingVertical: space.md,
     borderRadius: radius.pill,
-    backgroundColor: colors.ink,
+    backgroundColor: colors.primary,
     overflow: "hidden",
   },
   primaryDisabled: { backgroundColor: colors.tile, boxShadow: "none" },
   primaryLabel: {
     ...type.bodyStrong,
     fontSize: 16,
-    color: colors.onInk,
+    color: colors.onPrimary,
     textAlign: "center",
     flexShrink: 1,
   },
@@ -166,7 +166,7 @@ const useStyles = makeStyles((colors) => ({
   },
   textLabel: {
     ...type.bodyStrong,
-    color: colors.ink2,
+    color: colors.primary,
     textAlign: "center",
   },
   pressed: { opacity: 0.85 },

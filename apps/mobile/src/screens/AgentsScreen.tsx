@@ -1,69 +1,109 @@
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { useState } from "react";
-import { Banner } from "../components/Banner";
+import { useRef, useState } from "react";
+import {
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  Text,
+  View,
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { PrimaryButton } from "../components/Button";
+import { GhostButton } from "../components/blocks";
 import {
-  BigAmount,
-  GhostButton,
-  Note,
-  Row,
-  Rows,
-  SectionHeading,
-  Voice,
-} from "../components/blocks";
-import { Screen } from "../components/Screen";
+  AgentMessage,
+  CardLine,
+  Composer,
+  Suggestions,
+  ThreadCard,
+  UserBubble,
+} from "../components/chat";
+import { Icon } from "../components/Icon";
 import type { RootStackParamList } from "../navigation/RootNavigator";
-import { updateDraft } from "../state/sendDraft";
-import { useDraftContext } from "../state/useSendDraft";
+import { agentLine, describeRequest, readRequest } from "../state/agentThread";
+import type { BrowserForm } from "../state/taskModels";
+import { useServicePoll } from "../state/useServicePoll";
+import { radius, space, type, makeStyles, useColors } from "../theme";
 import {
-  agentWallet,
-  createAgentWallet,
-  recentAgentEvents,
-} from "../wallet/chain";
+  createTask,
+  getTask,
+  registeredServiceWallet,
+  serviceTaskReferences,
+  useApiSession,
+} from "../wallet/api";
+import { agentWallet } from "../wallet/chain";
 import { TOKENS } from "../wallet/config";
-import { formatAmount, shortAddress } from "../wallet/format";
+import { formatAmount } from "../wallet/format";
 import { currentAccount, useWallet } from "../wallet/session";
 import { errorText, useAsync } from "../wallet/useAsync";
-import { ServiceAgent } from "./ServiceAgent";
 
-const EVENT_LABELS: Record<string, string> = {
-  ActionExecuted: "Agent payment",
-  OwnerTransferExecuted: "Moved out by you",
-  WalletPaused: "Pause changed",
-  WalletFrozen: "Freeze changed",
-  WalletPolicyUpdated: "Wallet limits signed",
-  PermitActivated: "Task approved",
-};
+type Nav = NativeStackNavigationProp<RootStackParamList>;
 
-// The agent wallet the factory recorded for this account, read from the
-// chain. Everything here is signed on this phone and sent from the personal
-// account, so it works without the Mandate service.
+const STARTERS = [
+  "Check that the checkout page loads",
+  "Check the checkout form submits",
+  "Test the broken checkout page",
+] as const;
+
+// The agent tab is a conversation: you ask in plain words, the agent reads the
+// request back, and each task continues in its own thread.
 export function AgentsScreen() {
-  const navigation =
-    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const navigation = useNavigation<Nav>();
+  const styles = useStyles();
+  const colors = useColors();
+  const insets = useSafeAreaInsets();
   useWallet();
   const account = currentAccount();
-  const context = useDraftContext();
-  const agent = useAsync(
+  const api = useApiSession();
+  const chain = useAsync(
     () => (account ? agentWallet(account.address) : Promise.resolve(null)),
     [account?.address],
   );
-  const w = agent.data;
-  const events = useAsync(
-    () => (w ? recentAgentEvents(w.address) : Promise.resolve([])),
-    [w?.address],
+  const service = useServicePoll(
+    registeredServiceWallet,
+    "service-wallet",
+    10000,
   );
-  const [error, setError] = useState<string | null>(null);
+  const refs = useServicePoll(serviceTaskReferences, "known-tasks", 10000);
+  const [text, setText] = useState("");
+  const [draft, setDraft] = useState<
+    { text: string; form: BrowserForm } | { text: string; error: string } | null
+  >(null);
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const scroll = useRef<ScrollView>(null);
 
-  const create = async () => {
-    if (!account) return;
+  const w = service.data;
+  const ready = !!api && w?.provisioningState === "READY";
+  const tasks = (refs.data ?? [])
+    .filter((t) => t.walletId === w?.walletId)
+    .slice(0, 5)
+    .reverse();
+
+  const send = (value: string) => {
+    setError(null);
+    try {
+      setDraft({ text: value, form: readRequest(value) });
+    } catch (e) {
+      setDraft({ text: value, error: errorText(e) });
+    }
+  };
+  const start = async () => {
+    if (!draft || !("form" in draft) || !w || busy) return;
     setBusy(true);
     setError(null);
     try {
-      const hash = await createAgentWallet(account.address);
-      navigation.navigate("TxDetail", { hash });
+      const task = await createTask({
+        walletId: w.walletId,
+        runbookId: "browser-check",
+        goal: draft.text,
+        input: { ...draft.form },
+      });
+      setDraft(null);
+      refs.reload();
+      navigation.navigate("TaskDetail", { taskId: task.taskId });
     } catch (e) {
       setError(errorText(e));
     } finally {
@@ -71,162 +111,213 @@ export function AgentsScreen() {
     }
   };
 
+  const balance = chain.data
+    ? `${formatAmount(chain.data.balances[0]!, TOKENS[0]!.decimals)} DUSD`
+    : "Wallet";
   return (
-    <Screen title="Agents">
-      {agent.error ? (
-        <Banner
-          icon="cloud-off-outline"
-          title="Could not read the chain"
-          body={agent.error}
-        />
-      ) : null}
-      {error ? (
-        <Banner icon="alert-outline" title="Not done" body={error} />
-      ) : null}
-      {agent.loading && !w ? <Voice>Checking the chain…</Voice> : null}
-      {!agent.loading && !w && !agent.error ? (
-        <>
-          <Voice>No agent wallet for this account.</Voice>
-          <Note>
-            An agent wallet is a separate contract you own. Creating it costs a
-            small network fee in ETH. Register with the Mandate service below to
-            run tasks.
-          </Note>
-          <PrimaryButton
-            label={busy ? "Creating…" : "Create agent wallet"}
-            disabled={busy}
-            onPress={create}
-          />
-        </>
-      ) : null}
-      {w ? (
-        <>
-          <BigAmount
-            value={formatAmount(w.balances[0]!, TOKENS[0]!.decimals)}
-            unit="DUSD in the agent wallet"
-          />
-          <Rows>
-            <Row label="Address" value={shortAddress(w.address)} mono />
-            <Row
-              label="State"
-              value={w.frozen ? "Frozen" : w.paused ? "Paused" : "Active"}
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      style={[styles.root, { paddingTop: insets.top }]}
+    >
+      <View style={styles.header}>
+        <Text style={styles.title} accessibilityRole="header">
+          Agent
+        </Text>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`Agent wallet, ${balance}`}
+          onPress={() => navigation.navigate("AgentWallet")}
+          style={({ pressed }) => [
+            styles.walletPill,
+            pressed && styles.pressed,
+          ]}
+        >
+          <Icon name="wallet-outline" size={18} color={colors.primary} />
+          <Text style={styles.walletText}>
+            {chain.data?.paused
+              ? "Paused"
+              : chain.data?.frozen
+                ? "Frozen"
+                : balance}
+          </Text>
+        </Pressable>
+      </View>
+      <ScrollView
+        ref={scroll}
+        keyboardShouldPersistTaps="handled"
+        style={styles.scroll}
+        contentContainerStyle={styles.thread}
+        onContentSizeChange={() => scroll.current?.scrollToEnd()}
+      >
+        {!api ? (
+          <AgentMessage text="Sign in to the Mandate service in Settings, and I can run tasks for you.">
+            <GhostButton
+              label="Open Settings"
+              onPress={() =>
+                navigation.navigate("Tabs", { screen: "Settings" })
+              }
             />
-            {TOKENS.slice(1).map((t, i) => (
-              <Row
-                key={t.name}
-                label={t.name}
-                value={formatAmount(w.balances[i + 1]!, t.decimals)}
+          </AgentMessage>
+        ) : !ready ? (
+          <AgentMessage
+            text={
+              service.loading
+                ? "Checking your agent wallet…"
+                : w
+                  ? "Your agent wallet is still being set up. I'll be ready when it is."
+                  : "I need an agent wallet before I can pay for anything. Set one up first."
+            }
+          >
+            {!service.loading ? (
+              <GhostButton
+                label="Set up the agent wallet"
+                onPress={() => navigation.navigate("AgentWallet")}
               />
-            ))}
-          </Rows>
+            ) : null}
+          </AgentMessage>
+        ) : (
+          <AgentMessage text="Tell me what to check. I'll show you the plan and ask before I spend anything." />
+        )}
 
-          <SectionHeading>Money</SectionHeading>
-          <Rows>
-            <Row
-              label="Approvals"
-              detail="Payments the agent wants to make above your limit."
-              onPress={() =>
-                navigation.navigate("Approvals", { wallet: w.address })
+        {tasks.map((t) => (
+          <View key={t.taskId} style={styles.turn}>
+            <UserBubble>{t.goal}</UserBubble>
+            <TaskLine
+              taskId={t.taskId}
+              onOpen={() =>
+                navigation.navigate("TaskDetail", { taskId: t.taskId })
               }
             />
-            <Row
-              label="Fund the agent wallet"
-              detail="A normal send from your account. Funding is not spending."
-              onPress={() => {
-                updateDraft(context, {
-                  recipient: w.address,
-                  asset: "DemoUSD",
-                });
-                navigation.navigate("Send");
-              }}
-            />
-            <Row
-              label="Move funds out"
-              detail="Back to you or another address. This pauses all agents."
-              onPress={() =>
-                navigation.navigate("OwnerMoveOut", { wallet: w.address })
-              }
-            />
-            <Row
-              label="Wallet limits"
-              detail="Per payment, each day, each week, and who agents may pay."
-              onPress={() =>
-                navigation.navigate("WalletLimits", { wallet: w.address })
-              }
-            />
-          </Rows>
+          </View>
+        ))}
 
-          <SectionHeading>Stop</SectionHeading>
-          <Rows>
-            <Row
-              label={w.paused ? "Resume" : "Pause all agents"}
-              detail={
-                w.paused
-                  ? "Lifts the pause. Old approvals stay ended."
-                  : "Nothing new is paid. Resuming needs new approvals."
-              }
-              onPress={() =>
-                navigation.navigate("AgentControl", {
-                  command: w.paused ? "UNPAUSE" : "PAUSE",
-                  wallet: w.address,
-                })
-              }
-            />
-            <Row
-              label={w.frozen ? "Unfreeze the wallet" : "Freeze the wallet"}
-              detail={
-                w.frozen
-                  ? "Agents can pay again within their approvals."
-                  : "Blocks every agent payment until you unfreeze it."
-              }
-              onPress={() =>
-                navigation.navigate("AgentControl", {
-                  command: w.frozen ? "UNFREEZE" : "FREEZE",
-                  wallet: w.address,
-                })
-              }
-            />
-          </Rows>
-
-          <SectionHeading>Last hour</SectionHeading>
-          {events.loading ? (
-            <Note>Reading recent events…</Note>
-          ) : events.error ? (
-            <Note>{events.error}</Note>
-          ) : (events.data ?? []).length === 0 ? (
-            <Note>Nothing happened in this wallet in about the last hour.</Note>
-          ) : (
-            <Rows>
-              {events.data!.map((e) => (
-                <Row
-                  key={`${e.hash}${e.name}`}
-                  label={EVENT_LABELS[e.name] ?? e.name}
-                  detail={`Block ${e.block.toString()}`}
-                  onPress={() =>
-                    navigation.navigate("TxDetail", {
-                      hash: e.hash,
-                      origin: "service",
-                    })
-                  }
-                />
-              ))}
-            </Rows>
-          )}
-          <Note>
-            The public network only answers short history queries, so older
-            events need the Mandate history service. Tasks and approvals need
-            the Mandate service too.
-          </Note>
-        </>
-      ) : null}
-      <ServiceAgent />
-      <GhostButton
-        label="Refresh"
-        onPress={() => {
-          agent.reload();
-          events.reload();
-        }}
-      />
-    </Screen>
+        {draft ? (
+          <View style={styles.turn}>
+            <UserBubble>{draft.text}</UserBubble>
+            {"error" in draft ? (
+              <AgentMessage text={draft.error} />
+            ) : (
+              <AgentMessage text="Here's what I'll do. Nothing is paid until you approve the spending.">
+                <ThreadCard>
+                  <Text style={styles.cardTitle}>
+                    {describeRequest(draft.form)}
+                  </Text>
+                  <CardLine
+                    label="Paid attempts"
+                    value={`Up to ${draft.form.maxPaidAttempts}`}
+                  />
+                  <CardLine label="Finish within" value="1 hour" />
+                  <PrimaryButton
+                    label={busy ? "Starting…" : "Start this task"}
+                    disabled={busy}
+                    onPress={start}
+                  />
+                  <GhostButton
+                    label="Change the details"
+                    onPress={() =>
+                      w &&
+                      navigation.navigate("TaskCreate", {
+                        walletId: w.walletId,
+                      })
+                    }
+                  />
+                </ThreadCard>
+                {error ? <Text style={styles.error}>{error}</Text> : null}
+              </AgentMessage>
+            )}
+          </View>
+        ) : ready && tasks.length === 0 ? (
+          <Suggestions items={STARTERS} onPick={setText} />
+        ) : null}
+      </ScrollView>
+      <View style={styles.composerWrap}>
+        <Composer
+          placeholder={
+            ready ? "Ask your agent to check a page" : "Agent not ready"
+          }
+          value={text}
+          onChange={setText}
+          onSend={ready ? send : undefined}
+          onPlus={
+            ready && w
+              ? () =>
+                  navigation.navigate("TaskCreate", { walletId: w.walletId })
+              : undefined
+          }
+        />
+      </View>
+    </KeyboardAvoidingView>
   );
 }
+
+// The agent's one-line status under an earlier request, from the service.
+function TaskLine({ taskId, onOpen }: { taskId: string; onOpen: () => void }) {
+  const styles = useStyles();
+  const colors = useColors();
+  const task = useServicePoll(() => getTask(taskId), `line:${taskId}`, 10000);
+  return (
+    <AgentMessage>
+      <Pressable
+        accessibilityRole="button"
+        onPress={onOpen}
+        style={({ pressed }) => [styles.lineRow, pressed && styles.pressed]}
+      >
+        <Text style={styles.lineText}>
+          {task.data
+            ? agentLine(task.data)
+            : task.error
+              ? "I can't read this task right now."
+              : "Loading…"}
+        </Text>
+        <Icon name="chevron-right" size={20} color={colors.primary} />
+      </Pressable>
+    </AgentMessage>
+  );
+}
+
+const useStyles = makeStyles((colors) => ({
+  root: { flex: 1, backgroundColor: colors.ground },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: space.xl,
+    paddingTop: space.md,
+    paddingBottom: space.sm,
+  },
+  title: { ...type.hero, color: colors.ink },
+  walletPill: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: space.xs,
+    minHeight: 40,
+    paddingHorizontal: space.md,
+    borderRadius: radius.pill,
+    backgroundColor: colors.primaryTint,
+  },
+  walletText: { ...type.bodyStrong, color: colors.primary },
+  scroll: { flex: 1 },
+  thread: {
+    paddingHorizontal: space.xl,
+    paddingTop: space.md,
+    paddingBottom: space.lg,
+    gap: space.xxl,
+  },
+  turn: { gap: space.md },
+  cardTitle: { ...type.heading, color: colors.ink },
+  error: { ...type.body, color: colors.bad },
+  lineRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: space.sm,
+    minHeight: 44,
+    paddingHorizontal: space.md,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.rule,
+    backgroundColor: colors.raised,
+  },
+  lineText: { ...type.body, color: colors.ink, flex: 1 },
+  composerWrap: { paddingHorizontal: space.lg, paddingBottom: space.sm },
+  pressed: { opacity: 0.8 },
+}));
