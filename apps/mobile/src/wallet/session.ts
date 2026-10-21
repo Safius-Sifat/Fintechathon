@@ -81,13 +81,20 @@ export async function restoreWallet(phrase: string, passphrase: string) {
   await start(await vault.saveWallet(phrase, passphrase), true);
 }
 
+// When the owner last unlocked with Face ID, Touch ID or the passcode.
+let unlockedAt = 0;
+// How long after an unlock the service sign-in may reuse it.
+const SIGN_IN_AFTER_UNLOCK_MS = 60_000;
+
 export async function unlock() {
   seed = await vault.readSeed();
+  unlockedAt = Date.now();
   set({ status: "unlocked" });
 }
 
 export function lock() {
   seed = null;
+  unlockedAt = 0;
   if (state.status === "unlocked") set({ status: "locked" });
 }
 
@@ -142,11 +149,20 @@ export async function confirmBackup() {
 
 // For the signer module only: confirms with the owner, then returns the
 // current account's signer. Screens never call this.
-export async function signerForCurrent(reason: string): Promise<HDAccount> {
+export async function signerForCurrent(
+  reason: string,
+  // Only for the service sign-in: the unlock a moment ago already confirmed
+  // the owner. Payments, permissions and limits always ask again.
+  options: { reuseRecentUnlock?: boolean } = {},
+): Promise<HDAccount> {
   const meta = currentAccount();
   if (!seed || !meta) throw new vault.AuthError("Unlock the wallet first.");
   const unlockedSeed = seed;
-  await vault.confirmOwner(reason);
+  if (
+    !options.reuseRecentUnlock ||
+    Date.now() - unlockedAt > SIGN_IN_AFTER_UNLOCK_MS
+  )
+    await vault.confirmOwner(reason);
   if (
     state.status !== "unlocked" ||
     seed !== unlockedSeed ||
