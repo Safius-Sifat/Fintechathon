@@ -40,6 +40,28 @@ test("provider: lists providers and marks those without a key unavailable", asyn
   assert.equal(json[0].recipient, privateKeyToAccount(KEY_A).address);
   assert.equal(json[1].available, false);
   assert.equal(json[1].recipient, null);
+  assert.deepEqual(json[2], {
+    providerId: "shop",
+    recipient: null,
+    capabilities: ["order"],
+    price: "500000",
+    available: false,
+  });
+});
+
+test("provider: the shop is listed with its own recipient when it has a key", async () => {
+  const server = Fastify();
+  const dir = await mkdtemp(join(tmpdir(), "provider-"));
+  await registerProviderRoutes(server, {
+    keys: {},
+    shopKey: KEY_B,
+    store: new InvoiceStore(dir),
+  });
+  const shop = (await server.inject({ method: "GET", url: "/providers" }))
+    .json()
+    .find((p: { providerId: string }) => p.providerId === "shop");
+  assert.equal(shop.recipient, privateKeyToAccount(KEY_B).address);
+  assert.equal(shop.available, true);
 });
 
 test("provider: without a signing key no quote is issued", async () => {

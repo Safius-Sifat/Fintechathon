@@ -3,6 +3,7 @@ import { type FastifyInstance, type FastifyReply } from "fastify";
 import {
   CheckRequestSchema,
   DeliveryEnvelopeSchema,
+  MAX_SHOP_PRICE,
   QuoteEnvelopeSchema,
   ResultRequestSchema,
   X402ResultRequestSchema,
@@ -50,6 +51,8 @@ export interface ProviderConfig {
   // Provider signing keys, from the environment. A provider without a key is
   // listed as unavailable and refuses to quote.
   keys: { [K in ProviderId]?: Hex | undefined };
+  // The Mandate Test Shop's key, so the shop is listed with the providers.
+  shopKey?: Hex | undefined;
   store: InvoiceStore;
   // Reads Base Sepolia to confirm payments. Without it no result is delivered.
   chain?: ChainReader | undefined;
@@ -74,15 +77,24 @@ export async function registerProviderRoutes(
     if (key) signers[id] = privateKeyToAccount(key);
   }
 
-  app.get("/providers", async () =>
-    (["a", "b"] as const).map((providerId) => ({
+  const shop = config.shopKey ? privateKeyToAccount(config.shopKey) : null;
+  app.get("/providers", async () => [
+    ...(["a", "b"] as const).map((providerId) => ({
       providerId,
       recipient: signers[providerId]?.address ?? null,
       capabilities: CATALOG[providerId].capabilities,
       price: CATALOG[providerId].price,
       available: signers[providerId] !== undefined,
     })),
-  );
+    // Each order has its own price; this is the most any product costs.
+    {
+      providerId: "shop",
+      recipient: shop?.address ?? null,
+      capabilities: ["order"],
+      price: MAX_SHOP_PRICE,
+      available: shop !== null,
+    },
+  ]);
 
   app.post<{ Params: { id: string } }>(
     "/providers/:id/check",
