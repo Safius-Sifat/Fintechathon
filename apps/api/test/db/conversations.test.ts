@@ -279,6 +279,34 @@ test("conversations: another owner cannot read or post, and a second message wai
   }
 });
 
+test("conversations: an empty final message keeps the text the agent wrote", async () => {
+  const agent: AgentClient = {
+    reply: async (_r, onEvent) => {
+      onEvent({ type: "text_delta", text: "The order is ready " });
+      onEvent({ type: "text_delta", text: "for you to approve." });
+      onEvent({ type: "agent", text: "" });
+    },
+  };
+  const s = await setup(agent);
+  try {
+    const id = await s.chat();
+    await s.e.call("POST", `/v1/conversations/${id}/messages`, s.owner, {
+      text: "Size 42",
+      deliveryHash: null,
+    });
+    await s.idle(id);
+    const events = (
+      await s.e.call("GET", `/v1/conversations/${id}/events`, s.owner)
+    ).json().events as { type: string; payload: { text?: string } }[];
+    assert.equal(
+      events.at(-1)!.payload.text,
+      "The order is ready for you to approve.",
+    );
+  } finally {
+    await s.e.close();
+  }
+});
+
 test("conversations: the stream sends stored events, then live text", async () => {
   let release: () => void = () => {};
   const agent: AgentClient = {

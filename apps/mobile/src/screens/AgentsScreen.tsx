@@ -107,7 +107,10 @@ export function AgentsScreen() {
   const delivery = useAsync(readDelivery, [focused]);
   const chat = useConversation(chatId);
   const scroll = useRef<ScrollView>(null);
-  const atBottom = useRef(true);
+  // Follows new messages until you scroll up to read; only your own drags
+  // change it, so the screen's jumps to the end never count as reading.
+  const following = useRef(true);
+  const dragging = useRef(false);
 
   const w = service.data;
   const ready = !!api && w?.provisioningState === "READY";
@@ -163,7 +166,7 @@ export function AgentsScreen() {
     if (!w || outgoing) return;
     setSendError(null);
     setOutgoing(value);
-    atBottom.current = true;
+    following.current = true;
     try {
       const hash = delivery.data ? deliveryHash(delivery.data) : null;
       if (chatId) await chat.send(value, hash);
@@ -184,7 +187,7 @@ export function AgentsScreen() {
     setChatId(id);
     setOutgoing(null);
     setSendError(null);
-    atBottom.current = true;
+    following.current = true;
   };
   const openTask = (taskId: string) =>
     navigation.navigate("TaskDetail", { taskId });
@@ -209,9 +212,13 @@ export function AgentsScreen() {
     }
   };
   const onScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    if (!dragging.current) return;
     const { contentOffset, contentSize, layoutMeasurement } = e.nativeEvent;
-    atBottom.current =
+    following.current =
       contentOffset.y + layoutMeasurement.height >= contentSize.height - 80;
+  };
+  const toEnd = () => {
+    if (following.current) scroll.current?.scrollToEnd({ animated: false });
   };
 
   const balance = chain.data
@@ -299,9 +306,22 @@ export function AgentsScreen() {
         contentContainerStyle={styles.thread}
         onScroll={onScroll}
         scrollEventThrottle={64}
-        onContentSizeChange={() => {
-          if (atBottom.current) scroll.current?.scrollToEnd();
+        onScrollBeginDrag={() => {
+          dragging.current = true;
         }}
+        onScrollEndDrag={(e) => {
+          onScroll(e);
+          dragging.current = false;
+        }}
+        onMomentumScrollBegin={() => {
+          dragging.current = true;
+        }}
+        onMomentumScrollEnd={(e) => {
+          onScroll(e);
+          dragging.current = false;
+        }}
+        onContentSizeChange={toEnd}
+        onLayout={toEnd}
       >
         {!chatId && !outgoing ? (
           <View style={styles.welcome}>

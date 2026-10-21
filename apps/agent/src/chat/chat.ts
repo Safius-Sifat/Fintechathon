@@ -54,15 +54,20 @@ export async function reply(
     maxTurns: options.maxTurns ?? 8,
     ...(options.signal ? { signal: options.signal } : {}),
   });
+  let streamed = "";
   for await (const event of result) {
     if (
       event.type === "raw_model_stream_event" &&
       event.data.type === "output_text_delta"
-    )
+    ) {
+      streamed += event.data.delta;
       emit({ type: "text_delta", text: event.data.delta });
+    }
   }
   await result.completed;
-  const text = String(result.finalOutput ?? "").trim();
+  // A final turn that only called a tool has no output of its own; the reply
+  // is then what the owner saw written.
+  const text = (String(result.finalOutput ?? "").trim() || streamed).trim();
   emit({ type: "agent", text });
   return text;
 }
