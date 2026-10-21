@@ -159,6 +159,13 @@ interface CapText {
 }
 
 const toText = (v: bigint, decimals: number) => formatUnits(v, decimals);
+// Suggested USDC limits for a wallet that has none, so shop orders can be
+// allowed in the same signature. Shown for review before signing.
+const USDC_START: CapText = { perTx: "0.5", daily: "2", weekly: "5" };
+// USDC leads: it is what the agent shops with.
+const LIMIT_ASSETS = [...AGENT_ASSETS].sort(
+  (a, b) => Number(b.symbol === "USDC") - Number(a.symbol === "USDC"),
+);
 
 // Edits the agent wallet's limits and signs a new WalletPolicy. The tightest
 // rule wins; each limit must fit the contract ceilings.
@@ -192,7 +199,9 @@ export function WalletLimitsScreen({ navigation, route }: LimitProps) {
             daily: toText(c.daily, t.decimals),
             weekly: toText(c.weekly, t.decimals),
           }
-        : { perTx: "", daily: "", weekly: "" };
+        : t.symbol === "USDC"
+          ? USDC_START
+          : { perTx: "", daily: "", weekly: "" };
     }
     setCaps(next);
     // No threshold (max uint) asks for nothing; at the per-payment ceiling
@@ -283,7 +292,7 @@ export function WalletLimitsScreen({ navigation, route }: LimitProps) {
         <Note>Reading the current limits from the chain…</Note>
       ) : null}
       {caps
-        ? AGENT_ASSETS.map((t) => (
+        ? LIMIT_ASSETS.map((t) => (
             <View key={t.name} style={styles.field}>
               <SectionHeading>{t.name}</SectionHeading>
               {(["perTx", "daily", "weekly"] as const).map((k) => (

@@ -38,6 +38,7 @@ import {
   createConversation,
   getTask,
   listConversations,
+  listProviders,
   registeredServiceWallet,
   rememberTask,
   runTask,
@@ -325,10 +326,13 @@ export function AgentsScreen() {
                 />
               )
             ) : (
-              <View style={styles.examples}>
-                <Text style={styles.examplesTitle}>Try</Text>
-                <Suggestions items={EXAMPLES} onPick={setText} />
-              </View>
+              <>
+                <View style={styles.examples}>
+                  <Text style={styles.examplesTitle}>Try</Text>
+                  <Suggestions items={EXAMPLES} onPick={setText} />
+                </View>
+                <Discover onTry={setText} />
+              </>
             )}
           </View>
         ) : null}
@@ -420,6 +424,60 @@ export function AgentsScreen() {
         }}
       />
     </KeyboardAvoidingView>
+  );
+}
+
+// The services the agent can pay, as the service publishes them.
+function Discover({ onTry }: { onTry: (prompt: string) => void }) {
+  const styles = useStyles();
+  const colors = useColors();
+  const providers = useAsync(listProviders, []);
+  const services = (providers.data ?? [])
+    .filter((p) => p.available)
+    .map((p) =>
+      p.providerId === "shop"
+        ? {
+            id: p.providerId,
+            icon: "shoe-sneaker" as const,
+            title: "Mandate Test Shop",
+            detail: "Sample shoes, under 0.50 USDC each. Nothing ships.",
+            prompt: "Find running shoes under 0.40 USDC",
+          }
+        : {
+            id: p.providerId,
+            icon: "web-check" as const,
+            title: `Page check by provider ${p.providerId.toUpperCase()}`,
+            detail: `${formatAmount(BigInt(p.price), 6)} DUSD a check`,
+            prompt: "Check that the checkout page loads",
+          },
+    );
+  if (!services.length && !providers.error) return null;
+  return (
+    <View style={styles.examples}>
+      <Text style={styles.examplesTitle}>Services your agent can pay</Text>
+      {providers.error ? (
+        <Text style={styles.welcomeText}>
+          The services can't be listed right now.
+        </Text>
+      ) : null}
+      {services.map((s) => (
+        <View key={s.id} style={styles.service}>
+          <Icon name={s.icon} size={22} color={colors.ink2} />
+          <View style={styles.serviceText}>
+            <Text style={styles.serviceTitle}>{s.title}</Text>
+            <Text style={styles.serviceDetail}>{s.detail}</Text>
+          </View>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`Try ${s.title}`}
+            onPress={() => onTry(s.prompt)}
+            style={({ pressed }) => [styles.try, pressed && styles.pressed]}
+          >
+            <Text style={styles.tryText}>Try</Text>
+          </Pressable>
+        </View>
+      ))}
+    </View>
   );
 }
 
@@ -579,6 +637,27 @@ const useStyles = makeStyles((colors) => ({
   welcomeText: { ...type.body, color: colors.ink2 },
   examples: { gap: space.sm, alignSelf: "stretch", marginTop: space.md },
   examplesTitle: { ...type.label, color: colors.ink3 },
+  service: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: space.md,
+    padding: space.md,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.rule,
+    backgroundColor: colors.raised,
+  },
+  serviceText: { flex: 1, gap: 2 },
+  serviceTitle: { ...type.bodyStrong, color: colors.ink },
+  serviceDetail: { ...type.small, color: colors.ink3 },
+  try: {
+    minHeight: 36,
+    paddingHorizontal: space.lg,
+    borderRadius: radius.pill,
+    justifyContent: "center",
+    backgroundColor: colors.primaryTint,
+  },
+  tryText: { ...type.bodyStrong, color: colors.primary },
   reply: {
     alignSelf: "flex-start",
     backgroundColor: colors.raised,
