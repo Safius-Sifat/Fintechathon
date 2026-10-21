@@ -62,7 +62,14 @@ async function send(to: Hex, data: Hex) {
 
 test("P2-03/P2-04 task create, owner Permit draft and activation on chain, run, and one Action per decision", async () => {
   // Fixture runbook manifest with non-zero artifact hashes stands in for a built release.
-  const built = testManifest(PROVIDER_A);
+  const fixture = testManifest(PROVIDER_A);
+  const built = {
+    ...fixture,
+    runbooks: [
+      ...fixture.runbooks,
+      { ...fixture.runbooks[0]!, runbookId: "commerce-buy" as const },
+    ],
+  };
   const unbuilt = {
     ...built,
     runbooks: built.runbooks.map((r) => ({
@@ -231,6 +238,27 @@ test("P2-03/P2-04 task create, owner Permit draft and activation on chain, run, 
         })
       ).statusCode,
       422,
+    );
+    // An order may only pay the shop bound to it.
+    const order = await e.call("POST", "/v1/tasks", auth, {
+      walletId,
+      runbookId: "commerce-buy",
+      goal: "Buy the Aero Runner",
+      input: {
+        productId: "aero-runner",
+        size: "42",
+        maxAmount: "450000",
+        deliveryHash: "0x" + "ab".repeat(32),
+        taskDeadline: String(now() + 3600),
+      },
+    });
+    assert.equal(order.statusCode, 200, order.body);
+    await assert.rejects(
+      new TaskService(e.pool, chain.client, built, now).draft(principal, {
+        taskId: TaskViewSchema.parse(order.json()).taskId,
+        terms: { ...terms, maxPayments: 1, recipients: [PROVIDER_A] },
+      }),
+      (error: { code?: string }) => error.code === "RECIPIENT_DENIED",
     );
     const drafted = await e.call("POST", "/v1/permits/draft", auth, {
       taskId: task.taskId,
