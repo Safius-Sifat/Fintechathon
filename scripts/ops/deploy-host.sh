@@ -14,6 +14,26 @@ exec >>"$base/logs/$commit.log" 2>&1
 trap 'echo "Deployment failed; inspect private host log" >&3' ERR
 [[ ! -f "$base/state/needs-reconciliation" ]] || { echo 'Reconcile previous interrupted deployment before retry'; exit 1; }
 source_repo="$base/source"
+# Every release keeps its own dependencies and image, so old ones are removed:
+# only the named commits stay. A failed cleanup never fails the deployment.
+prune_releases() {
+  local keep=" $* " dir tag
+  for dir in "$base/releases"/*/; do
+    [[ -d "$dir" && "$keep" != *" $(basename "$dir") "* ]] || continue
+    git -C "$source_repo" worktree remove --force "$dir" || rm -rf "$dir" || true
+  done
+  git -C "$source_repo" worktree prune || true
+  docker image ls --format '{{.Repository}}:{{.Tag}}' mandate-api | while read -r tag; do
+    [[ "$keep" == *" ${tag#mandate-api:} "* ]] || docker image rm "$tag" >/dev/null || true
+  done || true
+  docker builder prune --force >/dev/null || true
+}
+running_commit=''
+if [[ -f "$base/state/current" ]]; then read -r _ _ running_commit _ < "$base/state/current"; fi
+prune_releases "$running_commit" "$commit"
+# A full disk fails the build half-way and leaves Run Command waiting; stop first.
+free_kb=$(df --output=avail -k "$base" | tail -n 1)
+(( free_kb > 4 * 1024 * 1024 )) || { echo 'Less than 4 GB free on the app disk; deployment stopped' >&3; exit 1; }
 git -C "$source_repo" fetch origin main
 git -C "$source_repo" merge-base --is-ancestor "$commit" origin/main
 [[ "$(git -C "$source_repo" rev-parse origin/main)" == "$commit" ]] || { echo 'Superseded main commit'; exit 1; }
@@ -92,4 +112,5 @@ fi
 printf '%s %s %s %s\n' "$image" "${manifest:--}" "$commit" "$mode" > "$base/state/current.tmp"
 mv "$base/state/current.tmp" "$base/state/current"
 rm "$base/state/needs-reconciliation"
+prune_releases "$commit" "$previous_commit"
 echo "MANDATE_DEPLOY_OK $commit" >&3

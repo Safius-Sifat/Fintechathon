@@ -64,7 +64,7 @@ systemctl status mandate-backup.timer
 sudo -u mandate-deploy cat /opt/mandate/state/current
 ```
 
-Root-owned `/opt/mandate/bin/deploy` is installed from the reviewed deployment script. Updates to that controller require an explicit operator installation; ordinary releases fetch application source from main. Logs are private under `/opt/mandate/logs`.
+Root-owned `/opt/mandate/bin/deploy` is installed from the reviewed deployment script. Updates to that controller require an explicit operator installation; ordinary releases fetch application source from main. Logs are private under `/opt/mandate/logs`. Each deployment keeps only the running and previous release worktrees and API images, clears the Docker build cache, and stops before building when the app disk has less than 4 GB free.
 
 ## Limits
 
