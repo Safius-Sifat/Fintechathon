@@ -629,6 +629,99 @@ const draftMutations: [string, (d: OwnerApproval) => void][] = [
     },
   ],
 ];
+const DELIVERY = Hex32Schema.parse("0x" + "cd".repeat(32));
+// A shop order: one payment of at most the price, to the bound shop only.
+function orderExample() {
+  const base = example();
+  const vector = vectors.valid[0]!;
+  const shop = hashes.recipients.input[0]!;
+  const scope = ScopeSchema.parse({
+    conditions: {
+      schemaVersion: 4,
+      runbookId: "commerce-buy",
+      browser: null,
+      liquidity: null,
+      schedule: null,
+      allowance: null,
+      calls: null,
+      commerce: {
+        providerId: "shop",
+        productId: "aero-runner",
+        size: "42",
+        maxAmount: "450000",
+        deliveryHash: DELIVERY,
+        taskDeadline: vector.message.expiresAt,
+      },
+    },
+    runbookManifest: {
+      ...hashes.runbookManifest.input,
+      runbookId: "commerce-buy",
+    },
+    providerBindings: [{ providerId: "shop", recipient: shop }],
+  });
+  const message = SharedPermit.parse({
+    ...vector.message,
+    maxPayments: 1,
+    maxPayment: "450000",
+    spendCap: "450000",
+    reviewThreshold: "450000",
+    recipientsHash: hashRecipients([shop]),
+    conditionsHash: hashConditions(scope.conditions),
+    runbookHash: hashRunbook(scope.runbookManifest),
+  });
+  const domain = walletDomain(vector.domain.verifyingContract);
+  const draft = OwnerApprovalSchema.parse({
+    ...base.draft,
+    typedData: typedDataJson("Permit", message, domain),
+    scope,
+    recipients: [shop],
+    digest: hashDigest("Permit", message, domain),
+  });
+  const context: PermitContext = {
+    ...base.context,
+    task: { ...base.task, runbookId: "commerce-buy" },
+    terms: {
+      ...base.context.terms!,
+      maxPayments: 1,
+      maxPayment: "450000",
+      spendCap: "450000",
+      reviewThreshold: "450000",
+      recipients: [shop],
+    },
+    order: {
+      productId: "aero-runner",
+      size: "42",
+      amount: "450000",
+      deliveryHash: DELIVERY,
+    },
+  };
+  return { draft, context };
+}
+
+test("service: an order Permit for the order shown passes", () => {
+  const { draft, context } = orderExample();
+  assert.deepEqual(validatePermitDraft(draft, context), draft);
+});
+for (const [name, change] of [
+  ["another product", { productId: "trail-pro" }],
+  ["another size", { size: "43" }],
+  ["another price", { amount: "400000" }],
+  ["another address", { deliveryHash: OTHER_HASH }],
+] as const)
+  test(`service: an order Permit rejects ${name} than shown`, () => {
+    const { draft, context } = orderExample();
+    context.order = { ...context.order!, ...change };
+    assert.throws(
+      () => validatePermitDraft(draft, context),
+      /differs from the one shown/,
+    );
+  });
+test("service: an order Permit needs the order it was shown for", () => {
+  const { draft, context } = orderExample();
+  delete context.order;
+  assert.throws(() => validatePermitDraft(draft, context));
+});
+
 for (const [name, mutate] of draftMutations)
   test(`service: Permit rejects ${name}`, () => {
     const { draft, context } = example();

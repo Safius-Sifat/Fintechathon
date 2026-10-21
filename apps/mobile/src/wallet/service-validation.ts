@@ -155,6 +155,13 @@ export interface PermitContext {
   agentAssets: readonly Address[];
   executor: Address;
   terms?: Terms;
+  // The order shown to the owner; an order Permit must commit to exactly it.
+  order?: {
+    productId: string;
+    size: string | null;
+    amount: string;
+    deliveryHash: Hex;
+  };
 }
 export function validatePermitDraft(value: unknown, context: PermitContext) {
   const draft = OwnerApprovalSchema.parse(value);
@@ -251,6 +258,33 @@ export function validatePermitDraft(value: unknown, context: PermitContext) {
         conditions.browser!.providerIds.includes(b.providerId),
       ),
       "Unexpected provider binding.",
+    );
+  }
+  if (conditions.commerce) {
+    const c = conditions.commerce;
+    const o = context.order;
+    requireMatch(
+      !!o &&
+        c.productId === o.productId &&
+        c.size === o.size &&
+        c.maxAmount === o.amount &&
+        c.deliveryHash.toLowerCase() === o.deliveryHash.toLowerCase(),
+      "The order differs from the one shown.",
+    );
+    requireMatch(
+      p.kind === 0 &&
+        BigInt(p.expiresAt) <= BigInt(c.taskDeadline) &&
+        p.maxPayments === 1 &&
+        BigInt(p.maxPayment) <= BigInt(c.maxAmount) &&
+        BigInt(p.spendCap) <= BigInt(c.maxAmount),
+      "The order's limits exceed its price.",
+    );
+    requireMatch(
+      providerBindings.length === 1 &&
+        providerBindings[0]!.providerId === "shop" &&
+        canonicalJson([providerBindings[0]!.recipient.toLowerCase()]) ===
+          canonicalJson(draft.recipients.map((a) => a.toLowerCase())),
+      "The order must pay only the shop.",
     );
   }
   if (p.kind !== 2)

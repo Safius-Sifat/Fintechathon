@@ -160,7 +160,15 @@ export function TaskDetailScreen({ navigation, route }: Props) {
           />
         ) : (
           <>
-            <AgentMessage text={agentLine(task, pending.length, signed)}>
+            <AgentMessage
+              text={
+                task.runbookId === "commerce-buy" &&
+                task.outcomeState === "AWAITING_OWNER" &&
+                !signed
+                  ? "Approve this order from its chat with the agent."
+                  : agentLine(task, pending.length, signed)
+              }
+            >
               <ThreadSteps items={threadSteps(task, signed)} />
             </AgentMessage>
 
@@ -278,7 +286,9 @@ export function TaskDetailScreen({ navigation, route }: Props) {
           </>
         )}
       </ScrollView>
-      {task?.outcomeState === "AWAITING_OWNER" && !signed ? (
+      {task?.outcomeState === "AWAITING_OWNER" &&
+      !signed &&
+      task.runbookId === "browser-check" ? (
         <ApproveSheet
           bottomInset={insets.bottom}
           taskId={taskId}

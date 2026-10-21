@@ -88,7 +88,7 @@ export function taskTerms(
   // MandateLimits.sol MIN_LIQUID_FLOOR: the wallet refuses lower floors.
   if (BigInt(liquidFloor) < 3000000n)
     throw new Error(
-      "Keep at least 3.000000 DemoUSD liquid in the agent wallet.",
+      "Keep at least 3.000000 of the asset liquid in the agent wallet.",
     );
   if (
     BigInt(maxPayment) > 500000n ||

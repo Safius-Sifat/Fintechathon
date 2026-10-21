@@ -50,6 +50,7 @@ import { ShopProductSchema } from "./service-dto/provider";
 import {
   AddressSchema,
   Hex32Schema,
+  JsonObjectSchema,
   Uint256,
   UuidSchema,
   Uint64,
@@ -473,6 +474,24 @@ export async function createTask(
   gate.assert(auth.ticket);
   return task;
 }
+// Keeps a task the agent prepared, so its approval can propose limits from
+// the task's input as for tasks started on this phone.
+export async function rememberTask(task: {
+  taskId: string;
+  walletId: string;
+  goal: string;
+  input: Record<string, unknown>;
+}) {
+  const auth = authorized();
+  await updateServiceReferences(auth.session.owner, (refs) => ({
+    ...refs,
+    tasks: [task, ...refs.tasks.filter((t) => t.taskId !== task.taskId)].slice(
+      0,
+      100,
+    ),
+  }));
+  gate.assert(auth.ticket);
+}
 export async function getTask(taskId: string) {
   UuidSchema.parse(taskId);
   const task = await get(`/v1/tasks/${taskId}`, TaskViewSchema);
@@ -873,6 +892,7 @@ const ChatPayloadSchema = z.discriminatedUnion("type", [
     taskId: UuidSchema,
     runbookId: z.string().max(40),
     label: z.string().max(200),
+    input: JsonObjectSchema,
   }),
   z.object({ type: z.literal("error"), message: z.string().max(400) }),
 ]);

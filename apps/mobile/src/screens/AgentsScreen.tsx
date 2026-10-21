@@ -1,4 +1,4 @@
-import { useNavigation } from "@react-navigation/native";
+import { useIsFocused, useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -23,7 +23,13 @@ import {
 import { Icon } from "../components/Icon";
 import { MandateMark } from "../components/MandateMark";
 import type { RootStackParamList } from "../navigation/RootNavigator";
-import { canStop, nowDoing } from "../state/agentThread";
+import {
+  canStop,
+  nowDoing,
+  signedTasks,
+  startedTasks,
+} from "../state/agentThread";
+import { deliveryHash } from "../state/delivery";
 import { useConversation } from "../state/chat";
 import { chatTitle, type ChatCard, type Turn } from "../state/chatThread";
 import { useServicePoll } from "../state/useServicePoll";
@@ -33,12 +39,15 @@ import {
   getTask,
   listConversations,
   registeredServiceWallet,
+  rememberTask,
+  runTask,
   sendMessage,
   useApiSession,
 } from "../wallet/api";
 import { agentWallet } from "../wallet/chain";
 import { TOKENS } from "../wallet/config";
 import { formatAmount } from "../wallet/format";
+import { readDelivery } from "../wallet/local";
 import type { TaskView } from "../wallet/service-dto/api";
 import { currentAccount, useWallet } from "../wallet/session";
 import { errorText, useAsync } from "../wallet/useAsync";
@@ -52,6 +61,7 @@ import {
   WorkingSteps,
 } from "./agent/cards";
 import { HistoryDrawer } from "./agent/HistoryDrawer";
+import { OrderSheet, type OrderRequest } from "./agent/OrderSheet";
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
@@ -91,6 +101,9 @@ export function AgentsScreen() {
   // Your message until the service has stored it.
   const [outgoing, setOutgoing] = useState<string | null>(null);
   const [sendError, setSendError] = useState<string | null>(null);
+  const [ordering, setOrdering] = useState<OrderRequest | null>(null);
+  const focused = useIsFocused();
+  const delivery = useAsync(readDelivery, [focused]);
   const chat = useConversation(chatId);
   const scroll = useRef<ScrollView>(null);
   const atBottom = useRef(true);
@@ -119,6 +132,24 @@ export function AgentsScreen() {
   const doing =
     [...taskMap.values()].map((t) => nowDoing(t)).find(Boolean) ?? null;
 
+  // The agent starts on its own once an approval is active on chain.
+  useEffect(() => {
+    for (const t of taskMap.values())
+      if (
+        t.authorityState === "ACTIVE" &&
+        t.outcomeState === "READY" &&
+        !startedTasks.has(t.taskId)
+      ) {
+        startedTasks.add(t.taskId);
+        runTask(t.taskId)
+          .then(tasks.reload)
+          .catch((e) => {
+            startedTasks.delete(t.taskId);
+            setSendError(errorText(e));
+          });
+      }
+  }, [taskMap, tasks.reload]);
+
   useEffect(() => {
     if (
       outgoing &&
@@ -133,11 +164,12 @@ export function AgentsScreen() {
     setOutgoing(value);
     atBottom.current = true;
     try {
-      if (chatId) await chat.send(value, null);
+      const hash = delivery.data ? deliveryHash(delivery.data) : null;
+      if (chatId) await chat.send(value, hash);
       else {
         const created = await createConversation(w.walletId);
         setChatId(created.conversationId);
-        await sendMessage(created.conversationId, value, null);
+        await sendMessage(created.conversationId, value, hash);
       }
       history.reload();
     } catch (e) {
@@ -155,6 +187,26 @@ export function AgentsScreen() {
   };
   const openTask = (taskId: string) =>
     navigation.navigate("TaskDetail", { taskId });
+  // A check the agent prepared is kept with its input, so its approval can
+  // propose limits as for checks started on this phone.
+  const openCheck = async (c: {
+    taskId: string;
+    label: string;
+    input: Record<string, unknown>;
+  }) => {
+    if (!w) return;
+    try {
+      await rememberTask({
+        taskId: c.taskId,
+        walletId: w.walletId,
+        goal: c.label,
+        input: c.input,
+      });
+      openTask(c.taskId);
+    } catch (e) {
+      setSendError(errorText(e));
+    }
+  };
   const onScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
     const { contentOffset, contentSize, layoutMeasurement } = e.nativeEvent;
     atBottom.current =
@@ -295,6 +347,8 @@ export function AgentsScreen() {
             tasks={taskMap}
             onSend={ready ? send : undefined}
             onOpenTask={openTask}
+            onOpenCheck={openCheck}
+            onApprove={setOrdering}
           />
         ))}
 
@@ -335,6 +389,22 @@ export function AgentsScreen() {
         />
       </View>
 
+      {ordering ? (
+        <OrderSheet
+          order={ordering}
+          onClose={() => setOrdering(null)}
+          onSigned={() => {
+            signedTasks.add(ordering.taskId);
+            setOrdering(null);
+            tasks.reload();
+          }}
+          onAddAddress={() => {
+            setOrdering(null);
+            navigation.navigate("DeliveryAddress");
+          }}
+        />
+      ) : null}
+
       <HistoryDrawer
         open={drawer}
         chats={history.data ?? []}
@@ -359,6 +429,8 @@ function TurnView({
   tasks,
   onSend,
   onOpenTask,
+  onOpenCheck,
+  onApprove,
 }: {
   turn: Turn;
   // The newest reply, whose questions and products can still be answered.
@@ -366,6 +438,12 @@ function TurnView({
   tasks: Map<string, TaskView>;
   onSend: ((text: string) => void) | undefined;
   onOpenTask: (taskId: string) => void;
+  onOpenCheck: (check: {
+    taskId: string;
+    label: string;
+    input: Record<string, unknown>;
+  }) => void;
+  onApprove: (order: OrderRequest) => void;
 }) {
   const styles = useStyles();
   if (turn.kind === "user") return <UserBubble>{turn.text}</UserBubble>;
@@ -393,26 +471,37 @@ function TurnView({
             onPick={answer}
           />
         );
-      case "purchase":
+      case "purchase": {
+        const task = tasks.get(c.taskId);
+        const waiting =
+          task?.outcomeState === "AWAITING_OWNER" && !signedTasks.has(c.taskId);
         return (
           <OrderCard
             key={c.key}
             product={c.product}
             size={c.size}
             amount={c.amount}
-            task={tasks.get(c.taskId)}
-            onOpen={() => onOpenTask(c.taskId)}
+            task={task}
+            waiting={waiting}
+            onOpen={() => (waiting ? onApprove(c) : onOpenTask(c.taskId))}
           />
         );
-      case "task":
+      }
+      case "task": {
+        const task = tasks.get(c.taskId);
         return (
           <CheckCard
             key={c.key}
             label={c.label}
-            task={tasks.get(c.taskId)}
-            onOpen={() => onOpenTask(c.taskId)}
+            task={task}
+            waiting={
+              task?.outcomeState === "AWAITING_OWNER" &&
+              !signedTasks.has(c.taskId)
+            }
+            onOpen={() => onOpenCheck(c)}
           />
         );
+      }
       case "error":
         return <ErrorLine key={c.key} message={c.message} />;
     }

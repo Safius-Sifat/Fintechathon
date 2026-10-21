@@ -1,7 +1,8 @@
-// Non-secret data kept on this phone: account names, contacts, and the
-// transactions this phone sent. Never holds phrases, seeds or keys.
+// Non-secret data kept on this phone: account names, contacts, the test
+// delivery address and the transactions this phone sent. Never holds phrases,
+// seeds or keys.
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import type { Address, Hash } from "viem";
+import type { Address, Hash, Hex } from "viem";
 
 async function read<T>(key: string, fallback: T): Promise<T> {
   const raw = await AsyncStorage.getItem(key);
@@ -62,8 +63,23 @@ export const readSignedLists = (wallet: Address) =>
 export const writeSignedLists = (wallet: Address, l: SignedLists) =>
   write(listsKey(wallet), l);
 
+// A test delivery address for Mandate Test Shop orders. Only a salted hash
+// of it leaves the phone, and nothing ships.
+export interface DeliveryAddress {
+  name: string;
+  line1: string;
+  city: string;
+  postcode: string;
+  country: string;
+  salt: Hex;
+}
+const DELIVERY = "mandate.delivery.v1";
+export const readDelivery = () => read<DeliveryAddress | null>(DELIVERY, null);
+export const writeDelivery = (a: DeliveryAddress) => write(DELIVERY, a);
+export const removeDelivery = () => AsyncStorage.removeItem(DELIVERY);
+
 export async function clearLocal() {
-  await AsyncStorage.multiRemove([PROFILE, CONTACTS, SENT]);
+  await AsyncStorage.multiRemove([PROFILE, CONTACTS, SENT, DELIVERY]);
 }
 
 export interface ServiceTaskReference {

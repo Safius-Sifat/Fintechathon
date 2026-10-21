@@ -1,6 +1,7 @@
 import { useState } from "react";
 import {
   ActivityIndicator,
+  Linking,
   Pressable,
   ScrollView,
   Text,
@@ -19,10 +20,14 @@ import {
   makeStyles,
   useColors,
 } from "../../theme";
-import { SHOP_ORIGIN } from "../../wallet/config";
-import { formatAmount } from "../../wallet/format";
+import { EXPLORER, SHOP_ORIGIN } from "../../wallet/config";
+import { formatAmount, shortAddress } from "../../wallet/format";
+import { Hex32Schema } from "../../wallet/service-dto/primitives";
 import type { TaskView } from "../../wallet/service-dto/api";
-import type { ShopProduct } from "../../wallet/service-dto/provider";
+import {
+  OrderSchema,
+  type ShopProduct,
+} from "../../wallet/service-dto/provider";
 
 export const usdc = (units: string) => `${formatAmount(BigInt(units), 6)} USDC`;
 
@@ -235,16 +240,19 @@ export function OrderCard({
   size,
   amount,
   task,
+  waiting,
   onOpen,
 }: {
   product: ShopProduct;
   size: string | null;
   amount: string;
   task: TaskView | undefined;
+  // The order waits for your approval.
+  waiting: boolean;
   onOpen: () => void;
 }) {
   const styles = useStyles();
-  const waiting = task?.outcomeState === "AWAITING_OWNER";
+  const receipt = orderReceipt(task);
   return (
     <ThreadCard>
       <View style={styles.orderHead}>
@@ -259,8 +267,31 @@ export function OrderCard({
           </Text>
         </View>
       </View>
-      <CardLine label="Price" value={usdc(amount)} />
-      <CardLine label="Shop" value="Mandate Test Shop" />
+      {receipt ? (
+        <>
+          <CardLine label="Order" value={shortAddress(receipt.order.orderId)} />
+          <CardLine label="Paid" value={usdc(receipt.order.amount)} />
+          <Pressable
+            accessibilityRole="link"
+            accessibilityLabel="View the payment on BaseScan"
+            onPress={() =>
+              Linking.openURL(`${EXPLORER}/tx/${receipt.paymentTxHash}`)
+            }
+            hitSlop={8}
+            style={styles.txLink}
+          >
+            <Text style={styles.txLabel}>Payment</Text>
+            <Text style={styles.txValue}>
+              {shortAddress(receipt.paymentTxHash)} ↗
+            </Text>
+          </Pressable>
+        </>
+      ) : (
+        <>
+          <CardLine label="Price" value={usdc(amount)} />
+          <CardLine label="Shop" value="Mandate Test Shop" />
+        </>
+      )}
       <TaskStatus task={task} />
       <Pressable
         accessibilityRole="button"
@@ -279,18 +310,31 @@ export function OrderCard({
   );
 }
 
+// The shop's order and the payment's transaction, once the order completed.
+function orderReceipt(task: TaskView | undefined) {
+  if (task?.runbookId !== "commerce-buy" || task.outcomeState !== "COMPLETED")
+    return null;
+  const order = OrderSchema.safeParse(task.result?.order);
+  const tx = Hex32Schema.safeParse(task.result?.paymentTxHash);
+  return order.success && tx.success
+    ? { order: order.data, paymentTxHash: tx.data }
+    : null;
+}
+
 // A paid page check the agent prepared.
 export function CheckCard({
   label,
   task,
+  waiting,
   onOpen,
 }: {
   label: string;
   task: TaskView | undefined;
+  // The check waits for your approval.
+  waiting: boolean;
   onOpen: () => void;
 }) {
   const styles = useStyles();
-  const waiting = task?.outcomeState === "AWAITING_OWNER";
   return (
     <ThreadCard>
       <Text style={styles.cardTitle}>{label}</Text>
@@ -451,6 +495,13 @@ const useStyles = makeStyles((colors) => ({
   },
   secondaryText: { ...type.bodyStrong, color: colors.ink },
   fine: { ...type.small, color: colors.ink3 },
+  txLink: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: space.md,
+  },
+  txLabel: { ...type.body, color: colors.ink2 },
+  txValue: { ...type.bodyStrong, color: colors.primary },
   error: { flexDirection: "row", gap: space.sm, alignItems: "flex-start" },
   errorText: { ...type.body, color: colors.bad, flex: 1 },
   pressed: { opacity: 0.8 },

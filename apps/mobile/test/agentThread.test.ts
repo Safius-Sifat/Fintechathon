@@ -5,6 +5,7 @@ import {
   canStop,
   defaultTerms,
   nowDoing,
+  orderTerms,
   threadSteps,
 } from "../src/state/agentThread";
 import type { Provider } from "../src/wallet/api";
@@ -127,3 +128,27 @@ test("status lines follow the service states, and Stop shows only while the agen
 function owner(n: number) {
   return `0x${String(n).repeat(40)}` as const;
 }
+
+test("an order allows one payment of its price to the published shop", () => {
+  const shop = {
+    providerId: "shop",
+    recipient: "0x00000000000000000000000000000000000000a1",
+    capabilities: ["order"],
+    price: "0",
+    available: true,
+  } as Provider;
+  const form = orderTerms([shop], { amount: "450000", preparedAt: 1000 }, 1000);
+  assert.equal(form.recipients, shop.recipient);
+  assert.equal(form.maxPayment, "0.450000");
+  assert.equal(form.spendCap, "0.450000");
+  assert.equal(form.maxPayments, 1);
+  assert.equal(form.expiresAt, String(1000 + 15 * 60));
+  assert.throws(
+    () => orderTerms([], { amount: "450000", preparedAt: 1000 }, 1000),
+    /not available/,
+  );
+  assert.throws(
+    () => orderTerms([shop], { amount: "450000", preparedAt: 1000 }, 4500),
+    /expired/,
+  );
+});

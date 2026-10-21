@@ -7,6 +7,7 @@ import { AgentControlScreen } from "../screens/AgentControl";
 import { ApprovalsScreen } from "../screens/Approvals";
 import { OwnerMoveOutScreen, WalletLimitsScreen } from "../screens/AgentMoney";
 import { ContactsScreen } from "../screens/Contacts";
+import { DeliveryAddressScreen } from "../screens/DeliveryAddress";
 import { TxDetailScreen } from "../screens/TxDetail";
 import {
   ConfirmPhraseScreen,
@@ -53,6 +54,7 @@ export type RootStackParamList = {
   Lock: undefined;
   ShowPhrase: undefined;
   Contacts: { pick?: boolean };
+  DeliveryAddress: undefined;
   TxDetail: {
     hash: Hash;
     origin?: "phone" | "agent" | "service";
@@ -156,6 +158,10 @@ export function RootNavigator() {
           />
           <Stack.Screen name="TxDetail" component={TxDetailScreen} />
           <Stack.Screen name="Contacts" component={ContactsScreen} />
+          <Stack.Screen
+            name="DeliveryAddress"
+            component={DeliveryAddressScreen}
+          />
           <Stack.Screen name="ShowPhrase" component={ShowPhraseScreen} />
           <Stack.Screen name="AgentWallet" component={AgentWalletScreen} />
           <Stack.Screen name="AgentControl" component={AgentControlScreen} />

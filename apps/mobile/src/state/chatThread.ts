@@ -21,8 +21,16 @@ export type ChatCard =
       product: ShopProduct;
       size: string | null;
       amount: string;
+      // When the agent prepared the order, in seconds.
+      preparedAt: number;
     }
-  | { kind: "task"; key: string; taskId: string; label: string }
+  | {
+      kind: "task";
+      key: string;
+      taskId: string;
+      label: string;
+      input: Record<string, unknown>;
+    }
   | { kind: "error"; key: string; message: string };
 
 export type Turn =
@@ -106,6 +114,7 @@ export function buildThread(
           product: e.product,
           size: e.size,
           amount: e.amount,
+          preparedAt: e.createdAt,
         });
         break;
       case "task":
@@ -114,6 +123,7 @@ export function buildThread(
           key,
           taskId: e.taskId,
           label: e.label,
+          input: e.input,
         });
         break;
       case "error":

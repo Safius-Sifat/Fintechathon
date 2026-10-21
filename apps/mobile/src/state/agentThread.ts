@@ -48,6 +48,42 @@ export function defaultTerms(
   };
 }
 
+// The order is ready about this long after the agent prepared it; its task
+// ends an hour after that.
+const ORDER_WINDOW = 15 * 60;
+const TASK_LIFE = 3600;
+
+// Limits for one shop order: a single payment of exactly its price, to the
+// shop the service publishes, for at most 15 minutes.
+export function orderTerms(
+  providers: Provider[],
+  order: { amount: string; preparedAt: number },
+  now = Math.floor(Date.now() / 1000),
+): TermsForm {
+  const shop = providers.find(
+    (p) => p.providerId === "shop" && p.available && p.recipient !== null,
+  );
+  if (!shop) throw new Error("The Mandate Test Shop is not available now.");
+  const expiresAt = Math.min(
+    now + ORDER_WINDOW,
+    order.preparedAt + TASK_LIFE - 60,
+  );
+  if (expiresAt <= now + 120)
+    throw new Error("This order has expired. Ask the agent again.");
+  const price = formatUnitsExact(order.amount, 6);
+  return {
+    recipients: shop.recipient!,
+    maxPayment: price,
+    spendCap: price,
+    liquidFloor: "3",
+    reviewThreshold: price,
+    startsAt: String(now + 30),
+    expiresAt: String(expiresAt),
+    maxActions: 2,
+    maxPayments: 1,
+  };
+}
+
 const stopped = ["REVOKED", "EXPIRED", "INVALIDATED", "FROZEN"];
 
 // Tasks whose permission was signed on this phone in this session. The service
@@ -74,17 +110,20 @@ export function agentLine(
     return "Approved on your phone. Waiting for it to land on chain before I start.";
   if (pendingApprovals > 0)
     return "A payment needs your approval before I continue.";
+  const order = task.runbookId === "commerce-buy";
   if (task.outcomeState === "COMPLETED")
     return progress.done
-      ? "Done. Here's what the provider found."
-      : "The provider sent a result. The payment isn't final on chain yet.";
+      ? order
+        ? "Ordered. The shop's signed receipt is below."
+        : "Done. Here's what the provider found."
+      : `The ${order ? "shop sent a receipt" : "provider sent a result"}. The payment isn't final on chain yet.`;
   if (task.outcomeState === "DELIVERY_FAILED")
-    return "I paid, but the provider's result didn't check out.";
+    return `I paid, but the ${order ? "shop's receipt" : "provider's result"} didn't check out.`;
   if (task.outcomeState === "NEEDS_OWNER")
     return "I'm stuck and need you to look at this task.";
   if (task.outcomeState === "RUNNING" || task.outcomeState === "AWAITING_AGENT")
     return progress.payment === "FAILED"
-      ? "A payment didn't go through. Check the agent wallet holds enough DemoUSD above what I must keep."
+      ? "A payment didn't go through. Check the agent wallet holds enough above what I must keep."
       : "Working on it.";
   return "Approved. Starting now.";
 }
@@ -112,8 +151,9 @@ export function threadSteps(
   const working =
     ["RUNNING", "AWAITING_AGENT"].includes(task.outcomeState) &&
     taskProgress(task).payment !== "FAILED";
+  const order = task.runbookId === "commerce-buy";
   steps.push({
-    title: "Checking the page",
+    title: order ? "Placing the order" : "Checking the page",
     state:
       task.outcomeState === "COMPLETED" ||
       task.outcomeState === "DELIVERY_FAILED"
@@ -123,10 +163,12 @@ export function threadSteps(
           : "todo",
   });
   for (const p of task.payments) {
-    const who = p.providerId
-      ? `provider ${p.providerId.toUpperCase()}`
-      : "a provider";
-    const amount = `${formatAmount(BigInt(p.amountUnits), 6)} DUSD`;
+    const who = order
+      ? "the shop"
+      : p.providerId
+        ? `provider ${p.providerId.toUpperCase()}`
+        : "a provider";
+    const amount = `${formatAmount(BigInt(p.amountUnits), 6)} ${order ? "USDC" : "DUSD"}`;
     steps.push(
       PAYMENT_FAILED.includes(p.chainState)
         ? { title: `Payment of ${amount} to ${who} failed`, state: "failed" }
@@ -143,10 +185,12 @@ export function threadSteps(
     steps.push({
       title:
         task.delivery.state === "VALID"
-          ? "Result received and verified"
+          ? order
+            ? "Receipt received and verified"
+            : "Result received and verified"
           : task.delivery.state === "PENDING"
-            ? "Waiting for the provider's result"
-            : "The provider's result failed checks",
+            ? `Waiting for the ${order ? "shop's receipt" : "provider's result"}`
+            : `The ${order ? "shop's receipt" : "provider's result"} failed checks`,
       state: task.delivery.state === "PENDING" ? "now" : "done",
     });
   return steps;
@@ -170,6 +214,10 @@ export function nowDoing(
   if (task.delivery.state === "PENDING")
     return "Waiting for the provider's result";
   if (taskProgress(task).payment === "FAILED") return null;
+  if (task.runbookId === "commerce-buy")
+    return task.payments.length
+      ? "Placing the order"
+      : "Getting the shop's quote";
   return task.payments.length
     ? "Checking the page"
     : "Asking providers for a quote";
