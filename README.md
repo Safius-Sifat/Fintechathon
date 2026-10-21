@@ -62,14 +62,14 @@ Built for the PBCSF Fintechathon, Topic F. It runs on the Base Sepolia test netw
 |     | Feature                  | In simple words                                                                                          |
 | --- | ------------------------ | -------------------------------------------------------------------------------------------------------- |
 | 👛  | **Personal wallet**      | Create or restore a wallet, send and receive tokens, scan QR codes. Keys stay on the phone.              |
-| 🤖  | **AI agent**             | A real agent built on the OpenAI Agents SDK picks a provider, pays for a task and collects the result.    |
+| 🤖  | **AI agent**             | A real agent built on the OpenAI Agents SDK picks a provider, pays for a task and collects the result.   |
 | 📜  | **On-chain rules**       | Spending limits, allowed recipients, time windows and call templates are enforced by the smart contract. |
 | ✋  | **Owner approval**       | Bigger or unusual payments wait for you to approve them on your phone (co-signature).                    |
 | 🧊  | **Freeze and stop**      | One tap freezes or stops an agent on-chain.                                                              |
-| 🔐  | **Shared signing (MPC)** | Agent payments are signed by several servers together, so no single server holds a full key.            |
+| 🔐  | **Shared signing (MPC)** | Agent payments are signed by several servers together, so no single server holds a full key.             |
 | 🛡️  | **Risk checks**          | A policy service screens each payment before it is signed.                                               |
 | 🧾  | **Verifiable evidence**  | Each task's history is hashed and anchored on-chain; a separate verifier tool checks it.                 |
-| 💵  | **USDC and x402**        | Agents can pay in test USDC, including web services that charge per request (x402).                     |
+| 💵  | **USDC and x402**        | Agents can pay in test USDC, including web services that charge per request (x402).                      |
 
 ## How it works
 
@@ -100,10 +100,10 @@ flowchart LR
 
 | Area                    | Third-party packages                                                                                                                                                                                                                                |
 | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| AI agent                | [OpenAI Agents SDK](https://www.npmjs.com/package/@openai/agents) 0.20.0                                                                                                                                                            |
+| AI agent                | [OpenAI Agents SDK](https://www.npmjs.com/package/@openai/agents) 0.20.0                                                                                                                                                                            |
 | Backend                 | [Fastify](https://fastify.dev) 5.6.2, [viem](https://viem.sh) 2.38.5, [zod](https://zod.dev) 3.25.76, [jose](https://github.com/panva/jose) 6.1.0, [pg](https://node-postgres.com) 8.16.3, [playwright-core](https://playwright.dev) 1.55.1, dotenv |
 | Shared schema           | viem, zod, [@scure/bip39](https://github.com/paulmillr/scure-bip39) 1.6.0, [json-canonicalize](https://www.npmjs.com/package/json-canonicalize) 1.2.0                                                                                               |
-| Mobile app              | [Expo](https://expo.dev) SDK 54, React Native 0.81.5, React 19.1.0, React Navigation, expo-secure-store, expo-local-authentication, expo-camera, react-native-svg, react-native-qrcode-svg                                                           |
+| Mobile app              | [Expo](https://expo.dev) SDK 54, React Native 0.81.5, React 19.1.0, React Navigation, expo-secure-store, expo-local-authentication, expo-camera, react-native-svg, react-native-qrcode-svg                                                          |
 | Smart contracts         | [OpenZeppelin Contracts](https://www.openzeppelin.com/contracts) 5.4.0, [Foundry](https://book.getfoundry.sh), Solidity 0.8.28                                                                                                                      |
 | MPC signing (Go 1.25.8) | [MPCium](https://github.com/fystack/mpcium) (pinned `90e3ee3`), pgx, nats.go, decred secp256k1                                                                                                                                                      |
 | Infrastructure          | PostgreSQL 16, NATS 2.11, Consul 1.21, Docker, Caddy, Azure                                                                                                                                                                                         |
@@ -261,22 +261,22 @@ Step-by-step guide: [mobile build](docs/mobile-build.md).
 
 Each area has its own test command. GitHub Actions also runs these on every pull request.
 
-| What is tested  | Command                                                  | What the tests check                                                                                                                                                         |
-| --------------- | -------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| What is tested  | Command                                                  | What the tests check                                                                                                                                                             |
+| --------------- | -------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Smart contracts | `make check-contracts`                                   | Spending limits, allowances, approvals, freeze, replay protection, x402 payments, recovery, owner transfer, plus "can never happen" invariant tests and a live-network fork test |
-| Shared formats  | `make check-schema`                                      | The TypeScript and Solidity code produce the exact same hashes and signatures                                                                                                |
-| API             | `pnpm --filter @mandate/api check`                       | Login, sessions and routes against a real database                                                                                                                           |
-| Worker          | `pnpm --filter @mandate/worker check`                    | Key storage, reading receipts, restarts, and a full MPC payment end to end                                                                                                  |
-| Policy          | `pnpm --filter @mandate/policy check`                    | Risk screening rules                                                                                                                                                         |
-| Provider        | `pnpm --filter @mandate/provider check`                  | Signed quotes, only exact payments count, and results come from a real browser check                                                                                         |
-| Agent, MCP, SDK | `pnpm --filter @mandate/agent check` (also `mcp`, `sdk`) | The agent and its tools behave correctly                                                                                                                                     |
-| Verifier        | `pnpm --filter @mandate/verifier check`                  | Evidence checks catch tampering                                                                                                                                              |
-| Runbooks        | `pnpm --filter @mandate/runbooks check`                  | Task recipes are valid                                                                                                                                                       |
-| Mobile app      | `make check-mobile`                                      | Wallet logic, send drafts, service calls and screen logic                                                                                                                    |
-| Database        | `pnpm test:migrations` and `pnpm test:db`                | Migrations apply cleanly on a fresh PostgreSQL                                                                                                                               |
-| MPC services    | `go test -race ./...` in each `services/mpc-*` folder    | Signing requests and signatures are checked correctly (run `make mpc-fetch` first)                                                                                           |
-| Whole repo      | `pnpm typecheck`, `pnpm check:repository`                | Types compile and repository rules hold                                                                                                                                      |
-| Container       | `bash scripts/ops/container-smoke.sh <image>`            | The production image starts and answers health checks                                                                                                                       |
+| Shared formats  | `make check-schema`                                      | The TypeScript and Solidity code produce the exact same hashes and signatures                                                                                                    |
+| API             | `pnpm --filter @mandate/api check`                       | Login, sessions and routes against a real database                                                                                                                               |
+| Worker          | `pnpm --filter @mandate/worker check`                    | Key storage, reading receipts, restarts, and a full MPC payment end to end                                                                                                       |
+| Policy          | `pnpm --filter @mandate/policy check`                    | Risk screening rules                                                                                                                                                             |
+| Provider        | `pnpm --filter @mandate/provider check`                  | Signed quotes, only exact payments count, and results come from a real browser check                                                                                             |
+| Agent, MCP, SDK | `pnpm --filter @mandate/agent check` (also `mcp`, `sdk`) | The agent and its tools behave correctly                                                                                                                                         |
+| Verifier        | `pnpm --filter @mandate/verifier check`                  | Evidence checks catch tampering                                                                                                                                                  |
+| Runbooks        | `pnpm --filter @mandate/runbooks check`                  | Task recipes are valid                                                                                                                                                           |
+| Mobile app      | `make check-mobile`                                      | Wallet logic, send drafts, service calls and screen logic                                                                                                                        |
+| Database        | `pnpm test:migrations` and `pnpm test:db`                | Migrations apply cleanly on a fresh PostgreSQL                                                                                                                                   |
+| MPC services    | `go test -race ./...` in each `services/mpc-*` folder    | Signing requests and signatures are checked correctly (run `make mpc-fetch` first)                                                                                               |
+| Whole repo      | `pnpm typecheck`, `pnpm check:repository`                | Types compile and repository rules hold                                                                                                                                          |
+| Container       | `bash scripts/ops/container-smoke.sh <image>`            | The production image starts and answers health checks                                                                                                                            |
 
 Checks for parts that are not finished yet (`check-platform`, `check-agents`, `check-integration`) fail on purpose instead of pretending to pass.
 
@@ -301,22 +301,22 @@ Mandate never fakes a payment or a result. If something is missing, it fails wit
 
 ## Documentation
 
-| Topic           | Document                                                                                                    |
-| --------------- | ----------------------------------------------------------------------------------------------------------- |
-| Product idea    | [Pitch](pitch.md), [PRD](PRD.md)                                                                            |
-| How it is built | [Architecture](architecture.md), [master plan](FINAL%20PLAN.md), [complete app](docs/COMPLETE-APP.md)       |
-| Setting up      | [Setup](docs/SETUP.md), [mobile build](docs/mobile-build.md)                                                |
+| Topic           | Document                                                                                                      |
+| --------------- | ------------------------------------------------------------------------------------------------------------- |
+| Product idea    | [Pitch](pitch.md), [PRD](PRD.md)                                                                              |
+| How it is built | [Architecture](architecture.md), [master plan](FINAL%20PLAN.md), [complete app](docs/COMPLETE-APP.md)         |
+| Setting up      | [Setup](docs/SETUP.md), [mobile build](docs/mobile-build.md)                                                  |
 | Security        | [Security self-assessment](docs/security-self-assessment.md), [contract security](docs/contracts-security.md) |
-| APIs            | [Owner sessions](docs/api/OWNER-SESSIONS.md), [owner transfer](docs/owner-transfer.md)                      |
-| Teamwork        | [Coordination and merge rules](docs/COORDINATION-AND-MERGE-POLICY.md), [review](review.md)                  |
+| APIs            | [Owner sessions](docs/api/OWNER-SESSIONS.md), [owner transfer](docs/owner-transfer.md)                        |
+| Teamwork        | [Coordination and merge rules](docs/COORDINATION-AND-MERGE-POLICY.md), [review](review.md)                    |
 
 Older documents are kept in [docs/archive](docs/archive/pre-bootstrap-2026-10-17/) for history only.
 
 ## Team
 
-| Member   | Responsible for                              | Plan                                                                     |
-| -------- | -------------------------------------------- | ------------------------------------------------------------------------ |
-| Person 1 | Smart contracts, shared formats, deployment  | [Plan 01](docs/plans/01%20-%20Contracts%20and%20Shared%20Interfaces.md)  |
-| Person 2 | Backend, policy, MPC signing, infrastructure | [Plan 02](docs/plans/02%20-%20Platform%20Policy%20and%20MPCium.md)       |
-| Person 3 | Mobile wallet (Android and iOS)              | [Plan 03](docs/plans/03%20-%20Android%20Owner%20Wallet.md)               |
+| Member   | Responsible for                              | Plan                                                                          |
+| -------- | -------------------------------------------- | ----------------------------------------------------------------------------- |
+| Person 1 | Smart contracts, shared formats, deployment  | [Plan 01](docs/plans/01%20-%20Contracts%20and%20Shared%20Interfaces.md)       |
+| Person 2 | Backend, policy, MPC signing, infrastructure | [Plan 02](docs/plans/02%20-%20Platform%20Policy%20and%20MPCium.md)            |
+| Person 3 | Mobile wallet (Android and iOS)              | [Plan 03](docs/plans/03%20-%20Android%20Owner%20Wallet.md)                    |
 | Person 4 | Agents, providers, verifier, demo            | [Plan 04](docs/plans/04%20-%20Agents%20Services%20Inspection%20and%20Demo.md) |
