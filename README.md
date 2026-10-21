@@ -1,3 +1,7 @@
+
+
+
+
 <h1 align="center">Mandate Wallet</h1>
 
 <p align="center"><strong>Your wallet. Your agents. Your rules.</strong></p>
@@ -26,6 +30,13 @@
   <a href="pitch.md">Pitch</a> ·
   <a href="architecture.md">Architecture</a> ·
   <a href="docs/SETUP.md">Setup guide</a>
+</p>
+
+https://github.com/user-attachments/assets/786351cc-10ab-4f77-83a2-54eedb4b8b6c
+
+<p align="center">
+  <sub>A real 3-minute walkthrough on Base Sepolia: restore a wallet, set the agent's limits, shop by chat, approve with Face ID and pay on chain.<br>
+  <a href="demo/PROOF.md">Check every wallet and transaction on BaseScan</a>.</sub>
 </p>
 
 ---
