@@ -223,3 +223,40 @@ test("chat server: a model failure becomes a plain error event, not a fake reply
     { type: "error", message: "The agent's model is not configured." },
   ]);
 });
+
+test("chat server: a reply is not cancelled once the request body is read", async () => {
+  let aborted: boolean | null = null;
+  const app = chatServer({
+    serviceToken: "s",
+    apiUrl: "https://api.test",
+    shopUrl: "https://shop.test",
+    reply: async (_ctx, _history, emit, opts) => {
+      await new Promise((r) => setTimeout(r, 50));
+      aborted = opts?.signal?.aborted ?? null;
+      emit({ type: "agent", text: "done" });
+      return "done";
+    },
+  });
+  await app.listen({ port: 0, host: "127.0.0.1" });
+  try {
+    const { port } = app.server.address() as { port: number };
+    const res = await fetch(`http://127.0.0.1:${port}/v1/reply`, {
+      method: "POST",
+      headers: {
+        authorization: "Bearer s",
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        conversationId: "33333333-3333-4333-8333-333333333333",
+        walletId: "22222222-2222-4222-8222-222222222222",
+        token: TOKEN,
+        deliveryHash: null,
+        history: [{ role: "user", text: "hello" }],
+      }),
+    });
+    assert.match(await res.text(), /"type":"agent"/);
+    assert.equal(aborted, false);
+  } finally {
+    await app.close();
+  }
+});
