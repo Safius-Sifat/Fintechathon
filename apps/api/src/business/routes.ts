@@ -6,7 +6,11 @@ import type { BusinessService } from "./service.js";
 import type { AgenticService } from "./agentic.js";
 import type { ControlService } from "./controls.js";
 import type { TaskService } from "./tasks.js";
-import type { ConversationService } from "./conversations.js";
+import type {
+  ConversationService,
+  ConversationUpdate,
+  StoredEvent,
+} from "./conversations.js";
 
 const emptyBody = z.object({}).strict();
 const idParam = z.object({}).catchall(UuidSchema);
@@ -377,11 +381,24 @@ export async function registerBusiness(
         const { conversationId } = parse(chatParam, request.params);
         const { after } = parse(afterQuery, request.query);
         const who = await principal(request);
-        const backlog = await chats().events(
-          who,
-          conversationId,
-          Number(after ?? 0),
+        // Subscribed before reading the backlog so nothing appended in between
+        // is missed; stored events are deduplicated by seq.
+        const early: ConversationUpdate[] = [];
+        let deliver = (event: ConversationUpdate): unknown => early.push(event);
+        const unsubscribe = chats().subscribe(conversationId, (event) =>
+          deliver(event),
         );
+        let backlog: StoredEvent[];
+        try {
+          backlog = await chats().events(
+            who,
+            conversationId,
+            Number(after ?? 0),
+          );
+        } catch (error) {
+          unsubscribe();
+          throw error;
+        }
         reply.hijack();
         const out = reply.raw;
         out.writeHead(200, {
@@ -398,12 +415,13 @@ export async function registerBusiness(
           send(e, e.seq);
           last = e.seq;
         }
-        const unsubscribe = chats().subscribe(conversationId, (event) => {
+        deliver = (event) => {
           if ("live" in event) return send({ live: event.live });
           if (event.seq > 0 && event.seq <= last) return;
           if (event.seq > 0) last = event.seq;
           send(event, event.seq);
-        });
+        };
+        for (const event of early) deliver(event);
         const heartbeat = setInterval(() => out.write(": ping\n\n"), 15_000);
         request.raw.on("close", () => {
           clearInterval(heartbeat);

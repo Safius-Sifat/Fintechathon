@@ -115,7 +115,8 @@ export type StoredEvent = {
   payload: Record<string, unknown>;
   createdAt: number;
 };
-type Listener = (event: StoredEvent | { live: AgentEvent }) => void;
+export type ConversationUpdate = StoredEvent | { live: AgentEvent };
+type Listener = (event: ConversationUpdate) => void;
 
 const REPLY_TOKEN_SECONDS = 15 * 60;
 const HISTORY_EVENTS = 40;
