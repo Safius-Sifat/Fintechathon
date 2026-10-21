@@ -21,6 +21,7 @@ const app = chatServer({
   apiUrl: need("MANDATE_API_URL"),
   shopUrl: need("MANDATE_SHOP_URL"),
   model: process.env.MANDATE_CHAT_MODEL,
+  logger: true,
 });
 await app.listen({
   host: process.env.AGENT_HOST ?? "127.0.0.1",

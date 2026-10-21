@@ -35,6 +35,7 @@ export interface ChatServerConfig {
   model?: string | undefined;
   // Replaces the model call in tests.
   reply?: typeof reply;
+  logger?: boolean;
 }
 
 const sameSecret = (a: string, b: string) => {
@@ -45,7 +46,10 @@ const sameSecret = (a: string, b: string) => {
 
 // POST /v1/reply streams one agent reply as newline-delimited JSON events.
 export function chatServer(config: ChatServerConfig): FastifyInstance {
-  const app = Fastify({ logger: false, bodyLimit: 256 * 1024 });
+  const app = Fastify({
+    logger: config.logger ?? false,
+    bodyLimit: 256 * 1024,
+  });
   const answer = config.reply ?? reply;
   app.get("/healthz", async () => ({ ok: true }));
   app.post("/v1/reply", async (request, res) => {
@@ -56,8 +60,12 @@ export function chatServer(config: ChatServerConfig): FastifyInstance {
     if (!parsed.success)
       return res.code(400).send({ error: parsed.error.message });
     const body = parsed.data;
+    // Stops the model when the API goes away mid-reply. The request's own
+    // "close" fires once its body is read, so the response is watched instead.
     const abort = new AbortController();
-    request.raw.on("close", () => abort.abort());
+    res.raw.on("close", () => {
+      if (!res.raw.writableEnded) abort.abort();
+    });
     res.hijack();
     res.raw.writeHead(200, {
       "content-type": "application/x-ndjson",
@@ -80,6 +88,10 @@ export function chatServer(config: ChatServerConfig): FastifyInstance {
         { model: config.model, signal: abort.signal },
       );
     } catch (error) {
+      request.log.error(
+        { err: error instanceof Error ? error.message : String(error) },
+        "chat reply failed",
+      );
       emit({
         type: "error",
         message:
