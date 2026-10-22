@@ -39,6 +39,33 @@ https://github.com/user-attachments/assets/786351cc-10ab-4f77-83a2-54eedb4b8b6c
   <a href="demo/PROOF.md">Check every wallet and transaction on BaseScan</a>.</sub>
 </p>
 
+### Download the app
+
+<p>
+  <a href="https://github.com/Safius-Sifat/Mandate-Agentic-Wallet/releases/latest"><img src="https://img.shields.io/badge/Download-Android%20APK-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Download the Android APK"></a>
+</p>
+
+**Android:** download `mandate-wallet.apk` from the [latest release](https://github.com/Safius-Sifat/Mandate-Agentic-Wallet/releases/latest) and install it on your phone. You may need to allow installing apps from your browser or file manager. The phone needs a screen lock, because the wallet protects its keys with it.
+
+### Try the demo account
+
+Open the app, choose **I have a recovery phrase** and paste these 12 words to restore the wallet used in the video:
+
+```text
+skill wait mind whip interest chat just stove put dog guitar reform
+```
+
+> [!WARNING]
+> This is a shared, public **test-only** wallet on Base Sepolia. Anyone can use it, so never send real funds to it and never reuse these words for anything else.
+
+After restoring, open **Agent wallet** and tap **Register agent wallet** to reconnect it to the Mandate service, then add a test delivery address in **Settings** before ordering from the test shop.
+
+| What                    | Address                                                                                                                         |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| Personal wallet (owner) | [`0xC6231dB66DECE674aE83633C07e9015C26C2D64B`](https://sepolia.basescan.org/address/0xC6231dB66DECE674aE83633C07e9015C26C2D64B) |
+| Agent wallet            | [`0x20a3597894fAC8DF7F608104A873c14c2d02C151`](https://sepolia.basescan.org/address/0x20a3597894fAC8DF7F608104A873c14c2d02C151) |
+| Mandate Test Shop       | [`0x96EEaf3A973ff962f950089c30fc6b5ff380A068`](https://sepolia.basescan.org/address/0x96EEaf3A973ff962f950089c30fc6b5ff380A068) |
+
 ---
 
 ## Table of contents
@@ -324,6 +351,13 @@ Mandate never fakes a payment or a result. If something is missing, it fails wit
 Older documents are kept in [docs/archive](docs/archive/pre-bootstrap-2026-10-17/) for history only.
 
 ## Team
+
+- Reza Abdullah
+- Asif Saad
+- Md Safius Sifat
+- Asif Ishtiaque
+
+The work was split into four parts:
 
 | Member   | Responsible for                              | Plan                                                                          |
 | -------- | -------------------------------------------- | ----------------------------------------------------------------------------- |
