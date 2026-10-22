@@ -42,10 +42,10 @@ https://github.com/user-attachments/assets/786351cc-10ab-4f77-83a2-54eedb4b8b6c
 ### Download the app
 
 <p>
-  <a href="https://github.com/Safius-Sifat/Mandate-Agentic-Wallet/releases/latest"><img src="https://img.shields.io/badge/Download-Android%20APK-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Download the Android APK"></a>
+  <a href="https://github.com/Safius-Sifat/Mandate-Agentic-Wallet/releases/download/v0.1.0-demo/mandate-wallet.apk"><img src="https://img.shields.io/badge/Download-Android%20APK-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Download the Android APK"></a>
 </p>
 
-**Android:** download `mandate-wallet.apk` from the [latest release](https://github.com/Safius-Sifat/Mandate-Agentic-Wallet/releases/latest) and install it on your phone. You may need to allow installing apps from your browser or file manager. The phone needs a screen lock, because the wallet protects its keys with it.
+**Android:** download `mandate-wallet.apk` from the [latest release](https://github.com/Safius-Sifat/Mandate-Agentic-Wallet/releases/download/v0.1.0-demo/mandate-wallet.apk) and install it on your phone. You may need to allow installing apps from your browser or file manager. The phone needs a screen lock, because the wallet protects its keys with it.
 
 ### Try the demo account
 
